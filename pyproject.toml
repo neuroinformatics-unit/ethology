@@ -18,6 +18,9 @@ classifiers = [
     "Operating System :: OS Independent",
     "License :: OSI Approved :: BSD License",
 ]
+dependencies = [
+    "xarray", # "xarray[accel,viz]",
+]
 
 [project.urls]
 "Homepage" = "https://github.com/neuroinformatics-unit/ethology"
@@ -25,6 +28,7 @@ classifiers = [
 "Documentation" = "https://github.com/neuroinformatics-unit/ethology"
 "Source Code" = "https://github.com/neuroinformatics-unit/ethology"
 "User Support" = "https://github.com/neuroinformatics-unit/ethology/issues"
+
 
 [project.optional-dependencies]
 dev = [
