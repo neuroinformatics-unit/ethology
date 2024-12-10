@@ -1,4 +1,22 @@
-# %%
+"""Explore formatting COCO annotations as an xarray Dataset.
+
+The dataset is made up from the following data variables:
+- bbox:  a 3D array with bounding box coordinates and shape
+        (max_n_bboxes_per_image, n_images, 4).
+        The four coordinates represent (x, y, h, w) per annotation.
+- global_id: a 2D array of shape (max_n_bboxes_per_image, n_images) with
+        the global ID of each annotation.
+
+To add:
+- category: a 2D array of shape (max_n_bboxes_per_image, n_images) with
+        the category ID / str of each annotation.
+- split bbox into position and shape.
+- keep track of image filename?
+
+"""
+
+# %%%%%%%%%%%%%%%%%%%%
+# imports
 
 import numpy as np
 import xarray as xr
@@ -17,15 +35,16 @@ coco_file_path = (
 # print(via_data.keys())  # _via_img_metadata, _via_image_id_list
 
 # %%%%%%%%%%%%%%%%%%%%
-# read as dict
+# read input json as dict
 coco_data = read_json_file_as_dict(coco_file_path)
 
 print(
     coco_data.keys()
 )  # dict_keys(['annotations', 'categories', 'images', 'info', 'licenses'])
+
+
 # %%%%%%%%%%%%%%%%%%%%
-
-
+# helper fn to format data as homogeneous arrays
 def compute_homog_data_array_per_image_id(data_str, axis_image_id_in_output):
     # pair up data with image id
     pair_data = []
@@ -44,7 +63,7 @@ def compute_homog_data_array_per_image_id(data_str, axis_image_id_in_output):
         axis=0,
     )
 
-    # pad
+    # pad missing annotation-image IDs
     max_bboxes_per_image = max([d.shape[0] for d in data_array_per_image_id])
     data_array_per_image_id_with_nans = np.stack(
         [
@@ -65,153 +84,35 @@ def compute_homog_data_array_per_image_id(data_str, axis_image_id_in_output):
 
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-# Format bboxes data as xarray DataArray
-
-# # get bboxes coordinates per image
-# bbox_and_image_id_array = np.array(
-#     [annot["bbox"] + [annot["image_id"]]
-# for annot in coco_data["annotations"]]
-# )
-# bbox_array_per_image_id = np.split(
-#     bbox_and_image_id_array[:, :4],
-#     np.where(np.diff(bbox_and_image_id_array[:, -1]))[0] + 1,
-#     axis=0,
-# )
-
-# # pad missing annnotation-image-ids with np.nan
-# max_bboxes_per_image = max([d.shape[0] for d in bbox_array_per_image_id])
-# bbox_array_per_image_id_with_nans = np.stack(
-#     [
-#         np.concat(
-#             (
-#                 d,
-#                 np.full(
-#                     (max_bboxes_per_image - d.shape[0], d.shape[1]), np.nan
-#                 ),
-#             )
-#         ).squeeze()
-#         for d in bbox_array_per_image_id
-#     ],
-#     axis=1
-# )  #annotation_image_id, image_id, space
+# Format data
 
 # define bboxes data array
 bboxes_data = compute_homog_data_array_per_image_id(
     "bbox", axis_image_id_in_output=1
 )
-bboxes_da = xr.DataArray.from_dict(
-    {
-        "dims": [
-            "annotation_image_id",
-            "image_id",
-            "space",
-        ],
-        "data": bboxes_data,
-        "coords": {
-            "annotation_image_id": {
-                "dims": "annotation_image_id",
-                "data": list(range(bboxes_data.shape[0])),  # ---------
-            },
-            "image_id": {
-                "dims": "image_id",
-                "data": np.unique(
-                    [annot["image_id"] for annot in coco_data["annotations"]]
-                ),
-            },
-            "space": {
-                "dims": "space",
-                "data": ["x", "y", "width", "height"],
-            },
-        },
-        # "attrs": {"title": "air temperature"},
-        "name": "bbox",
-    }
-)
-
-# %%%%%%%%%%%%%%%%%%%%
-# Format annotation ID as xarray DataArray
-
-# # get data
-# annot_and_image_id_array = np.array(
-#     [
-#         [annot["id"]] + [annot["image_id"]]
-#         for annot in coco_data["annotations"]
-#     ],
-#     dtype=int,
-# )
-
-# # split based on image id
-# annot_array_per_image_id = np.split(
-#     annot_and_image_id_array[:, 0].reshape(-1, 1),
-#     np.where(np.diff(annot_and_image_id_array[:, -1]))[0] + 1,
-#     axis=0,
-# )
-
-# # pad missing annnotation-image-ids with np.nan
-# # max_bboxes_per_image = max([d.shape[0] for d in annot_array_per_image_id])
-# annot_array_per_image_id_with_nans = np.stack(
-#     [
-#         np.concat(
-#             (
-#                 d,
-#                 np.full(
-#                     (max_bboxes_per_image - d.shape[0], d.shape[1]), np.nan
-#                 ),
-#             )
-#         ).squeeze()
-#         for d in annot_array_per_image_id
-#     ],
-#     axis=-1,
-#     # dtype=int
-# )  # annotation_image_id, image_id
-
 
 # define annot ID data array
 annot_ID_data = compute_homog_data_array_per_image_id(
     "id", axis_image_id_in_output=-1
 )
-annotation_id_da = xr.DataArray.from_dict(
-    {
-        "dims": [
-            "annotation_image_id",
-            "image_id",
-        ],
-        "data": annot_ID_data,
-        "coords": {
-            "annotation_image_id": {
-                "dims": "annotation_image_id",
-                "data": list(range(annot_ID_data.shape[0])),  # ---------
-            },
-            "image_id": {
-                "dims": "image_id",
-                "data": np.unique(
-                    [annot["image_id"] for annot in coco_data["annotations"]]
-                ),
-            },
-        },
-        "attrs": {"title": "annotations ID per dataset"},
-        "name": "bbox",
-    }
-)
 
-
-# %%
+# %%%%%%%%%%%%%%%%%%%%
+# Create xarray Dataset
 ds = xr.Dataset(
     data_vars=dict(
-        bbox=(["annotation_image_id", "image_id", "space"], bboxes_da.data),
+        bbox=(["annotation_image_id", "image_id", "space"], bboxes_data),
         global_id=(
             ["annotation_image_id", "image_id"],
-            annotation_id_da.data,
+            annot_ID_data,
         ),
-        # category=(["annotation_id", "category_id"], category_da),
     ),
     coords=dict(
-        annotation_image_id=bboxes_da.coords["annotation_image_id"],
-        image_id=bboxes_da.coords["image_id"],
-        space=bboxes_da.coords["space"],
-        # category_id=category_da.coords["category_id"],
+        annotation_image_id=list(range(bboxes_data.shape[0])),
+        image_id=np.unique(
+            [annot["image_id"] for annot in coco_data["annotations"]]
+        ),
+        space=["x", "y", "width", "height"],
     ),
-    # attrs=dict(description="Weather related data."),
 )
 
 # %%%%%%%%%%%%%%%%%%%%
@@ -224,8 +125,9 @@ ds.bbox.sel(image_id=4)
 
 
 # get the bbox coordinates of the annotation with global ID = 2
-# a.where(a.x + a.y < 4)
 ds.bbox.where(ds.global_id == 2, drop=True)
 
 # get the global ID of the third annotation per image
 ds.global_id.sel(annotation_image_id=3)
+
+# %%
