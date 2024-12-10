@@ -21,6 +21,9 @@ classifiers = [
 dependencies = [
   "movement",
 ]
+dependencies = [
+    "xarray", # "xarray[accel,viz]",
+]
 
 [project.urls]
 "Homepage" = "https://github.com/neuroinformatics-unit/ethology"
