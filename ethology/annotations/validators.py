@@ -166,20 +166,6 @@ class ValidVIAUntrackedJSON:
             "shape_attributes_keys": ["x", "y", "width", "height"],
         }
 
-        def _check_keys(
-            list_required_keys: list[str],
-            data_dict: dict,
-            additional_error_message: str = "",
-        ):
-            missing_keys = set(list_required_keys) - data_dict.keys()
-            if missing_keys:
-                raise ValueError(
-                    f"Required key(s) {missing_keys} not "
-                    f"found in {list(data_dict.keys())} "
-                    + additional_error_message
-                    + "."
-                )
-
         # Read data as dict
         with open(value) as file:
             data = json.load(file)
@@ -304,3 +290,62 @@ class ValidCOCOUntrackedJSON:
                 "The JSON data does not match "
                 f"the provided schema: {COCO_JSON_schema}"
             ) from val_err
+
+    @path.validator
+    def _file_contains_required_keys(self, attribute, value):
+        """Ensure that the JSON file contains the required keys."""
+        required_keys = {
+            "main": ["images", "annotations", "categories"],
+            "image_keys": [
+                "id",
+                "file_name",
+            ],  # add height and width of image?
+            "annotations_keys": ["id", "image_id", "bbox", "category_id"],
+            "categories_keys": ["id", "name", "supercategory"],
+        }
+
+        # Read data as dict
+        with open(value) as file:
+            data = json.load(file)
+
+        # Check first level keys
+        _check_keys(required_keys["main"], data)
+
+        # Check keys in images dicts
+        for img_dict in data["images"]:
+            _check_keys(
+                required_keys["image_keys"],
+                img_dict,
+                additional_error_message=f"for image dict {img_dict}",
+            )
+
+        # Check keys in annotations dicts
+        for annot_dict in data["annotations"]:
+            _check_keys(
+                required_keys["annotations_keys"],
+                annot_dict,
+                additional_error_message=f"for annotation dict {annot_dict}",
+            )
+
+        # Check keys in categories dicts
+        for cat_dict in data["categories"]:
+            _check_keys(
+                required_keys["categories_keys"],
+                cat_dict,
+                additional_error_message=f"for category dict {cat_dict}",
+            )
+
+
+def _check_keys(
+    list_required_keys: list[str],
+    data_dict: dict,
+    additional_error_message: str = "",
+):
+    missing_keys = set(list_required_keys) - data_dict.keys()
+    if missing_keys:
+        raise ValueError(
+            f"Required key(s) {missing_keys} not "
+            f"found in {list(data_dict.keys())} "
+            + additional_error_message
+            + "."
+        )
