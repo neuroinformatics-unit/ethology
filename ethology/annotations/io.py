@@ -29,16 +29,23 @@ def df_from_via_json_file(file_path: Path) -> pd.DataFrame:
     """Validate and read untracked VIA JSON file.
 
     The data is formatted as an untracked annotations DataFrame.
+
+    Parameters
+    ----------
+    file_path : Path
+        Path to the untracked VIA JSON file.
+
+    Returns
+    -------
+    pd.DataFrame
+        Untracked annotations DataFrame.
+
     """
-    # General file validation
+    # Run validators
     file = ValidFile(
         file_path, expected_permission="r", expected_suffix=[".json"]
     )
-
-    # JSON file validation
     json_file = ValidJSON(file.path)
-
-    # VIA Untracked JSON schema validation
     via_untracked_file = ValidVIAUntrackedJSON(json_file.path)
 
     # Read as standard dataframe
@@ -46,16 +53,26 @@ def df_from_via_json_file(file_path: Path) -> pd.DataFrame:
 
 
 def df_from_coco_json_file(file_path: Path) -> pd.DataFrame:
-    """Validate and read COCO JSON file."""
-    # General file validation
+    """Validate and read untracked COCO JSON file.
+
+    The data is formatted as an untracked annotations DataFrame.
+
+    Parameters
+    ----------
+    file_path : Path
+        Path to the untracked COCO JSON file.
+
+    Returns
+    -------
+    pd.DataFrame
+        Untracked annotations DataFrame.
+
+    """
+    # Run validators
     file = ValidFile(
         file_path, expected_permission="r", expected_suffix=[".json"]
     )
-
-    # JSON file validation
     json_file = ValidJSON(file.path)
-
-    # COCO Untracked JSON schema validation
     coco_untracked_file = ValidCOCOUntrackedJSON(json_file.path)
 
     # Read as standard dataframe
