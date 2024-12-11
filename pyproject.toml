@@ -1,20 +1,20 @@
 [project]
 name = "ethology"
-authors = [{name = "Adam Tyson", email= "code@adamltyson.com"}]
+authors = [{ name = "Adam Tyson", email = "code@adamltyson.com" }]
 description = "Data processing tools for animal behavioural analysis"
 readme = "README.md"
-requires-python = ">=3.9.0"
+requires-python = ">=3.10.0"
 dynamic = ["version"]
 
-license = {text = "BSD-3-Clause"}
+license = { text = "BSD-3-Clause" }
 
 classifiers = [
     "Development Status :: 2 - Pre-Alpha",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "Operating System :: OS Independent",
     "License :: OSI Approved :: BSD License",
 ]
@@ -28,23 +28,27 @@ classifiers = [
 
 [project.optional-dependencies]
 dev = [
-  "pytest",
-  "pytest-cov",
-  "coverage",
-  "tox",
-  "black",
-  "mypy",
-  "pre-commit",
-  "ruff",
-  "setuptools_scm",
+    "pytest",
+    "pytest-cov",
+    "coverage",
+    "tox",
+    "mypy",
+    "pre-commit",
+    "ruff",
+    "codespell",
+    "setuptools_scm",
+    "pandas-stubs",
+    "types-attrs",
+    "check-manifest",
+    "types-PyYAML",
+    "types-requests",
 ]
 
+# [project.scripts]
+# movement = "movement.cli_entrypoint:main"
+
 [build-system]
-requires = [
-    "setuptools>=45",
-    "wheel",
-    "setuptools_scm[toml]>=6.2",
-]
+requires = ["setuptools>=45", "wheel", "setuptools_scm[toml]>=6.2"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
@@ -57,39 +61,69 @@ exclude = ["tests*"]
 [tool.pytest.ini_options]
 addopts = "--cov=ethology"
 
-[tool.black]
-target-version = ['py39', 'py310', 'py311']
-skip-string-normalization = false
-line-length = 79
-
 [tool.setuptools_scm]
 
 [tool.check-manifest]
 ignore = [
-  ".yaml",
-  "tox.ini",
-  "tests/",
-  "tests/test_unit/",
-  "tests/test_integration/",
+    ".yaml",
+    "tox.ini",
+    "tests/",
+    "tests/test_unit/",
+    "tests/test_integration/",
 ]
 
 [tool.ruff]
 line-length = 79
-exclude = ["__init__.py","build",".eggs"]
-select = ["I", "E", "F"]
+exclude = ["__init__.py", "build", ".eggs"]
 fix = true
+
+[tool.ruff.lint]
+# See https://docs.astral.sh/ruff/rules/
+ignore = [
+  "D203", # one blank line before class
+  "D213", # multi-line-summary second line
+]
+select = [
+  "E",      # pycodestyle errors
+  "F",      # Pyflakes
+  "UP",     # pyupgrade
+  "I",      # isort
+  "B",      # flake8 bugbear
+  "SIM",    # flake8 simplify
+  "C90",    # McCabe complexity
+  "D",      # pydocstyle
+  "NPY201", # checks for syntax that was deprecated in numpy2.0
+]
+per-file-ignores = { "tests/*" = [
+  "D100", # missing docstring in public module
+  "D205", # missing blank line between summary and description
+  "D103", # missing docstring in public function
+], "examples/*" = [
+  "B018", # Found useless expression
+  "D103", # Missing docstring in public function
+  "D400", # first line should end with a period.
+  "D415", # first line should end with a period, question mark...
+  "D205", # missing blank line between summary and description
+] }
+
+[tool.ruff.format]
+docstring-code-format = true # Also format code in docstrings
+
+[tool.codespell]
+skip = '.git,.tox'
+check-hidden = true
 
 [tool.tox]
 legacy_tox_ini = """
 [tox]
-envlist = py{39,310,311}
+envlist = py{310,311,312}
 isolated_build = True
 
 [gh-actions]
 python =
-    3.9: py39
     3.10: py310
     3.11: py311
+    3.12: py312
 
 [testenv]
 extras =
