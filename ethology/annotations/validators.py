@@ -159,67 +159,52 @@ class ValidVIAUntrackedJSON:
     @path.validator
     def _file_contains_required_keys(self, attribute, value):
         """Ensure that the JSON file contains the required keys."""
-        required_keys_main = [
-            "_via_img_metadata",
-            "_via_image_id_list",
-        ]
+        required_keys = {
+            "main": ["_via_img_metadata", "_via_image_id_list"],
+            "image_keys": ["filename", "regions"],
+            "region_keys": ["shape_attributes", "region_attributes"],
+            "shape_attributes_keys": ["x", "y", "width", "height"],
+        }
 
-        required_keys_img_metadata_dicts = [
-            "filename",
-            "regions",
-        ]
+        def _check_keys(
+            list_required_keys: list[str],
+            data_dict: dict,
+            additional_error_message: str = "",
+        ):
+            missing_keys = set(list_required_keys) - data_dict.keys()
+            if missing_keys:
+                raise ValueError(
+                    f"Required key(s) {missing_keys} not "
+                    f"found in {list(data_dict.keys())} "
+                    + additional_error_message
+                    + "."
+                )
 
-        required_keys_region_dicts = [
-            "shape_attributes",
-            "region_attributes",
-        ]
-
-        required_keys_shape_attributes_dicts = [
-            "x",
-            "y",
-            "width",
-            "height",
-        ]
-
+        # Read data as dict
         with open(value) as file:
             data = json.load(file)
 
-        # check keys first level
-        for key in required_keys_main:
-            if key not in data:
-                raise ValueError(
-                    f"Key '{key}' not found in first level "
-                    f"of the JSON input file: {value}"
+        # Check first level keys
+        _check_keys(required_keys["main"], data)
+
+        # Check keys in nested dicts
+        for img_str, img_dict in data["_via_img_metadata"].items():
+            # Check keys for each image dictionary
+            _check_keys(
+                required_keys["image_keys"],
+                img_dict,
+                additional_error_message=f"for {img_str}",
+            )
+            # Check keys for each region
+            for region in img_dict["regions"]:
+                _check_keys(required_keys["region_keys"], region)
+
+                # Check keys under shape_attributes
+                _check_keys(
+                    required_keys["shape_attributes_keys"],
+                    region["shape_attributes"],
+                    additional_error_message=f"for region under {img_str}",
                 )
-
-        # check keys in each of the _via_img_metadata dicts
-        for key in required_keys_img_metadata_dicts:
-            for img_str, img_dict in data["_via_img_metadata"]:
-                if key not in img_dict:
-                    raise ValueError(
-                        f"Key '{key}' not found for {img_str}"
-                        " under _via_img_metadata"
-                    )
-
-        # check keys under regions
-        for key in required_keys_region_dicts:
-            for img_str, img_dict in data["_via_img_metadata"]:
-                for region in img_dict["regions"]:
-                    if key not in region:
-                        raise ValueError(
-                            f"Key '{key}' not found for region"
-                            f" under {img_str}"
-                        )
-
-        # check keys under shape_attributes
-        for key in required_keys_shape_attributes_dicts:
-            for img_str, img_dict in data["_via_img_metadata"]:
-                for region in img_dict["regions"]:
-                    if key not in region["shape_attributes"]:
-                        raise ValueError(
-                            f"Key 'shape_attributes > {key}' not found "
-                            f"for region under {img_str}"
-                        )
 
 
 @define
