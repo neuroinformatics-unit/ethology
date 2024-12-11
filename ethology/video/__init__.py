@@ -1,1 +1,1 @@
-"""Utils to extract frames, reencode videos, crop, etc. """
+"""Utils to extract frames, re-encode videos, crop, etc. """
