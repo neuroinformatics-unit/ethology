@@ -1,11 +1,11 @@
+"""Validators for annotation files."""
+
 import json
 from pathlib import Path
 
 import jsonschema
 import jsonschema.exceptions
 from attrs import define, field, validators
-
-# 
 
 
 @define
@@ -63,15 +63,16 @@ class ValidVIAUntrackedJSON:
 
     path: Path = field(validator=validators.instance_of(Path))
     # expected_schema: dict = field(factory=dict, kw_only=True)
-    # https://stackoverflow.com/questions/16222633/how-would-you-design-json-schema-for-an-arbitrary-key
 
     @path.validator
     def _file_macthes_VIA_JSON_schema(self, attribute, value):
         """Ensure that the JSON file matches the expected schema."""
-        # should the schema be an attribute?
+        # Define schema for VIA JSON file for untracked
+        # (aka manually labelled) data
         VIA_JSON_schema = {
             "type": "object",
             "properties": {
+                # settings for browser UI
                 "_via_settings": {
                     "type": "object",
                     "properties": {
@@ -80,27 +81,33 @@ class ValidVIAUntrackedJSON:
                         "project": {"type": "object"},
                     },
                 },
+                # annotation data
                 "_via_img_metadata": {
                     "type": "object",
-                    "additionalProperties": {  # ---- does this work?
+                    "additionalProperties": {
+                        # "additionalProperties" to allow any key,
+                        # see https://stackoverflow.com/a/69811612/24834957
                         "type": "object",
                         "properties": {
                             "filename": {"type": "string"},
                             "size": {"type": "integer"},
                             "regions": {
-                                "type": "list",  # does this work?
-                                "properties": {
-                                    "shape_attributes": {
-                                        "type": "object",
-                                        "properties": {
-                                            "name": {"type": "string"},
-                                            "x": {"type": "integer"},
-                                            "y": {"type": "integer"},
-                                            "width": {"type": "integer"},
-                                            "height": {"type": "integer"},
-                                        },
-                                        "region_attributes": {
-                                            "type": "object"
+                                "type": "array",  # a list of dicts
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "shape_attributes": {
+                                            "type": "object",
+                                            "properties": {
+                                                "name": {"type": "string"},
+                                                "x": {"type": "integer"},
+                                                "y": {"type": "integer"},
+                                                "width": {"type": "integer"},
+                                                "height": {"type": "integer"},
+                                            },
+                                            "region_attributes": {
+                                                "type": "object"
+                                            },  # we just check it's a dict
                                         },
                                     },
                                 },
@@ -109,15 +116,22 @@ class ValidVIAUntrackedJSON:
                         },
                     },
                 },
+                # ordered list of image keys
+                # - the position defines the image ID
+                "_via_image_id_list": {
+                    "type": "array",
+                    "items": {"type": "string"},
+                },
+                # region (aka annotation) and file attributes for VIA UI
                 "_via_attributes": {
-                    "type": "dict",
+                    "type": "object",
                     "properties": {
-                        "region": {"type": "dict"},
-                        "file": {"type": "dict"},
+                        "region": {"type": "object"},
+                        "file": {"type": "object"},
                     },
                 },
+                # version of the VIA data format
                 "_via_data_format_version": {"type": "string"},
-                "_via_image_id_list": {"type": "list"},
             },
         }
 
@@ -125,7 +139,7 @@ class ValidVIAUntrackedJSON:
         with open(value) as file:
             data = json.load(file)
 
-        # check schema
+        # check against schema
         try:
             jsonschema.validate(instance=data, schema=VIA_JSON_schema)
         except jsonschema.exceptions.ValidationError as val_err:
@@ -139,6 +153,6 @@ class ValidVIAUntrackedJSON:
         #     ) from schema_err
 
 
-@define
-class ValidCOCOUntrackedJSON:
-    pass
+# @define
+# class ValidCOCOUntrackedJSON:
+#     pass
