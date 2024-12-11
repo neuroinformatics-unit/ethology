@@ -6,7 +6,11 @@ from pathlib import Path
 import pandas as pd
 from movement.validators.files import ValidFile
 
-from ethology.annotations.validators import ValidJSON, ValidVIAUntrackedJSON
+from ethology.annotations.validators import (
+    ValidCOCOUntrackedJSON,
+    ValidJSON,
+    ValidVIAUntrackedJSON,
+)
 
 STANDARD_DF_COLUMNS = [
     "annotation_id",
@@ -16,15 +20,15 @@ STANDARD_DF_COLUMNS = [
     "y_min",
     "width",
     "height",
-    "superclass",
-    "class",
+    "supercategory",
+    "category",
 ]
 
 
-def df_from_via_json_file(file_path: Path):
+def df_from_via_json_file(file_path: Path) -> pd.DataFrame:
     """Validate and read untracked VIA JSON file.
 
-    The data is formated as an untracked annotations DataFrame.
+    The data is formatted as an untracked annotations DataFrame.
     """
     # General file validation
     file = ValidFile(
@@ -41,13 +45,30 @@ def df_from_via_json_file(file_path: Path):
     return _df_from_validated_via_json_file(via_untracked_file.path)
 
 
+def df_from_coco_json_file(file_path: Path) -> pd.DataFrame:
+    """Validate and read COCO JSON file."""
+    # General file validation
+    file = ValidFile(
+        file_path, expected_permission="r", expected_suffix=[".json"]
+    )
+
+    # JSON file validation
+    json_file = ValidJSON(file.path)
+
+    # COCO Untracked JSON schema validation
+    coco_untracked_file = ValidCOCOUntrackedJSON(json_file.path)
+
+    # Read as standard dataframe
+    return _df_from_validated_coco_json_file(coco_untracked_file.path)
+
+
 def _df_from_validated_via_json_file(file_path):
     """Read VIA JSON file as standard untracked annotations DataFrame."""
     # Read validated json as dict
     with open(file_path) as file:
         data_dict = json.load(file)
 
-    # Get relevant fields
+    # Prepare data
     image_metadata_dict = data_dict["_via_img_metadata"]
     via_image_id_list = data_dict[
         "_via_image_id_list"
@@ -68,28 +89,26 @@ def _df_from_validated_via_json_file(file_path):
             region_shape = region["shape_attributes"]
             region_attributes = region["region_attributes"]
 
+            row = {
+                "image_filename": img_dict["filename"],
+                "x_min": region_shape["x"],
+                "y_min": region_shape["y"],
+                "width": region_shape["width"],
+                "height": region_shape["height"],
+                "supercategory": list(region_attributes.keys())[
+                    0
+                ],  # takes first key as supercategory
+                "category": region_attributes[
+                    list(region_attributes.keys())[0]
+                ],
+            }
+
             # append annotations to df
-            list_rows.append(
-                {
-                    "image_filename": img_dict["filename"],
-                    "x_min": region_shape["x"],
-                    "y_min": region_shape["y"],
-                    "width": region_shape["width"],
-                    "height": region_shape["height"],
-                    "superclass": list(region_attributes.keys())[
-                        0
-                    ],  # takes first key as superclass
-                    "class": region_attributes[
-                        list(region_attributes.keys())[0]
-                    ],
-                },
-            )
+            list_rows.append(row)
 
     df = pd.DataFrame(
         list_rows,
-        columns=[
-            col for col in STANDARD_DF_COLUMNS if not col.endswith("_id")
-        ],
+        # columns=list(row.keys()),  # do I need this?
     )
 
     # add image_id column
@@ -102,5 +121,57 @@ def _df_from_validated_via_json_file(file_path):
 
     # reorder columns to match standard
     df = df.reindex(columns=STANDARD_DF_COLUMNS)
+
+    return df
+
+
+def _df_from_validated_coco_json_file(file_path: Path) -> pd.DataFrame:
+    """Read COCO JSON file as standard untracked annotations DataFrame."""
+    # Read validated json as dict
+    with open(file_path) as file:
+        data_dict = json.load(file)
+
+    # Prepare data
+    map_image_id_to_filename = {
+        img_dict["id"]: img_dict["file_name"]
+        for img_dict in data_dict["images"]
+    }
+
+    map_category_id_to_category_data = {
+        cat_dict["id"]: (cat_dict["name"], cat_dict["supercategory"])
+        for cat_dict in data_dict["categories"]
+    }
+
+    # Build standard dataframe
+    list_rows = []
+    for annot_dict in data_dict["annotations"]:
+        annotation_id = annot_dict["id"]
+        # image data
+        image_id = annot_dict["image_id"]
+        image_filename = map_image_id_to_filename[image_id]
+
+        # bbox data
+        x_min, y_min, width, height = annot_dict["bbox"]
+
+        # class data
+        category_id = annot_dict["category_id"]
+        category, supercategory = map_category_id_to_category_data[category_id]
+
+        row = {
+            "annotation_id": annotation_id,
+            "image_filename": image_filename,
+            "image_id": image_id,
+            "x_min": x_min,
+            "y_min": y_min,
+            "width": width,
+            "height": height,
+            "supercategory": supercategory,
+            "category": category,
+        }
+
+        list_rows.append(row)
+
+    df = pd.DataFrame(list_rows)
+    df.reindex(columns=STANDARD_DF_COLUMNS)
 
     return df
