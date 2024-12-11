@@ -156,6 +156,71 @@ class ValidVIAUntrackedJSON:
                 f"the provided schema: {VIA_JSON_schema}"
             ) from val_err
 
+    @path.validator
+    def _file_contains_required_keys(self, attribute, value):
+        """Ensure that the JSON file contains the required keys."""
+        required_keys_main = [
+            "_via_img_metadata",
+            "_via_image_id_list",
+        ]
+
+        required_keys_img_metadata_dicts = [
+            "filename",
+            "regions",
+        ]
+
+        required_keys_region_dicts = [
+            "shape_attributes",
+            "region_attributes",
+        ]
+
+        required_keys_shape_attributes_dicts = [
+            "x",
+            "y",
+            "width",
+            "height",
+        ]
+
+        with open(value) as file:
+            data = json.load(file)
+
+        # check keys first level
+        for key in required_keys_main:
+            if key not in data:
+                raise ValueError(
+                    f"Key '{key}' not found in first level "
+                    f"of the JSON input file: {value}"
+                )
+
+        # check keys in each of the _via_img_metadata dicts
+        for key in required_keys_img_metadata_dicts:
+            for img_str, img_dict in data["_via_img_metadata"]:
+                if key not in img_dict:
+                    raise ValueError(
+                        f"Key '{key}' not found for {img_str}"
+                        " under _via_img_metadata"
+                    )
+
+        # check keys under regions
+        for key in required_keys_region_dicts:
+            for img_str, img_dict in data["_via_img_metadata"]:
+                for region in img_dict["regions"]:
+                    if key not in region:
+                        raise ValueError(
+                            f"Key '{key}' not found for region"
+                            f" under {img_str}"
+                        )
+
+        # check keys under shape_attributes
+        for key in required_keys_shape_attributes_dicts:
+            for img_str, img_dict in data["_via_img_metadata"]:
+                for region in img_dict["regions"]:
+                    if key not in region["shape_attributes"]:
+                        raise ValueError(
+                            f"Key 'shape_attributes > {key}' not found "
+                            f"for region under {img_str}"
+                        )
+
 
 @define
 class ValidCOCOUntrackedJSON:
