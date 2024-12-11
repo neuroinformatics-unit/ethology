@@ -1,3 +1,9 @@
+[![Python Version](https://img.shields.io/pypi/pyversions/ethology.svg)](https://pypi.org/project/ethology)
+[![License](https://img.shields.io/badge/License-BSD_3--Clause-orange.svg)](https://opensource.org/licenses/BSD-3-Clause)
+[![CI](https://img.shields.io/github/actions/workflow/status/neuroinformatics-unit/ethology/test_and_deploy.yml?label=CI)](https://github.com/neuroinformatics-unit/ethology/actions)
+[![Code style: Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/format.json)](https://github.com/astral-sh/ruff)
+[![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit)
+
 # ethology
 
 
