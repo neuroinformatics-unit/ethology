@@ -69,30 +69,24 @@ def get_paths_test_data():
     directory containing the relevant test files.
     """
 
-    def _get_paths_test_data(pooch_registry, zip_filename: str) -> dict:
+    def _get_paths_test_data(pooch_registry, subdir_name: str) -> dict:
         """Return the paths of the test files under the specified zip filename.
 
-        The zip filename is expected to match a testing module.
+        subdir_name is the name of the subdirectory under `test_data`.
         """
-        # Fetch the test data for the annotations module
-        list_files_in_local_storage = pooch_registry.fetch(
-            f"{zip_filename}.zip",
-            processor=pooch.Unzip(extract_dir=""),
-            progressbar=True,
-        )
+        test_filename_to_path = {}
+        for relative_filepath in pooch_registry.registry:
+            # relative to test_data
+            if relative_filepath.startswith(f"{subdir_name}/"):
+                # fetch file from pooch registry
+                fetched_filepath = pooch_registry.fetch(
+                    relative_filepath,  # under test_data
+                    progressbar=True,
+                )
 
-        # Filter out files not under `test_annotations` directory
-        list_files_annotations = [
-            f
-            for f in list_files_in_local_storage
-            if (zip_filename in f) and (not f.endswith(".zip"))
-        ]
-
-        # return paths as dict
-        input_data_dict = {}
-        for f in list_files_annotations:
-            input_data_dict[Path(f).name] = Path(f)
-
-        return input_data_dict
+                test_filename_to_path[Path(fetched_filepath).name] = Path(
+                    fetched_filepath
+                )
+        return test_filename_to_path
 
     return _get_paths_test_data
