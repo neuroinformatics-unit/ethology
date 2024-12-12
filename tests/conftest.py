@@ -30,6 +30,12 @@ def pooch_registry() -> dict:
     # Cache the test data in the user's home directory
     test_data_dir = Path.home() / ".ethology-test-data"
 
+    # Remove the file registry if it exists
+    # otherwise it is not downloaded from scratch every time
+    file_registry_path = test_data_dir / "files-registry.txt"
+    if file_registry_path.is_file():
+        Path(file_registry_path).unlink()
+
     # Initialise pooch registry
     registry = pooch.create(
         test_data_dir,
@@ -37,12 +43,11 @@ def pooch_registry() -> dict:
     )
 
     # Download only the registry file from GIN
-    # if known_hash = None, the file is always downloaded.
     file_registry = pooch.retrieve(
         url=f"{GIN_TEST_DATA_REPO}/raw/master/files-registry.txt",
         known_hash=None,
-        fname="files-registry.txt",
-        path=test_data_dir,
+        fname=file_registry_path.name,
+        path=file_registry_path.parent,
     )
 
     # Load registry file onto pooch registry
