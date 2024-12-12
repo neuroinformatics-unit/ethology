@@ -17,12 +17,6 @@ class ValidJSON:
     path : pathlib.Path
         Path to the JSON file.
 
-    Raises
-    ------
-    ValueError
-        If the file is not in JSON format or if it does not contain the
-        expected keys.
-
     """
 
     path: Path = field(validator=validators.instance_of(Path))
@@ -34,7 +28,9 @@ class ValidJSON:
             with open(value) as file:
                 json.load(file)
         except FileNotFoundError as not_found_error:
-            raise ValueError(f"File not found: {value}") from not_found_error
+            raise FileNotFoundError(
+                f"File not found: {value}"
+            ) from not_found_error
         except json.JSONDecodeError as decode_error:
             raise ValueError(
                 f"Error decoding JSON data from file: {value}"
