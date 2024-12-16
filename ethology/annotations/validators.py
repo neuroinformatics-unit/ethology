@@ -38,7 +38,9 @@ class ValidJSON:
 
     # Required attributes
     path: Path = field(validator=validators.instance_of(Path))
-    schema: dict = field()
+
+    # Optional attributes
+    schema: dict | None = field(default=None)
 
     @path.validator
     def _file_is_json(self, attribute, value):
@@ -66,14 +68,15 @@ class ValidJSON:
         with open(value) as file:
             data = json.load(file)
 
-        # check against schema
-        try:
-            jsonschema.validate(instance=data, schema=self.schema)
-        except jsonschema.exceptions.ValidationError as val_err:
-            raise ValueError(
-                "The JSON data does not match "
-                f"the provided schema: {self.schema}."
-            ) from val_err
+        # check against schema if provided
+        if self.schema:
+            try:
+                jsonschema.validate(instance=data, schema=self.schema)
+            except jsonschema.exceptions.ValidationError as val_err:
+                raise ValueError(
+                    "The JSON data does not match "
+                    f"the provided schema: {self.schema}."
+                ) from val_err
 
 
 @define

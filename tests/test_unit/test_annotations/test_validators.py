@@ -68,20 +68,28 @@ def coco_json_file_with_schema_error(
 
 
 @pytest.mark.parametrize(
-    "input_json_file, input_schema",
+    "input_json_file_suffix",
+    ["1", "2"],
+)
+@pytest.mark.parametrize(
+    "input_file_standard, input_schema",
     [
-        ("VIA_JSON_sample_1.json", VIA_UNTRACKED_SCHEMA),
-        ("VIA_JSON_sample_2.json", VIA_UNTRACKED_SCHEMA),
-        ("COCO_JSON_sample_1.json", COCO_UNTRACKED_SCHEMA),
-        ("COCO_JSON_sample_2.json", COCO_UNTRACKED_SCHEMA),
+        ("VIA", VIA_UNTRACKED_SCHEMA),
+        ("VIA", None),
+        ("COCO", COCO_UNTRACKED_SCHEMA),
+        ("COCO", None),
     ],
 )
 def test_valid_json(
     annotations_test_data,
-    input_json_file,
+    input_file_standard,
+    input_json_file_suffix,
     input_schema,
 ):
     """Test the ValidJSON validator with valid files."""
+    input_json_file = (
+        f"{input_file_standard}_JSON_sample_{input_json_file_suffix}.json"
+    )
     input_json_file = annotations_test_data[input_json_file]
     with does_not_raise():
         ValidJSON(path=input_json_file, schema=input_schema)
