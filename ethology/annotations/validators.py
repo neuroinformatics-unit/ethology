@@ -29,11 +29,11 @@ class ValidJSON:
                 json.load(file)
         except FileNotFoundError as not_found_error:
             raise FileNotFoundError(
-                f"File not found: {value}"
+                f"File not found: {value}."
             ) from not_found_error
         except json.JSONDecodeError as decode_error:
             raise ValueError(
-                f"Error decoding JSON data from file: {value}"
+                f"Error decoding JSON data from file: {value}."
             ) from decode_error
 
 
