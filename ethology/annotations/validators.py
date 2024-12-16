@@ -17,9 +17,28 @@ class ValidJSON:
     path : pathlib.Path
         Path to the JSON file.
 
+    schema : dict
+        JSON schema to validate the file against.
+
+    Raises
+    ------
+    FileNotFoundError
+        If the file does not exist.
+    ValueError
+        If the JSON file cannot be decoded, or
+        if the type of any of its keys does not match those
+        specified in the schema.
+
+
+    Notes
+    -----
+    https://json-schema.org/understanding-json-schema/
+
     """
 
+    # Required attributes
     path: Path = field(validator=validators.instance_of(Path))
+    schema: dict = field()
 
     @path.validator
     def _file_is_json(self, attribute, value):
@@ -36,121 +55,44 @@ class ValidJSON:
                 f"Error decoding JSON data from file: {value}."
             ) from decode_error
 
+    @path.validator
+    def _file_matches_JSON_schema(self, attribute, value):
+        """Ensure that the JSON file matches the expected schema.
+
+        The schema validation only checks the type for each specified
+        key if it exists. It does not check for the presence of the keys.
+        """
+        # read json file
+        with open(value) as file:
+            data = json.load(file)
+
+        # check against schema
+        try:
+            jsonschema.validate(instance=data, schema=self.schema)
+        except jsonschema.exceptions.ValidationError as val_err:
+            raise ValueError(
+                "The JSON data does not match "
+                f"the provided schema: {self.schema}."
+            ) from val_err
+
 
 @define
 class ValidVIAUntrackedJSON:
     """Class for validating VIA JSON files for untracked data.
 
-    The validator ensures that the file matches the expected schema.
-    The schema validation only checks the type for each specified
-    key if it exists. It does not check for the presence of the keys.
+    Checks the VIA JSON file for untracked data contains the required keys.
 
+    Note that the validation against the schema does not check the existence
+    of the keys, only the type of their values if they exist.
 
     Attributes
     ----------
     path : pathlib.Path
         Path to the JSON file.
 
-    Raises
-    ------
-    ValueError
-        If the JSON file does not match the expected schema.
-
-    Notes
-    -----
-    https://json-schema.org/understanding-json-schema/
-
     """
 
-    # TODO: add a check for the presence of the keys
-    # that I use in loading the data
-
     path: Path = field(validator=validators.instance_of(Path))
-
-    @path.validator
-    def _file_macthes_VIA_JSON_schema(self, attribute, value):
-        """Ensure that the JSON file matches the expected schema."""
-        # Define schema for VIA JSON file for untracked
-        # (aka manually labelled) data
-        VIA_JSON_schema = {
-            "type": "object",
-            "properties": {
-                # settings for browser UI
-                "_via_settings": {
-                    "type": "object",
-                    "properties": {
-                        "ui": {"type": "object"},
-                        "core": {"type": "object"},
-                        "project": {"type": "object"},
-                    },
-                },
-                # annotation data
-                "_via_img_metadata": {
-                    "type": "object",
-                    "additionalProperties": {
-                        # "additionalProperties" to allow any key,
-                        # see https://stackoverflow.com/a/69811612/24834957
-                        "type": "object",
-                        "properties": {
-                            "filename": {"type": "string"},
-                            "size": {"type": "integer"},
-                            "regions": {
-                                "type": "array",  # a list of dicts
-                                "items": {
-                                    "type": "object",
-                                    "properties": {
-                                        "shape_attributes": {
-                                            "type": "object",
-                                            "properties": {
-                                                "name": {"type": "string"},
-                                                "x": {"type": "integer"},
-                                                "y": {"type": "integer"},
-                                                "width": {"type": "integer"},
-                                                "height": {"type": "integer"},
-                                            },
-                                            "region_attributes": {
-                                                "type": "object"
-                                            },  # we just check it's a dict
-                                        },
-                                    },
-                                },
-                            },
-                            "file_attributes": {"type": "object"},
-                        },
-                    },
-                },
-                # ordered list of image keys
-                # - the position defines the image ID
-                "_via_image_id_list": {
-                    "type": "array",
-                    "items": {"type": "string"},
-                },
-                # region (aka annotation) and file attributes for VIA UI
-                "_via_attributes": {
-                    "type": "object",
-                    "properties": {
-                        "region": {"type": "object"},
-                        "file": {"type": "object"},
-                    },
-                },
-                # version of the VIA data format
-                "_via_data_format_version": {"type": "string"},
-            },
-        }
-
-        # should have been validated with ValidJSON
-        # already so this should work fine
-        with open(value) as file:
-            data = json.load(file)
-
-        # check against schema
-        try:
-            jsonschema.validate(instance=data, schema=VIA_JSON_schema)
-        except jsonschema.exceptions.ValidationError as val_err:
-            raise ValueError(
-                "The JSON data does not match "
-                f"the provided schema: {VIA_JSON_schema}"
-            ) from val_err
 
     @path.validator
     def _file_contains_required_keys(self, attribute, value):
