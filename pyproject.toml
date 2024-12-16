@@ -19,8 +19,7 @@ classifiers = [
   "License :: OSI Approved :: BSD License",
 ]
 dependencies = [
-  "movement",
-  "xarray",   # "xarray[accel,viz]",
+  "movement"
 ]
 
 [project.urls]
