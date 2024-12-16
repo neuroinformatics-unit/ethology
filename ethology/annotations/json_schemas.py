@@ -1,4 +1,11 @@
-"""JSON schemas for VIA and COCO annotations."""
+"""JSON schemas for VIA and COCO annotations.
+
+References
+----------
+- https://github.com/python-jsonschema/jsonschema
+- https://json-schema.org/understanding-json-schema/
+
+"""
 
 VIA_SCHEMA = {
     "type": "object",
