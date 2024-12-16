@@ -1,6 +1,7 @@
 import json
 from contextlib import nullcontext as does_not_raise
 
+import jsonschema
 import pytest
 
 from ethology.annotations.json_schemas import (
@@ -25,24 +26,39 @@ def json_file_with_not_found_error(tmp_path):
     return tmp_path / "JSON_file_not_found.json"
 
 
-@pytest.fixture()
-def via_json_file_with_schema_error(tmp_path, annotations_test_data):
+def _json_file_with_schema_error(out_parent_path, json_valid_path):
     """Return path to a JSON file that doesn't match the expected schema."""
     # read valid json file
-    via_json_valid_filepath = annotations_test_data["VIA_JSON_sample_1.json"]
-    with open(via_json_valid_filepath) as f:
+    with open(json_valid_path) as f:
         data = json.load(f)
 
-    # change type of specific keys
-    # - change "_via_image_id_list" from list of strings to list of integers
-    # TODO: what if I change several?
-    data["_via_image_id_list"] = list(range(len(data["_via_image_id_list"])))
+    # modify so that it doesn't match the corresponding schema
+    if "VIA" in json_valid_path.name:
+        # change "width" of a bounding box from int to float
+        data["_via_img_metadata"][
+            "09.08_09.08.2023-01-Left_frame_001764.png15086122"
+        ]["regions"][0]["shape_attributes"]["width"] = 49.5
+    elif "COCO" in json_valid_path.name:
+        # change "annotations" from list of dicts to list of lists
+        data["annotations"] = [[d] for d in data["annotations"]]
 
-    # save the modified data to a new file under tmp_path
-    out_json = tmp_path / "VIA_JSON_schema_error.json"
+    # save the modified json to a new file
+    out_json = out_parent_path / f"{json_valid_path.name}_schema_error.json"
     with open(out_json, "w") as f:
         json.dump(data, f)
     return out_json
+
+
+@pytest.fixture()
+def via_json_file_with_schema_error(
+    tmp_path,
+    annotations_test_data,
+):
+    """Return path to a VIA JSON file that doesn't match its schema."""
+    return _json_file_with_schema_error(
+        tmp_path,
+        annotations_test_data["VIA_JSON_sample_1.json"],
+    )
 
 
 @pytest.fixture()
@@ -50,49 +66,43 @@ def coco_json_file_with_schema_error(
     tmp_path,
     annotations_test_data,
 ):
-    """Return path to a JSON file that doesn't match the expected schema."""
-    # read valid json file
-    via_json_valid_filepath = annotations_test_data["COCO_JSON_sample_1.json"]
-    with open(via_json_valid_filepath) as f:
-        data = json.load(f)
-
-    # change "annotations" from list of dicts to list of lists
-    # TODO: what if I change several?
-    data["annotations"] = [[d] for d in data["annotations"]]
-
-    # save the modified data to a new file under tmp_path
-    out_json = tmp_path / "VIA_JSON_schema_error.json"
-    with open(out_json, "w") as f:
-        json.dump(data, f)
-    return out_json
+    """Return path to a COCO JSON file that doesn't match its schema."""
+    return _json_file_with_schema_error(
+        tmp_path,
+        annotations_test_data["COCO_JSON_sample_1.json"],
+    )
 
 
-@pytest.mark.parametrize(
-    "input_json_file_suffix",
-    ["1", "2"],
-)
 @pytest.mark.parametrize(
     "input_file_standard, input_schema",
     [
-        ("VIA", VIA_UNTRACKED_SCHEMA),
         ("VIA", None),
-        ("COCO", COCO_UNTRACKED_SCHEMA),
+        ("VIA", VIA_UNTRACKED_SCHEMA),
         ("COCO", None),
+        ("COCO", COCO_UNTRACKED_SCHEMA),
     ],
 )
+@pytest.mark.parametrize(
+    "input_json_file_suffix",
+    ["JSON_sample_1.json", "JSON_sample_2.json"],
+)
 def test_valid_json(
-    annotations_test_data,
     input_file_standard,
     input_json_file_suffix,
     input_schema,
+    annotations_test_data,
 ):
     """Test the ValidJSON validator with valid files."""
-    input_json_file = (
-        f"{input_file_standard}_JSON_sample_{input_json_file_suffix}.json"
-    )
-    input_json_file = annotations_test_data[input_json_file]
+    # get path to file
+    filepath = annotations_test_data[
+        f"{input_file_standard}_{input_json_file_suffix}"
+    ]
+
     with does_not_raise():
-        ValidJSON(path=input_json_file, schema=input_schema)
+        ValidJSON(
+            path=filepath,
+            schema=input_schema,
+        )
 
 
 @pytest.mark.parametrize(
@@ -100,27 +110,55 @@ def test_valid_json(
     [
         (
             "json_file_with_decode_error",
-            VIA_UNTRACKED_SCHEMA,  # should be independent of schema
+            None,  # should be independent of schema
             pytest.raises(ValueError),
             "Error decoding JSON data from file: {}.",
         ),
         (
             "json_file_with_not_found_error",
-            VIA_UNTRACKED_SCHEMA,  # should be independent of schema
+            None,  # should be independent of schema
             pytest.raises(FileNotFoundError),
             "File not found: {}.",
         ),
         (
             "via_json_file_with_schema_error",
             VIA_UNTRACKED_SCHEMA,
-            pytest.raises(ValueError),
-            "The JSON data does not match the provided schema: {}.",
+            pytest.raises(jsonschema.exceptions.ValidationError),
+            "49.5 is not of type 'integer'\n\n"
+            "Failed validating 'type' in "
+            "schema['properties']['_via_img_metadata']['additionalProperties']"
+            "['properties']['regions']['items']['properties']"
+            "['shape_attributes']['properties']['width']:\n"
+            "    {'type': 'integer'}\n\n"
+            "On instance['_via_img_metadata']"
+            "['09.08_09.08.2023-01-Left_frame_001764.png15086122']['regions']"
+            "[0]['shape_attributes']['width']:\n"
+            "    49.5",
         ),
         (
             "coco_json_file_with_schema_error",
             COCO_UNTRACKED_SCHEMA,
-            pytest.raises(ValueError),
-            "The JSON data does not match the provided schema: {}.",
+            pytest.raises(jsonschema.exceptions.ValidationError),
+            "[{'area': 432, 'bbox': [1278, 556, 16, 27], 'category_id': 1, "
+            "'id': 8917, 'image_id': 199, 'iscrowd': 0}] is not of type "
+            "'object'\n\n"
+            "Failed validating 'type' in "
+            "schema['properties']['annotations']['items']:\n"
+            "    {'type': 'object',\n"
+            "     'properties': {'id': {'type': 'integer'},\n"
+            "                    'image_id': {'type': 'integer'},\n"
+            "                    'bbox': {'type': 'array', 'items': "
+            "{'type': 'integer'}},\n"
+            "                    'category_id': {'type': 'integer'},\n"
+            "                    'area': {'type': 'integer'},\n"
+            "                    'iscrowd': {'type': 'integer'}}}\n\n"
+            "On instance['annotations'][4343]:\n"
+            "    [{'area': 432,\n"
+            "      'bbox': [1278, 556, 16, 27],\n"
+            "      'category_id': 1,\n"
+            "      'id': 8917,\n"
+            "      'image_id': 199,\n"
+            "      'iscrowd': 0}]",
         ),
     ],
 )
@@ -131,50 +169,13 @@ def test_valid_json_error(
     log_message,
     request,
 ):
-    """Test the ValidJSON validator throws the expected error."""
+    """Test the ValidJSON validator throws the expected errors."""
     invalid_json_file = request.getfixturevalue(invalid_json_file_str)
 
     with expected_exception as excinfo:
         ValidJSON(path=invalid_json_file, schema=input_schema)
 
-    if "schema" in invalid_json_file_str:
-        assert str(excinfo.value) == log_message.format(input_schema)
+    if input_schema:
+        assert str(excinfo.value) == log_message
     else:
         assert str(excinfo.value) == log_message.format(invalid_json_file)
-
-
-# @pytest.mark.parametrize(
-#     "valid_json_file, input_schema",
-#     [
-#         ("VIA_JSON_sample_1.json", VIA_UNTRACKED_SCHEMA),
-#         ("COCO_JSON_sample_1.json", COCO_UNTRACKED_SCHEMA),
-#     ],
-# )
-# @pytest.mark.parametrize(
-#     "invalid_json_factory, expected_exception, log_message",
-#     [
-#         (
-#             "get_json_file_with_schema_error",
-#             pytest.raises(ValueError),
-#             "The JSON data does not match the provided schema: {}.",
-#         ),
-#     ],
-# )
-# def test_valid_json_schema_error(
-#     valid_json_file,
-#     input_schema,
-#     invalid_json_factory,
-#     expected_exception,
-#     log_message,
-#     tmp_path,
-#     request,
-# ):
-#     """Test the ValidJSON validator throws the expected error."""
-#     invalid_json_factory = request.getfixturevalue(invalid_json_factory)
-#     invalid_json_file = invalid_json_factory(valid_json_file)
-
-#     with expected_exception as excinfo:
-#         ValidJSON(path=invalid_json_file, schema=input_schema)
-
-#     if log_message:
-#         assert str(excinfo.value) == log_message.format(input_schema)

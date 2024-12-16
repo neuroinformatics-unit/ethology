@@ -5,6 +5,7 @@ from pathlib import Path
 
 import jsonschema
 import jsonschema.exceptions
+import jsonschema.validators
 from attrs import define, field, validators
 
 
@@ -73,10 +74,8 @@ class ValidJSON:
             try:
                 jsonschema.validate(instance=data, schema=self.schema)
             except jsonschema.exceptions.ValidationError as val_err:
-                raise ValueError(
-                    "The JSON data does not match "
-                    f"the provided schema: {self.schema}."
-                ) from val_err
+                # forward the error message as it is quite informative
+                raise val_err
 
 
 @define
