@@ -9,14 +9,17 @@ dynamic = ["version"]
 license = { text = "BSD-3-Clause" }
 
 classifiers = [
-    "Development Status :: 2 - Pre-Alpha",
-    "Programming Language :: Python",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12",
-    "Operating System :: OS Independent",
-    "License :: OSI Approved :: BSD License",
+  "Development Status :: 2 - Pre-Alpha",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Operating System :: OS Independent",
+  "License :: OSI Approved :: BSD License",
+]
+dependencies = [
+  "movement",
 ]
 
 [project.urls]
@@ -26,22 +29,23 @@ classifiers = [
 "Source Code" = "https://github.com/neuroinformatics-unit/ethology"
 "User Support" = "https://github.com/neuroinformatics-unit/ethology/issues"
 
+
 [project.optional-dependencies]
 dev = [
-    "pytest",
-    "pytest-cov",
-    "coverage",
-    "tox",
-    "mypy",
-    "pre-commit",
-    "ruff",
-    "codespell",
-    "setuptools_scm",
-    "pandas-stubs",
-    "types-attrs",
-    "check-manifest",
-    "types-PyYAML",
-    "types-requests",
+  "pytest",
+  "pytest-cov",
+  "coverage",
+  "tox",
+  "mypy",
+  "pre-commit",
+  "ruff",
+  "codespell",
+  "setuptools_scm",
+  "pandas-stubs",
+  "types-attrs",
+  "check-manifest",
+  "types-PyYAML",
+  "types-requests",
 ]
 
 # [project.scripts]
@@ -65,11 +69,11 @@ addopts = "--cov=ethology"
 
 [tool.check-manifest]
 ignore = [
-    ".yaml",
-    "tox.ini",
-    "tests/",
-    "tests/test_unit/",
-    "tests/test_integration/",
+  ".yaml",
+  "tox.ini",
+  "tests/",
+  "tests/test_unit/",
+  "tests/test_integration/",
 ]
 
 [tool.ruff]
