@@ -8,10 +8,7 @@ from ethology.annotations.json_schemas import (
     COCO_UNTRACKED_SCHEMA,
     VIA_UNTRACKED_SCHEMA,
 )
-from ethology.annotations.validators import (
-    ValidJSON,
-    ValidVIAUntrackedJSON,
-)
+from ethology.annotations.validators import ValidJSON, ValidVIAUntrackedJSON
 
 
 @pytest.fixture()
@@ -81,7 +78,12 @@ def via_json_file_with_missing_keys(tmp_path, annotations_test_data):
     def _via_json_file_with_missing_keys(
         valid_json_filename, required_keys_to_pop
     ):
-        """Return path to a JSON file that is missing required keys."""
+        """Return path to a JSON file that is missing required keys.
+
+        If a key to pop refers to a nested dictionary, it is removed from
+        the first element.
+
+        """
         # read valid json file
         valid_json_path = annotations_test_data[valid_json_filename]
         with open(valid_json_path) as f:
@@ -91,28 +93,35 @@ def via_json_file_with_missing_keys(tmp_path, annotations_test_data):
         for key in required_keys_to_pop.get("main", []):
             data.pop(key)
 
-        # remove keys in nested dicts
-        for _, img_dict in data["_via_img_metadata"].items():
-            # remove keys for each image dictionary
+        # remove keys in nested dictionaries
+        edited_image_dicts = {}
+        if "_via_img_metadata" in data:
+            # remove image keys for first image dictionary
+            img_str, img_dict = list(data["_via_img_metadata"].items())[
+                0
+            ]  # list(data["_via_img_metadata"].values())[0]
             for key in required_keys_to_pop.get("image_keys", []):
                 img_dict.pop(key)
+                edited_image_dicts["image_keys"] = img_str
 
-            for region in img_dict["regions"]:
-                # remove keys for each region
-                for key in required_keys_to_pop.get("region_keys", []):
-                    region.pop(key)
+            # remove region keys for first region under second image dictionary
+            img_str, img_dict = list(data["_via_img_metadata"].items())[1]
+            for key in required_keys_to_pop.get("region_keys", []):
+                img_dict["regions"][0].pop(key)
+                edited_image_dicts["region_keys"] = img_str
 
-                # remove keys under shape_attributes
-                for key in required_keys_to_pop.get(
-                    "shape_attributes_keys", []
-                ):
-                    region["shape_attributes"].pop(key)
+            # remove shape_attributes keys for first region under third image
+            # dictionary
+            img_str, img_dict = list(data["_via_img_metadata"].items())[2]
+            for key in required_keys_to_pop.get("shape_attributes_keys", []):
+                img_dict["regions"][0]["shape_attributes"].pop(key)
+                edited_image_dicts["shape_attributes_keys"] = img_str
 
         # save the modified json to a new file
         out_json = tmp_path / f"{valid_json_path.name}_missing_keys.json"
         with open(out_json, "w") as f:
             json.dump(data, f)
-        return out_json
+        return out_json, edited_image_dicts
 
     return _via_json_file_with_missing_keys
 
@@ -226,26 +235,28 @@ def test_valid_via_untracked_json(annotations_test_data, input_json_file):
         (
             {"main": ["_via_image_id_list"]},
             pytest.raises(ValueError),
-            "Required key(s) {'_via_image_id_list'} not found "
+            "Required key(s) {{'_via_image_id_list'}} not found "
             "in ['_via_settings', '_via_img_metadata', '_via_attributes', "
             "'_via_data_format_version'].",
         ),
         (
             {"image_keys": ["filename"]},
             pytest.raises(ValueError),
-            "Required key(s) {'filename'} not found "
+            "Required key(s) {{'filename'}} not found "
             "in ['size', 'regions', 'file_attributes'] "
-            "for 09.08_09.08.2023-01-Left_frame_001764.png15086122.",
+            "for {}.",
         ),
         (
             {"region_keys": ["shape_attributes"]},
             pytest.raises(ValueError),
-            "The JSON data does not contain the required keys: annotations.",
+            "Required key(s) {{'shape_attributes'}} not found in "
+            "['region_attributes'] for region 0 under {}.",
         ),
         (
             {"shape_attributes_keys": ["x"]},
             pytest.raises(ValueError),
-            "The JSON data does not contain the required keys: annotations.",
+            "Required key(s) {{'x'}} not found in "
+            "['name', 'y', 'width', 'height'] for region 0 under {}.",
         ),
     ],
 )
@@ -257,17 +268,20 @@ def test_valid_via_untracked_json_missing_keys(
     log_message,
 ):
     # create invalid json file with missing keys
-    invalid_json_file = via_json_file_with_missing_keys(
+    invalid_json_file, edited_image_dicts = via_json_file_with_missing_keys(
         valid_json_file, missing_keys
     )
 
-    # run validatio
+    # get key of affected image in _via_img_metadata
+    img_key_str = edited_image_dicts.get(list(missing_keys.keys())[0], None)
+
+    # run validation
     with expected_exception as excinfo:
         ValidVIAUntrackedJSON(
             path=invalid_json_file,
         )
 
-    assert str(excinfo.value) == log_message
+    assert str(excinfo.value) == log_message.format(img_key_str)
 
 
 # def test_valid_via_untracked_json ---> checks required keys

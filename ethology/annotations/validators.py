@@ -116,17 +116,21 @@ class ValidVIAUntrackedJSON:
             _check_keys(
                 required_keys["image_keys"],
                 img_dict,
-                additional_error_message=f" for {img_str}",
+                additional_message=f" for {img_str}",
             )
             # Check keys for each region
-            for region in img_dict["regions"]:
-                _check_keys(required_keys["region_keys"], region)
+            for i, region in enumerate(img_dict["regions"]):
+                _check_keys(
+                    required_keys["region_keys"],
+                    region,
+                    additional_message=f" for region {i} under {img_str}",
+                )
 
                 # Check keys under shape_attributes
                 _check_keys(
                     required_keys["shape_attributes_keys"],
                     region["shape_attributes"],
-                    additional_error_message=f" for region under {img_str}",
+                    additional_message=f" for region {i} under {img_str}",
                 )
 
 
@@ -181,7 +185,7 @@ class ValidCOCOUntrackedJSON:
             _check_keys(
                 required_keys["image_keys"],
                 img_dict,
-                additional_error_message=f" for image dict {img_dict}",
+                additional_message=f" for image dict {img_dict}",
             )
 
         # Check keys in annotations dicts
@@ -189,7 +193,7 @@ class ValidCOCOUntrackedJSON:
             _check_keys(
                 required_keys["annotations_keys"],
                 annot_dict,
-                additional_error_message=f" for annotation dict {annot_dict}",
+                additional_message=f" for annotation dict {annot_dict}",
             )
 
         # Check keys in categories dicts
@@ -197,20 +201,18 @@ class ValidCOCOUntrackedJSON:
             _check_keys(
                 required_keys["categories_keys"],
                 cat_dict,
-                additional_error_message=f" for category dict {cat_dict}",
+                additional_message=f" for category dict {cat_dict}",
             )
 
 
 def _check_keys(
     list_required_keys: list[str],
     data_dict: dict,
-    additional_error_message: str = "",
+    additional_message: str = "",
 ):
     missing_keys = set(list_required_keys) - data_dict.keys()
     if missing_keys:
         raise ValueError(
             f"Required key(s) {missing_keys} not "
-            f"found in {list(data_dict.keys())}"
-            + additional_error_message
-            + "."
+            f"found in {list(data_dict.keys())}" + additional_message + "."
         )
