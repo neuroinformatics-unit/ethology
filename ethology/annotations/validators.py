@@ -211,5 +211,5 @@ def _check_keys(
     if missing_keys:
         raise ValueError(
             f"Required key(s) {sorted(missing_keys)} not "
-            f"found in {list(data_dict.keys())}" + additional_message + "."
+            f"found in {list(data_dict.keys())}{additional_message}."
         )
