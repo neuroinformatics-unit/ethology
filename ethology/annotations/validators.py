@@ -79,7 +79,7 @@ class ValidJSON:
 
 
 @define
-class ValidVIAUntrackedJSON:
+class ValidVIAJSON:
     """Class for validating VIA JSON files for untracked data.
 
     Checks the VIA JSON file for untracked data contains the required keys.
@@ -135,7 +135,7 @@ class ValidVIAUntrackedJSON:
 
 
 @define
-class ValidCOCOUntrackedJSON:
+class ValidCOCOJSON:
     """Class for validating COCO JSON files for untracked data.
 
     The validator ensures that the file matches the expected schema.

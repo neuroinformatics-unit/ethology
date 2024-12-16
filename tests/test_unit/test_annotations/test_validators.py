@@ -4,14 +4,11 @@ from contextlib import nullcontext as does_not_raise
 import jsonschema
 import pytest
 
-from ethology.annotations.json_schemas import (
-    COCO_UNTRACKED_SCHEMA,
-    VIA_UNTRACKED_SCHEMA,
-)
+from ethology.annotations.json_schemas import COCO_SCHEMA, VIA_SCHEMA
 from ethology.annotations.validators import (
-    ValidCOCOUntrackedJSON,
+    ValidCOCOJSON,
     ValidJSON,
-    ValidVIAUntrackedJSON,
+    ValidVIAJSON,
     _check_keys,
 )
 
@@ -179,9 +176,9 @@ def coco_json_file_with_missing_keys(tmp_path, annotations_test_data):
     "input_file_standard, input_schema",
     [
         ("VIA", None),
-        ("VIA", VIA_UNTRACKED_SCHEMA),
+        ("VIA", VIA_SCHEMA),
         ("COCO", None),
-        ("COCO", COCO_UNTRACKED_SCHEMA),
+        ("COCO", COCO_SCHEMA),
     ],
 )
 @pytest.mark.parametrize(
@@ -194,7 +191,7 @@ def test_valid_json(
     input_schema,
     annotations_test_data,
 ):
-    """Test the ValidJSON validator with valid files."""
+    """Test the ValidJSON validator with valid inputs."""
     filepath = annotations_test_data[
         f"{input_file_standard}_{input_json_file_suffix}"
     ]
@@ -223,13 +220,13 @@ def test_valid_json(
         ),
         (
             "via_json_file_with_schema_error",
-            VIA_UNTRACKED_SCHEMA,
+            VIA_SCHEMA,
             pytest.raises(jsonschema.exceptions.ValidationError),
             "49.5 is not of type 'integer'\n\n",
         ),
         (
             "coco_json_file_with_schema_error",
-            COCO_UNTRACKED_SCHEMA,
+            COCO_SCHEMA,
             pytest.raises(jsonschema.exceptions.ValidationError),
             "[{'area': 432, 'bbox': [1278, 556, 16, 27], 'category_id': 1, "
             "'id': 8917, 'image_id': 199, 'iscrowd': 0}] is not of type "
@@ -263,16 +260,17 @@ def test_valid_json_errors(
         "VIA_JSON_sample_2.json",
     ],
 )
-def test_valid_via_untracked_json(annotations_test_data, input_json_file):
+def test_valid_via_json(annotations_test_data, input_json_file):
+    """Test the ValidVIAJSON validator with valid inputs."""
     filepath = annotations_test_data[input_json_file]
     with does_not_raise():
-        ValidVIAUntrackedJSON(
+        ValidVIAJSON(
             path=filepath,
         )
 
 
 @pytest.mark.parametrize(
-    "valid_json_file",
+    "valid_via_json_file",
     [
         "VIA_JSON_sample_1.json",
         "VIA_JSON_sample_2.json",
@@ -316,24 +314,25 @@ def test_valid_via_untracked_json(annotations_test_data, input_json_file):
         ),
     ],
 )
-def test_valid_via_untracked_json_missing_keys(
-    valid_json_file,
+def test_valid_via_json_missing_keys(
+    valid_via_json_file,
     missing_keys,
     via_json_file_with_missing_keys,
     expected_exception,
     log_message,
 ):
-    # create invalid json file with missing keys
+    """Test the ValidVIAJSON when input has missing keys."""
+    # create invalid VIA json file with missing keys
     invalid_json_file, edited_image_dicts = via_json_file_with_missing_keys(
-        valid_json_file, missing_keys
+        valid_via_json_file, missing_keys
     )
 
-    # get key of affected image in _via_img_metadata
+    # get key of affected images in _via_img_metadata
     img_key_str = edited_image_dicts.get(list(missing_keys.keys())[0], None)
 
     # run validation
     with expected_exception as excinfo:
-        ValidVIAUntrackedJSON(
+        ValidVIAJSON(
             path=invalid_json_file,
         )
 
@@ -341,7 +340,7 @@ def test_valid_via_untracked_json_missing_keys(
 
 
 @pytest.mark.parametrize(
-    "valid_json_file",
+    "valid_coco_json_file",
     [
         "COCO_JSON_sample_1.json",
         "COCO_JSON_sample_2.json",
@@ -383,16 +382,17 @@ def test_valid_via_untracked_json_missing_keys(
         ),
     ],
 )
-def test_valid_coco_untracked_json(
-    valid_json_file,
+def test_valid_coco_json_missing_keys(
+    valid_coco_json_file,
     missing_keys,
     coco_json_file_with_missing_keys,
     expected_exception,
     log_message,
 ):
+    """Test the ValidCOCOJSON when input has missing keys."""
     # create invalid json file with missing keys
     invalid_json_file, edited_image_dicts = coco_json_file_with_missing_keys(
-        valid_json_file, missing_keys
+        valid_coco_json_file, missing_keys
     )
 
     # get key of affected image in _via_img_metadata
@@ -400,7 +400,7 @@ def test_valid_coco_untracked_json(
 
     # run validation
     with expected_exception as excinfo:
-        ValidCOCOUntrackedJSON(
+        ValidCOCOJSON(
             path=invalid_json_file,
         )
 
@@ -415,7 +415,7 @@ def test_valid_coco_untracked_json(
             {"images": "", "annotations": "", "categories": ""},
             "",
             does_not_raise(),
-        ),
+        ),  # zero missing keys
         (
             ["images", "annotations", "categories"],
             {"annotations": "", "categories": ""},
@@ -431,9 +431,9 @@ def test_valid_coco_untracked_json(
         (
             ["images", "annotations", "categories"],
             {"annotations": "", "categories": ""},
-            "TEST",
+            "FOO",
             pytest.raises(ValueError),
-        ),  # one missing key
+        ),  # one missing key with additional message
     ],
 )
 def test_check_keys(
