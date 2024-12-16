@@ -66,7 +66,6 @@ VIA_UNTRACKED_SCHEMA = {
     },
 }
 
-
 COCO_UNTRACKED_SCHEMA = {
     "type": "object",
     "properties": {
