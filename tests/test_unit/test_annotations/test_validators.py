@@ -8,7 +8,11 @@ from ethology.annotations.json_schemas import (
     COCO_UNTRACKED_SCHEMA,
     VIA_UNTRACKED_SCHEMA,
 )
-from ethology.annotations.validators import ValidJSON, ValidVIAUntrackedJSON
+from ethology.annotations.validators import (
+    ValidCOCOUntrackedJSON,
+    ValidJSON,
+    ValidVIAUntrackedJSON,
+)
 
 
 @pytest.fixture()
@@ -75,15 +79,12 @@ def _json_file_with_schema_error(out_parent_path, json_valid_path):
 
 @pytest.fixture()
 def via_json_file_with_missing_keys(tmp_path, annotations_test_data):
+    """Return factory of paths to VIA JSON files with missing required keys."""
+
     def _via_json_file_with_missing_keys(
         valid_json_filename, required_keys_to_pop
     ):
-        """Return path to a JSON file that is missing required keys.
-
-        If a key to pop refers to a nested dictionary, it is removed from
-        the first element.
-
-        """
+        """Return path to a JSON file that is missing required keys."""
         # read valid json file
         valid_json_path = annotations_test_data[valid_json_filename]
         with open(valid_json_path) as f:
@@ -96,26 +97,26 @@ def via_json_file_with_missing_keys(tmp_path, annotations_test_data):
         # remove keys in nested dictionaries
         edited_image_dicts = {}
         if "_via_img_metadata" in data:
+            list_img_metadata_tuples = list(data["_via_img_metadata"].items())
+
             # remove image keys for first image dictionary
-            img_str, img_dict = list(data["_via_img_metadata"].items())[
-                0
-            ]  # list(data["_via_img_metadata"].values())[0]
+            img_str, img_dict = list_img_metadata_tuples[0]
+            edited_image_dicts["image_keys"] = img_str
             for key in required_keys_to_pop.get("image_keys", []):
                 img_dict.pop(key)
-                edited_image_dicts["image_keys"] = img_str
 
             # remove region keys for first region under second image dictionary
-            img_str, img_dict = list(data["_via_img_metadata"].items())[1]
+            img_str, img_dict = list_img_metadata_tuples[1]
+            edited_image_dicts["region_keys"] = img_str
             for key in required_keys_to_pop.get("region_keys", []):
                 img_dict["regions"][0].pop(key)
-                edited_image_dicts["region_keys"] = img_str
 
             # remove shape_attributes keys for first region under third image
             # dictionary
-            img_str, img_dict = list(data["_via_img_metadata"].items())[2]
+            img_str, img_dict = list_img_metadata_tuples[2]
+            edited_image_dicts["shape_attributes_keys"] = img_str
             for key in required_keys_to_pop.get("shape_attributes_keys", []):
                 img_dict["regions"][0]["shape_attributes"].pop(key)
-                edited_image_dicts["shape_attributes_keys"] = img_str
 
         # save the modified json to a new file
         out_json = tmp_path / f"{valid_json_path.name}_missing_keys.json"
@@ -124,6 +125,54 @@ def via_json_file_with_missing_keys(tmp_path, annotations_test_data):
         return out_json, edited_image_dicts
 
     return _via_json_file_with_missing_keys
+
+
+@pytest.fixture()
+def coco_json_file_with_missing_keys(tmp_path, annotations_test_data):
+    """Return factory of paths to COCO JSON files with missing required
+    keys.
+    """
+
+    def _coco_json_file_with_missing_keys(
+        valid_json_filename, required_keys_to_pop
+    ):
+        """Return path to a JSON file that is missing required keys."""
+        # read valid json file
+        valid_json_path = annotations_test_data[valid_json_filename]
+        with open(valid_json_path) as f:
+            data = json.load(f)
+
+        # remove any keys in the first level
+        for key in required_keys_to_pop.get("main", []):
+            data.pop(key)
+
+        edited_image_dicts = {}
+
+        # remove required keys in first images dictionary
+        if "images" in data:
+            edited_image_dicts["image_keys"] = data["images"][0]
+            for key in required_keys_to_pop.get("image_keys", []):
+                data["images"][0].pop(key)
+
+        # remove required keys in first annotations dictionary
+        if "annotations" in data:
+            edited_image_dicts["annotations_keys"] = data["annotations"][0]
+            for key in required_keys_to_pop.get("annotations_keys", []):
+                data["annotations"][0].pop(key)
+
+        # remove required keys in first categories dictionary
+        if "categories" in data:
+            edited_image_dicts["categories_keys"] = data["categories"][0]
+            for key in required_keys_to_pop.get("categories_keys", []):
+                data["categories"][0].pop(key)
+
+        # save the modified json to a new file
+        out_json = tmp_path / f"{valid_json_path.name}_missing_keys.json"
+        with open(out_json, "w") as f:
+            json.dump(data, f)
+        return out_json, edited_image_dicts
+
+    return _coco_json_file_with_missing_keys
 
 
 @pytest.mark.parametrize(
@@ -235,27 +284,34 @@ def test_valid_via_untracked_json(annotations_test_data, input_json_file):
         (
             {"main": ["_via_image_id_list"]},
             pytest.raises(ValueError),
-            "Required key(s) {{'_via_image_id_list'}} not found "
+            "Required key(s) ['_via_image_id_list'] not found "
             "in ['_via_settings', '_via_img_metadata', '_via_attributes', "
+            "'_via_data_format_version'].",
+        ),
+        (
+            {"main": ["_via_image_id_list", "_via_img_metadata"]},
+            pytest.raises(ValueError),
+            "Required key(s) ['_via_image_id_list', '_via_img_metadata'] "
+            "not found in ['_via_settings', '_via_attributes', "
             "'_via_data_format_version'].",
         ),
         (
             {"image_keys": ["filename"]},
             pytest.raises(ValueError),
-            "Required key(s) {{'filename'}} not found "
+            "Required key(s) ['filename'] not found "
             "in ['size', 'regions', 'file_attributes'] "
             "for {}.",
         ),
         (
             {"region_keys": ["shape_attributes"]},
             pytest.raises(ValueError),
-            "Required key(s) {{'shape_attributes'}} not found in "
+            "Required key(s) ['shape_attributes'] not found in "
             "['region_attributes'] for region 0 under {}.",
         ),
         (
             {"shape_attributes_keys": ["x"]},
             pytest.raises(ValueError),
-            "Required key(s) {{'x'}} not found in "
+            "Required key(s) ['x'] not found in "
             "['name', 'y', 'width', 'height'] for region 0 under {}.",
         ),
     ],
@@ -284,6 +340,68 @@ def test_valid_via_untracked_json_missing_keys(
     assert str(excinfo.value) == log_message.format(img_key_str)
 
 
-# def test_valid_via_untracked_json ---> checks required keys
-# def test_valid_coco_untracked_json ---> checks required keys
-# def test_check_keys?
+@pytest.mark.parametrize(
+    "valid_json_file",
+    [
+        "COCO_JSON_sample_1.json",
+        "COCO_JSON_sample_2.json",
+    ],
+)
+@pytest.mark.parametrize(
+    "missing_keys, expected_exception, log_message",
+    [
+        (
+            {"main": ["categories"]},
+            pytest.raises(ValueError),
+            "Required key(s) ['categories'] not found "
+            "in ['annotations', 'images', 'info', 'licenses'].",
+        ),
+        (
+            {"main": ["categories", "images"]},
+            pytest.raises(ValueError),
+            "Required key(s) ['categories', 'images'] not found "
+            "in ['annotations', 'info', 'licenses'].",
+        ),
+        (
+            {"image_keys": ["file_name"]},
+            pytest.raises(ValueError),
+            "Required key(s) ['file_name'] not found in "
+            "['height', 'id', 'width'] for image dict {}.",
+        ),
+        (
+            {"annotations_keys": ["category_id"]},
+            pytest.raises(ValueError),
+            "Required key(s) ['category_id'] not found in "
+            "['area', 'bbox', 'id', 'image_id', 'iscrowd'] for "
+            "annotation dict {}.",
+        ),
+        (
+            {"categories_keys": ["id"]},
+            pytest.raises(ValueError),
+            "Required key(s) ['id'] not found in "
+            "['name', 'supercategory'] for category dict {}.",
+        ),
+    ],
+)
+def test_valid_coco_untracked_json(
+    valid_json_file,
+    missing_keys,
+    coco_json_file_with_missing_keys,
+    expected_exception,
+    log_message,
+):
+    # create invalid json file with missing keys
+    invalid_json_file, edited_image_dicts = coco_json_file_with_missing_keys(
+        valid_json_file, missing_keys
+    )
+
+    # get key of affected image in _via_img_metadata
+    img_dict = edited_image_dicts.get(list(missing_keys.keys())[0], None)
+
+    # run validation
+    with expected_exception as excinfo:
+        ValidCOCOUntrackedJSON(
+            path=invalid_json_file,
+        )
+
+    assert str(excinfo.value) == log_message.format(img_dict)

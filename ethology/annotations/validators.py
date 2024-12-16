@@ -165,10 +165,7 @@ class ValidCOCOUntrackedJSON:
         """Ensure that the JSON file contains the required keys."""
         required_keys = {
             "main": ["images", "annotations", "categories"],
-            "image_keys": [
-                "id",
-                "file_name",
-            ],  # add height and width of image?
+            "image_keys": ["id", "file_name"],  # "height", "width"?
             "annotations_keys": ["id", "image_id", "bbox", "category_id"],
             "categories_keys": ["id", "name", "supercategory"],
         }
@@ -213,6 +210,6 @@ def _check_keys(
     missing_keys = set(list_required_keys) - data_dict.keys()
     if missing_keys:
         raise ValueError(
-            f"Required key(s) {missing_keys} not "
+            f"Required key(s) {sorted(missing_keys)} not "
             f"found in {list(data_dict.keys())}" + additional_message + "."
         )
