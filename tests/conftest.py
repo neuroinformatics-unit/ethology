@@ -59,14 +59,14 @@ def pooch_registry() -> dict:
 @pytest.fixture()
 def get_paths_test_data():
     """Define a factory fixture to get the paths of the data files
-    under a specific zip.
+    under a specific subdirectory in the GIN repository.
 
-    The name of the zip file is intended to match a testing module. For
+    The name of the subdirectories is intended to match a testing module. For
     example, to get the paths to the test files for the annotations
-    tests module, we would call `get_paths_test_data(pooch_registry,
+    module, we would call `get_paths_test_data(pooch_registry,
     "test_annotations")` in a test. This assumes in the GIN repository
-    there is a zip file named `test_annotations.zip` under the `test_data`
-    directory containing the relevant test files.
+    there is a subdirectory named `test_annotations` under the `test_data`
+    directory with the relevant test files.
     """
 
     def _get_paths_test_data(pooch_registry, subdir_name: str) -> dict:

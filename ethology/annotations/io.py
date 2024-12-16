@@ -6,14 +6,11 @@ from pathlib import Path
 import pandas as pd
 from movement.validators.files import ValidFile
 
-from ethology.annotations.json_schemas import (
-    COCO_UNTRACKED_SCHEMA,
-    VIA_UNTRACKED_SCHEMA,
-)
+from ethology.annotations.json_schemas import COCO_SCHEMA, VIA_SCHEMA
 from ethology.annotations.validators import (
-    ValidCOCOUntrackedJSON,
+    ValidCOCOJSON,
     ValidJSON,
-    ValidVIAUntrackedJSON,
+    ValidVIAJSON,
 )
 
 STANDARD_DF_COLUMNS = [
@@ -49,8 +46,8 @@ def df_from_via_json_file(file_path: Path) -> pd.DataFrame:
     file = ValidFile(
         file_path, expected_permission="r", expected_suffix=[".json"]
     )
-    json_file = ValidJSON(path=file.path, schema=VIA_UNTRACKED_SCHEMA)
-    via_untracked_file = ValidVIAUntrackedJSON(json_file.path)
+    json_file = ValidJSON(path=file.path, schema=VIA_SCHEMA)
+    via_untracked_file = ValidVIAJSON(json_file.path)
 
     # Read as standard dataframe
     return _df_from_validated_via_json_file(via_untracked_file.path)
@@ -76,8 +73,8 @@ def df_from_coco_json_file(file_path: Path) -> pd.DataFrame:
     file = ValidFile(
         file_path, expected_permission="r", expected_suffix=[".json"]
     )
-    json_file = ValidJSON(path=file.path, schema=COCO_UNTRACKED_SCHEMA)
-    coco_untracked_file = ValidCOCOUntrackedJSON(json_file.path)
+    json_file = ValidJSON(path=file.path, schema=COCO_SCHEMA)
+    coco_untracked_file = ValidCOCOJSON(json_file.path)
 
     # Read as standard dataframe
     return _df_from_validated_coco_json_file(coco_untracked_file.path)

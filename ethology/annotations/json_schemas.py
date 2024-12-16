@@ -1,6 +1,6 @@
 """JSON schemas for VIA and COCO annotations."""
 
-VIA_UNTRACKED_SCHEMA = {
+VIA_SCHEMA = {
     "type": "object",
     "properties": {
         # settings for browser UI
@@ -66,7 +66,7 @@ VIA_UNTRACKED_SCHEMA = {
     },
 }
 
-COCO_UNTRACKED_SCHEMA = {
+COCO_SCHEMA = {
     "type": "object",
     "properties": {
         "info": {"type": "object"},
