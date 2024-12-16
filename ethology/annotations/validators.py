@@ -84,9 +84,6 @@ class ValidVIAUntrackedJSON:
 
     Checks the VIA JSON file for untracked data contains the required keys.
 
-    Note that the validation against the schema does not check the existence
-    of the keys, only the type of their values if they exist.
-
     Attributes
     ----------
     path : pathlib.Path
@@ -119,7 +116,7 @@ class ValidVIAUntrackedJSON:
             _check_keys(
                 required_keys["image_keys"],
                 img_dict,
-                additional_error_message=f"for {img_str}",
+                additional_error_message=f" for {img_str}",
             )
             # Check keys for each region
             for region in img_dict["regions"]:
@@ -129,7 +126,7 @@ class ValidVIAUntrackedJSON:
                 _check_keys(
                     required_keys["shape_attributes_keys"],
                     region["shape_attributes"],
-                    additional_error_message=f"for region under {img_str}",
+                    additional_error_message=f" for region under {img_str}",
                 )
 
 
@@ -159,78 +156,6 @@ class ValidCOCOUntrackedJSON:
 
     path: Path = field(validator=validators.instance_of(Path))
 
-    # TODO: add a check for the presence of the keys
-    # that I use in loading the data
-
-    @path.validator
-    def _file_macthes_COCO_JSON_schema(self, attribute, value):
-        """Ensure that the JSON file matches the expected schema."""
-        # Define schema for VIA JSON file for untracked
-        # (aka manually labelled) data
-        COCO_JSON_schema = {
-            "type": "object",
-            "properties": {
-                "info": {"type": "object"},
-                "licenses": {
-                    "type": "array",
-                },
-                "images": {
-                    "type": "array",
-                    "items": {
-                        "type": "object",
-                        "properties": {
-                            "file_name": {"type": "string"},
-                            "id": {"type": "integer"},
-                            "width": {"type": "integer"},
-                            "height": {"type": "integer"},
-                        },
-                    },
-                },
-                "annotations": {
-                    "type": "array",
-                    "items": {
-                        "type": "object",
-                        "properties": {
-                            "id": {"type": "integer"},  # annotation global ID
-                            "image_id": {"type": "integer"},
-                            "bbox": {
-                                "type": "array",
-                                "items": {"type": "integer"},
-                            },
-                            "category_id": {"type": "integer"},
-                            "area": {"type": "integer"},
-                            "iscrowd": {"type": "integer"},
-                        },
-                    },
-                },
-                "categories": {
-                    "type": "array",
-                    "items": {
-                        "type": "object",
-                        "properties": {
-                            "id": {"type": "integer"},
-                            "name": {"type": "string"},
-                            "supercategory": {"type": "string"},
-                        },
-                    },
-                },
-            },
-        }
-
-        # should have been validated with ValidJSON
-        # already so this should work fine
-        with open(value) as file:
-            data = json.load(file)
-
-        # check against schema
-        try:
-            jsonschema.validate(instance=data, schema=COCO_JSON_schema)
-        except jsonschema.exceptions.ValidationError as val_err:
-            raise ValueError(
-                "The JSON data does not match "
-                f"the provided schema: {COCO_JSON_schema}"
-            ) from val_err
-
     @path.validator
     def _file_contains_required_keys(self, attribute, value):
         """Ensure that the JSON file contains the required keys."""
@@ -256,7 +181,7 @@ class ValidCOCOUntrackedJSON:
             _check_keys(
                 required_keys["image_keys"],
                 img_dict,
-                additional_error_message=f"for image dict {img_dict}",
+                additional_error_message=f" for image dict {img_dict}",
             )
 
         # Check keys in annotations dicts
@@ -264,7 +189,7 @@ class ValidCOCOUntrackedJSON:
             _check_keys(
                 required_keys["annotations_keys"],
                 annot_dict,
-                additional_error_message=f"for annotation dict {annot_dict}",
+                additional_error_message=f" for annotation dict {annot_dict}",
             )
 
         # Check keys in categories dicts
@@ -272,7 +197,7 @@ class ValidCOCOUntrackedJSON:
             _check_keys(
                 required_keys["categories_keys"],
                 cat_dict,
-                additional_error_message=f"for category dict {cat_dict}",
+                additional_error_message=f" for category dict {cat_dict}",
             )
 
 
@@ -285,7 +210,7 @@ def _check_keys(
     if missing_keys:
         raise ValueError(
             f"Required key(s) {missing_keys} not "
-            f"found in {list(data_dict.keys())} "
+            f"found in {list(data_dict.keys())}"
             + additional_error_message
             + "."
         )
