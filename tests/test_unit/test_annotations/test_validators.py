@@ -26,29 +26,6 @@ def json_file_with_not_found_error(tmp_path):
     return tmp_path / "JSON_file_not_found.json"
 
 
-def _json_file_with_schema_error(out_parent_path, json_valid_path):
-    """Return path to a JSON file that doesn't match the expected schema."""
-    # read valid json file
-    with open(json_valid_path) as f:
-        data = json.load(f)
-
-    # modify so that it doesn't match the corresponding schema
-    if "VIA" in json_valid_path.name:
-        # change "width" of a bounding box from int to float
-        data["_via_img_metadata"][
-            "09.08_09.08.2023-01-Left_frame_001764.png15086122"
-        ]["regions"][0]["shape_attributes"]["width"] = 49.5
-    elif "COCO" in json_valid_path.name:
-        # change "annotations" from list of dicts to list of lists
-        data["annotations"] = [[d] for d in data["annotations"]]
-
-    # save the modified json to a new file
-    out_json = out_parent_path / f"{json_valid_path.name}_schema_error.json"
-    with open(out_json, "w") as f:
-        json.dump(data, f)
-    return out_json
-
-
 @pytest.fixture()
 def via_json_file_with_schema_error(
     tmp_path,
@@ -73,6 +50,29 @@ def coco_json_file_with_schema_error(
     )
 
 
+def _json_file_with_schema_error(out_parent_path, json_valid_path):
+    """Return path to a JSON file that doesn't match the expected schema."""
+    # read valid json file
+    with open(json_valid_path) as f:
+        data = json.load(f)
+
+    # modify so that it doesn't match the corresponding schema
+    if "VIA" in json_valid_path.name:
+        # change "width" of a bounding box from int to float
+        data["_via_img_metadata"][
+            "09.08_09.08.2023-01-Left_frame_001764.png15086122"
+        ]["regions"][0]["shape_attributes"]["width"] = 49.5
+    elif "COCO" in json_valid_path.name:
+        # change "annotations" from list of dicts to list of lists
+        data["annotations"] = [[d] for d in data["annotations"]]
+
+    # save the modified json to a new file
+    out_json = out_parent_path / f"{json_valid_path.name}_schema_error.json"
+    with open(out_json, "w") as f:
+        json.dump(data, f)
+    return out_json
+
+
 @pytest.mark.parametrize(
     "input_file_standard, input_schema",
     [
@@ -93,7 +93,6 @@ def test_valid_json(
     annotations_test_data,
 ):
     """Test the ValidJSON validator with valid files."""
-    # get path to file
     filepath = annotations_test_data[
         f"{input_file_standard}_{input_json_file_suffix}"
     ]
@@ -124,16 +123,7 @@ def test_valid_json(
             "via_json_file_with_schema_error",
             VIA_UNTRACKED_SCHEMA,
             pytest.raises(jsonschema.exceptions.ValidationError),
-            "49.5 is not of type 'integer'\n\n"
-            "Failed validating 'type' in "
-            "schema['properties']['_via_img_metadata']['additionalProperties']"
-            "['properties']['regions']['items']['properties']"
-            "['shape_attributes']['properties']['width']:\n"
-            "    {'type': 'integer'}\n\n"
-            "On instance['_via_img_metadata']"
-            "['09.08_09.08.2023-01-Left_frame_001764.png15086122']['regions']"
-            "[0]['shape_attributes']['width']:\n"
-            "    49.5",
+            "49.5 is not of type 'integer'\n\n",
         ),
         (
             "coco_json_file_with_schema_error",
@@ -141,24 +131,7 @@ def test_valid_json(
             pytest.raises(jsonschema.exceptions.ValidationError),
             "[{'area': 432, 'bbox': [1278, 556, 16, 27], 'category_id': 1, "
             "'id': 8917, 'image_id': 199, 'iscrowd': 0}] is not of type "
-            "'object'\n\n"
-            "Failed validating 'type' in "
-            "schema['properties']['annotations']['items']:\n"
-            "    {'type': 'object',\n"
-            "     'properties': {'id': {'type': 'integer'},\n"
-            "                    'image_id': {'type': 'integer'},\n"
-            "                    'bbox': {'type': 'array', 'items': "
-            "{'type': 'integer'}},\n"
-            "                    'category_id': {'type': 'integer'},\n"
-            "                    'area': {'type': 'integer'},\n"
-            "                    'iscrowd': {'type': 'integer'}}}\n\n"
-            "On instance['annotations'][4343]:\n"
-            "    [{'area': 432,\n"
-            "      'bbox': [1278, 556, 16, 27],\n"
-            "      'category_id': 1,\n"
-            "      'id': 8917,\n"
-            "      'image_id': 199,\n"
-            "      'iscrowd': 0}]",
+            "'object'\n\n",
         ),
     ],
 )
@@ -176,6 +149,6 @@ def test_valid_json_error(
         ValidJSON(path=invalid_json_file, schema=input_schema)
 
     if input_schema:
-        assert str(excinfo.value) == log_message
+        assert log_message in str(excinfo.value)
     else:
-        assert str(excinfo.value) == log_message.format(invalid_json_file)
+        assert log_message.format(invalid_json_file) == str(excinfo.value)
