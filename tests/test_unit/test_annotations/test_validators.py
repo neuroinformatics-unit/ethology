@@ -12,6 +12,7 @@ from ethology.annotations.validators import (
     ValidCOCOUntrackedJSON,
     ValidJSON,
     ValidVIAUntrackedJSON,
+    _check_keys,
 )
 
 
@@ -61,13 +62,12 @@ def _json_file_with_schema_error(out_parent_path, json_valid_path):
         data = json.load(f)
 
     # modify so that it doesn't match the corresponding schema
+    # if VIA, change "width" of a bounding box from int to float
+    # if COCO, change "annotations" from list of dicts to list of lists
     if "VIA" in json_valid_path.name:
-        # change "width" of a bounding box from int to float
-        data["_via_img_metadata"][
-            "09.08_09.08.2023-01-Left_frame_001764.png15086122"
-        ]["regions"][0]["shape_attributes"]["width"] = 49.5
+        _, img_dict = list(data["_via_img_metadata"].items())[0]
+        img_dict["regions"][0]["shape_attributes"]["width"] = 49.5
     elif "COCO" in json_valid_path.name:
-        # change "annotations" from list of dicts to list of lists
         data["annotations"] = [[d] for d in data["annotations"]]
 
     # save the modified json to a new file
@@ -405,3 +405,47 @@ def test_valid_coco_untracked_json(
         )
 
     assert str(excinfo.value) == log_message.format(img_dict)
+
+
+@pytest.mark.parametrize(
+    "list_required_keys, data_dict, additional_message, expected_exception",
+    [
+        (
+            ["images", "annotations", "categories"],
+            {"images": "", "annotations": "", "categories": ""},
+            "",
+            does_not_raise(),
+        ),
+        (
+            ["images", "annotations", "categories"],
+            {"annotations": "", "categories": ""},
+            "",
+            pytest.raises(ValueError),
+        ),  # one missing key
+        (
+            ["images", "annotations", "categories"],
+            {"annotations": ""},
+            "",
+            pytest.raises(ValueError),
+        ),  # two missing keys
+        (
+            ["images", "annotations", "categories"],
+            {"annotations": "", "categories": ""},
+            "TEST",
+            pytest.raises(ValueError),
+        ),  # one missing key
+    ],
+)
+def test_check_keys(
+    list_required_keys, data_dict, additional_message, expected_exception
+):
+    """Test the _check_keys helper function."""
+    with expected_exception as excinfo:
+        _check_keys(list_required_keys, data_dict, additional_message)
+
+    if excinfo:
+        missing_keys = set(list_required_keys) - data_dict.keys()
+        assert str(excinfo.value) == (
+            f"Required key(s) {sorted(missing_keys)} not "
+            f"found in {list(data_dict.keys())}{additional_message}."
+        )
