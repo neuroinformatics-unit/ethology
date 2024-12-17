@@ -3,10 +3,13 @@
 import json
 from pathlib import Path
 
+import attrs
 import jsonschema
 import jsonschema.exceptions
 import jsonschema.validators
 from attrs import define, field, validators
+
+from ethology.annotations.json_schemas import COCO_SCHEMA, VIA_SCHEMA
 
 
 @define
@@ -84,7 +87,7 @@ class ValidJSON:
 
 
 @define
-class ValidVIAJSON:
+class ValidVIAJSON(ValidJSON):
     """Class for valid VIA JSON files for untracked data.
 
     It checks the input VIA JSON file contains the required keys.
@@ -94,6 +97,9 @@ class ValidVIAJSON:
     path : pathlib.Path
         Path to the VIA JSON file.
 
+    schema : dict, optional
+        JSON schema to validate the file against. Default is VIA_SCHEMA.
+
     Raises
     ------
     ValueError
@@ -101,8 +107,17 @@ class ValidVIAJSON:
 
     """
 
-    path: Path = field(validator=validators.instance_of(Path))
+    # run the parent's validators first
+    path: Path = field(validator=attrs.fields(ValidJSON).path.validator)
+    schema: dict = field(
+        validator=attrs.fields(ValidJSON).schema.validator,  # type: ignore
+        default=VIA_SCHEMA,
+    )
 
+    # TODO: add a validator to check the schema defines types
+    # for the required keys
+
+    # run additional validators
     @path.validator
     def _file_contains_required_keys(self, attribute, value):
         """Ensure that the VIA JSON file contains the required keys."""
@@ -145,7 +160,7 @@ class ValidVIAJSON:
 
 
 @define
-class ValidCOCOJSON:
+class ValidCOCOJSON(ValidJSON):
     """Class valid COCO JSON files for untracked data.
 
     It checks the input COCO JSON file contains the required keys.
@@ -162,8 +177,17 @@ class ValidCOCOJSON:
 
     """
 
-    path: Path = field(validator=validators.instance_of(Path))
+    # run the parent's validators first
+    path: Path = field(validator=attrs.fields(ValidJSON).path.validator)
+    schema: dict = field(
+        validator=attrs.fields(ValidJSON).schema.validator,  # type: ignore
+        default=COCO_SCHEMA,
+    )
 
+    # TODO: add a validator to check the schema defines types
+    # for the required keys
+
+    # run additional validators
     @path.validator
     def _file_contains_required_keys(self, attribute, value):
         """Ensure that the COCO JSON file contains the required keys."""
