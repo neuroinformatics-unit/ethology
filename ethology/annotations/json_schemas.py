@@ -1,16 +1,28 @@
-"""JSON schemas for VIA and COCO annotations.
+"""JSON schemas for manual annotations files.
+
+We use JSON schemas to check the structure of a supported
+annotation file via validators.
+
+Note that the schema validation only checks the type of a key
+if that key is present. It does not check for the presence of
+the keys.
 
 References
 ----------
 - https://github.com/python-jsonschema/jsonschema
 - https://json-schema.org/understanding-json-schema/
+- https://cocodataset.org/#format-data
+- https://gitlab.com/vgg/via/-/blob/master/via-2.x.y/CodeDoc.md?ref_type=heads#description-of-via-project-json-file
 
 """
 
+# The VIA schema corresponds to the
+# format exported by VGG Image Annotator 2.x.y
+# for manual labels
 VIA_SCHEMA = {
     "type": "object",
     "properties": {
-        # settings for browser UI
+        # settings for the browser-based UI of VIA
         "_via_settings": {
             "type": "object",
             "properties": {
@@ -19,18 +31,20 @@ VIA_SCHEMA = {
                 "project": {"type": "object"},
             },
         },
-        # annotation data
+        # annotations data per image
         "_via_img_metadata": {
             "type": "object",
             "additionalProperties": {
-                # "additionalProperties" to allow any key,
-                # see https://stackoverflow.com/a/69811612/24834957
+                # Each image under _via_img_metadata is indexed
+                # using a unique key: FILENAME-FILESIZE.
+                # We use "additionalProperties" to allow for any
+                # key name, see https://stackoverflow.com/a/69811612/24834957
                 "type": "object",
                 "properties": {
                     "filename": {"type": "string"},
                     "size": {"type": "integer"},
                     "regions": {
-                        "type": "array",  # a list of dicts
+                        "type": "array",  # 'regions' is a list of dicts
                         "items": {
                             "type": "object",
                             "properties": {
@@ -43,9 +57,7 @@ VIA_SCHEMA = {
                                         "width": {"type": "integer"},
                                         "height": {"type": "integer"},
                                     },
-                                    "region_attributes": {
-                                        "type": "object"
-                                    },  # we just check it's a dict
+                                    "region_attributes": {"type": "object"},
                                 },
                             },
                         },
@@ -54,13 +66,15 @@ VIA_SCHEMA = {
                 },
             },
         },
-        # ordered list of image keys
-        # - the position defines the image ID
+        # _via_image_id_list contains an
+        # ordered list of image keys using a unique key: FILENAME-FILESIZE,
+        # the position in the list defines the image ID
         "_via_image_id_list": {
             "type": "array",
             "items": {"type": "string"},
         },
-        # region (aka annotation) and file attributes for VIA UI
+        # region attributes and file attributes, to
+        # display in VIA's UI and to classify the data
         "_via_attributes": {
             "type": "object",
             "properties": {
@@ -68,11 +82,14 @@ VIA_SCHEMA = {
                 "file": {"type": "object"},
             },
         },
-        # version of the VIA data format
+        # version of the VIA tool used
         "_via_data_format_version": {"type": "string"},
     },
 }
 
+# The COCO schema follows the COCO dataset
+# format for object detection
+# See https://cocodataset.org/#format-data
 COCO_SCHEMA = {
     "type": "object",
     "properties": {
@@ -97,15 +114,19 @@ COCO_SCHEMA = {
             "items": {
                 "type": "object",
                 "properties": {
-                    "id": {"type": "integer"},  # annotation global ID
+                    "id": {"type": "integer"},
                     "image_id": {"type": "integer"},
                     "bbox": {
                         "type": "array",
                         "items": {"type": "integer"},
                     },
+                    # (box coordinates are measured from the
+                    # top left image corner and are 0-indexed)
                     "category_id": {"type": "integer"},
-                    "area": {"type": "integer"},
+                    "area": {"type": "number"},
+                    # float according to the official schema
                     "iscrowd": {"type": "integer"},
+                    # 0 or 1 according to the official schema
                 },
             },
         },
