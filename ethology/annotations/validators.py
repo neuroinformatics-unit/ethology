@@ -11,14 +11,17 @@ from attrs import define, field, validators
 
 @define
 class ValidJSON:
-    """Class for validating JSON files.
+    """Class for valid JSON files.
+
+    It checks the JSON file exists, can be decoded, and optionally
+    validates the file against a JSON schema.
 
     Attributes
     ----------
     path : pathlib.Path
         Path to the JSON file.
 
-    schema : dict
+    schema : dict, optional
         JSON schema to validate the file against.
 
     Raises
@@ -26,9 +29,10 @@ class ValidJSON:
     FileNotFoundError
         If the file does not exist.
     ValueError
-        If the JSON file cannot be decoded, or
-        if the type of any of its keys does not match those
-        specified in the schema.
+        If the JSON file cannot be decoded.
+    jsonschema.exceptions.ValidationError
+        If the type of any of the keys in the JSON file
+        does not match the type specified in the schema.
 
 
     Notes
@@ -63,7 +67,8 @@ class ValidJSON:
         """Ensure that the JSON file matches the expected schema.
 
         The schema validation only checks the type for each specified
-        key if it exists. It does not check for the presence of the keys.
+        key if the key exists. It does not check for the presence of
+        the keys.
         """
         # read json file
         with open(value) as file:
@@ -80,14 +85,19 @@ class ValidJSON:
 
 @define
 class ValidVIAJSON:
-    """Class for validating VIA JSON files for untracked data.
+    """Class for valid VIA JSON files for untracked data.
 
-    Checks the VIA JSON file for untracked data contains the required keys.
+    It checks the input VIA JSON file contains the required keys.
 
     Attributes
     ----------
     path : pathlib.Path
-        Path to the JSON file.
+        Path to the VIA JSON file.
+
+    Raises
+    ------
+    ValueError
+        If the VIA JSON file misses any of the required keys.
 
     """
 
@@ -95,7 +105,7 @@ class ValidVIAJSON:
 
     @path.validator
     def _file_contains_required_keys(self, attribute, value):
-        """Ensure that the JSON file contains the required keys."""
+        """Ensure that the VIA JSON file contains the required keys."""
         required_keys = {
             "main": ["_via_img_metadata", "_via_image_id_list"],
             "image_keys": ["filename", "regions"],
@@ -136,25 +146,19 @@ class ValidVIAJSON:
 
 @define
 class ValidCOCOJSON:
-    """Class for validating COCO JSON files for untracked data.
+    """Class valid COCO JSON files for untracked data.
 
-    The validator ensures that the file matches the expected schema.
-    The schema validation only checks the type for each specified
-    key if it exists. It does not check for the presence of the keys.
+    It checks the input COCO JSON file contains the required keys.
 
     Attributes
     ----------
     path : pathlib.Path
-        Path to the JSON file.
+        Path to the COCO JSON file.
 
     Raises
     ------
     ValueError
-        If the JSON file does not match the expected schema.
-
-    Notes
-    -----
-    https://json-schema.org/understanding-json-schema/
+        If the COCO JSON file misses any of the required keys.
 
     """
 
@@ -162,10 +166,10 @@ class ValidCOCOJSON:
 
     @path.validator
     def _file_contains_required_keys(self, attribute, value):
-        """Ensure that the JSON file contains the required keys."""
+        """Ensure that the COCO JSON file contains the required keys."""
         required_keys = {
             "main": ["images", "annotations", "categories"],
-            "image_keys": ["id", "file_name"],  # "height", "width"?
+            "image_keys": ["id", "file_name"],  # add "height" and "width"?
             "annotations_keys": ["id", "image_id", "bbox", "category_id"],
             "categories_keys": ["id", "name", "supercategory"],
         }
@@ -207,6 +211,7 @@ def _check_keys(
     data_dict: dict,
     additional_message: str = "",
 ):
+    """Check if the required keys are present in the input data_dict."""
     missing_keys = set(list_required_keys) - data_dict.keys()
     if missing_keys:
         raise ValueError(
