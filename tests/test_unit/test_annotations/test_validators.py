@@ -231,10 +231,10 @@ def coco_json_file_with_missing_keys(
     ["JSON_sample_1.json", "JSON_sample_2.json"],
 )
 def test_valid_json(
-    input_file_standard,
-    input_json_file_suffix,
-    input_schema,
-    annotations_test_data,
+    input_file_standard: str,
+    input_json_file_suffix: str,
+    input_schema: dict | None,
+    annotations_test_data: dict,
 ):
     """Test the ValidJSON validator with valid inputs."""
     filepath = annotations_test_data[
@@ -249,7 +249,7 @@ def test_valid_json(
 
 
 @pytest.mark.parametrize(
-    "invalid_json_file_str, input_schema, expected_exception, log_message",
+    "invalid_json_fixture_name, input_schema, expected_exception, log_message",
     [
         (
             "json_file_decode_error",
@@ -271,7 +271,7 @@ def test_valid_json(
         ),
         (
             "json_file_not_found_error",
-            VIA_SCHEMA,  # should be independent of schema
+            COCO_SCHEMA,  # should be independent of schema
             pytest.raises(FileNotFoundError),
             "File not found",
         ),
@@ -292,16 +292,16 @@ def test_valid_json(
     ],
 )
 def test_valid_json_errors(
-    invalid_json_file_str,
-    input_schema,
-    expected_exception,
-    log_message,
-    request,
+    invalid_json_fixture_name: str,
+    input_schema: dict | None,
+    expected_exception: pytest.raises,
+    log_message: str,
+    request: pytest.FixtureRequest,
 ):
     """Test the ValidJSON validator throws the expected errors when given
     invalid inputs.
     """
-    invalid_json_file = request.getfixturevalue(invalid_json_file_str)
+    invalid_json_file = request.getfixturevalue(invalid_json_fixture_name)
 
     with expected_exception as excinfo:
         ValidJSON(path=invalid_json_file, schema=input_schema)
@@ -322,7 +322,7 @@ def test_valid_json_errors(
         "VIA_JSON_sample_2.json",
     ],
 )
-def test_valid_via_json(annotations_test_data, input_json_file):
+def test_valid_via_json(annotations_test_data: dict, input_json_file: str):
     """Test the ValidVIAJSON validator with valid inputs."""
     filepath = annotations_test_data[input_json_file]
     with does_not_raise():
@@ -339,7 +339,7 @@ def test_valid_via_json(annotations_test_data, input_json_file):
     ],
 )
 @pytest.mark.parametrize(
-    "missing_keys, expected_exception, log_message",
+    "expected_missing_keys, expected_exception, log_message",
     [
         (
             {"main": ["_via_image_id_list"]},
@@ -377,27 +377,36 @@ def test_valid_via_json(annotations_test_data, input_json_file):
     ],
 )
 def test_valid_via_json_missing_keys(
-    valid_via_json_file,
-    missing_keys,
-    via_json_file_with_missing_keys,
-    expected_exception,
-    log_message,
+    valid_via_json_file: str,
+    expected_missing_keys: dict,
+    expected_exception: pytest.raises,
+    log_message: str,
+    via_json_file_with_missing_keys: Callable,
 ):
-    """Test the ValidVIAJSON when input has missing keys."""
-    # create invalid VIA json file with missing keys
+    """Test the ValidVIAJSON validator throws an error when the input misses
+    some required keys.
+    """
+    # Create an invalid VIA JSON file with missing keys
     invalid_json_file, edited_image_dicts = via_json_file_with_missing_keys(
-        valid_via_json_file, missing_keys
+        valid_via_json_file,
+        expected_missing_keys,  # required keys to remove
     )
 
-    # get key of affected images in _via_img_metadata
-    img_key_str = edited_image_dicts.get(list(missing_keys.keys())[0], None)
+    # Get key of image whose data has been edited
+    # (if the modified data belongs to the "main" section of the VIA JSON
+    # file, the key for the modified image is None)
+    modified_data = list(expected_missing_keys.keys())[0]
+    img_key_str = edited_image_dicts.get(modified_data, None)
 
-    # run validation
+    # Run validation
     with expected_exception as excinfo:
         ValidVIAJSON(
             path=invalid_json_file,
         )
 
+    # Check the error message is as expected.
+    # If the modified data belongs to a specific image, its key should
+    # appear in the error message
     assert str(excinfo.value) == log_message.format(img_key_str)
 
 
