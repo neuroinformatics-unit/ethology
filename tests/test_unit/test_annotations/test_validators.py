@@ -16,13 +16,13 @@ from ethology.annotations.validators import (
 
 
 @pytest.fixture()
-def valid_via_json_1_file(annotations_test_data: dict) -> Path:
+def valid_via_file_sample_1(annotations_test_data: dict) -> Path:
     """Return path to a valid VIA JSON file."""
     return annotations_test_data["VIA_JSON_sample_1.json"]
 
 
 @pytest.fixture()
-def valid_coco_json_1_file(annotations_test_data: dict) -> Path:
+def valid_coco_file_sample_1(annotations_test_data: dict) -> Path:
     """Return path to a valid COCO JSON file."""
     return annotations_test_data["COCO_JSON_sample_1.json"]
 
@@ -43,8 +43,8 @@ def json_file_not_found_error(tmp_path: Path) -> Path:
 
 
 @pytest.fixture()
-def via_json_file_schema_error(
-    valid_via_json_1_file: Path,
+def via_file_schema_error(
+    valid_via_file_sample_1: Path,
     tmp_path: Path,
 ) -> Path:
     """Return path to a VIA JSON file that does not match its schema.
@@ -53,7 +53,7 @@ def via_json_file_schema_error(
     in the first image, from "int" to "float"
     """
     # Read valid JSON file
-    with open(valid_via_json_1_file) as f:
+    with open(valid_via_file_sample_1) as f:
         data = json.load(f)
 
     # Modify file so that it doesn't match the corresponding schema
@@ -61,15 +61,15 @@ def via_json_file_schema_error(
     img_dict["regions"][0]["shape_attributes"]["width"] = 49.5
 
     # Save the modified JSON to a new file
-    out_json = tmp_path / f"{valid_via_json_1_file.stem}_schema_error.json"
+    out_json = tmp_path / f"{valid_via_file_sample_1.stem}_schema_error.json"
     with open(out_json, "w") as f:
         json.dump(data, f)
     return out_json
 
 
 @pytest.fixture()
-def coco_json_file_schema_error(
-    valid_coco_json_1_file: Path,
+def coco_file_schema_error(
+    valid_coco_file_sample_1: Path,
     tmp_path: Path,
 ) -> Path:
     """Return path to a COCO JSON file that doesn't match its schema.
@@ -78,22 +78,22 @@ def coco_json_file_schema_error(
     key from "list of dicts" to "list of lists"
     """
     # Read valid JSON file
-    with open(valid_coco_json_1_file) as f:
+    with open(valid_coco_file_sample_1) as f:
         data = json.load(f)
 
     # Modify file so that it doesn't match the corresponding schema
     data["annotations"] = [[d] for d in data["annotations"]]
 
     # save the modified json to a new file
-    out_json = tmp_path / f"{valid_coco_json_1_file.stem}_schema_error.json"
+    out_json = tmp_path / f"{valid_coco_file_sample_1.stem}_schema_error.json"
     with open(out_json, "w") as f:
         json.dump(data, f)
     return out_json
 
 
 @pytest.fixture()
-def via_json_1_file_with_missing_keys(
-    valid_via_json_1_file: Path, tmp_path: Path
+def via_file_sample_1_with_missing_keys(
+    valid_via_file_sample_1: Path, tmp_path: Path
 ) -> Callable:
     """Get paths to a modified VIA JSON 1 file with some required keys missing.
 
@@ -110,7 +110,7 @@ def via_json_1_file_with_missing_keys(
         required_keys_to_pop: dict,
     ) -> tuple[Path, dict]:
         # Read valid json file
-        with open(valid_via_json_1_file) as f:
+        with open(valid_via_file_sample_1) as f:
             data = json.load(f)
 
         # Remove any keys in the first level
@@ -147,7 +147,9 @@ def via_json_1_file_with_missing_keys(
                 img_dict["regions"][0]["shape_attributes"].pop(key)
 
         # Save the modified json to a new file
-        out_json = tmp_path / f"{valid_via_json_1_file.stem}_missing_keys.json"
+        out_json = (
+            tmp_path / f"{valid_via_file_sample_1.stem}_missing_keys.json"
+        )
         with open(out_json, "w") as f:
             json.dump(data, f)
         return out_json, edited_image_dicts
@@ -156,8 +158,8 @@ def via_json_1_file_with_missing_keys(
 
 
 @pytest.fixture()
-def coco_json_1_file_with_missing_keys(
-    valid_coco_json_1_file: Path, tmp_path: Path
+def coco_file_sample_1_with_missing_keys(
+    valid_coco_file_sample_1: Path, tmp_path: Path
 ) -> Callable:
     """Get path to a modified COCO JSON file with some required keys missing.
 
@@ -174,7 +176,7 @@ def coco_json_1_file_with_missing_keys(
         required_keys_to_pop: dict,
     ) -> tuple[Path, dict]:
         # Read valid json file
-        with open(valid_coco_json_1_file) as f:
+        with open(valid_coco_file_sample_1) as f:
             data = json.load(f)
 
         # Remove any keys in the first level
@@ -202,7 +204,7 @@ def coco_json_1_file_with_missing_keys(
 
         # Save the modified json to a new file
         out_json = (
-            tmp_path / f"{valid_coco_json_1_file.stem}_missing_keys.json"
+            tmp_path / f"{valid_coco_file_sample_1.stem}_missing_keys.json"
         )
         with open(out_json, "w") as f:
             json.dump(data, f)
@@ -212,28 +214,21 @@ def coco_json_1_file_with_missing_keys(
 
 
 @pytest.mark.parametrize(
-    "input_file_standard, input_schema",
+    "input_file, input_schema",
     [
-        ("VIA", None),
-        ("VIA", VIA_SCHEMA),
-        ("COCO", None),
-        ("COCO", COCO_SCHEMA),
+        ("VIA_JSON_sample_1.json", None),
+        ("VIA_JSON_sample_2.json", VIA_SCHEMA),
+        ("COCO_JSON_sample_1.json", None),
+        ("COCO_JSON_sample_2.json", COCO_SCHEMA),
     ],
 )
-@pytest.mark.parametrize(
-    "input_json_file_suffix",
-    ["JSON_sample_1.json", "JSON_sample_2.json"],
-)
 def test_valid_json(
-    input_file_standard: str,
-    input_json_file_suffix: str,
+    input_file: str,
     input_schema: dict | None,
     annotations_test_data: dict,
 ):
     """Test the ValidJSON validator with valid inputs."""
-    filepath = annotations_test_data[
-        f"{input_file_standard}_{input_json_file_suffix}"
-    ]
+    filepath = annotations_test_data[input_file]
 
     with does_not_raise():
         ValidJSON(
@@ -243,7 +238,7 @@ def test_valid_json(
 
 
 @pytest.mark.parametrize(
-    "invalid_json_fixture_name, input_schema, expected_exception, log_message",
+    "invalid_input_file, input_schema, expected_exception, log_message",
     [
         (
             "json_file_decode_error",
@@ -270,13 +265,13 @@ def test_valid_json(
             "File not found",
         ),
         (
-            "via_json_file_schema_error",
+            "via_file_schema_error",
             VIA_SCHEMA,
             pytest.raises(jsonschema.exceptions.ValidationError),
             "49.5 is not of type 'integer'\n\n",
         ),
         (
-            "coco_json_file_schema_error",
+            "coco_file_schema_error",
             COCO_SCHEMA,
             pytest.raises(jsonschema.exceptions.ValidationError),
             "[{'area': 432, 'bbox': [1278, 556, 16, 27], 'category_id': 1, "
@@ -286,7 +281,7 @@ def test_valid_json(
     ],
 )
 def test_valid_json_errors(
-    invalid_json_fixture_name: str,
+    invalid_input_file: str,
     input_schema: dict | None,
     expected_exception: pytest.raises,
     log_message: str,
@@ -295,7 +290,7 @@ def test_valid_json_errors(
     """Test the ValidJSON validator throws the expected errors when given
     invalid inputs.
     """
-    invalid_json_file = request.getfixturevalue(invalid_json_fixture_name)
+    invalid_json_file = request.getfixturevalue(invalid_input_file)
 
     with expected_exception as excinfo:
         ValidJSON(path=invalid_json_file, schema=input_schema)
@@ -321,14 +316,12 @@ def test_valid_json_errors(
 def test_valid_via_coco_json(
     input_file: str, validator: Callable, annotations_test_data: dict
 ):
-    """Test the ValidVIA and the ValidCOCO validators
-    with valid inputs.
+    """Test the file-specific validators (VIA or COCO) validators with valid
+    inputs.
     """
     filepath = annotations_test_data[input_file]
     with does_not_raise():
-        validator(
-            path=filepath,
-        )
+        validator(path=filepath)
 
 
 @pytest.mark.parametrize(
@@ -349,39 +342,36 @@ def test_valid_via_coco_json(
     ],
 )
 def test_valid_via_coco_json_file_errors(
-    invalid_input_file,
-    validator,
-    expected_exception,
-    log_message,
-    request,
+    invalid_input_file: str,
+    validator: Callable,
+    expected_exception: pytest.raises,
+    log_message: str,
+    request: pytest.FixtureRequest,
 ):
-    """Test the ValidVIA and the ValidCOCO validators throw
-    the expected errors when given invalid input files.
+    """Test the file-specific validators (VIA or COCO) validators throw
+    the expected file-related errors when given invalid input files.
     """
     invalid_json_file = request.getfixturevalue(invalid_input_file)
-
     with expected_exception as excinfo:
         validator(path=invalid_json_file)
 
     # Check that the error message contains expected string
     assert log_message in str(excinfo.value)
 
-    # If error is not related to JSON schema, check the error message contains
-    # file path
-    if not isinstance(excinfo.value, jsonschema.exceptions.ValidationError):
-        assert invalid_json_file.name in str(excinfo.value)
+    # Check the error message contains file path
+    assert invalid_json_file.name in str(excinfo.value)
 
 
 @pytest.mark.parametrize(
     "input_file, validator, expected_error_message",
     [
         (
-            "via_json_file_schema_error",
+            "via_file_schema_error",
             ValidVIA,
             "49.5 is not of type 'integer'",
         ),
         (
-            "coco_json_file_schema_error",
+            "coco_file_schema_error",
             ValidCOCO,
             "[{'area': 432, 'bbox': [1278, 556, 16, 27], 'category_id': 1, "
             "'id': 8917, 'image_id': 199, 'iscrowd': 0}] is not of type "
@@ -411,9 +401,9 @@ def test_valid_via_coco_json_schema_errors(
     assert expected_error_message in str(excinfo.value)
 
 
-coco_json_1_parametrization = [
+invalid_coco_file_sample_1_parametrization = [
     (
-        "coco_json_1_file_with_missing_keys",
+        "coco_file_sample_1_with_missing_keys",
         ValidCOCO,
         {"main": ["categories"]},
         pytest.raises(ValueError),
@@ -421,7 +411,7 @@ coco_json_1_parametrization = [
         "in ['annotations', 'images', 'info', 'licenses'].",
     ),
     (
-        "coco_json_1_file_with_missing_keys",
+        "coco_file_sample_1_with_missing_keys",
         ValidCOCO,
         {"main": ["categories", "images"]},
         pytest.raises(ValueError),
@@ -429,7 +419,7 @@ coco_json_1_parametrization = [
         "in ['annotations', 'info', 'licenses'].",
     ),
     (
-        "coco_json_1_file_with_missing_keys",
+        "coco_file_sample_1_with_missing_keys",
         ValidCOCO,
         {"image_keys": ["file_name"]},
         pytest.raises(ValueError),
@@ -437,7 +427,7 @@ coco_json_1_parametrization = [
         "['height', 'id', 'width'] for image dict {}.",
     ),
     (
-        "coco_json_1_file_with_missing_keys",
+        "coco_file_sample_1_with_missing_keys",
         ValidCOCO,
         {"annotations_keys": ["category_id"]},
         pytest.raises(ValueError),
@@ -446,7 +436,7 @@ coco_json_1_parametrization = [
         "annotation dict {}.",
     ),
     (
-        "coco_json_1_file_with_missing_keys",
+        "coco_file_sample_1_with_missing_keys",
         ValidCOCO,
         {"categories_keys": ["id"]},
         pytest.raises(ValueError),
@@ -455,9 +445,9 @@ coco_json_1_parametrization = [
     ),
 ]
 
-via_json_1_parametrization = [
+invalid_via_file_sample_1_parametrization = [
     (
-        "via_json_1_file_with_missing_keys",
+        "via_file_sample_1_with_missing_keys",
         ValidVIA,
         {"main": ["_via_image_id_list"]},
         pytest.raises(ValueError),
@@ -466,7 +456,7 @@ via_json_1_parametrization = [
         "'_via_data_format_version'].",
     ),
     (
-        "via_json_1_file_with_missing_keys",
+        "via_file_sample_1_with_missing_keys",
         ValidVIA,
         {"main": ["_via_image_id_list", "_via_img_metadata"]},
         pytest.raises(ValueError),
@@ -475,7 +465,7 @@ via_json_1_parametrization = [
         "'_via_data_format_version'].",
     ),
     (
-        "via_json_1_file_with_missing_keys",
+        "via_file_sample_1_with_missing_keys",
         ValidVIA,
         {"image_keys": ["filename"]},
         pytest.raises(ValueError),
@@ -484,7 +474,7 @@ via_json_1_parametrization = [
         "for {}.",
     ),
     (
-        "via_json_1_file_with_missing_keys",
+        "via_file_sample_1_with_missing_keys",
         ValidVIA,
         {"region_keys": ["shape_attributes"]},
         pytest.raises(ValueError),
@@ -492,7 +482,7 @@ via_json_1_parametrization = [
         "['region_attributes'] for region 0 under {}.",
     ),
     (
-        "via_json_1_file_with_missing_keys",
+        "via_file_sample_1_with_missing_keys",
         ValidVIA,
         {"shape_attributes_keys": ["x"]},
         pytest.raises(ValueError),
@@ -507,7 +497,8 @@ via_json_1_parametrization = [
         "input_file, validator, "
         "expected_missing_keys, expected_exception, log_message"
     ),
-    via_json_1_parametrization + coco_json_1_parametrization,
+    invalid_via_file_sample_1_parametrization
+    + invalid_coco_file_sample_1_parametrization,
 )
 def test_valid_via_coco_json_missing_keys(
     input_file: str,
@@ -540,7 +531,7 @@ def test_valid_via_coco_json_missing_keys(
 
     # Check the error message is as expected.
     # If the modified data belongs to a specific image, its key should
-    # appear in the error message
+    # appear in the error message.
     assert str(excinfo.value) == log_message.format(img_key)
 
 
