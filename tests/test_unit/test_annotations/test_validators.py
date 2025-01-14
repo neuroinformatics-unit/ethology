@@ -44,58 +44,48 @@ def json_file_not_found_error(tmp_path: Path) -> Path:
 
 @pytest.fixture()
 def via_json_file_schema_error(
+    valid_via_json_1_file: Path,
     tmp_path: Path,
-    annotations_test_data: dict,
 ) -> Path:
-    """Return path to a VIA JSON file that doesn't match its schema.
+    """Return path to a VIA JSON file that does not match its schema.
 
-    It uses the `_json_file_with_schema_error` factory function.
+    Specifically, we modify the type of the "width" of the first bounding box
+    in the first image, from "int" to "float"
     """
-    return _json_file_with_schema_error(
-        tmp_path,
-        annotations_test_data["VIA_JSON_sample_1.json"],
-    )
+    # Read valid JSON file
+    with open(valid_via_json_1_file) as f:
+        data = json.load(f)
+
+    # Modify file so that it doesn't match the corresponding schema
+    _, img_dict = list(data["_via_img_metadata"].items())[0]
+    img_dict["regions"][0]["shape_attributes"]["width"] = 49.5
+
+    # Save the modified JSON to a new file
+    out_json = tmp_path / f"{valid_via_json_1_file.name}_schema_error.json"
+    with open(out_json, "w") as f:
+        json.dump(data, f)
+    return out_json
 
 
 @pytest.fixture()
 def coco_json_file_schema_error(
+    valid_coco_json_1_file: Path,
     tmp_path: Path,
-    annotations_test_data: dict,
 ) -> Path:
     """Return path to a COCO JSON file that doesn't match its schema.
 
-    It uses the `_json_file_with_schema_error` factory function.
-    """
-    return _json_file_with_schema_error(
-        tmp_path,
-        annotations_test_data["COCO_JSON_sample_1.json"],
-    )
-
-
-def _json_file_with_schema_error(
-    out_parent_path: Path, json_valid_path: Path
-) -> Path:
-    """From a valid input JSON file, return path to a JSON file that doesn't
-    match the expected schema.
+    Specifically, we modify the type of the object under the "annotations"
+    key from "list of dicts" to "list of lists"
     """
     # Read valid JSON file
-    with open(json_valid_path) as f:
+    with open(valid_coco_json_1_file) as f:
         data = json.load(f)
 
     # Modify file so that it doesn't match the corresponding schema
-    # if file is a VIA JSON test file, change "width" of a bounding box from
-    # int to float
-    if "VIA" in json_valid_path.name:
-        _, img_dict = list(data["_via_img_metadata"].items())[0]
-        img_dict["regions"][0]["shape_attributes"]["width"] = 49.5
-
-    # if file is a COCO JSON test file, change "annotations" from list of
-    # dicts to list of lists
-    elif "COCO" in json_valid_path.name:
-        data["annotations"] = [[d] for d in data["annotations"]]
+    data["annotations"] = [[d] for d in data["annotations"]]
 
     # save the modified json to a new file
-    out_json = out_parent_path / f"{json_valid_path.name}_schema_error.json"
+    out_json = tmp_path / f"{valid_coco_json_1_file.name}_schema_error.json"
     with open(out_json, "w") as f:
         json.dump(data, f)
     return out_json
