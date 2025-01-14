@@ -418,7 +418,7 @@ def test_valid_via_json_missing_keys(
     ],
 )
 @pytest.mark.parametrize(
-    "missing_keys, expected_exception, log_message",
+    "expected_missing_keys, expected_exception, log_message",
     [
         (
             {"main": ["categories"]},
@@ -454,69 +454,82 @@ def test_valid_via_json_missing_keys(
     ],
 )
 def test_valid_coco_json_missing_keys(
-    valid_coco_json_file,
-    missing_keys,
-    coco_json_file_with_missing_keys,
-    expected_exception,
-    log_message,
+    valid_coco_json_file: str,
+    expected_missing_keys: dict,
+    expected_exception: pytest.raises,
+    log_message: str,
+    coco_json_file_with_missing_keys: Callable,
 ):
-    """Test the ValidCOCOJSON when input has missing keys."""
-    # create invalid json file with missing keys
+    """Test the ValidCOCOJSON validator throws an error when the input misses
+    some required keys.
+    """
+    # Create an invalid COCO JSON file with missing keys
     invalid_json_file, edited_image_dicts = coco_json_file_with_missing_keys(
-        valid_coco_json_file, missing_keys
+        valid_coco_json_file,
+        expected_missing_keys,  # keys to remove
     )
 
-    # get key of affected image in _via_img_metadata
-    img_dict = edited_image_dicts.get(list(missing_keys.keys())[0], None)
+    # Get dict of image whose data has been edited
+    # (if the modified data belongs to the "main" section of the COCO JSON
+    # file, the key for the modified image is None)
+    modified_data = list(expected_missing_keys.keys())[0]
+    img_dict = edited_image_dicts.get(modified_data, None)
 
-    # run validation
+    # Run validation
     with expected_exception as excinfo:
         ValidCOCOJSON(
             path=invalid_json_file,
         )
 
+    # Check the error message is as expected.
+    # If the modified data belongs to a specific image, its dict should
+    # appear in the error message
     assert str(excinfo.value) == log_message.format(img_dict)
 
 
 @pytest.mark.parametrize(
-    "list_required_keys, data_dict, additional_message, expected_exception",
+    "required_keys, input_data, expected_exception, expected_in_log_message",
     [
         (
             ["images", "annotations", "categories"],
             {"images": "", "annotations": "", "categories": ""},
-            "",
             does_not_raise(),
+            "",
         ),  # zero missing keys
         (
             ["images", "annotations", "categories"],
             {"annotations": "", "categories": ""},
-            "",
             pytest.raises(ValueError),
+            "",
         ),  # one missing key
         (
             ["images", "annotations", "categories"],
             {"annotations": ""},
-            "",
             pytest.raises(ValueError),
+            "",
         ),  # two missing keys
         (
             ["images", "annotations", "categories"],
             {"annotations": "", "categories": ""},
-            "FOO",
             pytest.raises(ValueError),
+            "FOO",
         ),  # one missing key with additional message
     ],
 )
 def test_check_keys(
-    list_required_keys, data_dict, additional_message, expected_exception
+    required_keys: list,
+    input_data: dict,
+    expected_exception: pytest.raises,
+    expected_in_log_message: str,
 ):
     """Test the _check_keys helper function."""
     with expected_exception as excinfo:
-        _check_keys(list_required_keys, data_dict, additional_message)
+        _check_keys(required_keys, input_data, expected_in_log_message)
 
+    # If an exception is raised, check the error message is as expected
     if excinfo:
-        missing_keys = set(list_required_keys) - data_dict.keys()
+        missing_keys = set(required_keys) - input_data.keys()
         assert str(excinfo.value) == (
             f"Required key(s) {sorted(missing_keys)} not "
-            f"found in {list(data_dict.keys())}{additional_message}."
+            f"found in {list(input_data.keys())}{expected_in_log_message}."
         )
