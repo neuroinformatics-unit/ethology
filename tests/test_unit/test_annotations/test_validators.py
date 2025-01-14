@@ -102,32 +102,31 @@ def _json_file_with_schema_error(
 
 
 @pytest.fixture()
-def via_json_file_with_missing_keys(
-    tmp_path: Path, annotations_test_data: dict
+def via_json_1_file_with_missing_keys(
+    valid_via_json_1_file: Path, tmp_path: Path
 ) -> Callable:
-    """Get paths to VIA JSON files that have some required keys missing.
+    """Get paths to a modified VIA JSON 1 file with some required keys missing.
 
-    The VIA JSON file is expressed as a nested dictionary (images contain
-    regions which contain shape attributes). Therefore the missing keys can be
-    defined at the image level, the region level, or the shape attributes
+    A VIA JSON file can be seen as a nested dictionary ("images" contain
+    "regions" which contain "shape attributes"). Therefore the missing keys
+    can be defined at the image level, the region level, or the shape attribute
     level.
 
     This fixture is a factory of fixtures. It returns a function that can be
     used to create a fixture that is a tuple with:
-    - the path to the VIA JSON file with missing keys, and
+    - the path to the VIA JSON file 1 modified to omit some keys, and
     - a dictionary holding the names of the images whose data was removed.
     """
 
-    def _via_json_file_with_missing_keys(
-        valid_json_filename: str, required_keys_to_pop: dict
+    def _via_json_1_file_with_missing_keys(
+        required_keys_to_pop: dict,
     ) -> tuple[Path, dict]:
         """Return a tuple with:
         - the path to the VIA JSON file with some required keys missing,
         - a dictionary with the names of the images whose data was removed.
         """
         # Read valid json file
-        valid_json_path = annotations_test_data[valid_json_filename]
-        with open(valid_json_path) as f:
+        with open(valid_via_json_1_file) as f:
             data = json.load(f)
 
         # Remove any keys in the first level
@@ -164,12 +163,12 @@ def via_json_file_with_missing_keys(
                 img_dict["regions"][0]["shape_attributes"].pop(key)
 
         # Save the modified json to a new file
-        out_json = tmp_path / f"{valid_json_path.name}_missing_keys.json"
+        out_json = tmp_path / f"{valid_via_json_1_file.name}_missing_keys.json"
         with open(out_json, "w") as f:
             json.dump(data, f)
         return out_json, edited_image_dicts
 
-    return _via_json_file_with_missing_keys
+    return _via_json_1_file_with_missing_keys
 
 
 @pytest.fixture()
@@ -185,7 +184,7 @@ def coco_json_1_file_with_missing_keys(
 
     This fixture is a factory of fixtures. It returns a function that can be
     used to create a fixture that is a tuple with:
-    - the path to the COCO JSON 1 file modified to omit missing keys, and
+    - the path to the COCO JSON 1 file modified to omit some keys, and
     - a dictionary holding the names of the images whose data was removed.
     """
 
@@ -389,14 +388,13 @@ def test_valid_via_json_missing_keys(
     expected_missing_keys: dict,
     expected_exception: pytest.raises,
     log_message: str,
-    via_json_file_with_missing_keys: Callable,
+    via_json_1_file_with_missing_keys: pytest.fixture,
 ):
     """Test the ValidVIAJSON validator throws an error when the input misses
     some required keys.
     """
     # Create an invalid VIA JSON file with missing keys
-    invalid_json_file, edited_image_dicts = via_json_file_with_missing_keys(
-        "VIA_JSON_sample_1.json",
+    invalid_json_file, edited_image_dicts = via_json_1_file_with_missing_keys(
         expected_missing_keys,  # required keys to remove
     )
 
