@@ -1,4 +1,4 @@
-"""Validators for annotation files."""
+"""Validators for supported annotation files."""
 
 import json
 from pathlib import Path
@@ -44,10 +44,10 @@ class ValidJSON:
 
     """
 
-    # Required attributes
+    # Required attribute
     path: Path = field(validator=validators.instance_of(Path))
 
-    # Optional attributes
+    # Optional attribute
     schema: dict | None = field(default=None)
 
     @path.validator
@@ -70,8 +70,8 @@ class ValidJSON:
         """Ensure that the JSON file matches the expected schema.
 
         The schema validation only checks the type for each specified
-        key if the key exists. It does not check for the presence of
-        the keys.
+        key if the key exists. It does not check that the keys in the
+        schema are present in the JSON file.
         """
         # read json file
         with open(value) as file:
@@ -88,9 +88,10 @@ class ValidJSON:
 
 @define
 class ValidVIAJSON(ValidJSON):
-    """Class for valid VIA JSON files for untracked data.
+    """Class for valid VIA JSON files.
 
-    It checks the input VIA JSON file contains the required keys.
+    It runs the validations from `ValidJSON` on the input VIA JSON file and
+    additionally checks the file contains the required keys.
 
     Attributes
     ----------
@@ -107,17 +108,17 @@ class ValidVIAJSON(ValidJSON):
 
     """
 
-    # run the parent's validators first
+    # run the parent's class validators first
     path: Path = field(validator=attrs.fields(ValidJSON).path.validator)
     schema: dict = field(
         validator=attrs.fields(ValidJSON).schema.validator,  # type: ignore
-        default=VIA_SCHEMA,
+        default=VIA_SCHEMA,  # why is this optional?-------
     )
 
     # TODO: add a validator to check the schema defines types
     # for the required keys
 
-    # run additional validators
+    # run additional validators from this class
     @path.validator
     def _file_contains_required_keys(self, attribute, value):
         """Ensure that the VIA JSON file contains the required keys."""

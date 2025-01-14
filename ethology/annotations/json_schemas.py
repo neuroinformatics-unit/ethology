@@ -1,7 +1,7 @@
 """JSON schemas for manual annotations files.
 
-We use JSON schemas to check the structure of a supported
-annotation file via validators.
+We use JSON schemas to validate the types of a supported
+annotation file.
 
 Note that the schema validation only checks the type of a key
 if that key is present. It does not check for the presence of

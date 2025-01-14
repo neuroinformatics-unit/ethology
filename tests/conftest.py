@@ -1,37 +1,40 @@
 """Pytest configuration file with shared fixtures across all tests."""
 
+from collections.abc import Callable
 from pathlib import Path
 
 import pooch
 import pytest
 
-GIN_TEST_DATA_REPO = (
-    "https://gin.g-node.org/neuroinformatics/ethology-test-data"
-)
-
+# load fixtures defined as modules
 pytest_plugins = [
     "tests.fixtures.annotations",
 ]
 
+GIN_TEST_DATA_REPO = (
+    "https://gin.g-node.org/neuroinformatics/ethology-test-data"
+)
+
 
 @pytest.fixture(scope="session")
-def pooch_registry() -> dict:
-    """Pooch registry for the test data.
+def pooch_registry() -> pooch.Pooch:
+    """Return pooch registry with the test data.
 
-    This fixture is common to the entire test session. The
+    This fixture is common to the entire test session. This means that the
     file registry is downloaded fresh for every test session.
 
     Returns
     -------
-    dict
-        URL and hash of the GIN repository with the test data
+    pooch.Pooch
+        A Pooch object that holds the URL and hash of the GIN repository with
+        the test data
 
     """
     # Cache the test data in the user's home directory
     test_data_dir = Path.home() / ".ethology-test-data"
 
     # Remove the file registry if it exists
-    # otherwise it is not downloaded from scratch every time
+    # (required in order to download it from scratch every time)
     file_registry_path = test_data_dir / "files-registry.txt"
     if file_registry_path.is_file():
         Path(file_registry_path).unlink()
@@ -57,36 +60,59 @@ def pooch_registry() -> dict:
 
 
 @pytest.fixture()
-def get_paths_test_data():
-    """Define a factory fixture to get the paths of the data files
-    under a specific subdirectory in the GIN repository.
+def get_paths_test_data() -> Callable[[dict, str], dict]:
+    """Get paths of the test data files under a specific subdirectory in the
+    GIN repository.
 
-    The name of the subdirectories is intended to match a testing module. For
-    example, to get the paths to the test files for the annotations
-    module, we would call `get_paths_test_data(pooch_registry,
-    "test_annotations")` in a test. This assumes in the GIN repository
-    there is a subdirectory named `test_annotations` under the `test_data`
-    directory with the relevant test files.
+    This fixture is a factory of fixtures. It returns a function that can be
+    used to create a fixture that is a dictionary holding the paths under the
+    given `subdir_name`.
     """
 
-    def _get_paths_test_data(pooch_registry, subdir_name: str) -> dict:
-        """Return the paths of the test files under the specified zip filename.
+    def _get_paths_test_data(
+        pooch_registry: pooch.Pooch, subdir_name: str
+    ) -> dict:
+        """Return the paths of the test files under the specified subdirectory.
 
-        subdir_name is the name of the subdirectory under `test_data`.
+        Parameters
+        ----------
+        pooch_registry : pooch.Pooch
+            Pooch registry with the test data.
+        subdir_name : str
+            Name of the subdirectory under test_data for which to get the
+            paths.
+
+        Returns
+        -------
+        dict
+            Dictionary with the requested filenames as keys and the paths as
+            values.
+
+        Notes
+        -----
+        The name of the subdirectories is intended to match a testing module.
+        For example, to get the paths of the files used to test the annotations
+        module, we call `get_paths_test_data(pooch_registry,
+        "test_annotations")`. This assumes that in the GIN repository there is
+        a subdirectory named `test_annotations` under the `test_data`
+        directory with the relevant files.
+
         """
-        test_filename_to_path = {}
+        filename_to_path = {}
+
+        # In the pooch registry, each file is indexed by its path relative to
+        # the test_data directory.
         for relative_filepath in pooch_registry.registry:
-            # relative to test_data
             if relative_filepath.startswith(f"{subdir_name}/"):
-                # fetch file from pooch registry
-                fetched_filepath = pooch_registry.fetch(
-                    relative_filepath,  # under test_data
-                    progressbar=True,
+                fetched_filepath = Path(
+                    pooch_registry.fetch(
+                        relative_filepath,  # under test_data
+                        progressbar=True,
+                    )
                 )
 
-                test_filename_to_path[Path(fetched_filepath).name] = Path(
-                    fetched_filepath
-                )
-        return test_filename_to_path
+                filename_to_path[fetched_filepath.name] = fetched_filepath
+
+        return filename_to_path
 
     return _get_paths_test_data
