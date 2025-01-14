@@ -364,114 +364,117 @@ def test_valid_via_coco_json_with_schema_error(
     assert expected_error_message in str(excinfo.value)
 
 
+coco_json_1_parametrization = [
+    (
+        "coco_json_1_file_with_missing_keys",
+        ValidCOCOJSON,
+        {"main": ["categories"]},
+        pytest.raises(ValueError),
+        "Required key(s) ['categories'] not found "
+        "in ['annotations', 'images', 'info', 'licenses'].",
+    ),
+    (
+        "coco_json_1_file_with_missing_keys",
+        ValidCOCOJSON,
+        {"main": ["categories", "images"]},
+        pytest.raises(ValueError),
+        "Required key(s) ['categories', 'images'] not found "
+        "in ['annotations', 'info', 'licenses'].",
+    ),
+    (
+        "coco_json_1_file_with_missing_keys",
+        ValidCOCOJSON,
+        {"image_keys": ["file_name"]},
+        pytest.raises(ValueError),
+        "Required key(s) ['file_name'] not found in "
+        "['height', 'id', 'width'] for image dict {}.",
+    ),
+    (
+        "coco_json_1_file_with_missing_keys",
+        ValidCOCOJSON,
+        {"annotations_keys": ["category_id"]},
+        pytest.raises(ValueError),
+        "Required key(s) ['category_id'] not found in "
+        "['area', 'bbox', 'id', 'image_id', 'iscrowd'] for "
+        "annotation dict {}.",
+    ),
+    (
+        "coco_json_1_file_with_missing_keys",
+        ValidCOCOJSON,
+        {"categories_keys": ["id"]},
+        pytest.raises(ValueError),
+        "Required key(s) ['id'] not found in "
+        "['name', 'supercategory'] for category dict {}.",
+    ),
+]
+
+via_json_1_parametrization = [
+    (
+        "via_json_1_file_with_missing_keys",
+        ValidVIAJSON,
+        {"main": ["_via_image_id_list"]},
+        pytest.raises(ValueError),
+        "Required key(s) ['_via_image_id_list'] not found "
+        "in ['_via_settings', '_via_img_metadata', '_via_attributes', "
+        "'_via_data_format_version'].",
+    ),
+    (
+        "via_json_1_file_with_missing_keys",
+        ValidVIAJSON,
+        {"main": ["_via_image_id_list", "_via_img_metadata"]},
+        pytest.raises(ValueError),
+        "Required key(s) ['_via_image_id_list', '_via_img_metadata'] "
+        "not found in ['_via_settings', '_via_attributes', "
+        "'_via_data_format_version'].",
+    ),
+    (
+        "via_json_1_file_with_missing_keys",
+        ValidVIAJSON,
+        {"image_keys": ["filename"]},
+        pytest.raises(ValueError),
+        "Required key(s) ['filename'] not found "
+        "in ['size', 'regions', 'file_attributes'] "
+        "for {}.",
+    ),
+    (
+        "via_json_1_file_with_missing_keys",
+        ValidVIAJSON,
+        {"region_keys": ["shape_attributes"]},
+        pytest.raises(ValueError),
+        "Required key(s) ['shape_attributes'] not found in "
+        "['region_attributes'] for region 0 under {}.",
+    ),
+    (
+        "via_json_1_file_with_missing_keys",
+        ValidVIAJSON,
+        {"shape_attributes_keys": ["x"]},
+        pytest.raises(ValueError),
+        "Required key(s) ['x'] not found in "
+        "['name', 'y', 'width', 'height'] for region 0 under {}.",
+    ),
+]
+
+
 @pytest.mark.parametrize(
     (
-        "specific_json_file, specific_json_file_validator, "
+        "input_file, validator, "
         "expected_missing_keys, expected_exception, log_message"
     ),
-    [
-        (
-            "via_json_1_file_with_missing_keys",
-            ValidVIAJSON,
-            {"main": ["_via_image_id_list"]},
-            pytest.raises(ValueError),
-            "Required key(s) ['_via_image_id_list'] not found "
-            "in ['_via_settings', '_via_img_metadata', '_via_attributes', "
-            "'_via_data_format_version'].",
-        ),
-        (
-            "via_json_1_file_with_missing_keys",
-            ValidVIAJSON,
-            {"main": ["_via_image_id_list", "_via_img_metadata"]},
-            pytest.raises(ValueError),
-            "Required key(s) ['_via_image_id_list', '_via_img_metadata'] "
-            "not found in ['_via_settings', '_via_attributes', "
-            "'_via_data_format_version'].",
-        ),
-        (
-            "via_json_1_file_with_missing_keys",
-            ValidVIAJSON,
-            {"image_keys": ["filename"]},
-            pytest.raises(ValueError),
-            "Required key(s) ['filename'] not found "
-            "in ['size', 'regions', 'file_attributes'] "
-            "for {}.",
-        ),
-        (
-            "via_json_1_file_with_missing_keys",
-            ValidVIAJSON,
-            {"region_keys": ["shape_attributes"]},
-            pytest.raises(ValueError),
-            "Required key(s) ['shape_attributes'] not found in "
-            "['region_attributes'] for region 0 under {}.",
-        ),
-        (
-            "via_json_1_file_with_missing_keys",
-            ValidVIAJSON,
-            {"shape_attributes_keys": ["x"]},
-            pytest.raises(ValueError),
-            "Required key(s) ['x'] not found in "
-            "['name', 'y', 'width', 'height'] for region 0 under {}.",
-        ),
-        (
-            "coco_json_1_file_with_missing_keys",
-            ValidCOCOJSON,
-            {"main": ["categories"]},
-            pytest.raises(ValueError),
-            "Required key(s) ['categories'] not found "
-            "in ['annotations', 'images', 'info', 'licenses'].",
-        ),
-        (
-            "coco_json_1_file_with_missing_keys",
-            ValidCOCOJSON,
-            {"main": ["categories", "images"]},
-            pytest.raises(ValueError),
-            "Required key(s) ['categories', 'images'] not found "
-            "in ['annotations', 'info', 'licenses'].",
-        ),
-        (
-            "coco_json_1_file_with_missing_keys",
-            ValidCOCOJSON,
-            {"image_keys": ["file_name"]},
-            pytest.raises(ValueError),
-            "Required key(s) ['file_name'] not found in "
-            "['height', 'id', 'width'] for image dict {}.",
-        ),
-        (
-            "coco_json_1_file_with_missing_keys",
-            ValidCOCOJSON,
-            {"annotations_keys": ["category_id"]},
-            pytest.raises(ValueError),
-            "Required key(s) ['category_id'] not found in "
-            "['area', 'bbox', 'id', 'image_id', 'iscrowd'] for "
-            "annotation dict {}.",
-        ),
-        (
-            "coco_json_1_file_with_missing_keys",
-            ValidCOCOJSON,
-            {"categories_keys": ["id"]},
-            pytest.raises(ValueError),
-            "Required key(s) ['id'] not found in "
-            "['name', 'supercategory'] for category dict {}.",
-        ),
-    ],
+    via_json_1_parametrization + coco_json_1_parametrization,
 )
 def test_valid_via_coco_json_missing_keys(
-    specific_json_file: str,
-    specific_json_file_validator: Callable,
+    input_file: str,
+    validator: Callable,
     expected_missing_keys: dict,
     expected_exception: pytest.raises,
     log_message: str,
     request: pytest.FixtureRequest,
-    # via_json_1_file_with_missing_keys: pytest.fixture,
 ):
     """Test the file-specific validators (ValidVIAJSON and ValidCOCOJSON)
     throw an error when the input misses some required keys.
     """
     # Create an invalid VIA or COCO JSON file with missing keys
-    input_json_file_with_missing_keys = request.getfixturevalue(
-        specific_json_file
-    )
+    input_json_file_with_missing_keys = request.getfixturevalue(input_file)
     invalid_json_file, edited_image_dicts = input_json_file_with_missing_keys(
         expected_missing_keys,  # required keys to remove
     )
@@ -484,7 +487,7 @@ def test_valid_via_coco_json_missing_keys(
 
     # Run validation
     with expected_exception as excinfo:
-        specific_json_file_validator(
+        validator(
             path=invalid_json_file,
         )
 
