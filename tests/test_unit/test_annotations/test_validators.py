@@ -8,9 +8,9 @@ import pytest
 
 from ethology.annotations.json_schemas import COCO_SCHEMA, VIA_SCHEMA
 from ethology.annotations.validators import (
-    ValidCOCOJSON,
+    ValidCOCO,
     ValidJSON,
-    ValidVIAJSON,
+    ValidVIA,
     _check_keys,
 )
 
@@ -312,16 +312,16 @@ def test_valid_json_errors(
 @pytest.mark.parametrize(
     "input_file, validator",
     [
-        ("VIA_JSON_sample_1.json", ValidVIAJSON),
-        ("VIA_JSON_sample_2.json", ValidVIAJSON),
-        ("COCO_JSON_sample_1.json", ValidCOCOJSON),
-        ("COCO_JSON_sample_2.json", ValidCOCOJSON),
+        ("VIA_JSON_sample_1.json", ValidVIA),
+        ("VIA_JSON_sample_2.json", ValidVIA),
+        ("COCO_JSON_sample_1.json", ValidCOCO),
+        ("COCO_JSON_sample_2.json", ValidCOCO),
     ],
 )
 def test_valid_via_coco_json(
     input_file: str, validator: Callable, annotations_test_data: dict
 ):
-    """Test the ValidVIAJSON and the ValidCOCOJSON validators
+    """Test the ValidVIA and the ValidCOCO validators
     with valid inputs.
     """
     filepath = annotations_test_data[input_file]
@@ -336,13 +336,13 @@ def test_valid_via_coco_json(
     [
         (
             "json_file_decode_error",
-            ValidVIAJSON,
+            ValidVIA,
             pytest.raises(ValueError),
             "Error decoding JSON data from file",
         ),
         (
             "json_file_not_found_error",
-            ValidCOCOJSON,
+            ValidCOCO,
             pytest.raises(FileNotFoundError),
             "File not found",
         ),
@@ -355,7 +355,7 @@ def test_valid_via_coco_json_file_errors(
     log_message,
     request,
 ):
-    """Test the ValidVIAJSON and the ValidCOCOJSON validators throw
+    """Test the ValidVIA and the ValidCOCO validators throw
     the expected errors when given invalid input files.
     """
     invalid_json_file = request.getfixturevalue(invalid_input_file)
@@ -377,12 +377,12 @@ def test_valid_via_coco_json_file_errors(
     [
         (
             "via_json_file_schema_error",
-            ValidVIAJSON,
+            ValidVIA,
             "49.5 is not of type 'integer'",
         ),
         (
             "coco_json_file_schema_error",
-            ValidCOCOJSON,
+            ValidCOCO,
             "[{'area': 432, 'bbox': [1278, 556, 16, 27], 'category_id': 1, "
             "'id': 8917, 'image_id': 199, 'iscrowd': 0}] is not of type "
             "'object'\n\n",
@@ -414,7 +414,7 @@ def test_valid_via_coco_json_schema_errors(
 coco_json_1_parametrization = [
     (
         "coco_json_1_file_with_missing_keys",
-        ValidCOCOJSON,
+        ValidCOCO,
         {"main": ["categories"]},
         pytest.raises(ValueError),
         "Required key(s) ['categories'] not found "
@@ -422,7 +422,7 @@ coco_json_1_parametrization = [
     ),
     (
         "coco_json_1_file_with_missing_keys",
-        ValidCOCOJSON,
+        ValidCOCO,
         {"main": ["categories", "images"]},
         pytest.raises(ValueError),
         "Required key(s) ['categories', 'images'] not found "
@@ -430,7 +430,7 @@ coco_json_1_parametrization = [
     ),
     (
         "coco_json_1_file_with_missing_keys",
-        ValidCOCOJSON,
+        ValidCOCO,
         {"image_keys": ["file_name"]},
         pytest.raises(ValueError),
         "Required key(s) ['file_name'] not found in "
@@ -438,7 +438,7 @@ coco_json_1_parametrization = [
     ),
     (
         "coco_json_1_file_with_missing_keys",
-        ValidCOCOJSON,
+        ValidCOCO,
         {"annotations_keys": ["category_id"]},
         pytest.raises(ValueError),
         "Required key(s) ['category_id'] not found in "
@@ -447,7 +447,7 @@ coco_json_1_parametrization = [
     ),
     (
         "coco_json_1_file_with_missing_keys",
-        ValidCOCOJSON,
+        ValidCOCO,
         {"categories_keys": ["id"]},
         pytest.raises(ValueError),
         "Required key(s) ['id'] not found in "
@@ -458,7 +458,7 @@ coco_json_1_parametrization = [
 via_json_1_parametrization = [
     (
         "via_json_1_file_with_missing_keys",
-        ValidVIAJSON,
+        ValidVIA,
         {"main": ["_via_image_id_list"]},
         pytest.raises(ValueError),
         "Required key(s) ['_via_image_id_list'] not found "
@@ -467,7 +467,7 @@ via_json_1_parametrization = [
     ),
     (
         "via_json_1_file_with_missing_keys",
-        ValidVIAJSON,
+        ValidVIA,
         {"main": ["_via_image_id_list", "_via_img_metadata"]},
         pytest.raises(ValueError),
         "Required key(s) ['_via_image_id_list', '_via_img_metadata'] "
@@ -476,7 +476,7 @@ via_json_1_parametrization = [
     ),
     (
         "via_json_1_file_with_missing_keys",
-        ValidVIAJSON,
+        ValidVIA,
         {"image_keys": ["filename"]},
         pytest.raises(ValueError),
         "Required key(s) ['filename'] not found "
@@ -485,7 +485,7 @@ via_json_1_parametrization = [
     ),
     (
         "via_json_1_file_with_missing_keys",
-        ValidVIAJSON,
+        ValidVIA,
         {"region_keys": ["shape_attributes"]},
         pytest.raises(ValueError),
         "Required key(s) ['shape_attributes'] not found in "
@@ -493,7 +493,7 @@ via_json_1_parametrization = [
     ),
     (
         "via_json_1_file_with_missing_keys",
-        ValidVIAJSON,
+        ValidVIA,
         {"shape_attributes_keys": ["x"]},
         pytest.raises(ValueError),
         "Required key(s) ['x'] not found in "
@@ -517,7 +517,7 @@ def test_valid_via_coco_json_missing_keys(
     log_message: str,
     request: pytest.FixtureRequest,
 ):
-    """Test the file-specific validators (ValidVIAJSON and ValidCOCOJSON)
+    """Test the file-specific validators (ValidVIA and ValidCOCO)
     throw an error when the input misses some required keys.
     """
     # Create an invalid VIA or COCO JSON file with missing keys

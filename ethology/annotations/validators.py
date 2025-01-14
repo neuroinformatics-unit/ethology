@@ -87,7 +87,7 @@ class ValidJSON:
 
 
 @define
-class ValidVIAJSON(ValidJSON):
+class ValidVIA(ValidJSON):
     """Class for valid VIA JSON files.
 
     It checks the input file is a `ValidJSON` and additionally checks the
@@ -173,7 +173,7 @@ class ValidVIAJSON(ValidJSON):
 
 
 @define
-class ValidCOCOJSON(ValidJSON):
+class ValidCOCO(ValidJSON):
     """Class valid COCO JSON files for untracked data.
 
     It checks the input COCO JSON file contains the required keys.
