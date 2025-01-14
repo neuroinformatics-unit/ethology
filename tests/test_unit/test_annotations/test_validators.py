@@ -1,5 +1,7 @@
 import json
+from collections.abc import Callable
 from contextlib import nullcontext as does_not_raise
+from pathlib import Path
 
 import jsonschema
 import pytest
@@ -14,8 +16,8 @@ from ethology.annotations.validators import (
 
 
 @pytest.fixture()
-def json_file_with_decode_error(tmp_path):
-    """Return factory of paths to JSON files with a decoding error."""
+def json_file_decode_error(tmp_path: Path) -> Path:
+    """Return path to a JSON file with a decoding error."""
     json_file = tmp_path / "JSON_decode_error.json"
     with open(json_file, "w") as f:
         f.write("just-a-string")
@@ -23,17 +25,20 @@ def json_file_with_decode_error(tmp_path):
 
 
 @pytest.fixture()
-def json_file_with_not_found_error(tmp_path):
-    """Return the path to a JSON file that does not exist."""
+def json_file_not_found_error(tmp_path: Path) -> Path:
+    """Return path to a JSON file that does not exist."""
     return tmp_path / "JSON_file_not_found.json"
 
 
 @pytest.fixture()
-def via_json_file_with_schema_error(
-    tmp_path,
-    annotations_test_data,
-):
-    """Return path to a VIA JSON file that doesn't match its schema."""
+def via_json_file_schema_error(
+    tmp_path: Path,
+    annotations_test_data: dict,
+) -> Path:
+    """Return path to a VIA JSON file that doesn't match its schema.
+
+    It uses the `_json_file_with_schema_error` factory function.
+    """
     return _json_file_with_schema_error(
         tmp_path,
         annotations_test_data["VIA_JSON_sample_1.json"],
@@ -41,29 +46,39 @@ def via_json_file_with_schema_error(
 
 
 @pytest.fixture()
-def coco_json_file_with_schema_error(
-    tmp_path,
-    annotations_test_data,
-):
-    """Return path to a COCO JSON file that doesn't match its schema."""
+def coco_json_file_schema_error(
+    tmp_path: Path,
+    annotations_test_data: dict,
+) -> Path:
+    """Return path to a COCO JSON file that doesn't match its schema.
+
+    It uses the `_json_file_with_schema_error` factory function.
+    """
     return _json_file_with_schema_error(
         tmp_path,
         annotations_test_data["COCO_JSON_sample_1.json"],
     )
 
 
-def _json_file_with_schema_error(out_parent_path, json_valid_path):
-    """Return path to a JSON file that doesn't match the expected schema."""
-    # read valid json file
+def _json_file_with_schema_error(
+    out_parent_path: Path, json_valid_path: Path
+) -> Path:
+    """From a valid input JSON file, return path to a JSON file that doesn't
+    match the expected schema.
+    """
+    # Read valid JSON file
     with open(json_valid_path) as f:
         data = json.load(f)
 
-    # modify so that it doesn't match the corresponding schema
-    # if VIA, change "width" of a bounding box from int to float
-    # if COCO, change "annotations" from list of dicts to list of lists
+    # Modify file so that it doesn't match the corresponding schema
+    # if file is a VIA JSON test file, change "width" of a bounding box from
+    # int to float
     if "VIA" in json_valid_path.name:
         _, img_dict = list(data["_via_img_metadata"].items())[0]
         img_dict["regions"][0]["shape_attributes"]["width"] = 49.5
+
+    # if file is a COCO JSON test file, change "annotations" from list of
+    # dicts to list of lists
     elif "COCO" in json_valid_path.name:
         data["annotations"] = [[d] for d in data["annotations"]]
 
@@ -75,47 +90,68 @@ def _json_file_with_schema_error(out_parent_path, json_valid_path):
 
 
 @pytest.fixture()
-def via_json_file_with_missing_keys(tmp_path, annotations_test_data):
-    """Return factory of paths to VIA JSON files with missing required keys."""
+def via_json_file_with_missing_keys(
+    tmp_path: Path, annotations_test_data: dict
+) -> Callable:
+    """Get paths to VIA JSON files that have some required keys missing.
+
+    The VIA JSON file is expressed as a nested dictionary (images contain
+    regions which contain shape attributes). Therefore the missing keys can be
+    defined at the image level, the region level, or the shape attributes
+    level.
+
+    This fixture is a factory of fixtures. It returns a function that can be
+    used to create a fixture that is a tuple with:
+    - the path to the VIA JSON file with missing keys, and
+    - a dictionary holding the names of the images whose data was removed.
+    """
 
     def _via_json_file_with_missing_keys(
-        valid_json_filename, required_keys_to_pop
-    ):
-        """Return path to a JSON file that is missing required keys."""
-        # read valid json file
+        valid_json_filename: str, required_keys_to_pop: dict
+    ) -> tuple[Path, dict]:
+        """Return a tuple with:
+        - the path to the VIA JSON file with some required keys missing,
+        - a dictionary with the names of the images whose data was removed.
+        """
+        # Read valid json file
         valid_json_path = annotations_test_data[valid_json_filename]
         with open(valid_json_path) as f:
             data = json.load(f)
 
-        # remove any keys in the first level
+        # Remove any keys in the first level
         for key in required_keys_to_pop.get("main", []):
             data.pop(key)
 
-        # remove keys in nested dictionaries
+        # Remove any keys in nested dictionaries
         edited_image_dicts = {}
         if "_via_img_metadata" in data:
             list_img_metadata_tuples = list(data["_via_img_metadata"].items())
 
-            # remove image keys for first image dictionary
+            # If image keys are specified in the keys to remove,
+            # remove them in the first image dictionary that appears
+            # in the VIA JSON file
             img_str, img_dict = list_img_metadata_tuples[0]
             edited_image_dicts["image_keys"] = img_str
             for key in required_keys_to_pop.get("image_keys", []):
                 img_dict.pop(key)
 
-            # remove region keys for first region under second image dictionary
+            # If region keys are specified in the keys to remove,
+            # remove them in the first region under the second
+            # image dictionary that appears in the VIA JSON file
             img_str, img_dict = list_img_metadata_tuples[1]
             edited_image_dicts["region_keys"] = img_str
             for key in required_keys_to_pop.get("region_keys", []):
                 img_dict["regions"][0].pop(key)
 
-            # remove shape_attributes keys for first region under third image
-            # dictionary
+            # If shape attribute keys are specified in the keys to remove,
+            # remove them in the first region under third image dictionary
+            # that appears in the VIA JSON file
             img_str, img_dict = list_img_metadata_tuples[2]
             edited_image_dicts["shape_attributes_keys"] = img_str
             for key in required_keys_to_pop.get("shape_attributes_keys", []):
                 img_dict["regions"][0]["shape_attributes"].pop(key)
 
-        # save the modified json to a new file
+        # Save the modified json to a new file
         out_json = tmp_path / f"{valid_json_path.name}_missing_keys.json"
         with open(out_json, "w") as f:
             json.dump(data, f)
@@ -125,45 +161,54 @@ def via_json_file_with_missing_keys(tmp_path, annotations_test_data):
 
 
 @pytest.fixture()
-def coco_json_file_with_missing_keys(tmp_path, annotations_test_data):
-    """Return factory of paths to COCO JSON files with missing required
-    keys.
+def coco_json_file_with_missing_keys(
+    tmp_path: Path, annotations_test_data: dict
+):
+    """Get paths to COCO JSON files that have some required keys missing.
+
+    The COCO JSON file is expressed as a dictionary that maps keys (such as
+    images, annotations or categories) to lists of data. Therefore the missing
+    keys can be defined for the data under images, annotations or categories.
+
+    This fixture is a factory of fixtures. It returns a function that can be
+    used to create a fixture that is a tuple with:
+    - the path to the COCO JSON file with missing keys, and
+    - a dictionary holding the names of the images whose data was removed.
     """
 
     def _coco_json_file_with_missing_keys(
-        valid_json_filename, required_keys_to_pop
-    ):
+        valid_json_filename: Path, required_keys_to_pop: dict
+    ) -> tuple[Path, dict]:
         """Return path to a JSON file that is missing required keys."""
-        # read valid json file
+        # Read valid json file
         valid_json_path = annotations_test_data[valid_json_filename]
         with open(valid_json_path) as f:
             data = json.load(f)
 
-        # remove any keys in the first level
+        # Remove any keys in the first level
         for key in required_keys_to_pop.get("main", []):
             data.pop(key)
 
+        # Remove required image keys in the first images dictionary
         edited_image_dicts = {}
-
-        # remove required keys in first images dictionary
         if "images" in data:
             edited_image_dicts["image_keys"] = data["images"][0]
             for key in required_keys_to_pop.get("image_keys", []):
                 data["images"][0].pop(key)
 
-        # remove required keys in first annotations dictionary
+        # Remove required annotations keys in the first annotations dictionary
         if "annotations" in data:
             edited_image_dicts["annotations_keys"] = data["annotations"][0]
             for key in required_keys_to_pop.get("annotations_keys", []):
                 data["annotations"][0].pop(key)
 
-        # remove required keys in first categories dictionary
+        # Remove required categories keys in the first categories dictionary
         if "categories" in data:
             edited_image_dicts["categories_keys"] = data["categories"][0]
             for key in required_keys_to_pop.get("categories_keys", []):
                 data["categories"][0].pop(key)
 
-        # save the modified json to a new file
+        # Save the modified json to a new file
         out_json = tmp_path / f"{valid_json_path.name}_missing_keys.json"
         with open(out_json, "w") as f:
             json.dump(data, f)
@@ -207,25 +252,37 @@ def test_valid_json(
     "invalid_json_file_str, input_schema, expected_exception, log_message",
     [
         (
-            "json_file_with_decode_error",
+            "json_file_decode_error",
             None,  # should be independent of schema
             pytest.raises(ValueError),
-            "Error decoding JSON data from file: {}.",
+            "Error decoding JSON data from file",
         ),
         (
-            "json_file_with_not_found_error",
+            "json_file_not_found_error",
             None,  # should be independent of schema
             pytest.raises(FileNotFoundError),
-            "File not found: {}.",
+            "File not found",
         ),
         (
-            "via_json_file_with_schema_error",
+            "json_file_decode_error",
+            VIA_SCHEMA,  # should be independent of schema
+            pytest.raises(ValueError),
+            "Error decoding JSON data from file",
+        ),
+        (
+            "json_file_not_found_error",
+            VIA_SCHEMA,  # should be independent of schema
+            pytest.raises(FileNotFoundError),
+            "File not found",
+        ),
+        (
+            "via_json_file_schema_error",
             VIA_SCHEMA,
             pytest.raises(jsonschema.exceptions.ValidationError),
             "49.5 is not of type 'integer'\n\n",
         ),
         (
-            "coco_json_file_with_schema_error",
+            "coco_json_file_schema_error",
             COCO_SCHEMA,
             pytest.raises(jsonschema.exceptions.ValidationError),
             "[{'area': 432, 'bbox': [1278, 556, 16, 27], 'category_id': 1, "
@@ -241,16 +298,21 @@ def test_valid_json_errors(
     log_message,
     request,
 ):
-    """Test the ValidJSON validator throws the expected errors."""
+    """Test the ValidJSON validator throws the expected errors when given
+    invalid inputs.
+    """
     invalid_json_file = request.getfixturevalue(invalid_json_file_str)
 
     with expected_exception as excinfo:
         ValidJSON(path=invalid_json_file, schema=input_schema)
 
-    if input_schema:
-        assert log_message in str(excinfo.value)
-    else:
-        assert log_message.format(invalid_json_file) == str(excinfo.value)
+    # Check that the error message contains expected string
+    assert log_message in str(excinfo.value)
+
+    # If error is not related to JSON schema, check the error message contains
+    # file path
+    if not isinstance(excinfo.value, jsonschema.exceptions.ValidationError):
+        assert invalid_json_file.name in str(excinfo.value)
 
 
 @pytest.mark.parametrize(
