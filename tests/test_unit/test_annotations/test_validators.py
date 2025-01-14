@@ -61,7 +61,7 @@ def via_json_file_schema_error(
     img_dict["regions"][0]["shape_attributes"]["width"] = 49.5
 
     # Save the modified JSON to a new file
-    out_json = tmp_path / f"{valid_via_json_1_file.name}_schema_error.json"
+    out_json = tmp_path / f"{valid_via_json_1_file.stem}_schema_error.json"
     with open(out_json, "w") as f:
         json.dump(data, f)
     return out_json
@@ -85,7 +85,7 @@ def coco_json_file_schema_error(
     data["annotations"] = [[d] for d in data["annotations"]]
 
     # save the modified json to a new file
-    out_json = tmp_path / f"{valid_coco_json_1_file.name}_schema_error.json"
+    out_json = tmp_path / f"{valid_coco_json_1_file.stem}_schema_error.json"
     with open(out_json, "w") as f:
         json.dump(data, f)
     return out_json
@@ -147,7 +147,7 @@ def via_json_1_file_with_missing_keys(
                 img_dict["regions"][0]["shape_attributes"].pop(key)
 
         # Save the modified json to a new file
-        out_json = tmp_path / f"{valid_via_json_1_file.name}_missing_keys.json"
+        out_json = tmp_path / f"{valid_via_json_1_file.stem}_missing_keys.json"
         with open(out_json, "w") as f:
             json.dump(data, f)
         return out_json, edited_image_dicts
@@ -202,7 +202,7 @@ def coco_json_1_file_with_missing_keys(
 
         # Save the modified json to a new file
         out_json = (
-            tmp_path / f"{valid_coco_json_1_file.name}_missing_keys.json"
+            tmp_path / f"{valid_coco_json_1_file.stem}_missing_keys.json"
         )
         with open(out_json, "w") as f:
             json.dump(data, f)
@@ -310,23 +310,70 @@ def test_valid_json_errors(
 
 
 @pytest.mark.parametrize(
-    "input_json_file",
+    "input_file, validator",
     [
-        "VIA_JSON_sample_1.json",
-        "VIA_JSON_sample_2.json",
+        ("VIA_JSON_sample_1.json", ValidVIAJSON),
+        ("VIA_JSON_sample_2.json", ValidVIAJSON),
+        ("COCO_JSON_sample_1.json", ValidCOCOJSON),
+        ("COCO_JSON_sample_2.json", ValidCOCOJSON),
     ],
 )
-def test_valid_via_json(annotations_test_data: dict, input_json_file: str):
-    """Test the ValidVIAJSON validator with valid inputs."""
-    filepath = annotations_test_data[input_json_file]
+def test_valid_via_coco_json(
+    input_file: str, validator: Callable, annotations_test_data: dict
+):
+    """Test the ValidVIAJSON and the ValidCOCOJSON validators
+    with valid inputs.
+    """
+    filepath = annotations_test_data[input_file]
     with does_not_raise():
-        ValidVIAJSON(
+        validator(
             path=filepath,
         )
 
 
 @pytest.mark.parametrize(
-    "specific_json_file, specific_json_file_validator, expected_error_message",
+    "invalid_input_file, validator, expected_exception, log_message",
+    [
+        (
+            "json_file_decode_error",
+            ValidVIAJSON,
+            pytest.raises(ValueError),
+            "Error decoding JSON data from file",
+        ),
+        (
+            "json_file_not_found_error",
+            ValidCOCOJSON,
+            pytest.raises(FileNotFoundError),
+            "File not found",
+        ),
+    ],
+)
+def test_valid_via_coco_json_file_errors(
+    invalid_input_file,
+    validator,
+    expected_exception,
+    log_message,
+    request,
+):
+    """Test the ValidVIAJSON and the ValidCOCOJSON validators throw
+    the expected errors when given invalid input files.
+    """
+    invalid_json_file = request.getfixturevalue(invalid_input_file)
+
+    with expected_exception as excinfo:
+        validator(path=invalid_json_file)
+
+    # Check that the error message contains expected string
+    assert log_message in str(excinfo.value)
+
+    # If error is not related to JSON schema, check the error message contains
+    # file path
+    if not isinstance(excinfo.value, jsonschema.exceptions.ValidationError):
+        assert invalid_json_file.name in str(excinfo.value)
+
+
+@pytest.mark.parametrize(
+    "input_file, validator, expected_error_message",
     [
         (
             "via_json_file_schema_error",
@@ -342,21 +389,21 @@ def test_valid_via_json(annotations_test_data: dict, input_json_file: str):
         ),
     ],
 )
-def test_valid_via_coco_json_with_schema_error(
-    specific_json_file: Path,
-    specific_json_file_validator: Callable,
+def test_valid_via_coco_json_schema_errors(
+    input_file: Path,
+    validator: Callable,
     expected_error_message: str,
     request: pytest.FixtureRequest,
 ):
     """Test the file-specific validators (VIA or COCO) throw an error when the
     input does not match the expected schema.
     """
-    input_file = request.getfixturevalue(specific_json_file)
+    input_file = request.getfixturevalue(input_file)
 
     # Check the file-specific validator throws an error for the
     # default schema
     with pytest.raises(jsonschema.exceptions.ValidationError) as excinfo:
-        specific_json_file_validator(
+        validator(
             path=input_file,
         )
 

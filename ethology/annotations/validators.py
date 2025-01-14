@@ -90,29 +90,41 @@ class ValidJSON:
 class ValidVIAJSON(ValidJSON):
     """Class for valid VIA JSON files.
 
-    It runs the validations from `ValidJSON` on the input VIA JSON file and
-    additionally checks the file contains the required keys.
+    It checks the input file is a `ValidJSON` and additionally checks the
+    file contains the required keys.
 
     Attributes
     ----------
     path : pathlib.Path
         Path to the VIA JSON file.
 
-    schema : dict, optional
-        JSON schema to validate the file against. Default is VIA_SCHEMA.
+    schema : dict
+        The JSON schema is set to VIA_SCHEMA.
 
     Raises
     ------
+    FileNotFoundError
+        If the file does not exist.
+    ValueError
+        If the JSON file cannot be decoded.
+    jsonschema.exceptions.ValidationError
+        If the type of any of the keys in the JSON file
+        does not match the type specified in the schema.
     ValueError
         If the VIA JSON file misses any of the required keys.
 
     """
 
-    # Run the parent's class validators first
+    # Run the parent's validator on the provided path
     path: Path = field(validator=attrs.fields(ValidJSON).path.validator)
+
+    # Run the parent's validator on the hardcoded schema
     schema: dict = field(
         validator=attrs.fields(ValidJSON).schema.validator,  # type: ignore
-        default=VIA_SCHEMA,  # why is this optional?-------
+        default=VIA_SCHEMA,
+        init=False,
+        # init=False makes the attribute to be unconditionally initialized
+        # with the specified default
     )
 
     # TODO: add a validator to check the schema defines types
@@ -173,16 +185,28 @@ class ValidCOCOJSON(ValidJSON):
 
     Raises
     ------
+    FileNotFoundError
+        If the file does not exist.
+    ValueError
+        If the JSON file cannot be decoded.
+    jsonschema.exceptions.ValidationError
+        If the type of any of the keys in the JSON file
+        does not match the type specified in the schema.
     ValueError
         If the COCO JSON file misses any of the required keys.
 
     """
 
-    # run the parent's validators first
+    # Run the parent's validators on the provided path
     path: Path = field(validator=attrs.fields(ValidJSON).path.validator)
+
+    # Run the parent's validator on the hardcoded schema
     schema: dict = field(
         validator=attrs.fields(ValidJSON).schema.validator,  # type: ignore
         default=COCO_SCHEMA,
+        init=False,
+        # init=False makes the attribute to be unconditionally initialized
+        # with the specified default
     )
 
     # TODO: add a validator to check the schema defines types
