@@ -313,7 +313,7 @@ def test_valid_json_errors(
         ("COCO_JSON_sample_2.json", ValidCOCO),
     ],
 )
-def test_valid_via_coco_json(
+def test_valid_via_coco(
     input_file: str, validator: Callable, annotations_test_data: dict
 ):
     """Test the file-specific validators (VIA or COCO) validators with valid
@@ -341,7 +341,7 @@ def test_valid_via_coco_json(
         ),
     ],
 )
-def test_valid_via_coco_json_file_errors(
+def test_valid_via_coco_file_errors(
     invalid_input_file: str,
     validator: Callable,
     expected_exception: pytest.raises,
@@ -379,7 +379,7 @@ def test_valid_via_coco_json_file_errors(
         ),
     ],
 )
-def test_valid_via_coco_json_schema_errors(
+def test_valid_via_coco_schema_errors(
     input_file: Path,
     validator: Callable,
     expected_error_message: str,
@@ -434,7 +434,7 @@ def test_valid_via_coco_json_schema_errors(
         ),
     ],
 )
-def test_valid_via_json_missing_keys(
+def test_valid_via_missing_keys(
     via_file_sample_1_with_missing_keys: Callable,
     expected_missing_keys: dict,
     log_message: str,
@@ -498,7 +498,7 @@ def test_valid_via_json_missing_keys(
         ),
     ],
 )
-def test_valid_coco_json_missing_keys(
+def test_valid_coco_missing_keys(
     coco_file_sample_1_with_missing_keys: Callable,
     expected_missing_keys: dict,
     log_message: str,
