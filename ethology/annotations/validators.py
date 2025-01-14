@@ -108,7 +108,7 @@ class ValidVIAJSON(ValidJSON):
 
     """
 
-    # run the parent's class validators first
+    # Run the parent's class validators first
     path: Path = field(validator=attrs.fields(ValidJSON).path.validator)
     schema: dict = field(
         validator=attrs.fields(ValidJSON).schema.validator,  # type: ignore

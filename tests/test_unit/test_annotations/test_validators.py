@@ -326,6 +326,45 @@ def test_valid_via_json(annotations_test_data: dict, input_json_file: str):
 
 
 @pytest.mark.parametrize(
+    "specific_json_file, specific_json_file_validator, expected_error_message",
+    [
+        (
+            "via_json_file_schema_error",
+            ValidVIAJSON,
+            "49.5 is not of type 'integer'",
+        ),
+        (
+            "coco_json_file_schema_error",
+            ValidCOCOJSON,
+            "[{'area': 432, 'bbox': [1278, 556, 16, 27], 'category_id': 1, "
+            "'id': 8917, 'image_id': 199, 'iscrowd': 0}] is not of type "
+            "'object'\n\n",
+        ),
+    ],
+)
+def test_valid_specific_json_with_schema_error(
+    specific_json_file: Path,
+    specific_json_file_validator: Callable,
+    expected_error_message: str,
+    request: pytest.FixtureRequest,
+):
+    """Test the file-specific validators (VIA or COCO) throw an error when the
+    input does not match the expected schema.
+    """
+    input_file = request.getfixturevalue(specific_json_file)
+
+    # Check the file-specific validator throws an error for the
+    # default schema
+    with pytest.raises(jsonschema.exceptions.ValidationError) as excinfo:
+        specific_json_file_validator(
+            path=input_file,
+        )
+
+    # Check the error message is as expected
+    assert expected_error_message in str(excinfo.value)
+
+
+@pytest.mark.parametrize(
     "expected_missing_keys, expected_exception, log_message",
     [
         (
@@ -395,6 +434,7 @@ def test_valid_via_json_missing_keys(
     assert str(excinfo.value) == log_message.format(img_key_str)
 
 
+# THIS TEST CAN BE COMBINED WITH test_valid_via_json_missing_keys
 @pytest.mark.parametrize(
     "expected_missing_keys, expected_exception, log_message",
     [
