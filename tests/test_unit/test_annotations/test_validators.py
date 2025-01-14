@@ -16,6 +16,18 @@ from ethology.annotations.validators import (
 
 
 @pytest.fixture()
+def valid_via_json_1_file(annotations_test_data: dict) -> Path:
+    """Return path to a valid VIA JSON file."""
+    return annotations_test_data["VIA_JSON_sample_1.json"]
+
+
+@pytest.fixture()
+def valid_coco_json_1_file(annotations_test_data: dict) -> Path:
+    """Return path to a valid COCO JSON file."""
+    return annotations_test_data["COCO_JSON_sample_1.json"]
+
+
+@pytest.fixture()
 def json_file_decode_error(tmp_path: Path) -> Path:
     """Return path to a JSON file with a decoding error."""
     json_file = tmp_path / "JSON_decode_error.json"
@@ -161,28 +173,30 @@ def via_json_file_with_missing_keys(
 
 
 @pytest.fixture()
-def coco_json_file_with_missing_keys(
-    tmp_path: Path, annotations_test_data: dict
-):
-    """Get paths to COCO JSON files that have some required keys missing.
+def coco_json_1_file_with_missing_keys(
+    valid_coco_json_1_file: Path, tmp_path: Path
+) -> Callable:
+    """Get path to a modified COCO JSON file with some required keys missing.
 
-    The COCO JSON file is expressed as a dictionary that maps keys (such as
-    images, annotations or categories) to lists of data. Therefore the missing
-    keys can be defined for the data under images, annotations or categories.
+    A COCO JSON file can be seen as a dictionary that maps certain keys (such
+    as "images", "annotations" or "categories") to lists of data. Therefore
+    the missing keys can be defined for the data under "images", "annotations"
+    or "categories".
 
     This fixture is a factory of fixtures. It returns a function that can be
     used to create a fixture that is a tuple with:
-    - the path to the COCO JSON file with missing keys, and
+    - the path to the COCO JSON 1 file modified to omit missing keys, and
     - a dictionary holding the names of the images whose data was removed.
     """
 
-    def _coco_json_file_with_missing_keys(
-        valid_json_filename: Path, required_keys_to_pop: dict
+    def _coco_json_1_file_with_missing_keys(
+        required_keys_to_pop: dict,
     ) -> tuple[Path, dict]:
-        """Return path to a JSON file that is missing required keys."""
+        """Return path to a modified COCO JSON 1 file with some required
+        keys missing.
+        """
         # Read valid json file
-        valid_json_path = annotations_test_data[valid_json_filename]
-        with open(valid_json_path) as f:
+        with open(valid_coco_json_1_file) as f:
             data = json.load(f)
 
         # Remove any keys in the first level
@@ -209,12 +223,14 @@ def coco_json_file_with_missing_keys(
                 data["categories"][0].pop(key)
 
         # Save the modified json to a new file
-        out_json = tmp_path / f"{valid_json_path.name}_missing_keys.json"
+        out_json = (
+            tmp_path / f"{valid_coco_json_1_file.name}_missing_keys.json"
+        )
         with open(out_json, "w") as f:
             json.dump(data, f)
         return out_json, edited_image_dicts
 
-    return _coco_json_file_with_missing_keys
+    return _coco_json_1_file_with_missing_keys
 
 
 @pytest.mark.parametrize(
@@ -332,13 +348,6 @@ def test_valid_via_json(annotations_test_data: dict, input_json_file: str):
 
 
 @pytest.mark.parametrize(
-    "valid_via_json_file",
-    [
-        "VIA_JSON_sample_1.json",
-        "VIA_JSON_sample_2.json",
-    ],
-)
-@pytest.mark.parametrize(
     "expected_missing_keys, expected_exception, log_message",
     [
         (
@@ -377,7 +386,6 @@ def test_valid_via_json(annotations_test_data: dict, input_json_file: str):
     ],
 )
 def test_valid_via_json_missing_keys(
-    valid_via_json_file: str,
     expected_missing_keys: dict,
     expected_exception: pytest.raises,
     log_message: str,
@@ -388,7 +396,7 @@ def test_valid_via_json_missing_keys(
     """
     # Create an invalid VIA JSON file with missing keys
     invalid_json_file, edited_image_dicts = via_json_file_with_missing_keys(
-        valid_via_json_file,
+        "VIA_JSON_sample_1.json",
         expected_missing_keys,  # required keys to remove
     )
 
@@ -410,13 +418,6 @@ def test_valid_via_json_missing_keys(
     assert str(excinfo.value) == log_message.format(img_key_str)
 
 
-@pytest.mark.parametrize(
-    "valid_coco_json_file",
-    [
-        "COCO_JSON_sample_1.json",
-        "COCO_JSON_sample_2.json",
-    ],
-)
 @pytest.mark.parametrize(
     "expected_missing_keys, expected_exception, log_message",
     [
@@ -454,19 +455,17 @@ def test_valid_via_json_missing_keys(
     ],
 )
 def test_valid_coco_json_missing_keys(
-    valid_coco_json_file: str,
     expected_missing_keys: dict,
     expected_exception: pytest.raises,
     log_message: str,
-    coco_json_file_with_missing_keys: Callable,
+    coco_json_1_file_with_missing_keys: pytest.fixture,
 ):
     """Test the ValidCOCOJSON validator throws an error when the input misses
     some required keys.
     """
     # Create an invalid COCO JSON file with missing keys
-    invalid_json_file, edited_image_dicts = coco_json_file_with_missing_keys(
-        valid_coco_json_file,
-        expected_missing_keys,  # keys to remove
+    invalid_json_file, edited_image_dicts = coco_json_1_file_with_missing_keys(
+        expected_missing_keys,  # keys to remove from "COCO_JSON_sample_1.json"
     )
 
     # Get dict of image whose data has been edited
