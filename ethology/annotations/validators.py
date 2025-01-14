@@ -136,7 +136,7 @@ class ValidVIA(ValidJSON):
         """Ensure that the VIA JSON file contains the required keys."""
         required_keys = {
             "main": ["_via_img_metadata", "_via_image_id_list"],
-            "image_keys": ["filename", "regions"],
+            "images_keys": ["filename", "regions"],
             "region_keys": ["shape_attributes", "region_attributes"],
             "shape_attributes_keys": ["x", "y", "width", "height"],
         }
@@ -152,7 +152,7 @@ class ValidVIA(ValidJSON):
         for img_str, img_dict in data["_via_img_metadata"].items():
             # Check keys for each image dictionary
             _check_keys(
-                required_keys["image_keys"],
+                required_keys["images_keys"],
                 img_dict,
                 additional_message=f" for {img_str}",
             )
@@ -209,31 +209,28 @@ class ValidCOCO(ValidJSON):
         # with the specified default
     )
 
-    # TODO: add a validator to check the schema defines types
-    # for the required keys
+    # Required keys for COCO JSON files
+    required_keys: dict = {
+        "main": ["images", "annotations", "categories"],
+        "images_keys": ["id", "file_name"],
+        "annotations_keys": ["id", "image_id", "bbox", "category_id"],
+        "categories_keys": ["id", "name", "supercategory"],
+    }
 
-    # run additional validators
     @path.validator
     def _file_contains_required_keys(self, attribute, value):
         """Ensure that the COCO JSON file contains the required keys."""
-        required_keys = {
-            "main": ["images", "annotations", "categories"],
-            "image_keys": ["id", "file_name"],  # add "height" and "width"?
-            "annotations_keys": ["id", "image_id", "bbox", "category_id"],
-            "categories_keys": ["id", "name", "supercategory"],
-        }
-
         # Read data as dict
         with open(value) as file:
             data = json.load(file)
 
         # Check first level keys
-        _check_keys(required_keys["main"], data)
+        _check_keys(self.required_keys["main"], data)
 
         # Check keys in images dicts
         for img_dict in data["images"]:
             _check_keys(
-                required_keys["image_keys"],
+                self.required_keys["images_keys"],
                 img_dict,
                 additional_message=f" for image dict {img_dict}",
             )
@@ -241,7 +238,7 @@ class ValidCOCO(ValidJSON):
         # Check keys in annotations dicts
         for annot_dict in data["annotations"]:
             _check_keys(
-                required_keys["annotations_keys"],
+                self.required_keys["annotations_keys"],
                 annot_dict,
                 additional_message=f" for annotation dict {annot_dict}",
             )
@@ -249,9 +246,36 @@ class ValidCOCO(ValidJSON):
         # Check keys in categories dicts
         for cat_dict in data["categories"]:
             _check_keys(
-                required_keys["categories_keys"],
+                self.required_keys["categories_keys"],
                 cat_dict,
                 additional_message=f" for category dict {cat_dict}",
+            )
+
+    @schema.validator
+    def _schema_contains_required_keys(self, attribute, value):
+        """Ensure that the schema includes the required keys."""
+        missing_keys = []
+        for key, subkeys in self.required_keys.items():
+            if key == "main":
+                main_dict = value.get("properties", {})
+                for subkey in subkeys:
+                    if subkey not in main_dict:
+                        missing_keys.append(subkey)
+            else:
+                key_modif = key.replace("_keys", "")
+                nested_dict = (
+                    value.get("properties", {})
+                    .get(key_modif, {})
+                    .get("items", {})
+                    .get("properties", {})
+                )
+                for subkey in subkeys:
+                    if subkey not in nested_dict:
+                        missing_keys.append(f"{key_modif}/{subkey}")
+
+        if missing_keys:
+            raise ValueError(
+                f"Required key(s) {sorted(missing_keys)} not found in schema."
             )
 
 

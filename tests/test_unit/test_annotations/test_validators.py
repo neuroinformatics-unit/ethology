@@ -1,4 +1,5 @@
 import json
+import re
 from collections.abc import Callable
 from contextlib import nullcontext as does_not_raise
 from pathlib import Path
@@ -434,7 +435,7 @@ def test_valid_via_coco_schema_errors(
         ),
     ],
 )
-def test_valid_via_missing_keys(
+def test_valid_via_missing_keys_in_file(
     via_file_sample_1_with_missing_keys: Callable,
     expected_missing_keys: dict,
     log_message: str,
@@ -498,7 +499,7 @@ def test_valid_via_missing_keys(
         ),
     ],
 )
-def test_valid_coco_missing_keys(
+def test_valid_coco_missing_keys_in_file(
     coco_file_sample_1_with_missing_keys: Callable,
     expected_missing_keys: dict,
     log_message: str,
@@ -529,6 +530,50 @@ def test_valid_coco_missing_keys(
     # If the modified data belongs to a specific image, its key should
     # appear in the error message.
     assert str(excinfo.value) == log_message.format(img_key)
+
+
+@pytest.mark.parametrize(
+    "keys2remove",
+    [
+        {"main": ["images", "annotations"]},
+        {"images_keys": ["file_name"]},
+        {"annotations_keys": ["id"]},
+        {"categories_keys": ["supercategory", "name"]},
+    ],
+)
+def test_valid_coco_missing_keys_in_schema(
+    valid_coco_file_sample_1: Path,
+    keys2remove: dict,
+    monkeypatch: pytest.MonkeyPatch,
+):
+    """Test the ValidCOCO validator throws an error when the schema
+    does not include a required key.
+    """
+    # Redefine COCO_schema to point to a schema with missing keys
+    for ky in keys2remove:
+        if ky == "main":
+            for ky_subdict in keys2remove[ky]:
+                monkeypatch.delitem(COCO_SCHEMA["properties"], ky_subdict)
+        else:
+            ky_modif = ky.replace("_keys", "")
+            for ky_subdict in keys2remove[ky]:
+                monkeypatch.delitem(
+                    COCO_SCHEMA["properties"][ky_modif]["items"]["properties"],  # type: ignore
+                    ky_subdict,
+                )
+
+    # Run validation
+    with pytest.raises(ValueError) as excinfo:
+        ValidCOCO(path=valid_coco_file_sample_1)
+
+    # Check the error message is as expected
+    # The regexp matches any keys that start as the expected keys to remove
+    missing_keys_pattern = "|".join(sorted(*keys2remove.values()))
+    pattern = re.compile(
+        rf"Required key\(s\) \[.*({missing_keys_pattern}).*\] "
+        rf"not found in schema\."
+    )
+    assert re.match(pattern, str(excinfo.value))
 
 
 @pytest.mark.parametrize(
