@@ -97,13 +97,11 @@ def via_json_1_file_with_missing_keys(
 ) -> Callable:
     """Get paths to a modified VIA JSON 1 file with some required keys missing.
 
-    A VIA JSON file can be seen as a nested dictionary ("images" contain
-    "regions" which contain "shape attributes"). Therefore the missing keys
-    can be defined at the image level, the region level, or the shape attribute
-    level.
-
     This fixture is a factory of fixtures. It returns a function that can be
-    used to create a fixture that is a tuple with:
+    used to create a fixture representing a VIA JSON file with some
+    user-defined keys missing.
+
+    Specifically, the fixture obtained is a tuple with:
     - the path to the VIA JSON file 1 modified to omit some keys, and
     - a dictionary holding the names of the images whose data was removed.
     """
@@ -111,10 +109,6 @@ def via_json_1_file_with_missing_keys(
     def _via_json_1_file_with_missing_keys(
         required_keys_to_pop: dict,
     ) -> tuple[Path, dict]:
-        """Return a tuple with:
-        - the path to the VIA JSON file with some required keys missing,
-        - a dictionary with the names of the images whose data was removed.
-        """
         # Read valid json file
         with open(valid_via_json_1_file) as f:
             data = json.load(f)
@@ -167,13 +161,11 @@ def coco_json_1_file_with_missing_keys(
 ) -> Callable:
     """Get path to a modified COCO JSON file with some required keys missing.
 
-    A COCO JSON file can be seen as a dictionary that maps certain keys (such
-    as "images", "annotations" or "categories") to lists of data. Therefore
-    the missing keys can be defined for the data under "images", "annotations"
-    or "categories".
-
     This fixture is a factory of fixtures. It returns a function that can be
-    used to create a fixture that is a tuple with:
+    used to create a fixture representing a COCO JSON file with some
+    user-defined keys missing.
+
+    Specifically, the fixture obtained is a tuple with:
     - the path to the COCO JSON 1 file modified to omit some keys, and
     - a dictionary holding the names of the images whose data was removed.
     """
@@ -181,9 +173,6 @@ def coco_json_1_file_with_missing_keys(
     def _coco_json_1_file_with_missing_keys(
         required_keys_to_pop: dict,
     ) -> tuple[Path, dict]:
-        """Return path to a modified COCO JSON 1 file with some required
-        keys missing.
-        """
         # Read valid json file
         with open(valid_coco_json_1_file) as f:
             data = json.load(f)
@@ -258,25 +247,25 @@ def test_valid_json(
     [
         (
             "json_file_decode_error",
-            None,  # should be independent of schema
+            None,
             pytest.raises(ValueError),
             "Error decoding JSON data from file",
         ),
         (
             "json_file_not_found_error",
-            None,  # should be independent of schema
+            None,
             pytest.raises(FileNotFoundError),
             "File not found",
         ),
         (
             "json_file_decode_error",
-            VIA_SCHEMA,  # should be independent of schema
+            VIA_SCHEMA,  # this error should be independent of the schema
             pytest.raises(ValueError),
             "Error decoding JSON data from file",
         ),
         (
             "json_file_not_found_error",
-            COCO_SCHEMA,  # should be independent of schema
+            COCO_SCHEMA,  # this error should be independent of the schema
             pytest.raises(FileNotFoundError),
             "File not found",
         ),
