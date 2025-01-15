@@ -473,29 +473,23 @@ def test_valid_via_missing_keys_in_file(
     [
         (
             {"main": ["categories"]},
-            "Required key(s) ['categories'] not found "
-            "in ['annotations', 'images', 'info', 'licenses'].",
+            "Required key(s) ['categories'] not found.",
         ),
         (
             {"main": ["categories", "images"]},
-            "Required key(s) ['categories', 'images'] not found "
-            "in ['annotations', 'info', 'licenses'].",
+            "Required key(s) ['categories', 'images'] not found.",
         ),
         (
             {"image_keys": ["file_name"]},
-            "Required key(s) ['file_name'] not found in "
-            "['height', 'id', 'width'] for image dict {}.",
+            "Required key(s) ['file_name'] not found " "for image {}.",
         ),
         (
             {"annotations_keys": ["category_id"]},
-            "Required key(s) ['category_id'] not found in "
-            "['area', 'bbox', 'id', 'image_id', 'iscrowd'] for "
-            "annotation dict {}.",
+            "Required key(s) ['category_id'] not found " "for annotation {}.",
         ),
         (
             {"categories_keys": ["id"]},
-            "Required key(s) ['id'] not found in "
-            "['name', 'supercategory'] for category dict {}.",
+            "Required key(s) ['id'] not found " "for category {}.",
         ),
     ],
 )

@@ -220,7 +220,14 @@ class ValidCOCO(ValidJSON):
     @path.validator
     def _file_contains_required_keys(self, attribute, value):
         """Ensure that the COCO JSON file contains the required keys."""
-        # Read data as dict
+
+        def _singularise(ky):
+            if ky != "categories":
+                return ky[:-1]
+            else:
+                return ky[:-3] + "y"
+
+        # Read file as dict
         with open(value) as file:
             data = json.load(file)
 
@@ -228,31 +235,15 @@ class ValidCOCO(ValidJSON):
         _check_keys(self.required_keys["main"], data)
 
         # Check keys in nested dicts
-        # for ky in ["images", "annotations", "categories"]
-
-        # Check keys in images dicts
-        for img_dict in data["images"]:
-            _check_keys(
-                self.required_keys["images"],
-                img_dict,
-                additional_message=f" for image dict {img_dict}",
-            )
-
-        # Check keys in annotations dicts
-        for annot_dict in data["annotations"]:
-            _check_keys(
-                self.required_keys["annotations"],
-                annot_dict,
-                additional_message=f" for annotation dict {annot_dict}",
-            )
-
-        # Check keys in categories dicts
-        for cat_dict in data["categories"]:
-            _check_keys(
-                self.required_keys["categories"],
-                cat_dict,
-                additional_message=f" for category dict {cat_dict}",
-            )
+        for ky in ["images", "annotations", "categories"]:
+            for instance_dict in data[ky]:
+                _check_keys(
+                    self.required_keys[ky],
+                    instance_dict,
+                    additional_message=(
+                        f" for {_singularise(ky)} {instance_dict}"
+                    ),
+                )
 
     @schema.validator
     def _schema_contains_required_keys(self, attribute, value):
@@ -262,19 +253,16 @@ class ValidCOCO(ValidJSON):
         # Get keys of properties dicts in schema
         properties_keys_in_schema = _extract_properties_keys(value)
 
-        # Modify required keys dict to match the schema
-        required_keys_modif = {}
-        for k, v in self.required_keys.items():
-            if k == "main":
-                required_keys_modif[""] = v
-            else:
-                required_keys_modif[f"{k.replace('_keys', '')}"] = v
-
         required_properties_keys = []
-        for ky, val in required_keys_modif.items():
-            for el in val:
+        for level, required_keys in self.required_keys.items():
+            # Prepare parent key for full key path
+            if level == "main":
+                level = ""
+
+            # Define full key path
+            for ky in required_keys:
                 required_properties_keys.append(
-                    f"{ky}/{el}" if ky else f"{el}"
+                    f"{level}/{ky}" if level else f"{ky}"
                 )
 
         # Get list of keys that are required but not in schema
@@ -299,7 +287,7 @@ def _check_keys(
     if missing_keys:
         raise ValueError(
             f"Required key(s) {sorted(missing_keys)} not "
-            f"found in {list(data_dict.keys())}{additional_message}."
+            f"found{additional_message}."
         )
 
 
