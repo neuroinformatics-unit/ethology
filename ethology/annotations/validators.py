@@ -297,26 +297,44 @@ def _extract_properties_keys(nested_dict: dict, parent_key="") -> list:
     """
     keys_in_properties_dicts = []
 
+    # list_properties_keys = ["properties", "additionalProperties"]
+
     if "type" in nested_dict:
         if "properties" in nested_dict:
-            subdict = nested_dict["properties"]
+            # # Get the subdictionary under the properties key
+            # properties_key = next(
+            #     k for k in list_properties_keys if k in nested_dict
+            # )  # ("properties" or "additionalProperties")
 
-            # add keys to list
+            properties_subdict = nested_dict["properties"]
+
+            # Check if there is a nested "properties" dict inside the current
+            # one. If so, go down one level.
+            if "properties" in properties_subdict:
+                properties_subdict = properties_subdict["properties"]
+
+            # Add keys of deepest "properties dict" to list
             keys_in_properties_dicts.extend(
-                [f"{parent_key}/{ky}" if parent_key else ky for ky in subdict]
+                [
+                    f"{parent_key}/{ky}" if parent_key else ky
+                    for ky in properties_subdict
+                ]
             )
 
-            # inspect dictionaries under properties subdict
-            for ky, val in subdict.items():
+            # Inspect non-properties dictionaries under this properties subdict
+            for ky, val in properties_subdict.items():
                 full_key = f"{parent_key}/{ky}" if parent_key else ky
-                # keys_in_properties_dicts.append(full_key)
                 keys_in_properties_dicts.extend(
                     _extract_properties_keys(val, full_key)
                 )
+
         elif "items" in nested_dict:
-            subdict = nested_dict["items"]
+            # Analyse the dictionary under the "items" key
+            properties_subdict = nested_dict["items"]
             keys_in_properties_dicts.extend(
-                _extract_properties_keys(subdict, parent_key=parent_key)
+                _extract_properties_keys(
+                    properties_subdict, parent_key=parent_key
+                )
             )
 
-    return keys_in_properties_dicts
+    return sorted(keys_in_properties_dicts)
