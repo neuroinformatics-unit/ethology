@@ -127,49 +127,85 @@ class ValidVIA(ValidJSON):
         # with the specified default
     )
 
-    # TODO: add a validator to check the schema defines types
-    # for the required keys
+    # Required keys for VIA JSON files
+    required_keys: dict = {
+        "main": ["_via_img_metadata", "_via_image_id_list"],
+        "images": ["filename", "regions"],
+        "regions": ["shape_attributes", "region_attributes"],
+        "shape_attributes": ["x", "y", "width", "height"],
+    }
 
-    # run additional validators from this class
     @path.validator
     def _file_contains_required_keys(self, attribute, value):
         """Ensure that the VIA JSON file contains the required keys."""
-        required_keys = {
-            "main": ["_via_img_metadata", "_via_image_id_list"],
-            "images_keys": ["filename", "regions"],
-            "region_keys": ["shape_attributes", "region_attributes"],
-            "shape_attributes_keys": ["x", "y", "width", "height"],
-        }
-
         # Read data as dict
         with open(value) as file:
             data = json.load(file)
 
         # Check first level keys
-        _check_keys(required_keys["main"], data)
+        _check_keys(self.required_keys["main"], data)
 
         # Check keys in nested dicts
         for img_str, img_dict in data["_via_img_metadata"].items():
             # Check keys for each image dictionary
             _check_keys(
-                required_keys["images_keys"],
+                self.required_keys["images"],
                 img_dict,
                 additional_message=f" for {img_str}",
             )
-            # Check keys for each region
+            # Check keys for each region in an image
             for i, region in enumerate(img_dict["regions"]):
+                # Check keys under first level per region
                 _check_keys(
-                    required_keys["region_keys"],
+                    self.required_keys["regions"],
                     region,
                     additional_message=f" for region {i} under {img_str}",
                 )
 
-                # Check keys under shape_attributes
+                # Check keys under "shape_attributes" per region
                 _check_keys(
-                    required_keys["shape_attributes_keys"],
+                    self.required_keys["shape_attributes"],
                     region["shape_attributes"],
                     additional_message=f" for region {i} under {img_str}",
                 )
+
+    @schema.validator
+    def _schema_contains_required_keys(
+        self, attribute, value
+    ):  # REFACTOR with coco version?
+        """Ensure that the schema includes the required keys."""
+        missing_keys = []
+
+        # Get keys of "property" dicts in schema
+        property_keys_in_schema = _extract_properties_keys(value)
+
+        # Prepare list of required "property" keys with full paths
+        map_required_to_property_keys = {
+            "main": "",
+            "images": "_via_img_metadata",
+            "regions": "_via_img_metadata/regions",
+            "shape_attributes": "_via_img_metadata/regions/shape_attributes",
+        }
+        required_property_keys = []
+        for ky, values in self.required_keys.items():
+            for val in values:
+                if ky == "main":
+                    required_property_keys.append(val)
+                else:
+                    required_property_keys.append(
+                        f"{map_required_to_property_keys[ky]}/{val}"
+                    )
+
+        # Get list of keys that are required but not in schema
+        missing_keys = set(required_property_keys) - set(
+            property_keys_in_schema
+        )
+
+        # Raise error if there are missing keys in the schema
+        if missing_keys:
+            raise ValueError(
+                f"Required key(s) {sorted(missing_keys)} not found in schema."
+            )
 
 
 @define
@@ -270,7 +306,8 @@ class ValidCOCO(ValidJSON):
         # Raise error if there are missing keys in the schema
         if missing_keys:
             raise ValueError(
-                f"Required key(s) {sorted(missing_keys)} not found in schema."
+                f"Required key(s) {sorted(missing_keys)} not found "
+                "in schema."
             )
 
 

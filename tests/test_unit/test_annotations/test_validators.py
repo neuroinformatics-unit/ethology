@@ -315,7 +315,7 @@ def test_valid_json_errors(
         ("COCO_JSON_sample_2.json", ValidCOCO),
     ],
 )
-def test_valid_via_coco(
+def test_valid_via_and_coco(
     input_file: str, validator: Callable, annotations_test_data: dict
 ):
     """Test the file-specific validators (VIA or COCO) validators with valid
@@ -343,7 +343,7 @@ def test_valid_via_coco(
         ),
     ],
 )
-def test_valid_via_coco_file_errors(
+def test_valid_via_and_coco_file_errors(
     invalid_input_file: str,
     validator: Callable,
     expected_exception: pytest.raises,
@@ -381,7 +381,7 @@ def test_valid_via_coco_file_errors(
         ),
     ],
 )
-def test_valid_via_coco_schema_errors(
+def test_valid_via_and_coco_schema_errors(
     input_file: Path,
     validator: Callable,
     expected_error_message: str,
@@ -464,6 +464,61 @@ def test_valid_via_missing_keys_in_file(
 
 
 @pytest.mark.parametrize(
+    "keys2remove",
+    [
+        {"main": ["_via_image_id_list"]},
+        {"images": ["regions"]},
+        {"regions": ["region_attributes"]},
+        {"shape_attributes": ["width", "height"]},
+    ],
+)
+def test_valid_via_missing_keys_in_schema(
+    valid_via_file_sample_1: Path,
+    keys2remove: dict,
+    monkeypatch: pytest.MonkeyPatch,
+):
+    """Test the ValidVIA validator throws an error when the schema
+    does not include a required key.
+    """
+    # Set a property dict in the schema as the base_dict
+    base_dict = VIA_SCHEMA["properties"]["_via_img_metadata"][  # type: ignore
+        "additionalProperties"
+    ]["properties"]
+
+    # Map keys in `keys2remove` to subdictionaries in the schema
+    map_key_to_subdict = {
+        "main": VIA_SCHEMA["properties"],
+        "images": base_dict,
+        "regions": base_dict["regions"]["items"]["properties"],
+        "shape_attributes": base_dict["regions"]["items"]["properties"][
+            "shape_attributes"
+        ]["properties"],
+    }
+
+    # Monkeypatch VIA_schema to define a schema with missing keys
+    for ky in keys2remove:
+        for ky_subdict in keys2remove[ky]:
+            monkeypatch.delitem(
+                map_key_to_subdict[ky],
+                ky_subdict,
+            )
+
+    # Run validation
+    with pytest.raises(ValueError) as excinfo:
+        ValidVIA(path=valid_via_file_sample_1)
+
+    # Check the error message is as expected
+    # The regexp matches any full key paths that start with the expected keys
+    # to remove
+    missing_keys_pattern = "|".join(sorted(*keys2remove.values()))
+    pattern = re.compile(
+        rf"Required key\(s\) \[.*({missing_keys_pattern}).*\] "
+        rf"not found in schema\."
+    )
+    assert re.match(pattern, str(excinfo.value))
+
+
+@pytest.mark.parametrize(
     ("expected_missing_keys, log_message"),
     [
         (
@@ -525,9 +580,9 @@ def test_valid_coco_missing_keys_in_file(
     "keys2remove",
     [
         {"main": ["images", "annotations"]},
-        {"images_keys": ["file_name"]},
-        {"annotations_keys": ["id"]},
-        {"categories_keys": ["supercategory", "name"]},
+        {"images": ["file_name"]},
+        {"annotations": ["id"]},
+        {"categories": ["supercategory", "name"]},
     ],
 )
 def test_valid_coco_missing_keys_in_schema(
@@ -544,10 +599,9 @@ def test_valid_coco_missing_keys_in_schema(
             for ky_subdict in keys2remove[ky]:
                 monkeypatch.delitem(COCO_SCHEMA["properties"], ky_subdict)
         else:
-            ky_modif = ky.replace("_keys", "")
             for ky_subdict in keys2remove[ky]:
                 monkeypatch.delitem(
-                    COCO_SCHEMA["properties"][ky_modif]["items"]["properties"],  # type: ignore
+                    COCO_SCHEMA["properties"][ky]["items"]["properties"],  # type: ignore
                     ky_subdict,
                 )
 
