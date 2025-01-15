@@ -212,9 +212,9 @@ class ValidCOCO(ValidJSON):
     # Required keys for COCO JSON files
     required_keys: dict = {
         "main": ["images", "annotations", "categories"],
-        "images_keys": ["id", "file_name"],
-        "annotations_keys": ["id", "image_id", "bbox", "category_id"],
-        "categories_keys": ["id", "name", "supercategory"],
+        "images": ["id", "file_name"],
+        "annotations": ["id", "image_id", "bbox", "category_id"],
+        "categories": ["id", "name", "supercategory"],
     }
 
     @path.validator
@@ -227,10 +227,13 @@ class ValidCOCO(ValidJSON):
         # Check first level keys
         _check_keys(self.required_keys["main"], data)
 
+        # Check keys in nested dicts
+        # for ky in ["images", "annotations", "categories"]
+
         # Check keys in images dicts
         for img_dict in data["images"]:
             _check_keys(
-                self.required_keys["images_keys"],
+                self.required_keys["images"],
                 img_dict,
                 additional_message=f" for image dict {img_dict}",
             )
@@ -238,7 +241,7 @@ class ValidCOCO(ValidJSON):
         # Check keys in annotations dicts
         for annot_dict in data["annotations"]:
             _check_keys(
-                self.required_keys["annotations_keys"],
+                self.required_keys["annotations"],
                 annot_dict,
                 additional_message=f" for annotation dict {annot_dict}",
             )
@@ -246,7 +249,7 @@ class ValidCOCO(ValidJSON):
         # Check keys in categories dicts
         for cat_dict in data["categories"]:
             _check_keys(
-                self.required_keys["categories_keys"],
+                self.required_keys["categories"],
                 cat_dict,
                 additional_message=f" for category dict {cat_dict}",
             )
@@ -255,24 +258,31 @@ class ValidCOCO(ValidJSON):
     def _schema_contains_required_keys(self, attribute, value):
         """Ensure that the schema includes the required keys."""
         missing_keys = []
-        for key, subkeys in self.required_keys.items():
-            if key == "main":
-                main_dict = value.get("properties", {})
-                for subkey in subkeys:
-                    if subkey not in main_dict:
-                        missing_keys.append(subkey)
-            else:
-                key_modif = key.replace("_keys", "")
-                nested_dict = (
-                    value.get("properties", {})
-                    .get(key_modif, {})
-                    .get("items", {})
-                    .get("properties", {})
-                )
-                for subkey in subkeys:
-                    if subkey not in nested_dict:
-                        missing_keys.append(f"{key_modif}/{subkey}")
 
+        # Get keys of properties dicts in schema
+        properties_keys_in_schema = _extract_properties_keys(value)
+
+        # Modify required keys dict to match the schema
+        required_keys_modif = {}
+        for k, v in self.required_keys.items():
+            if k == "main":
+                required_keys_modif[""] = v
+            else:
+                required_keys_modif[f"{k.replace('_keys', '')}"] = v
+
+        required_properties_keys = []
+        for ky, val in required_keys_modif.items():
+            for el in val:
+                required_properties_keys.append(
+                    f"{ky}/{el}" if ky else f"{el}"
+                )
+
+        # Get list of keys that are required but not in schema
+        missing_keys = set(required_properties_keys) - set(
+            properties_keys_in_schema
+        )
+
+        # Raise error if there are missing keys in the schema
         if missing_keys:
             raise ValueError(
                 f"Required key(s) {sorted(missing_keys)} not found in schema."
@@ -291,3 +301,31 @@ def _check_keys(
             f"Required key(s) {sorted(missing_keys)} not "
             f"found in {list(data_dict.keys())}{additional_message}."
         )
+
+
+def _extract_properties_keys(nested_dict: dict, parent_key="") -> list:
+    keys_in_properties_dicts = []  # properties dicts could be nested
+
+    if "type" in nested_dict:
+        if "properties" in nested_dict:
+            subdict = nested_dict["properties"]
+
+            # add keys to list
+            keys_in_properties_dicts.extend(
+                [f"{parent_key}/{ky}" if parent_key else ky for ky in subdict]
+            )
+
+            # inspect dictionaries under properties subdict
+            for ky, val in subdict.items():
+                full_key = f"{parent_key}/{ky}" if parent_key else ky
+                # keys_in_properties_dicts.append(full_key)
+                keys_in_properties_dicts.extend(
+                    _extract_properties_keys(val, full_key)
+                )
+        elif "items" in nested_dict:
+            subdict = nested_dict["items"]
+            keys_in_properties_dicts.extend(
+                _extract_properties_keys(subdict, parent_key=parent_key)
+            )
+
+    return keys_in_properties_dicts
