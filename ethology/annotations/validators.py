@@ -288,30 +288,36 @@ def _check_keys(
         )
 
 
-def _extract_properties_keys(nested_dict: dict, parent_key="") -> list:
+def _extract_properties_keys(input_dict: dict, parent_key="") -> list:
     """Recursively extract "properties" keys.
 
-    Recursively extract keys of all subdictionaries in nested_dict that are
+    Recursively extract keys of all subdictionaries in input_dict that are
     values to a "properties" key. The input nested_dict represents a JSON
     schema dictionary (see https://json-schema.org/understanding-json-schema/about).
+
+    The "properties" key always appears as part of a dictionary with at least
+    another key, that is "type" or "item".
     """
     keys_in_properties_dicts = []
+    property_str_options = ["properties", "additionalProperties"]
 
-    # list_properties_keys = ["properties", "additionalProperties"]
-
-    if "type" in nested_dict:
-        if "properties" in nested_dict:
-            # # Get the subdictionary under the properties key
-            # properties_key = next(
-            #     k for k in list_properties_keys if k in nested_dict
-            # )  # ("properties" or "additionalProperties")
-
-            properties_subdict = nested_dict["properties"]
+    if "type" in input_dict:
+        if any(x in input_dict for x in property_str_options):
+            # Get the subdictionary under the properties key
+            properties_subdict = input_dict[
+                next(k for k in property_str_options if k in input_dict)
+            ]
 
             # Check if there is a nested "properties" dict inside the current
             # one. If so, go down one level.
-            if "properties" in properties_subdict:
-                properties_subdict = properties_subdict["properties"]
+            if any(x in properties_subdict for x in property_str_options):
+                properties_subdict = properties_subdict[
+                    next(
+                        k
+                        for k in property_str_options
+                        if k in properties_subdict
+                    )
+                ]
 
             # Add keys of deepest "properties dict" to list
             keys_in_properties_dicts.extend(
@@ -328,9 +334,9 @@ def _extract_properties_keys(nested_dict: dict, parent_key="") -> list:
                     _extract_properties_keys(val, full_key)
                 )
 
-        elif "items" in nested_dict:
+        elif "items" in input_dict:
             # Analyse the dictionary under the "items" key
-            properties_subdict = nested_dict["items"]
+            properties_subdict = input_dict["items"]
             keys_in_properties_dicts.extend(
                 _extract_properties_keys(
                     properties_subdict, parent_key=parent_key
