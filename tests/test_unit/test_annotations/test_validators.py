@@ -407,31 +407,25 @@ def test_valid_via_coco_schema_errors(
     [
         (
             {"main": ["_via_image_id_list"]},
-            "Required key(s) ['_via_image_id_list'] not found "
-            "in ['_via_settings', '_via_img_metadata', '_via_attributes', "
-            "'_via_data_format_version'].",
+            "Required key(s) ['_via_image_id_list'] not found.",
         ),
         (
             {"main": ["_via_image_id_list", "_via_img_metadata"]},
             "Required key(s) ['_via_image_id_list', '_via_img_metadata'] "
-            "not found in ['_via_settings', '_via_attributes', "
-            "'_via_data_format_version'].",
+            "not found.",
         ),
         (
             {"image_keys": ["filename"]},
-            "Required key(s) ['filename'] not found "
-            "in ['size', 'regions', 'file_attributes'] "
-            "for {}.",
+            "Required key(s) ['filename'] not found " "for {}.",
         ),
         (
             {"region_keys": ["shape_attributes"]},
-            "Required key(s) ['shape_attributes'] not found in "
-            "['region_attributes'] for region 0 under {}.",
+            "Required key(s) ['shape_attributes'] not found "
+            "for region 0 under {}.",
         ),
         (
             {"shape_attributes_keys": ["x"]},
-            "Required key(s) ['x'] not found in "
-            "['name', 'y', 'width', 'height'] for region 0 under {}.",
+            "Required key(s) ['x'] not found for region 0 under {}.",
         ),
     ],
 )
@@ -613,6 +607,6 @@ def test_check_keys(
     if excinfo:
         missing_keys = set(required_keys) - input_data.keys()
         assert str(excinfo.value) == (
-            f"Required key(s) {sorted(missing_keys)} not "
-            f"found in {list(input_data.keys())}{expected_in_log_message}."
+            f"Required key(s) {sorted(missing_keys)} "
+            f"not found{expected_in_log_message}."
         )

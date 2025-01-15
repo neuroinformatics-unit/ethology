@@ -221,11 +221,20 @@ class ValidCOCO(ValidJSON):
     def _file_contains_required_keys(self, attribute, value):
         """Ensure that the COCO JSON file contains the required keys."""
 
-        def _singularise(ky):
-            if ky != "categories":
-                return ky[:-1]
-            else:
-                return ky[:-3] + "y"
+        def _check_nested_dicts(data, key):
+            # Helper function to singularise the input key
+            def _singularise(key):
+                return key[:-1] if key != "categories" else key[:-3] + "y"
+
+            # Check keys for each instance in the list
+            for instance_dict in data[key]:
+                _check_keys(
+                    self.required_keys[key],
+                    instance_dict,
+                    additional_message=(
+                        f" for {_singularise(key)} {instance_dict}"
+                    ),
+                )
 
         # Read file as dict
         with open(value) as file:
@@ -234,16 +243,9 @@ class ValidCOCO(ValidJSON):
         # Check first level keys
         _check_keys(self.required_keys["main"], data)
 
-        # Check keys in nested dicts
+        # Check keys in nested list of dicts
         for ky in ["images", "annotations", "categories"]:
-            for instance_dict in data[ky]:
-                _check_keys(
-                    self.required_keys[ky],
-                    instance_dict,
-                    additional_message=(
-                        f" for {_singularise(ky)} {instance_dict}"
-                    ),
-                )
+            _check_nested_dicts(data, ky)
 
     @schema.validator
     def _schema_contains_required_keys(self, attribute, value):
@@ -253,17 +255,12 @@ class ValidCOCO(ValidJSON):
         # Get keys of properties dicts in schema
         properties_keys_in_schema = _extract_properties_keys(value)
 
-        required_properties_keys = []
-        for level, required_keys in self.required_keys.items():
-            # Prepare parent key for full key path
-            if level == "main":
-                level = ""
-
-            # Define full key path
-            for ky in required_keys:
-                required_properties_keys.append(
-                    f"{level}/{ky}" if level else f"{ky}"
-                )
+        # Prepare list of required "properties" keys with full paths
+        required_properties_keys = [
+            f"{level}/{ky}" if level != "main" else ky
+            for level, required_keys in self.required_keys.items()
+            for ky in required_keys
+        ]
 
         # Get list of keys that are required but not in schema
         missing_keys = set(required_properties_keys) - set(
@@ -292,7 +289,13 @@ def _check_keys(
 
 
 def _extract_properties_keys(nested_dict: dict, parent_key="") -> list:
-    keys_in_properties_dicts = []  # properties dicts could be nested
+    """Recursively extract "properties" keys.
+
+    Recursively extract keys of all subdictionaries in nested_dict that are
+    values to a "properties" key. The input nested_dict represents a JSON
+    schema dictionary (see https://json-schema.org/understanding-json-schema/about).
+    """
+    keys_in_properties_dicts = []
 
     if "type" in nested_dict:
         if "properties" in nested_dict:
