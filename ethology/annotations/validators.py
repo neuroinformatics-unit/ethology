@@ -298,29 +298,33 @@ def _extract_properties_keys(input_dict: dict, parent_key="") -> list:
     The "properties" key always appears as part of a dictionary with at least
     another key, that is "type" or "item".
     """
-    keys_in_properties_dicts = []
-    property_str_options = ["properties", "additionalProperties"]
+    # The "property keys" are either "properties" or "additionalProperties"
+    # as they are the keys with the relevant data
+    property_keys = ["properties", "additionalProperties"]
 
+    def _contains_properties_key(input: dict):
+        """Return True if the input dictionary contains a property key."""
+        return any(x in input for x in property_keys)
+
+    def _get_properties_subdict(input: dict):
+        """Get the subdictionary under the property key."""
+        return input[next(k for k in property_keys if k in input)]
+
+    keys_of_properties_dicts = []
     if "type" in input_dict:
-        if any(x in input_dict for x in property_str_options):
+        if _contains_properties_key(input_dict):
             # Get the subdictionary under the properties key
-            properties_subdict = input_dict[
-                next(k for k in property_str_options if k in input_dict)
-            ]
+            properties_subdict = _get_properties_subdict(input_dict)
 
             # Check if there is a nested "properties" dict inside the current
             # one. If so, go down one level.
-            if any(x in properties_subdict for x in property_str_options):
-                properties_subdict = properties_subdict[
-                    next(
-                        k
-                        for k in property_str_options
-                        if k in properties_subdict
-                    )
-                ]
+            if _contains_properties_key(properties_subdict):
+                properties_subdict = _get_properties_subdict(
+                    properties_subdict
+                )
 
             # Add keys of deepest "properties dict" to list
-            keys_in_properties_dicts.extend(
+            keys_of_properties_dicts.extend(
                 [
                     f"{parent_key}/{ky}" if parent_key else ky
                     for ky in properties_subdict
@@ -330,17 +334,17 @@ def _extract_properties_keys(input_dict: dict, parent_key="") -> list:
             # Inspect non-properties dictionaries under this properties subdict
             for ky, val in properties_subdict.items():
                 full_key = f"{parent_key}/{ky}" if parent_key else ky
-                keys_in_properties_dicts.extend(
+                keys_of_properties_dicts.extend(
                     _extract_properties_keys(val, full_key)
                 )
 
         elif "items" in input_dict:
             # Analyse the dictionary under the "items" key
             properties_subdict = input_dict["items"]
-            keys_in_properties_dicts.extend(
+            keys_of_properties_dicts.extend(
                 _extract_properties_keys(
                     properties_subdict, parent_key=parent_key
                 )
             )
 
-    return sorted(keys_in_properties_dicts)
+    return sorted(keys_of_properties_dicts)

@@ -13,6 +13,7 @@ from ethology.annotations.validators import (
     ValidJSON,
     ValidVIA,
     _check_keys,
+    _extract_properties_keys,
 )
 
 
@@ -610,3 +611,65 @@ def test_check_keys(
             f"Required key(s) {sorted(missing_keys)} "
             f"not found{expected_in_log_message}."
         )
+
+
+@pytest.mark.parametrize(
+    "input_schema, expected_properties_keys",
+    [
+        (
+            VIA_SCHEMA,
+            [
+                "_via_attributes",
+                "_via_attributes/file",
+                "_via_attributes/region",
+                "_via_data_format_version",
+                "_via_image_id_list",
+                "_via_img_metadata",
+                "_via_img_metadata/file_attributes",
+                "_via_img_metadata/filename",
+                "_via_img_metadata/regions",
+                "_via_img_metadata/regions/region_attributes",
+                "_via_img_metadata/regions/shape_attributes",
+                "_via_img_metadata/regions/shape_attributes/height",
+                "_via_img_metadata/regions/shape_attributes/name",
+                "_via_img_metadata/regions/shape_attributes/width",
+                "_via_img_metadata/regions/shape_attributes/x",
+                "_via_img_metadata/regions/shape_attributes/y",
+                "_via_img_metadata/size",
+                "_via_settings",
+                "_via_settings/core",
+                "_via_settings/project",
+                "_via_settings/ui",
+            ],
+        ),
+        (
+            COCO_SCHEMA,
+            [
+                "annotations",
+                "annotations/area",
+                "annotations/bbox",
+                "annotations/category_id",
+                "annotations/id",
+                "annotations/image_id",
+                "annotations/iscrowd",
+                "categories",
+                "categories/id",
+                "categories/name",
+                "categories/supercategory",
+                "images",
+                "images/file_name",
+                "images/height",
+                "images/id",
+                "images/width",
+                "info",
+                "licenses",
+            ],
+        ),
+    ],
+)
+def test_extract_properties_keys(
+    input_schema: dict, expected_properties_keys: list
+):
+    list_keys = _extract_properties_keys(input_schema)
+
+    assert list_keys == sorted(expected_properties_keys)
