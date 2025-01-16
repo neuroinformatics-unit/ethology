@@ -7,12 +7,17 @@ Note that the schema validation only checks the type of a key
 if that key is present. It does not check for the presence of
 the keys.
 
+If the meta-schema (under $schema) is not provided, the jsonschema
+validator uses the the latest released draft of the JSON schema
+specification.
+
 References
 ----------
 - https://github.com/python-jsonschema/jsonschema
 - https://json-schema.org/understanding-json-schema/
 - https://cocodataset.org/#format-data
 - https://gitlab.com/vgg/via/-/blob/master/via-2.x.y/CodeDoc.md?ref_type=heads#description-of-via-project-json-file
+- https://python-jsonschema.readthedocs.io/en/stable/api/#jsonschema.validate
 
 """
 
@@ -20,6 +25,7 @@ References
 # format exported by VGG Image Annotator 2.x.y
 # for manual labels
 VIA_SCHEMA = {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",  # meta-schema
     "type": "object",
     "properties": {
         # settings for the browser-based UI of VIA
@@ -91,6 +97,7 @@ VIA_SCHEMA = {
 # format for object detection
 # See https://cocodataset.org/#format-data
 COCO_SCHEMA = {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",  # meta-schema
     "type": "object",
     "properties": {
         "info": {"type": "object"},

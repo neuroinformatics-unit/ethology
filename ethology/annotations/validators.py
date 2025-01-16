@@ -82,8 +82,9 @@ class ValidJSON:
             try:
                 jsonschema.validate(instance=data, schema=self.schema)
             except jsonschema.exceptions.ValidationError as val_err:
-                # forward the error message as it is quite informative
                 raise val_err
+            except jsonschema.exceptions.SchemaError as schema_err:
+                raise schema_err
 
 
 @define
@@ -172,13 +173,14 @@ class ValidVIA(ValidJSON):
     @schema.validator
     def _schema_contains_required_keys(
         self, attribute, value
-    ):  # REFACTOR with coco version?
+    ):  # REFACTOR with coco version?-------------
         """Ensure that the schema includes the required keys."""
         missing_keys = []
 
         # Get keys of "property" dicts in schema
         property_keys_in_schema = _extract_properties_keys(value)
 
+        # --------- Factor out?
         # Prepare list of required "property" keys with full paths
         map_required_to_property_keys = {
             "main": "",
@@ -195,6 +197,7 @@ class ValidVIA(ValidJSON):
                     required_property_keys.append(
                         f"{map_required_to_property_keys[ky]}/{val}"
                     )
+        # --------------------------------------------
 
         # Get list of keys that are required but not in schema
         missing_keys = set(required_property_keys) - set(
@@ -257,20 +260,9 @@ class ValidCOCO(ValidJSON):
     def _file_contains_required_keys(self, attribute, value):
         """Ensure that the COCO JSON file contains the required keys."""
 
-        def _check_nested_dicts(data, key):
+        def _singularise(key):
             # Helper function to singularise the input key
-            def _singularise(key):
-                return key[:-1] if key != "categories" else key[:-3] + "y"
-
-            # Check keys for each instance in the list
-            for instance_dict in data[key]:
-                _check_keys(
-                    self.required_keys[key],
-                    instance_dict,
-                    additional_message=(
-                        f" for {_singularise(key)} {instance_dict}"
-                    ),
-                )
+            return key[:-1] if key != "categories" else key[:-3] + "y"
 
         # Read file as dict
         with open(value) as file:
@@ -281,7 +273,14 @@ class ValidCOCO(ValidJSON):
 
         # Check keys in nested list of dicts
         for ky in ["images", "annotations", "categories"]:
-            _check_nested_dicts(data, ky)
+            for instance_dict in data[ky]:
+                _check_keys(
+                    self.required_keys[ky],
+                    instance_dict,
+                    additional_message=(
+                        f" for {_singularise(ky)} {instance_dict}"
+                    ),
+                )
 
     @schema.validator
     def _schema_contains_required_keys(self, attribute, value):
