@@ -282,6 +282,7 @@ def test_valid_json(
 
     with does_not_raise():
         from ethology.annotations.validators import ValidJSON
+
         ValidJSON(
             path=filepath,
             schema=input_schema,
@@ -352,6 +353,7 @@ def test_valid_json_invalid_inputs(
 
     with expected_exception as excinfo:
         from ethology.annotations.validators import ValidJSON
+
         ValidJSON(path=invalid_json_file, schema=input_schema)
 
     # Check that the error message contains expected string
@@ -381,6 +383,7 @@ def test_valid_json_invalid_schema(input_file, invalid_schema, request):
 
     with pytest.raises(jsonschema.exceptions.SchemaError) as excinfo:
         from ethology.annotations.validators import ValidJSON
+
         ValidJSON(
             path=input_file,
             schema=invalid_schema,
@@ -473,24 +476,25 @@ def test_valid_json_invalid_schema(input_file, invalid_schema, request):
 
 
 @pytest.mark.parametrize(
-    "input_file, valid_schema_str, invalid_schema",
+    "input_file, validator_str, valid_schema_str, invalid_schema",
     [
         (
             "valid_via_file_sample_1",
-            # ValidVIA,
+            "ValidVIA",
             "VIA_SCHEMA",
             "invalid_VIA_schema",
         ),
         (
-            "valid_via_file_sample_1",
-            # ValidVIA,
-            "VIA_SCHEMA",
-            "invalid_VIA_schema",
-        ),
-    ],
+            "valid_coco_file_sample_1",
+            "ValidCOCO",
+            "COCO_SCHEMA",
+            "invalid_COCO_schema",
+        )
+    ]
 )
 def test_valid_via_and_coco_invalid_schema(
     input_file,
+    validator_str,
     valid_schema_str,
     invalid_schema,
     request,
@@ -499,18 +503,30 @@ def test_valid_via_and_coco_invalid_schema(
     """Test the file-specific validators (VIA and COCO) throw an error when
     the schema is invalid.
     """
+    # Get the input file
     input_file = request.getfixturevalue(input_file)
-    invalid_schema = request.getfixturevalue(invalid_schema)
 
+    # Monkeypatch the schema to an invalid one
+    invalid_schema = request.getfixturevalue(invalid_schema)
     monkeypatch.setattr(
         f"ethology.annotations.json_schemas.{valid_schema_str}", invalid_schema
     )
 
+    # Run the validator
     with pytest.raises(jsonschema.exceptions.SchemaError) as excinfo:
-        # from ethology.annotations.validators import ValidVIA
-        validator_module = importlib.import_module("ethology.annotations.validators")
+        # import validator module
+        validator_module = importlib.import_module(
+            "ethology.annotations.validators"
+        )
 
-        validator_module.ValidVIA(path=input_file)
+        # force reload
+        importlib.reload(validator_module)
+
+        # get validator object
+        validator = getattr(validator_module, validator_str)
+
+        # apply validator to input file
+        validator(path=input_file)
 
     # Check the error message is as expected
     assert "is not valid under any of the given schemas" in str(excinfo.value)
@@ -567,6 +583,7 @@ def test_valid_via_missing_keys_in_file(
     # Run validation
     with pytest.raises(ValueError) as excinfo:
         from ethology.annotations.validators import ValidVIA
+
         ValidVIA(
             path=invalid_json_file,
         )
@@ -683,6 +700,7 @@ def test_valid_coco_missing_keys_in_file(
     # Run validation
     with pytest.raises(ValueError) as excinfo:
         from ethology.annotations.validators import ValidCOCO
+
         ValidCOCO(
             path=invalid_json_file,
         )
