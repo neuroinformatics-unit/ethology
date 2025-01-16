@@ -1,3 +1,4 @@
+import copy
 import json
 import re
 from collections.abc import Callable
@@ -215,6 +216,35 @@ def coco_file_sample_1_with_missing_keys(
     return _coco_json_1_file_with_missing_keys
 
 
+@pytest.fixture()
+def invalid_VIA_schema() -> dict:
+    """Return an invalid VIA schema.
+
+    Note: typos in the schema keywords are not considered violations
+    and are simply interpreted as additional keys.
+    """
+    from ethology.annotations.json_schemas import VIA_SCHEMA
+
+    invalid_VIA_schema = copy.deepcopy(VIA_SCHEMA)
+    invalid_VIA_schema["type"] = "FOO"  # invalid value for a valid keyword
+    return invalid_VIA_schema
+
+
+@pytest.fixture()
+def invalid_COCO_schema() -> dict:
+    """Return an invalid COCO schema.
+
+    Note: typos in the schema keywords are not considered violations
+    and are simply interpreted as additional keys.
+    """
+    from ethology.annotations.json_schemas import COCO_SCHEMA
+
+    invalid_COCO_schema = copy.deepcopy(COCO_SCHEMA)
+    invalid_COCO_schema["properties"]["images"]["type"] = 123
+    # "type" must be a string according to the meta-schema
+    return invalid_COCO_schema
+
+
 @pytest.mark.parametrize(
     "input_file, input_schema",
     [
@@ -314,10 +344,10 @@ def test_valid_json_invalid_inputs(
 @pytest.mark.parametrize(
     "input_file, invalid_schema",
     [
-        ("VIA_JSON_sample_1.json", "invalid_VIA_schema"),
-        ("VIA_JSON_sample_2.json", "invalid_VIA_schema"),
-        ("COCO_JSON_sample_1.json", "invalid_COCO_schema"),
-        ("COCO_JSON_sample_2.json", "invalid_COCO_schema"),
+        ("valid_via_file_sample_1", "invalid_VIA_schema"),
+        ("valid_via_file_sample_1", "invalid_VIA_schema"),
+        ("valid_coco_file_sample_1", "invalid_COCO_schema"),
+        ("valid_coco_file_sample_1", "invalid_COCO_schema"),
     ],
 )
 def test_valid_json_invalid_schema(input_file, invalid_schema, request):
@@ -334,7 +364,7 @@ def test_valid_json_invalid_schema(input_file, invalid_schema, request):
         )
 
     # Check the error message is as expected
-    assert "Invalid schema" in str(excinfo.value)
+    assert "is not valid under any of the given schemas" in str(excinfo.value)
 
 
 @pytest.mark.parametrize(

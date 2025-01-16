@@ -21,10 +21,12 @@ References
 
 """
 
+from mypy.types import JsonDict
+
 # The VIA schema corresponds to the
 # format exported by VGG Image Annotator 2.x.y
 # for manual labels
-VIA_SCHEMA = {
+VIA_SCHEMA: JsonDict = {
     "$schema": "https://json-schema.org/draft/2020-12/schema",  # meta-schema
     "type": "object",
     "properties": {
@@ -96,7 +98,7 @@ VIA_SCHEMA = {
 # The COCO schema follows the COCO dataset
 # format for object detection
 # See https://cocodataset.org/#format-data
-COCO_SCHEMA = {
+COCO_SCHEMA: JsonDict = {
     "$schema": "https://json-schema.org/draft/2020-12/schema",  # meta-schema
     "type": "object",
     "properties": {
