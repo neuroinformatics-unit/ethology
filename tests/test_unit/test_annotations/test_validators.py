@@ -45,7 +45,7 @@ def json_file_not_found_error(tmp_path: Path) -> Path:
 
 
 @pytest.fixture()
-def via_file_schema_error(
+def via_file_schema_mismatch(
     valid_via_file_sample_1: Path,
     tmp_path: Path,
 ) -> Path:
@@ -70,7 +70,7 @@ def via_file_schema_error(
 
 
 @pytest.fixture()
-def coco_file_schema_error(
+def coco_file_schema_mismatch(
     valid_coco_file_sample_1: Path,
     tmp_path: Path,
 ) -> Path:
@@ -246,51 +246,56 @@ def test_valid_json(
             "json_file_decode_error",
             None,
             pytest.raises(ValueError),
-            "Error decoding JSON data from file",
+            "Error decoding JSON data from file",  # decoding error
         ),
         (
             "json_file_not_found_error",
             None,
             pytest.raises(FileNotFoundError),
-            "File not found",
+            "File not found",  # file error
         ),
         (
             "json_file_decode_error",
             VIA_SCHEMA,  # this error should be independent of the schema
             pytest.raises(ValueError),
-            "Error decoding JSON data from file",
+            "Error decoding JSON data from file",  # decoding error
         ),
         (
             "json_file_not_found_error",
             COCO_SCHEMA,  # this error should be independent of the schema
             pytest.raises(FileNotFoundError),
-            "File not found",
+            "File not found",  # file error
         ),
         (
-            "via_file_schema_error",
+            "via_file_schema_mismatch",
             VIA_SCHEMA,
             pytest.raises(jsonschema.exceptions.ValidationError),
-            "49.5 is not of type 'integer'\n\n",
+            "49.5 is not of type 'integer'\n\n",  # schema mismatch
         ),
         (
-            "coco_file_schema_error",
+            "coco_file_schema_mismatch",
             COCO_SCHEMA,
             pytest.raises(jsonschema.exceptions.ValidationError),
             "[{'area': 432, 'bbox': [1278, 556, 16, 27], 'category_id': 1, "
             "'id': 8917, 'image_id': 199, 'iscrowd': 0}] is not of type "
-            "'object'\n\n",
+            "'object'\n\n",  # schema mismatch
         ),
     ],
 )
-def test_valid_json_errors(
+def test_valid_json_invalid_inputs(
     invalid_input_file: str,
     input_schema: dict | None,
     expected_exception: pytest.raises,
     log_message: str,
     request: pytest.FixtureRequest,
 ):
-    """Test the ValidJSON validator throws the expected errors when given
+    """Test the ValidJSON validator throws the expected errors when passed
     invalid inputs.
+
+    The invalid inputs cases covered in this test are:
+    - a JSON file that cannot be decoded
+    - a JSON file that does not exist
+    - a JSON file that does not match the given (correct) schema
     """
     invalid_json_file = request.getfixturevalue(invalid_input_file)
 
@@ -300,10 +305,36 @@ def test_valid_json_errors(
     # Check that the error message contains expected string
     assert log_message in str(excinfo.value)
 
-    # If error is not related to JSON schema, check the error message contains
+    # If error is not a schema-mismatch, check the error message contains
     # file path
     if not isinstance(excinfo.value, jsonschema.exceptions.ValidationError):
         assert invalid_json_file.name in str(excinfo.value)
+
+
+@pytest.mark.parametrize(
+    "input_file, invalid_schema",
+    [
+        ("VIA_JSON_sample_1.json", "invalid_VIA_schema"),
+        ("VIA_JSON_sample_2.json", "invalid_VIA_schema"),
+        ("COCO_JSON_sample_1.json", "invalid_COCO_schema"),
+        ("COCO_JSON_sample_2.json", "invalid_COCO_schema"),
+    ],
+)
+def test_valid_json_invalid_schema(input_file, invalid_schema, request):
+    """Test the ValidJSON validator throws an error when the schema is
+    invalid.
+    """
+    input_file = request.getfixturevalue(input_file)
+    invalid_schema = request.getfixturevalue(invalid_schema)
+
+    with pytest.raises(jsonschema.exceptions.SchemaError) as excinfo:
+        ValidJSON(
+            path=input_file,
+            schema=invalid_schema,
+        )
+
+    # Check the error message is as expected
+    assert "Invalid schema" in str(excinfo.value)
 
 
 @pytest.mark.parametrize(
@@ -341,19 +372,41 @@ def test_valid_via_and_coco(
             pytest.raises(FileNotFoundError),
             "File not found",
         ),
+        (
+            "via_file_schema_mismatch",
+            ValidVIA,
+            pytest.raises(jsonschema.exceptions.ValidationError),
+            "49.5 is not of type 'integer'",
+        ),
+        (
+            "coco_file_schema_mismatch",
+            ValidCOCO,
+            pytest.raises(jsonschema.exceptions.ValidationError),
+            "[{'area': 432, 'bbox': [1278, 556, 16, 27], 'category_id': 1, "
+            "'id': 8917, 'image_id': 199, 'iscrowd': 0}] is not of type "
+            "'object'\n\n",
+        ),
     ],
 )
-def test_valid_via_and_coco_file_errors(
+def test_valid_via_and_coco_invalid_inputs(
     invalid_input_file: str,
     validator: Callable,
     expected_exception: pytest.raises,
     log_message: str,
     request: pytest.FixtureRequest,
 ):
-    """Test the file-specific validators (VIA or COCO) validators throw
-    the expected file-related errors when given invalid input files.
+    """Test the file-specific validators (VIA or COCO) throw the expected
+    errors when passed invalid inputs.
+
+    The invalid inputs cases covered in this test are:
+    - a JSON file that cannot be decoded
+    - a JSON file that does not exist
+    - a JSON file that does not match the given (correct) schema
     """
     invalid_json_file = request.getfixturevalue(invalid_input_file)
+
+    # Check the file-specific validator throws an error for the
+    # default schema
     with expected_exception as excinfo:
         validator(path=invalid_json_file)
 
@@ -361,46 +414,37 @@ def test_valid_via_and_coco_file_errors(
     assert log_message in str(excinfo.value)
 
     # Check the error message contains file path
-    assert invalid_json_file.name in str(excinfo.value)
+    # assert invalid_json_file.name in str(excinfo.value)
+    if not isinstance(excinfo.value, jsonschema.exceptions.ValidationError):
+        assert invalid_json_file.name in str(excinfo.value)
 
 
 @pytest.mark.parametrize(
-    "input_file, validator, expected_error_message",
+    "input_file, validator, invalid_schema",
     [
-        (
-            "via_file_schema_error",
-            ValidVIA,
-            "49.5 is not of type 'integer'",
-        ),
-        (
-            "coco_file_schema_error",
-            ValidCOCO,
-            "[{'area': 432, 'bbox': [1278, 556, 16, 27], 'category_id': 1, "
-            "'id': 8917, 'image_id': 199, 'iscrowd': 0}] is not of type "
-            "'object'\n\n",
-        ),
+        ("VIA_JSON_sample_1.json", ValidVIA, "invalid_VIA_schema"),
+        ("VIA_JSON_sample_2.json", ValidVIA, "invalid_VIA_schema"),
+        ("COCO_JSON_sample_1.json", ValidCOCO, "invalid_COCO_schema"),
+        ("COCO_JSON_sample_2.json", ValidCOCO, "invalid_COCO_schema"),
     ],
 )
-def test_valid_via_and_coco_schema_errors(
-    input_file: Path,
-    validator: Callable,
-    expected_error_message: str,
-    request: pytest.FixtureRequest,
+def test_valid_via_and_coco_invalid_schema(
+    input_file, validator, invalid_schema, request
 ):
-    """Test the file-specific validators (VIA or COCO) throw an error when the
-    input does not match the expected schema.
+    """Test the file-specific validators (VIA and COCO) throw an error when
+    the schema is invalid.
     """
     input_file = request.getfixturevalue(input_file)
+    invalid_schema = request.getfixturevalue(invalid_schema)
 
-    # Check the file-specific validator throws an error for the
-    # default schema
-    with pytest.raises(jsonschema.exceptions.ValidationError) as excinfo:
+    with pytest.raises(jsonschema.exceptions.SchemaError) as excinfo:
         validator(
             path=input_file,
+            schema=invalid_schema,
         )
 
     # Check the error message is as expected
-    assert expected_error_message in str(excinfo.value)
+    assert "Invalid schema" in str(excinfo.value)
 
 
 @pytest.mark.parametrize(
