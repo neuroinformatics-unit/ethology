@@ -307,6 +307,9 @@ class ValidCOCO(ValidJSON):
             raise ValueError(
                 f"Required key(s) {sorted(missing_keys)} not found "
                 "in schema."
+                "A key may not be found correctly if the schema keywords "
+                "(such as 'properties', 'type' or 'items') are not spelt "
+                "correctly."
             )
 
 
