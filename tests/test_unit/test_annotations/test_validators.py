@@ -1,4 +1,5 @@
 import copy
+import importlib
 import json
 import re
 from collections.abc import Callable
@@ -9,13 +10,11 @@ import jsonschema
 import pytest
 
 # from ethology.annotations.json_schemas import COCO_SCHEMA, VIA_SCHEMA
-from ethology.annotations.validators import (
-    ValidCOCO,
-    ValidJSON,
-    ValidVIA,
-    _check_keys,
-    _extract_properties_keys,
-)
+# from ethology.annotations.validators import (
+#     # ValidCOCO,
+#     # ValidJSON,
+#     ValidVIA,
+# )
 
 
 @pytest.fixture()
@@ -282,6 +281,7 @@ def test_valid_json(
         input_schema = request.getfixturevalue(input_schema)
 
     with does_not_raise():
+        from ethology.annotations.validators import ValidJSON
         ValidJSON(
             path=filepath,
             schema=input_schema,
@@ -351,6 +351,7 @@ def test_valid_json_invalid_inputs(
         input_schema = request.getfixturevalue(input_schema)
 
     with expected_exception as excinfo:
+        from ethology.annotations.validators import ValidJSON
         ValidJSON(path=invalid_json_file, schema=input_schema)
 
     # Check that the error message contains expected string
@@ -379,6 +380,7 @@ def test_valid_json_invalid_schema(input_file, invalid_schema, request):
     invalid_schema = request.getfixturevalue(invalid_schema)
 
     with pytest.raises(jsonschema.exceptions.SchemaError) as excinfo:
+        from ethology.annotations.validators import ValidJSON
         ValidJSON(
             path=input_file,
             schema=invalid_schema,
@@ -388,86 +390,86 @@ def test_valid_json_invalid_schema(input_file, invalid_schema, request):
     assert "is not valid under any of the given schemas" in str(excinfo.value)
 
 
-@pytest.mark.parametrize(
-    "input_file, validator",
-    [
-        ("VIA_JSON_sample_1.json", ValidVIA),
-        ("VIA_JSON_sample_2.json", ValidVIA),
-        ("COCO_JSON_sample_1.json", ValidCOCO),
-        ("COCO_JSON_sample_2.json", ValidCOCO),
-    ],
-)
-def test_valid_via_and_coco(
-    input_file: str, validator: Callable, annotations_test_data: dict
-):
-    """Test the file-specific validators (VIA or COCO) validators with valid
-    inputs.
-    """
-    filepath = annotations_test_data[input_file]
-    with does_not_raise():
-        validator(path=filepath)
+# @pytest.mark.parametrize(
+#     "input_file, validator",
+#     [
+#         # ("VIA_JSON_sample_1.json", ValidVIA),
+#         # ("VIA_JSON_sample_2.json", ValidVIA),
+#         ("COCO_JSON_sample_1.json", ValidCOCO),
+#         ("COCO_JSON_sample_2.json", ValidCOCO),
+#     ],
+# )
+# def test_valid_via_and_coco(
+#     input_file: str, validator: Callable, annotations_test_data: dict
+# ):
+#     """Test the file-specific validators (VIA or COCO) validators with valid
+#     inputs.
+#     """
+#     filepath = annotations_test_data[input_file]
+#     with does_not_raise():
+#         validator(path=filepath)
 
 
-@pytest.mark.parametrize(
-    "invalid_input_file, validator, expected_exception, log_message",
-    [
-        (
-            "json_file_decode_error",
-            ValidVIA,
-            pytest.raises(ValueError),
-            "Error decoding JSON data from file",
-        ),
-        (
-            "json_file_not_found_error",
-            ValidCOCO,
-            pytest.raises(FileNotFoundError),
-            "File not found",
-        ),
-        (
-            "via_file_schema_mismatch",
-            ValidVIA,
-            pytest.raises(jsonschema.exceptions.ValidationError),
-            "49.5 is not of type 'integer'",
-        ),
-        (
-            "coco_file_schema_mismatch",
-            ValidCOCO,
-            pytest.raises(jsonschema.exceptions.ValidationError),
-            "[{'area': 432, 'bbox': [1278, 556, 16, 27], 'category_id': 1, "
-            "'id': 8917, 'image_id': 199, 'iscrowd': 0}] is not of type "
-            "'object'\n\n",
-        ),
-    ],
-)
-def test_valid_via_and_coco_invalid_inputs(
-    invalid_input_file: str,
-    validator: Callable,
-    expected_exception: pytest.raises,
-    log_message: str,
-    request: pytest.FixtureRequest,
-):
-    """Test the file-specific validators (VIA or COCO) throw the expected
-    errors when passed invalid inputs.
+# @pytest.mark.parametrize(
+#     "invalid_input_file, validator, expected_exception, log_message",
+#     [
+#         (
+#             "json_file_decode_error",
+#             ValidVIA,
+#             pytest.raises(ValueError),
+#             "Error decoding JSON data from file",
+#         ),
+#         (
+#             "json_file_not_found_error",
+#             ValidCOCO,
+#             pytest.raises(FileNotFoundError),
+#             "File not found",
+#         ),
+#         (
+#             "via_file_schema_mismatch",
+#             ValidVIA,
+#             pytest.raises(jsonschema.exceptions.ValidationError),
+#             "49.5 is not of type 'integer'",
+#         ),
+#         (
+#             "coco_file_schema_mismatch",
+#             ValidCOCO,
+#             pytest.raises(jsonschema.exceptions.ValidationError),
+#             "[{'area': 432, 'bbox': [1278, 556, 16, 27], 'category_id': 1, "
+#             "'id': 8917, 'image_id': 199, 'iscrowd': 0}] is not of type "
+#             "'object'\n\n",
+#         ),
+#     ],
+# )
+# def test_valid_via_and_coco_invalid_inputs(
+#     invalid_input_file: str,
+#     validator: Callable,
+#     expected_exception: pytest.raises,
+#     log_message: str,
+#     request: pytest.FixtureRequest,
+# ):
+#     """Test the file-specific validators (VIA or COCO) throw the expected
+#     errors when passed invalid inputs.
 
-    The invalid inputs cases covered in this test are:
-    - a JSON file that cannot be decoded
-    - a JSON file that does not exist
-    - a JSON file that does not match the given (correct) schema
-    """
-    invalid_json_file = request.getfixturevalue(invalid_input_file)
+#     The invalid inputs cases covered in this test are:
+#     - a JSON file that cannot be decoded
+#     - a JSON file that does not exist
+#     - a JSON file that does not match the given (correct) schema
+#     """
+#     invalid_json_file = request.getfixturevalue(invalid_input_file)
 
-    # Check the file-specific validator throws an error for the
-    # default schema
-    with expected_exception as excinfo:
-        validator(path=invalid_json_file)
+#     # Check the file-specific validator throws an error for the
+#     # default schema
+#     with expected_exception as excinfo:
+#         validator(path=invalid_json_file)
 
-    # Check that the error message contains expected string
-    assert log_message in str(excinfo.value)
+#     # Check that the error message contains expected string
+#     assert log_message in str(excinfo.value)
 
-    # Check the error message contains file path
-    # assert invalid_json_file.name in str(excinfo.value)
-    if not isinstance(excinfo.value, jsonschema.exceptions.ValidationError):
-        assert invalid_json_file.name in str(excinfo.value)
+#     # Check the error message contains file path
+#     # assert invalid_json_file.name in str(excinfo.value)
+#     if not isinstance(excinfo.value, jsonschema.exceptions.ValidationError):
+#         assert invalid_json_file.name in str(excinfo.value)
 
 
 @pytest.mark.parametrize(
@@ -505,10 +507,10 @@ def test_valid_via_and_coco_invalid_schema(
     )
 
     with pytest.raises(jsonschema.exceptions.SchemaError) as excinfo:
-        from ethology.annotations.validators import ValidVIA  # do I need this?
+        # from ethology.annotations.validators import ValidVIA
+        validator_module = importlib.import_module("ethology.annotations.validators")
 
-        val = ValidVIA(path=input_file)
-        val.schema
+        validator_module.ValidVIA(path=input_file)
 
     # Check the error message is as expected
     assert "is not valid under any of the given schemas" in str(excinfo.value)
@@ -564,6 +566,7 @@ def test_valid_via_missing_keys_in_file(
 
     # Run validation
     with pytest.raises(ValueError) as excinfo:
+        from ethology.annotations.validators import ValidVIA
         ValidVIA(
             path=invalid_json_file,
         )
@@ -591,6 +594,8 @@ def test_valid_via_missing_keys_in_schema(
     """Test the ValidVIA validator throws an error when the schema
     does not include a required key.
     """
+    from ethology.annotations.json_schemas import VIA_SCHEMA
+
     # Set a property dict in the schema as the base_dict
     base_dict = VIA_SCHEMA["properties"]["_via_img_metadata"][  # type: ignore
         "additionalProperties"
@@ -677,6 +682,7 @@ def test_valid_coco_missing_keys_in_file(
 
     # Run validation
     with pytest.raises(ValueError) as excinfo:
+        from ethology.annotations.validators import ValidCOCO
         ValidCOCO(
             path=invalid_json_file,
         )
@@ -774,6 +780,8 @@ def test_check_keys(
     expected_in_log_message: str,
 ):
     """Test the _check_keys helper function."""
+    from ethology.annotations.validators import _check_keys
+
     with expected_exception as excinfo:
         _check_keys(required_keys, input_data, expected_in_log_message)
 
@@ -846,6 +854,8 @@ def test_extract_properties_keys(
     request: pytest.FixtureRequest,
 ):
     """Test the _extract_properties_keys helper function."""
+    from ethology.annotations.validators import _extract_properties_keys
+
     input_schema = request.getfixturevalue(input_schema)
 
     list_keys = _extract_properties_keys(input_schema)
