@@ -9,7 +9,25 @@ import jsonschema.exceptions
 import jsonschema.validators
 from attrs import define, field, validators
 
-from ethology.annotations.json_schemas import COCO_SCHEMA, VIA_SCHEMA
+
+def get_default_via_schema() -> dict:
+    """Read a VIA schema file."""
+    via_schema_path = (
+        Path(__file__).parent / "json_schemas" / "via_schema.json"
+    )
+    with open(via_schema_path) as file:
+        via_schema_dict = json.load(file)
+    return via_schema_dict
+
+
+def get_default_coco_schema() -> dict:
+    """Read a COCO schema file."""
+    coco_schema_path = (
+        Path(__file__).parent / "json_schemas" / "coco_schema.json"
+    )
+    with open(coco_schema_path) as file:
+        coco_schema_dict = json.load(file)
+    return coco_schema_dict
 
 
 @define
@@ -122,7 +140,7 @@ class ValidVIA(ValidJSON):
     # Run the parent's validator on the hardcoded schema
     schema: dict = field(
         validator=attrs.fields(ValidJSON).schema.validator,  # type: ignore
-        default=VIA_SCHEMA,
+        default=get_default_via_schema(),
         init=False,
         # init=False makes the attribute to be unconditionally initialized
         # with the specified default
@@ -242,7 +260,7 @@ class ValidCOCO(ValidJSON):
     # Run the parent's validator on the hardcoded schema
     schema: dict = field(
         validator=attrs.fields(ValidJSON).schema.validator,  # type: ignore
-        default=COCO_SCHEMA,
+        default=get_default_coco_schema(),
         init=False,
         # init=False makes the attribute to be unconditionally initialized
         # with the specified default

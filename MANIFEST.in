@@ -6,3 +6,7 @@ recursive-exclude * __pycache__
 recursive-exclude * *.py[co]
 recursive-exclude docs *
 recursive-exclude tests *
+
+# Include json schemas
+recursive-include ethology *.json
+recursive-include ethology *.md
