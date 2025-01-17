@@ -239,6 +239,49 @@ def test_valid_via(input_file: str, annotations_test_data: dict):
 
 
 @pytest.mark.parametrize(
+    "invalid_input_file, expected_exception, log_message",
+    [
+        (
+            "json_file_decode_error",
+            pytest.raises(ValueError),
+            "Error decoding JSON data from file",
+        ),
+        (
+            "json_file_not_found_error",
+            pytest.raises(FileNotFoundError),
+            "File not found",
+        ),
+        (
+            "via_file_schema_mismatch",
+            pytest.raises(jsonschema.exceptions.ValidationError),
+            "'49' is not of type 'integer'",
+        ),
+    ],
+)
+def test_valid_via_invalid_inputs(
+    invalid_input_file: str,
+    expected_exception: pytest.raises,
+    log_message: str,
+    request: pytest.FixtureRequest,
+):
+    """Test the VIA validator throwS the expected errors when passed invalid
+    inputs.
+    """
+    invalid_json_file = request.getfixturevalue(invalid_input_file)
+
+    with expected_exception as excinfo:
+        ValidVIA(path=invalid_json_file)
+
+    # Check that the error message contains expected string
+    assert log_message in str(excinfo.value)
+
+    # Check the error message contains file path
+    # assert invalid_json_file.name in str(excinfo.value)
+    if not isinstance(excinfo.value, jsonschema.exceptions.ValidationError):
+        assert invalid_json_file.name in str(excinfo.value)
+
+
+@pytest.mark.parametrize(
     "input_file",
     [
         "COCO_JSON_sample_1.json",
