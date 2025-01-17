@@ -6,7 +6,9 @@ import jsonschema
 import pytest
 
 from ethology.annotations.validators import (
+    ValidCOCO,
     ValidJSON,
+    ValidVIA,
     get_default_coco_schema,
     get_default_via_schema,
 )
@@ -220,3 +222,32 @@ def test_valid_json_invalid_schema(
 
     # Check the error message is as expected
     assert "is not valid under any of the given schemas" in str(excinfo.value)
+
+
+@pytest.mark.parametrize(
+    "input_file,",
+    [
+        "VIA_JSON_sample_1.json",
+        "VIA_JSON_sample_2.json",
+    ],
+)
+def test_valid_via(input_file: str, annotations_test_data: dict):
+    """Test the VIA validator with valid inputs."""
+    filepath = annotations_test_data[input_file]
+    with does_not_raise():
+        ValidVIA(path=filepath)
+
+
+@pytest.mark.parametrize(
+    "input_file",
+    [
+        "COCO_JSON_sample_1.json",
+        "COCO_JSON_sample_2.json",
+    ],
+)
+def test_valid_coco(input_file: str, annotations_test_data: dict):
+    """Test the COCO validator with valid inputs."""
+    filepath = annotations_test_data[input_file]
+    with does_not_raise():
+        # run the validator
+        ValidCOCO(path=filepath)
