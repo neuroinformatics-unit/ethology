@@ -166,7 +166,7 @@ def test_valid_json(
         ),
     ],
 )
-def test_valid_json_invalid_inputs(
+def test_valid_json_invalid_files(
     invalid_input_file: str,
     input_schema: dict | None,
     expected_exception: pytest.raises,
@@ -258,7 +258,7 @@ def test_valid_via(input_file: str, annotations_test_data: dict):
         ),
     ],
 )
-def test_valid_via_invalid_inputs(
+def test_valid_via_invalid_files(
     invalid_input_file: str,
     expected_exception: pytest.raises,
     log_message: str,
