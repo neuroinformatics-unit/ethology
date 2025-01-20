@@ -1,30 +1,39 @@
 import json
 from contextlib import nullcontext as does_not_raise
 from pathlib import Path
+from unittest.mock import Mock
 
 import jsonschema
 import pytest
 
-from ethology.annotations.validators import (
-    ValidCOCO,
-    ValidJSON,
-    ValidVIA,
-    get_default_coco_schema,
-    get_default_via_schema,
-)
+from ethology.annotations.validators import ValidCOCO, ValidJSON, ValidVIA
 
 
 # Schema fixtures
 @pytest.fixture()
-def invalid_via_schema() -> dict:
-    invalid_VIA_schema = get_default_via_schema().copy()
+def valid_via_schema() -> dict:
+    from ethology.annotations.json_schemas.utils import get_default_via_schema
+
+    return get_default_via_schema()
+
+
+@pytest.fixture()
+def invalid_via_schema(valid_via_schema) -> dict:
+    invalid_VIA_schema = valid_via_schema.copy()
     invalid_VIA_schema["type"] = "FOO"
     return invalid_VIA_schema
 
 
 @pytest.fixture()
-def invalid_coco_schema() -> dict:
-    invalid_COCO_schema = get_default_coco_schema().copy()
+def valid_coco_schema() -> dict:
+    from ethology.annotations.json_schemas.utils import get_default_coco_schema
+
+    return get_default_coco_schema()
+
+
+@pytest.fixture()
+def invalid_coco_schema(valid_coco_schema) -> dict:
+    invalid_COCO_schema = valid_coco_schema.copy()
     invalid_COCO_schema["properties"]["images"]["type"] = 123
     return invalid_COCO_schema
 
@@ -101,22 +110,26 @@ def coco_file_schema_mismatch(
     "input_file, input_schema",
     [
         ("VIA_JSON_sample_1.json", None),
-        ("VIA_JSON_sample_1.json", get_default_via_schema()),
+        ("VIA_JSON_sample_1.json", "valid_via_schema"),
         ("COCO_JSON_sample_1.json", None),
-        ("COCO_JSON_sample_1.json", get_default_coco_schema()),
+        ("COCO_JSON_sample_1.json", "valid_coco_schema"),
         ("VIA_JSON_sample_2.json", None),
-        ("VIA_JSON_sample_2.json", get_default_via_schema()),
+        ("VIA_JSON_sample_2.json", "valid_via_schema"),
         ("COCO_JSON_sample_2.json", None),
-        ("COCO_JSON_sample_2.json", get_default_coco_schema()),
+        ("COCO_JSON_sample_2.json", "valid_coco_schema"),
     ],
 )
 def test_valid_json(
     input_file: str,
     input_schema: dict | None,
     annotations_test_data: dict,
+    request: pytest.FixtureRequest,
 ):
     """Test the ValidJSON validator with valid inputs."""
     filepath = annotations_test_data[input_file]
+
+    if input_schema:
+        input_schema = request.getfixturevalue(input_schema)
 
     with does_not_raise():
         ValidJSON(
@@ -136,7 +149,7 @@ def test_valid_json(
         ),
         (
             "json_file_decode_error",
-            get_default_via_schema(),  # with schema
+            "valid_via_schema",  # with schema
             pytest.raises(ValueError),
             "Error decoding JSON data from file",  # decoding error with schema
         ),
@@ -148,19 +161,19 @@ def test_valid_json(
         ),
         (
             "json_file_not_found_error",
-            get_default_via_schema(),  # with schema
+            "valid_via_schema",  # with schema
             pytest.raises(FileNotFoundError),
             "File not found",  # file error with schema
         ),
         (
             "via_file_schema_mismatch",
-            get_default_via_schema(),
+            "valid_via_schema",
             pytest.raises(jsonschema.exceptions.ValidationError),
             "'49' is not of type 'integer'\n\n",  # file does not match schema
         ),
         (
             "coco_file_schema_mismatch",
-            get_default_coco_schema(),
+            "valid_coco_schema",
             pytest.raises(jsonschema.exceptions.ValidationError),
             "3 is not of type 'object'\n\n",  # file does not match schema
         ),
@@ -182,6 +195,9 @@ def test_valid_json_invalid_files(
     - a JSON file that does not match the given (correct) schema
     """
     invalid_json_file = request.getfixturevalue(invalid_input_file)
+
+    if input_schema:
+        input_schema = request.getfixturevalue(input_schema)
 
     with expected_exception as excinfo:
         ValidJSON(
@@ -279,6 +295,248 @@ def test_valid_via_invalid_files(
     # assert invalid_json_file.name in str(excinfo.value)
     if not isinstance(excinfo.value, jsonschema.exceptions.ValidationError):
         assert invalid_json_file.name in str(excinfo.value)
+
+
+# Schema fixtures
+# @pytest.fixture()
+# def mock_get_default_via_schema(
+#     # valid_via_schema,
+#     monkeypatch: pytest.MonkeyPatch,
+# ) -> dict:
+#     """Mock get_default_via_schema() to return an invalid schema."""
+#     # Define invalid schema
+#     # invalid_VIA_schema = copy.deepcopy(valid_via_schema)
+#     invalid_VIA_schema = {
+#         "$schema": "https://json-schema.org/draft/2020-12/schema",
+#         "type": "object",
+#         "properties": {
+#             "_via_settings": {
+#                 "type": "object",
+#                 "properties": {
+#                     "ui": {
+#                         "type": "object"
+#                     },
+#                     "core": {
+#                         "type": "object"
+#                     },
+#                     "project": {
+#                         "type": "object"
+#                     }
+#                 }
+#             },
+#             "_via_img_metadata": {
+#                 "type": "object",
+#                 "additionalProperties": {
+#                     "type": "object",
+#                     "properties": {
+#                         "filename": {
+#                             "type": "string"
+#                         },
+#                         "size": {
+#                             "type": "integer"
+#                         },
+#                         "regions": {
+#                             "type": "array",
+#                             "items": {
+#                                 "type": "object",
+#                                 "properties": {
+#                                     "shape_attributes": {
+#                                         "type": "object",
+#                                         "properties": {
+#                                             "name": {
+#                                                 "type": "string"
+#                                             },
+#                                             "x": {
+#                                                 "type": "integer"
+#                                             },
+#                                             "y": {
+#                                                 "type": "integer"
+#                                             },
+#                                             "width": {
+#                                                 "type": "integer"
+#                                             },
+#                                             "height": {
+#                                                 "type": "integer"
+#                                             }
+#                                         }
+#                                     },
+#                                     "region_attributes": {
+#                                         "type": "object"
+#                                     }
+#                                 }
+#                             }
+#                         },
+#                         "file_attributes": {
+#                             "type": "object"
+#                         }
+#                     }
+#                 }
+#             },
+#             "_via_image_id_list": {
+#                 "type": "array",
+#                 "items": {
+#                     "type": "string"
+#                 }
+#             },
+#             "_via_attributes": {
+#                 "type": "object",
+#                 "properties": {
+#                     "region": {
+#                         "type": "object"
+#                     },
+#                     "file": {
+#                         "type": "object"
+#                     }
+#                 }
+#             },
+#             "_via_data_format_version": {
+#                 "type": "string"
+#             }
+#         }
+#     }
+#     invalid_VIA_schema["type"] = "FOO"
+
+#     def get_invalid_via_schema():
+#         return invalid_VIA_schema
+
+#     monkeypatch.setattr(
+#         # "ethology.annotations.json_schemas.utils.get_default_via_schema",
+#         "ethology.annotations.validators.get_default_via_schema",
+#         # "ethology.annotations.validators.get_default_via_schema",
+#         # "tests.test_unit.test_annotations.test_validators.get_default_via_schema",
+#         get_invalid_via_schema,
+#     )
+
+#     return invalid_VIA_schema
+
+
+@pytest.fixture
+def mock_get_default_via_schema(monkeypatch):
+    # def mock_schema():
+    #     inv_schema = {
+    #         "$schema": "https://json-schema.org/draft/2020-12/schema",
+    #         "type": "FOO",
+    #         "properties": {
+    #             "_via_settings": {
+    #                 "type": "object",
+    #                 "properties": {
+    #                     "ui": {
+    #                         "type": "object"
+    #                     },
+    #                     "core": {
+    #                         "type": "object"
+    #                     },
+    #                     "project": {
+    #                         "type": "object"
+    #                     }
+    #                 }
+    #             },
+    #             "_via_img_metadata": {
+    #                 "type": "object",
+    #                 "additionalProperties": {
+    #                     "type": "object",
+    #                     "properties": {
+    #                         "filename": {
+    #                             "type": "string"
+    #                         },
+    #                         "size": {
+    #                             "type": "integer"
+    #                         },
+    #                         "regions": {
+    #                             "type": "array",
+    #                             "items": {
+    #                                 "type": "object",
+    #                                 "properties": {
+    #                                     "shape_attributes": {
+    #                                         "type": "object",
+    #                                         "properties": {
+    #                                             "name": {
+    #                                                 "type": "string"
+    #                                             },
+    #                                             "x": {
+    #                                                 "type": "integer"
+    #                                             },
+    #                                             "y": {
+    #                                                 "type": "integer"
+    #                                             },
+    #                                             "width": {
+    #                                                 "type": "integer"
+    #                                             },
+    #                                             "height": {
+    #                                                 "type": "integer"
+    #                                             }
+    #                                         }
+    #                                     },
+    #                                     "region_attributes": {
+    #                                         "type": "object"
+    #                                     }
+    #                                 }
+    #                             }
+    #                         },
+    #                         "file_attributes": {
+    #                             "type": "object"
+    #                         }
+    #                     }
+    #                 }
+    #             },
+    #             "_via_image_id_list": {
+    #                 "type": "array",
+    #                 "items": {
+    #                     "type": "string"
+    #                 }
+    #             },
+    #             "_via_attributes": {
+    #                 "type": "object",
+    #                 "properties": {
+    #                     "region": {
+    #                         "type": "object"
+    #                     },
+    #                     "file": {
+    #                         "type": "object"
+    #                     }
+    #                 }
+    #             },
+    #             "_via_data_format_version": {
+    #                 "type": "string"
+    #             }
+    #         }
+    #     }
+    #     return inv_schema
+
+    mock_schema = Mock()
+    monkeypatch.setattr(
+        "ethology.annotations.validators.get_default_via_schema",
+        mock_schema,
+        # "get_default_via_schema", mock_schema
+    )
+    return mock_schema
+
+
+@pytest.mark.parametrize(
+    "input_file,",
+    [
+        "VIA_JSON_sample_1.json",
+        "VIA_JSON_sample_2.json",
+    ],
+)
+def test_valid_via_invalid_schema(
+    input_file: str,
+    annotations_test_data: dict,
+    mock_get_default_via_schema: pytest.fixture,
+):
+    """Test the file-specific validators (VIA and COCO) throw an error when
+    the schema is invalid.
+    """
+    filepath = annotations_test_data[input_file]
+
+    # with pytest.raises(jsonschema.exceptions.SchemaError) as excinfo:
+    #     ValidVIA(path=filepath)
+    ValidVIA(path=filepath)
+
+    mock_get_default_via_schema.assert_called_once()
+
+    # Check the error message is as expected
+    # assert "is not valid under any of the given schemas" in str(excinfo.value)
 
 
 @pytest.mark.parametrize(
