@@ -9,25 +9,10 @@ import jsonschema.exceptions
 import jsonschema.validators
 from attrs import define, field, validators
 
-
-def get_default_via_schema() -> dict:
-    """Read a VIA schema file."""
-    via_schema_path = (
-        Path(__file__).parent / "json_schemas" / "via_schema.json"
-    )
-    with open(via_schema_path) as file:
-        via_schema_dict = json.load(file)
-    return via_schema_dict
-
-
-def get_default_coco_schema() -> dict:
-    """Read a COCO schema file."""
-    coco_schema_path = (
-        Path(__file__).parent / "json_schemas" / "coco_schema.json"
-    )
-    with open(coco_schema_path) as file:
-        coco_schema_dict = json.load(file)
-    return coco_schema_dict
+from ethology.annotations.json_schemas.utils import (
+    get_default_coco_schema,
+    get_default_via_schema,
+)
 
 
 @define
