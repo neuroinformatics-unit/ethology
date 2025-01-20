@@ -60,7 +60,7 @@ def pooch_registry() -> pooch.Pooch:
 
 
 @pytest.fixture()
-def get_paths_test_data() -> Callable[[dict, str], dict]:
+def get_paths_test_data() -> Callable[[dict, str], dict[str, Path]]:
     """Get paths of the test data files under a specific subdirectory in the
     GIN repository.
 
