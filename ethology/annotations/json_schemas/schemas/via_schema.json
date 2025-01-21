@@ -1,0 +1,88 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "properties": {
+        "_via_settings": {
+            "type": "object",
+            "properties": {
+                "ui": {
+                    "type": "object"
+                },
+                "core": {
+                    "type": "object"
+                },
+                "project": {
+                    "type": "object"
+                }
+            }
+        },
+        "_via_img_metadata": {
+            "type": "object",
+            "additionalProperties": {
+                "type": "object",
+                "properties": {
+                    "filename": {
+                        "type": "string"
+                    },
+                    "size": {
+                        "type": "integer"
+                    },
+                    "regions": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "shape_attributes": {
+                                    "type": "object",
+                                    "properties": {
+                                        "name": {
+                                            "type": "string"
+                                        },
+                                        "x": {
+                                            "type": "integer"
+                                        },
+                                        "y": {
+                                            "type": "integer"
+                                        },
+                                        "width": {
+                                            "type": "integer"
+                                        },
+                                        "height": {
+                                            "type": "integer"
+                                        }
+                                    }
+                                },
+                                "region_attributes": {
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "file_attributes": {
+                        "type": "object"
+                    }
+                }
+            }
+        },
+        "_via_image_id_list": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
+        },
+        "_via_attributes": {
+            "type": "object",
+            "properties": {
+                "region": {
+                    "type": "object"
+                },
+                "file": {
+                    "type": "object"
+                }
+            }
+        },
+        "_via_data_format_version": {
+            "type": "string"
+        }
+    }
+}
