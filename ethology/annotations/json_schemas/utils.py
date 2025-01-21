@@ -8,7 +8,7 @@ import jsonschema.exceptions
 
 
 def _get_default_VIA_schema() -> dict:
-    """Read a VIA schema file."""
+    """Get the VIA schema as a dictionary."""
     via_schema_path = Path(__file__).parent / "schemas" / "via_schema.json"
     with open(via_schema_path) as file:
         via_schema_dict = json.load(file)
@@ -16,7 +16,7 @@ def _get_default_VIA_schema() -> dict:
 
 
 def _get_default_COCO_schema() -> dict:
-    """Read a COCO schema file."""
+    """Get the COCO schema file as a dictionary."""
     coco_schema_path = Path(__file__).parent / "schemas" / "coco_schema.json"
     with open(coco_schema_path) as file:
         coco_schema_dict = json.load(file)
@@ -24,32 +24,32 @@ def _get_default_COCO_schema() -> dict:
 
 
 def _check_file_is_json(filepath: Path):
-    """Ensure that the file is a JSON file."""
+    """Check the input file can be read as a JSON."""
     try:
         with open(filepath) as file:
             json.load(file)
-    except FileNotFoundError as not_found_error:
-        raise FileNotFoundError(
-            f"File not found: {filepath}."
-        ) from not_found_error
     except json.JSONDecodeError as decode_error:
+        # We override the error message for clarity
         raise ValueError(
-            f"Error decoding JSON data from file: {filepath}."
+            f"Error decoding JSON data from file: {filepath}. "
+            "The data being deserialized is not a valid JSON. "
         ) from decode_error
+    except Exception as error:
+        raise error
 
 
-def _check_file_matches_schema(filepath: Path, schema: dict):
-    """Ensure that the JSON file matches the expected schema.
+def _check_file_matches_schema(filepath: Path, schema: dict | None):
+    """Ensure that the input JSON file matches the given schema.
 
     The schema validation only checks the type for each specified
     key if the key exists. It does not check that the keys in the
     schema are present in the JSON file.
     """
-    # read json file
+    # Read json file
     with open(filepath) as file:
         data = json.load(file)
 
-    # check against schema if provided
+    # Check against schema if provided
     if schema:
         try:
             jsonschema.validate(instance=data, schema=schema)
@@ -62,7 +62,7 @@ def _check_file_matches_schema(filepath: Path, schema: dict):
 def _check_required_properties_keys(
     required_properties_keys: list, schema: dict
 ):
-    """Ensure that the input schema includes the required "properties" keys."""
+    """Ensure the input schema includes the required "properties" keys."""
     # Get keys of "properties" dictionaries in schema
     properties_keys_in_schema = _extract_properties_keys(schema)
 
@@ -87,8 +87,8 @@ def _check_required_keys_in_dict(
     data: dict,
     additional_message: str = "",
 ):
-    """Check if the required keys are present in the input data_dict."""
-    missing_keys = set(list_required_keys) - data.keys()
+    """Check if the required keys are present in the input dictionary."""
+    missing_keys = set(list_required_keys) - set(data.keys())
     if missing_keys:
         raise ValueError(
             f"Required key(s) {sorted(missing_keys)} not "

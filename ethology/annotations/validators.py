@@ -58,6 +58,7 @@ class ValidVIA:
         init=False,
     )
 
+    # Note: the validators are applied in order
     @path.validator
     def _file_is_json(self, attribute, value):
         _check_file_is_json(value)
@@ -146,6 +147,7 @@ class ValidCOCO:
         init=False,
     )
 
+    # Note: the validators are applied in order
     @path.validator
     def _file_is_json(self, attribute, value):
         _check_file_is_json(value)
