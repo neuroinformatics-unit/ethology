@@ -18,13 +18,61 @@ STANDARD_BBOXES_COLUMNS = [
     "height",
     "supercategory",
     "category",
-]
+]  # defines minimum columns?
 
 
 def df_bboxes_from_file(
-    file_path: Path, format: Literal["VIA", "COCO"]
+    file_path: Path | list[Path],
+    format: Literal["VIA", "COCO"],
+    **kwargs,
 ) -> pd.DataFrame:
     """Read bounding boxes annotations as a dataframe.
+
+    Parameters
+    ----------
+    file_path : Path | list[Path]
+        Path to the input annotations file or a list of paths.
+    format : Literal["VIA", "COCO"]
+        Format of the input annotations file.
+    **kwargs
+        Additional keyword arguments to pass to the
+        pandas.DataFrame.drop_duplicates method. The ignore_index=True
+        argument is always applied to force an index reset.
+
+    Returns
+    -------
+    pd.DataFrame
+        Bounding boxes annotations dataframe. The dataframe has the
+        following columns: "annotation_id", "image_filename", "image_id",
+        "x_min", "y_min", "width", "height", "supercategory", "category".
+
+    See Also
+    --------
+    pandas.concat : Concatenate pandas objects along a particular axis.
+    pandas.DataFrame.drop_duplicates : Return DataFrame with duplicate rows
+    removed.
+
+    """
+    if isinstance(file_path, list):
+        # Conactenate files
+        df_list = []
+        for file in file_path:
+            df = _df_bboxes_from_single_file(file, format=format)
+            df_list.append(df)
+        df_all = pd.concat(df_list)
+
+        # Remove duplicates
+        # ignore_index=True is used to force an index reset
+        return df_all.drop_duplicates(ignore_index=True, **kwargs)
+    else:
+        # Read single VIA file
+        return _df_bboxes_from_single_file(file_path, format=format)
+
+
+def _df_bboxes_from_single_file(
+    file_path: Path, format: Literal["VIA", "COCO"]
+) -> pd.DataFrame:
+    """Read bounding boxes annotations from a single file.
 
     Parameters
     ----------
@@ -36,18 +84,20 @@ def df_bboxes_from_file(
     Returns
     -------
     pd.DataFrame
-        Bounding boxes annotations dataframe.
+        Bounding boxes annotations dataframe. The dataframe has the
+        following columns: "annotation_id", "image_filename", "image_id",
+        "x_min", "y_min", "width", "height", "supercategory", "category".
 
     """
     if format == "VIA":
-        return df_bboxes_from_VIA_file(file_path)
+        return _df_bboxes_from_single_VIA_file(file_path)
     elif format == "COCO":
-        return df_bboxes_from_COCO_file(file_path)
+        return _df_bboxes_from_single_COCO_file(file_path)
     else:
         raise ValueError(f"Unsupported format: {format}")
 
 
-def df_bboxes_from_VIA_file(file_path: Path) -> pd.DataFrame:
+def _df_bboxes_from_single_VIA_file(file_path: Path) -> pd.DataFrame:
     """Validate and read untracked VIA JSON file.
 
     The data is formatted as an untracked annotations DataFrame.
@@ -132,7 +182,7 @@ def df_bboxes_from_VIA_file(file_path: Path) -> pd.DataFrame:
     return _df_from_valid_VIA_file(valid_via_file.path)
 
 
-def df_bboxes_from_COCO_file(file_path: Path) -> pd.DataFrame:
+def _df_bboxes_from_single_COCO_file(file_path: Path) -> pd.DataFrame:
     """Validate and read untracked COCO JSON file.
 
     The data is formatted as an untracked annotations DataFrame.
