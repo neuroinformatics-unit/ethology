@@ -8,5 +8,5 @@ recursive-exclude docs *
 recursive-exclude tests *
 
 # Include json schemas
-recursive-include ethology *.json
-recursive-include ethology *.md
+recursive-include ethology/annotations/json_schemas/schemas *.json
+recursive-include ethology/annotations/json_schemas/schemas *.md
