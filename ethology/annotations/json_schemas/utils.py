@@ -16,7 +16,7 @@ def _get_default_VIA_schema() -> dict:
 
 
 def _get_default_COCO_schema() -> dict:
-    """Get the COCO schema file as a dictionary."""
+    """Get the COCO schema as a dictionary."""
     coco_schema_path = Path(__file__).parent / "schemas" / "COCO_schema.json"
     with open(coco_schema_path) as file:
         coco_schema_dict = json.load(file)
@@ -39,7 +39,7 @@ def _check_file_is_json(filepath: Path):
 
 
 def _check_file_matches_schema(filepath: Path, schema: dict | None):
-    """Ensure that the input JSON file matches the given schema.
+    """Check the input JSON file matches the given schema.
 
     The schema validation only checks the type for each specified
     key if the key exists. It does not check that the keys in the
@@ -62,7 +62,7 @@ def _check_file_matches_schema(filepath: Path, schema: dict | None):
 def _check_required_properties_keys(
     required_properties_keys: list, schema: dict
 ):
-    """Ensure the input schema includes the required "properties" keys."""
+    """Check the input schema includes the required "properties" keys."""
     # Get keys of "properties" dictionaries in schema
     properties_keys_in_schema = _extract_properties_keys(schema)
 

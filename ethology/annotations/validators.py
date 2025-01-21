@@ -18,28 +18,30 @@ from ethology.annotations.json_schemas.utils import (
 class ValidVIA:
     """Class for valid VIA JSON files.
 
-    It checks the input file is a `ValidJSON` and additionally checks the
-    file contains the required keys.
+    It checks the input file is a valid JSON file, matches
+    the VIA schema and contains the required keys.
+
 
     Attributes
     ----------
     path : pathlib.Path
-        Path to the VIA JSON file.
-
+        Path to the VIA JSON file, passed as an input.
     schema : dict
-        The JSON schema is set to VIA_SCHEMA.
+        The JSON schema is set to the default VIA schema.
+    required_keys : dict
+        The required keys for the VIA JSON file.
 
     Raises
     ------
-    FileNotFoundError
-        If the file does not exist.
     ValueError
         If the JSON file cannot be decoded.
     jsonschema.exceptions.ValidationError
         If the type of any of the keys in the JSON file
         does not match the type specified in the schema.
+    jsonschema.exceptions.SchemaError
+        If the schema is invalid.
     ValueError
-        If the VIA JSON file misses any of the required keys.
+        If the VIA JSON file is missing any of the required keys.
 
     """
 
@@ -105,26 +107,31 @@ class ValidVIA:
 
 @define
 class ValidCOCO:
-    """Class valid COCO JSON files for untracked data.
+    """Class for valid COCO JSON files.
 
-    It checks the input COCO JSON file contains the required keys.
+    It checks the input file is a valid JSON file, matches
+    the COCO schema and contains the required keys.
 
     Attributes
     ----------
     path : pathlib.Path
-        Path to the COCO JSON file.
+        Path to the COCO JSON file, passed as an input.
+    schema : dict
+        The JSON schema is set to the default COCO schema.
+    required_keys : dict
+        The required keys for the COCO JSON file.
 
     Raises
     ------
-    FileNotFoundError
-        If the file does not exist.
     ValueError
         If the JSON file cannot be decoded.
     jsonschema.exceptions.ValidationError
         If the type of any of the keys in the JSON file
         does not match the type specified in the schema.
+    jsonschema.exceptions.SchemaError
+        If the schema is invalid.
     ValueError
-        If the COCO JSON file misses any of the required keys.
+        If the COCO JSON file is missing any of the required keys.
 
     """
 
