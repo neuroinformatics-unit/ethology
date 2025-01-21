@@ -126,114 +126,85 @@ def default_COCO_schema() -> dict:
 
 
 @pytest.mark.parametrize(
-    "input_file,",
+    "input_file, validator",
     [
-        "VIA_JSON_sample_1.json",
-        "VIA_JSON_sample_2.json",
+        ("VIA_JSON_sample_1.json", ValidVIA),
+        ("VIA_JSON_sample_2.json", ValidVIA),
+        ("COCO_JSON_sample_1.json", ValidCOCO),
+        ("COCO_JSON_sample_2.json", ValidCOCO),
     ],
 )
-def test_valid_VIA(input_file: str, annotations_test_data: dict):
-    """Test the VIA validator with valid inputs."""
+def test_validators_valid_input_files(
+    input_file: str,
+    validator: type[ValidVIA | ValidCOCO],
+    annotations_test_data: dict,
+):
+    """Test the file validator with valid inputs."""
     filepath = annotations_test_data[input_file]
     with does_not_raise():
-        ValidVIA(path=filepath)
+        validator(path=filepath)
 
 
 @pytest.mark.parametrize(
-    "invalid_input_file, expected_exception, log_message",
+    "invalid_input_file, validator, expected_exception, log_message",
     [
         (
             "json_file_decode_error",
+            ValidVIA,
             pytest.raises(ValueError),
             "Error decoding JSON data from file",
         ),
         (
             "json_file_not_found_error",
+            ValidVIA,
             pytest.raises(FileNotFoundError),
-            "File not found",
+            "No such file or directory: ",
+        ),
+        (
+            "json_file_decode_error",
+            ValidCOCO,
+            pytest.raises(ValueError),
+            "Error decoding JSON data from file",
+        ),
+        (
+            "json_file_not_found_error",
+            ValidCOCO,
+            pytest.raises(FileNotFoundError),
+            "No such file or directory: ",
         ),
         (
             "VIA_file_schema_mismatch",
+            ValidVIA,
             pytest.raises(jsonschema.exceptions.ValidationError),
             "'49' is not of type 'integer'",
         ),
-    ],
-)
-def test_valid_VIA_invalid_files(
-    invalid_input_file: str,
-    expected_exception: pytest.raises,
-    log_message: str,
-    request: pytest.FixtureRequest,
-):
-    """Test the VIA validator throwS the expected errors when passed invalid
-    inputs.
-    """
-    invalid_json_file = request.getfixturevalue(invalid_input_file)
-
-    with expected_exception as excinfo:
-        ValidVIA(path=invalid_json_file)
-
-    # Check that the error message contains expected string
-    assert log_message in str(excinfo.value)
-
-    # Check the error message contains file path
-    if not isinstance(excinfo.value, jsonschema.exceptions.ValidationError):
-        assert invalid_json_file.name in str(excinfo.value)
-
-
-@pytest.mark.parametrize(
-    "input_file",
-    [
-        "COCO_JSON_sample_1.json",
-        "COCO_JSON_sample_2.json",
-    ],
-)
-def test_valid_COCO(input_file: str, annotations_test_data: dict):
-    """Test the COCO validator with valid inputs."""
-    filepath = annotations_test_data[input_file]
-    with does_not_raise():
-        ValidCOCO(path=filepath)
-
-
-@pytest.mark.parametrize(
-    "invalid_input_file, expected_exception, log_message",
-    [
-        (
-            "json_file_decode_error",
-            pytest.raises(ValueError),
-            "Error decoding JSON data from file",
-        ),
-        (
-            "json_file_not_found_error",
-            pytest.raises(FileNotFoundError),
-            "File not found",
-        ),
         (
             "COCO_file_schema_mismatch",
+            ValidCOCO,
             pytest.raises(jsonschema.exceptions.ValidationError),
             "3 is not of type 'object'",
         ),
     ],
 )
-def test_valid_COCO_invalid_files(
+def test_validators_invalid_input_files(
     invalid_input_file: str,
+    validator: type[ValidVIA | ValidCOCO],
     expected_exception: pytest.raises,
     log_message: str,
     request: pytest.FixtureRequest,
 ):
-    """Test the COCO validator throws the expected errors when passed invalid
+    """Test the validators throw the expected errors when passed invalid
     inputs.
     """
     invalid_json_file = request.getfixturevalue(invalid_input_file)
 
     with expected_exception as excinfo:
-        ValidCOCO(path=invalid_json_file)
+        validator(path=invalid_json_file)
 
     # Check that the error message contains expected string
     assert log_message in str(excinfo.value)
 
     # Check the error message contains file path
-    # assert invalid_json_file.name in str(excinfo.value)
     if not isinstance(excinfo.value, jsonschema.exceptions.ValidationError):
         assert invalid_json_file.name in str(excinfo.value)
 
