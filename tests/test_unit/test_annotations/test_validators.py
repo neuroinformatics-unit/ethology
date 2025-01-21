@@ -39,8 +39,8 @@ def VIA_file_schema_mismatch(
     in the first image, from "int" to "str"
     """
     # Read valid JSON file
-    valid_via_file_sample_1 = annotations_test_data["VIA_JSON_sample_1.json"]
-    with open(valid_via_file_sample_1) as f:
+    valid_VIA_file_sample_1 = annotations_test_data["VIA_JSON_sample_1.json"]
+    with open(valid_VIA_file_sample_1) as f:
         data = json.load(f)
 
     # Modify file so that it doesn't match the corresponding schema
@@ -49,7 +49,7 @@ def VIA_file_schema_mismatch(
     img_dict["regions"][0]["shape_attributes"]["width"] = "49"
 
     # Save the modified JSON to a new file
-    out_json = tmp_path / f"{valid_via_file_sample_1.stem}_schema_error.json"
+    out_json = tmp_path / f"{valid_VIA_file_sample_1.stem}_schema_error.json"
     with open(out_json, "w") as f:
         json.dump(data, f)
     return out_json
@@ -66,15 +66,15 @@ def COCO_file_schema_mismatch(
     key from "list of dicts" to "list"
     """
     # Read valid JSON file
-    valid_coco_file_sample_1 = annotations_test_data["COCO_JSON_sample_1.json"]
-    with open(valid_coco_file_sample_1) as f:
+    valid_COCO_file_sample_1 = annotations_test_data["COCO_JSON_sample_1.json"]
+    with open(valid_COCO_file_sample_1) as f:
         data = json.load(f)
 
     # Modify file so that it doesn't match the corresponding schema
     data["annotations"] = [1, 2, 3]  # [d] for d in data["annotations"]]
 
     # save the modified json to a new file
-    out_json = tmp_path / f"{valid_coco_file_sample_1.stem}_schema_error.json"
+    out_json = tmp_path / f"{valid_COCO_file_sample_1.stem}_schema_error.json"
     with open(out_json, "w") as f:
         json.dump(data, f)
     return out_json
@@ -353,8 +353,8 @@ def test_required_keys_in_VIA_schema(
     """Check the provided VIA schema contains the ValidVIA required keys."""
     # Get required keys from a VIA valid file
     filepath = annotations_test_data[input_file]
-    valid_via = ValidVIA(path=filepath)
-    required_VIA_keys = valid_via.required_keys
+    valid_VIA = ValidVIA(path=filepath)
+    required_VIA_keys = valid_VIA.required_keys
 
     # Map required keys to "properties" keys in schema
     map_required_to_properties_keys = {
@@ -391,8 +391,8 @@ def test_required_keys_in_COCO_schema(
     """Check the provided COCO schema contains the ValidCOCO required keys."""
     # Get required keys from a COCO valid file
     filepath = annotations_test_data[input_file]
-    valid_coco = ValidCOCO(path=filepath)
-    required_COCO_keys = valid_coco.required_keys
+    valid_COCO = ValidCOCO(path=filepath)
+    required_COCO_keys = valid_COCO.required_keys
 
     # Prepare list of required "properties" keys with full paths
     required_properties_keys = [
