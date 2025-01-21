@@ -9,7 +9,7 @@ import jsonschema.exceptions
 
 def _get_default_VIA_schema() -> dict:
     """Get the VIA schema as a dictionary."""
-    via_schema_path = Path(__file__).parent / "schemas" / "via_schema.json"
+    via_schema_path = Path(__file__).parent / "schemas" / "VIA_schema.json"
     with open(via_schema_path) as file:
         via_schema_dict = json.load(file)
     return via_schema_dict
@@ -17,7 +17,7 @@ def _get_default_VIA_schema() -> dict:
 
 def _get_default_COCO_schema() -> dict:
     """Get the COCO schema file as a dictionary."""
-    coco_schema_path = Path(__file__).parent / "schemas" / "coco_schema.json"
+    coco_schema_path = Path(__file__).parent / "schemas" / "COCO_schema.json"
     with open(coco_schema_path) as file:
         coco_schema_dict = json.load(file)
     return coco_schema_dict
