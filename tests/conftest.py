@@ -26,8 +26,8 @@ def pooch_registry() -> pooch.Pooch:
     Returns
     -------
     pooch.Pooch
-        A Pooch object that holds the URL and hash of the GIN repository with
-        the test data
+        A Pooch object that holds the URLs and hashes for the test data files
+        stored on the GIN repository.
 
     """
     # Cache the test data in the user's home directory
