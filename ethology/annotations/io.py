@@ -160,18 +160,22 @@ def _df_bboxes_from_single_specific_file(
 
     # Build basic dataframe
     list_rows = df_rows_from_file_fn(valid_file.path)
-    df = pd.DataFrame(list_rows)
+    df = pd.DataFrame(list_rows)  # , index=STANDARD_BBOXES_INDEX)
+
+    # set annotation_id as index
+    # (otherwise duplicate annotations are not detected)
+    df = df.set_index(STANDARD_BBOXES_INDEX)
 
     # drop duplicates and reset indices
     # ignore_index=True so that the resulting axis is labeled 0,1,…,n - 1.
     # NOTE: the index name is no longer "annotation_id"
     df = df.drop_duplicates(ignore_index=True, **kwargs)
 
-    # set annotation_id as index
-    df = df.set_index(STANDARD_BBOXES_INDEX)
-
     # reorder columns to match standard columns
     df = df.reindex(columns=STANDARD_BBOXES_COLUMNS)
+
+    # Set the index name to "annotation_id"
+    df.index.name = STANDARD_BBOXES_INDEX
 
     # Read as standard dataframe
     return df
@@ -209,6 +213,8 @@ def _df_rows_from_valid_VIA_file(file_path: Path) -> list[dict]:
             if list(region_attributes.keys()):
                 supercategory = list(region_attributes.keys())[0]
                 category = region_attributes[supercategory]
+                # remove new line characters from "category"
+                category = category.replace("\n", "")
             else:
                 supercategory = ""
                 category = ""
