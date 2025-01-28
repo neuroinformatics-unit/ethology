@@ -1,6 +1,7 @@
 """Module for reading and writing manually labelled annotations."""
 
 import json
+from collections.abc import Callable
 from pathlib import Path
 from typing import Literal
 
@@ -8,8 +9,8 @@ import pandas as pd
 
 from ethology.annotations.validators import ValidCOCO, ValidVIA
 
+STANDARD_BBOXES_INDEX = "annotation_id"
 STANDARD_BBOXES_COLUMNS = [
-    "annotation_id",
     "image_filename",
     "image_id",
     "x_min",
@@ -37,7 +38,8 @@ def df_bboxes_from_file(
     **kwargs
         Additional keyword arguments to pass to the
         pandas.DataFrame.drop_duplicates method. The ignore_index=True
-        argument is always applied to force an index reset.
+        argument is always applied to force an index reset. The settings
+        apply if one or multiple files are read.
 
     Returns
     -------
@@ -54,23 +56,58 @@ def df_bboxes_from_file(
 
     """
     if isinstance(file_path, list):
-        # Conactenate files
-        df_list = []
-        for file in file_path:
-            df = _df_bboxes_from_single_file(file, format=format)
-            df_list.append(df)
-        df_all = pd.concat(df_list)
+        # Read multiple files
+        df_all = _df_bboxes_from_multiple_files(
+            file_path,
+            format=format,
+            **kwargs,
+        )
 
-        # Remove duplicates
-        # ignore_index=True is used to force an index reset
-        return df_all.drop_duplicates(ignore_index=True, **kwargs)
     else:
         # Read single VIA file
-        return _df_bboxes_from_single_file(file_path, format=format)
+        df_all = _df_bboxes_from_single_file(
+            file_path,
+            format=format,
+            **kwargs,
+        )  #
+
+    # Add list of input files as metadata
+    df_all.metadata = {"input_files": file_path}
+
+    return df_all
+
+
+def _df_bboxes_from_multiple_files(list_filepaths, format, **kwargs):
+    """Read bounding boxes annotations from multiple files."""
+    # Get list of dataframes
+    df_list = [
+        _df_bboxes_from_single_file(file, format=format)
+        for file in list_filepaths
+    ]
+
+    # Concatenate with ignore_index=True,
+    # so that the resulting axis is labeled 0,1,…,n - 1.
+    # NOTE: after ignore_index=True the index name is no longer "annotation_id"
+    df_all = pd.concat(df_list, ignore_index=True)
+
+    # Update image_id based on the full sorted list of image_filename
+    list_image_filenames = sorted(list(df_all["image_filename"].unique()))
+    df_all["image_id"] = df_all["image_filename"].apply(
+        lambda x: list_image_filenames.index(x)
+    )
+
+    # Remove duplicates that may exist across input files
+    # ignore_index=True so that the resulting axis is labeled 0,1,…,n - 1.
+    df_all = df_all.drop_duplicates(ignore_index=True, **kwargs)
+
+    # Set the index name to "annotation_id"
+    df_all.index.name = STANDARD_BBOXES_INDEX
+
+    return df_all
 
 
 def _df_bboxes_from_single_file(
-    file_path: Path, format: Literal["VIA", "COCO"]
+    file_path: Path, format: Literal["VIA", "COCO"], **kwargs
 ) -> pd.DataFrame:
     """Read bounding boxes annotations from a single file.
 
@@ -80,6 +117,10 @@ def _df_bboxes_from_single_file(
         Path to the input annotations file.
     format : Literal["VIA", "COCO"]
         Format of the input annotations file.
+    **kwargs
+        Additional keyword arguments to pass to the
+        pandas.DataFrame.drop_duplicates method. The ignore_index=True
+        argument is always applied to force an index reset.
 
     Returns
     -------
@@ -90,170 +131,147 @@ def _df_bboxes_from_single_file(
 
     """
     if format == "VIA":
-        return _df_bboxes_from_single_VIA_file(file_path)
+        return _df_bboxes_from_single_specific_file(
+            file_path,
+            validator=ValidVIA,
+            df_rows_from_file_fn=_df_rows_from_valid_VIA_file,
+            **kwargs,
+        )
     elif format == "COCO":
-        return _df_bboxes_from_single_COCO_file(file_path)
+        return _df_bboxes_from_single_specific_file(
+            file_path,
+            validator=ValidCOCO,
+            df_rows_from_file_fn=_df_rows_from_valid_COCO_file,
+            **kwargs,
+        )
     else:
         raise ValueError(f"Unsupported format: {format}")
 
 
-def _df_bboxes_from_single_VIA_file(file_path: Path) -> pd.DataFrame:
-    """Validate and read untracked VIA JSON file.
+def _df_bboxes_from_single_specific_file(
+    file_path: Path,
+    validator: type[ValidVIA] | type[ValidCOCO],
+    df_rows_from_file_fn: Callable,
+    **kwargs,
+) -> pd.DataFrame:
+    # Validate file
+    valid_file = validator(file_path)
 
-    The data is formatted as an untracked annotations DataFrame.
+    # Build basic dataframe
+    list_rows = df_rows_from_file_fn(valid_file.path)
+    df = pd.DataFrame(list_rows)
 
-    Parameters
-    ----------
-    file_path : Path
-        Path to the untracked VIA JSON file.
+    # drop duplicates and reset indices
+    df = df.drop_duplicates(ignore_index=True, **kwargs)
 
-    Returns
-    -------
-    pd.DataFrame
-        Untracked annotations DataFrame.
+    # set annotation_id as index
+    df = df.set_index(STANDARD_BBOXES_INDEX)
 
-    """
-
-    def _df_from_valid_VIA_file(file_path):
-        """Read VIA JSON file as standard untracked annotations DataFrame."""
-        # Read validated json as dict
-        with open(file_path) as file:
-            data_dict = json.load(file)
-
-        # Prepare data
-        image_metadata_dict = data_dict["_via_img_metadata"]
-        via_image_id_list = data_dict["_via_image_id_list"]
-
-        # map filename to keys in image_metadata_dict
-        # keys: filanme-filesize
-        map_filename_to_via_img_id = {
-            img_dict["filename"]: ky
-            for ky, img_dict in image_metadata_dict.items()
-        }
-
-        # Build standard dataframe
-        list_rows = []
-        # loop thru images
-        for _, img_dict in image_metadata_dict.items():
-            # loop thru annotations in the image
-            for region in img_dict["regions"]:
-                region_shape = region["shape_attributes"]
-                region_attributes = region["region_attributes"]
-
-                row = {
-                    "image_filename": img_dict["filename"],
-                    "x_min": region_shape["x"],
-                    "y_min": region_shape["y"],
-                    "width": region_shape["width"],
-                    "height": region_shape["height"],
-                    "supercategory": list(region_attributes.keys())[
-                        0
-                    ],  # takes first key as supercategory
-                    "category": region_attributes[
-                        list(region_attributes.keys())[0]
-                    ],
-                }
-
-                # append annotations to df
-                list_rows.append(row)
-
-        df = pd.DataFrame(
-            list_rows,
-            # columns=list(row.keys()),  # do I need this?
-        )
-
-        # add "image_id" column as an integer based on the VIA image ID
-        df["image_id"] = df["image_filename"].apply(
-            lambda x: via_image_id_list.index(map_filename_to_via_img_id[x])
-        )
-
-        # add "annotation_id" column based on index
-        df["annotation_id"] = df.index
-
-        # reorder columns to match standard
-        df = df.reindex(columns=STANDARD_BBOXES_COLUMNS)
-
-        return df
-
-    # Run validators
-    valid_via_file = ValidVIA(file_path)
+    # reorder columns to match standard columns
+    df = df.reindex(columns=STANDARD_BBOXES_COLUMNS)
 
     # Read as standard dataframe
-    return _df_from_valid_VIA_file(valid_via_file.path)
+    return df
 
 
-def _df_bboxes_from_single_COCO_file(file_path: Path) -> pd.DataFrame:
-    """Validate and read untracked COCO JSON file.
+def _df_rows_from_valid_VIA_file(file_path: Path) -> list[dict]:
+    """Read untracked VIA JSON file as a list of rows."""
+    # Read validated json as dict
+    with open(file_path) as file:
+        data_dict = json.load(file)
 
-    The data is formatted as an untracked annotations DataFrame.
+    # Prepare data
+    image_metadata_dict = data_dict["_via_img_metadata"]
+    via_image_id_list = data_dict["_via_image_id_list"]
 
-    Parameters
-    ----------
-    file_path : Path
-        Path to the untracked COCO JSON file.
+    # Map image filenames to image_metadata_dict keys
+    # the image_metadata_dict keys are <filename><filesize> strings
+    map_filename_to_via_img_id = {
+        img_dict["filename"]: ky
+        for ky, img_dict in image_metadata_dict.items()
+    }
 
-    Returns
-    -------
-    pd.DataFrame
-        A dataframe with bounding boxes annotations.
-
-    """
-
-    def _df_from_valid_coco_json_file(file_path: Path) -> pd.DataFrame:
-        """Read COCO JSON file as standard untracked annotations DataFrame."""
-        # Read validated json as dict
-        with open(file_path) as file:
-            data_dict = json.load(file)
-
-        # Prepare data
-        map_image_id_to_filename = {
-            img_dict["id"]: img_dict["file_name"]
-            for img_dict in data_dict["images"]
-        }
-
-        map_category_id_to_category_data = {
-            cat_dict["id"]: (cat_dict["name"], cat_dict["supercategory"])
-            for cat_dict in data_dict["categories"]
-        }
-
-        # Build standard dataframe
-        list_rows = []
-        for annot_dict in data_dict["annotations"]:
-            annotation_id = annot_dict["id"]
-            # image data
-            image_id = annot_dict["image_id"]
-            image_filename = map_image_id_to_filename[image_id]
-
-            # bbox data
-            x_min, y_min, width, height = annot_dict["bbox"]
-
-            # class data
-            category_id = annot_dict["category_id"]
-            category, supercategory = map_category_id_to_category_data[
-                category_id
-            ]
+    # Get list of rows in dataframe
+    list_rows = []
+    annotation_id = 0
+    # loop thru images
+    for _, img_dict in image_metadata_dict.items():
+        # loop thru annotations in the image
+        for region in img_dict["regions"]:
+            region_shape = region["shape_attributes"]
+            region_attributes = region["region_attributes"]
 
             row = {
                 "annotation_id": annotation_id,
-                "image_filename": image_filename,
-                "image_id": image_id,
-                "x_min": x_min,
-                "y_min": y_min,
-                "width": width,
-                "height": height,
-                "supercategory": supercategory,
-                "category": category,
+                "image_filename": img_dict["filename"],
+                "image_id": via_image_id_list.index(
+                    map_filename_to_via_img_id[img_dict["filename"]]
+                ),  # integer based on the VIA image ID
+                "x_min": region_shape["x"],
+                "y_min": region_shape["y"],
+                "width": region_shape["width"],
+                "height": region_shape["height"],
+                "supercategory": list(region_attributes.keys())[
+                    0
+                ],  # takes first key as supercategory
+                "category": region_attributes[
+                    list(region_attributes.keys())[0]
+                ],
             }
 
+            # append annotations to df
             list_rows.append(row)
 
-        df = pd.DataFrame(list_rows)
-        df.reindex(columns=STANDARD_BBOXES_COLUMNS)
+            # increment annotation_id
+            annotation_id += 1
 
-        return df
+    return list_rows
 
-    # Run validators
-    valid_coco_file = ValidCOCO(file_path)
 
-    # Read as standard dataframe
-    return _df_from_valid_coco_json_file(valid_coco_file.path)
+def _df_rows_from_valid_COCO_file(file_path: Path) -> list[dict]:
+    """Read untracked COCO JSON file as a list of rows."""
+    # Read validated json as dict
+    with open(file_path) as file:
+        data_dict = json.load(file)
+
+    # Prepare data
+    map_image_id_to_filename = {
+        img_dict["id"]: img_dict["file_name"]
+        for img_dict in data_dict["images"]
+    }
+
+    map_category_id_to_category_data = {
+        cat_dict["id"]: (cat_dict["name"], cat_dict["supercategory"])
+        for cat_dict in data_dict["categories"]
+    }
+
+    # Build standard dataframe
+    list_rows = []
+    for annot_dict in data_dict["annotations"]:
+        annotation_id = annot_dict["id"]
+        # image data
+        image_id = annot_dict["image_id"]
+        image_filename = map_image_id_to_filename[image_id]
+
+        # bbox data
+        x_min, y_min, width, height = annot_dict["bbox"]
+
+        # class data
+        category_id = annot_dict["category_id"]
+        category, supercategory = map_category_id_to_category_data[category_id]
+
+        row = {
+            "annotation_id": annotation_id,
+            "image_filename": image_filename,
+            "image_id": image_id,
+            "x_min": x_min,
+            "y_min": y_min,
+            "width": width,
+            "height": height,
+            "supercategory": supercategory,
+            "category": category,
+        }
+
+        list_rows.append(row)
+
+    return list_rows
