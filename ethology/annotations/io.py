@@ -107,7 +107,7 @@ def _df_bboxes_from_multiple_files(list_filepaths, format, **kwargs):
 
 
 def _df_bboxes_from_single_file(
-    file_path: Path, format: Literal["VIA", "COCO"], **kwargs
+    file_path: Path, format: str, **kwargs
 ) -> pd.DataFrame:
     """Read bounding boxes annotations from a single file.
 
@@ -115,8 +115,9 @@ def _df_bboxes_from_single_file(
     ----------
     file_path : Path
         Path to the input annotations file.
-    format : Literal["VIA", "COCO"]
+    format : str
         Format of the input annotations file.
+        Currently supported formats are "VIA" and "COCO".
     **kwargs
         Additional keyword arguments to pass to the
         pandas.DataFrame.drop_duplicates method. The ignore_index=True
