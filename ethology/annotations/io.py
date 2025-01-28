@@ -163,6 +163,8 @@ def _df_bboxes_from_single_specific_file(
     df = pd.DataFrame(list_rows)
 
     # drop duplicates and reset indices
+    # ignore_index=True so that the resulting axis is labeled 0,1,…,n - 1.
+    # NOTE: the index name is no longer "annotation_id"
     df = df.drop_duplicates(ignore_index=True, **kwargs)
 
     # set annotation_id as index
@@ -202,6 +204,15 @@ def _df_rows_from_valid_VIA_file(file_path: Path) -> list[dict]:
             region_shape = region["shape_attributes"]
             region_attributes = region["region_attributes"]
 
+            # takes first key of the region_attributes as supercategory,
+            # and its value as category
+            if list(region_attributes.keys()):
+                supercategory = list(region_attributes.keys())[0]
+                category = region_attributes[supercategory]
+            else:
+                supercategory = ""
+                category = ""
+
             row = {
                 "annotation_id": annotation_id,
                 "image_filename": img_dict["filename"],
@@ -212,12 +223,8 @@ def _df_rows_from_valid_VIA_file(file_path: Path) -> list[dict]:
                 "y_min": region_shape["y"],
                 "width": region_shape["width"],
                 "height": region_shape["height"],
-                "supercategory": list(region_attributes.keys())[
-                    0
-                ],  # takes first key as supercategory
-                "category": region_attributes[
-                    list(region_attributes.keys())[0]
-                ],
+                "supercategory": supercategory,
+                "category": category,
             }
 
             # append annotations to df
