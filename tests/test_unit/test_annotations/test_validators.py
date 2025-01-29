@@ -146,7 +146,7 @@ def test_validators_valid_input_files(
 
 
 @pytest.mark.parametrize(
-    "invalid_input_file, validator, expected_exception, log_message",
+    "invalid_input_file, validator, expected_exception, error_message",
     [
         (
             "json_file_decode_error",
@@ -190,7 +190,7 @@ def test_validators_invalid_input_files(
     invalid_input_file: str,
     validator: type[ValidVIA | ValidCOCO],
     expected_exception: pytest.raises,
-    log_message: str,
+    error_message: str,
     request: pytest.FixtureRequest,
 ):
     """Test the validators throw the expected errors when passed invalid
@@ -202,7 +202,7 @@ def test_validators_invalid_input_files(
         validator(path=invalid_json_file)
 
     # Check that the error message contains expected string
-    assert log_message in str(excinfo.value)
+    assert error_message in str(excinfo.value)
 
     # Check the error message contains file path
     if not isinstance(excinfo.value, jsonschema.exceptions.ValidationError):
