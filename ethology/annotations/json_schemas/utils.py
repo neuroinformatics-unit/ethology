@@ -4,7 +4,6 @@ import json
 from pathlib import Path
 
 import jsonschema
-import jsonschema.exceptions
 
 
 def _get_default_VIA_schema() -> dict:
@@ -34,8 +33,6 @@ def _check_file_is_json(filepath: Path):
             f"Error decoding JSON data from file: {filepath}. "
             "The data being deserialized is not a valid JSON. "
         ) from decode_error
-    except Exception as error:
-        raise error
 
 
 def _check_file_matches_schema(filepath: Path, schema: dict | None):
@@ -51,12 +48,7 @@ def _check_file_matches_schema(filepath: Path, schema: dict | None):
 
     # Check against schema if provided
     if schema:
-        try:
-            jsonschema.validate(instance=data, schema=schema)
-        except jsonschema.exceptions.ValidationError as val_err:
-            raise val_err
-        except jsonschema.exceptions.SchemaError as schema_err:
-            raise schema_err
+        jsonschema.validate(instance=data, schema=schema)
 
 
 def _check_required_properties_keys(
