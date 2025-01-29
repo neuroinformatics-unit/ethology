@@ -78,64 +78,53 @@ def _check_required_keys_in_dict(
         )
 
 
-def _extract_properties_keys(schema: dict, parent_key="") -> list:
-    """Recursively extract the keys of all "properties" subdictionaries.
+def _extract_properties_keys(input_schema: dict, prefix: str = "") -> list:
+    """Extract keys from all "properties" subdictionaries in a JSON schema.
 
     Recursively extract the keys of all subdictionaries in the input
     dictionary that are values to a "properties" key. The input dictionary
     represents a JSON schema dictionary
-    (see https://json-schema.org/understanding-json-schema/about).
+    (see https://json-schema.org/understanding-json-schema/about). The output
+    is a sorted list of strings with full paths (e.g. 'parent/child').
 
-    The "properties" key always appears as part of a dictionary with at least
-    another key, that is "type" or "item".
+    The "properties" key always appears as part of a set of dictionary keys
+    with at least another key being "type" or "item". We use this to find the
+    relevant subdictionaries.
+
     """
-    # The "property keys" are either "properties" or "additionalProperties"
-    # as they are the keys with the relevant data
-    property_keys = ["properties", "additionalProperties"]
+    result: list[str] = []
 
-    def _contains_properties_key(input: dict):
-        """Return True if the input dictionary contains a property key."""
-        return any(x in input for x in property_keys)
+    # Skip if "type" key is missing in the schema
+    if "type" not in input_schema:
+        return result
 
-    def _get_properties_subdict(input: dict):
-        """Get the subdictionary under the property key."""
-        return input[next(k for k in property_keys if k in input)]
+    # If the input dictionary has a "properties" key: extract keys
+    # and recurse into nested dictionaries
+    if "properties" in input_schema:
+        for key, value in input_schema["properties"].items():
+            full_key = f"{prefix}/{key}" if prefix else key
+            result.append(full_key)
+            # Recurse into nested dictionaries to look for more "properties"
+            # dicts
+            result.extend(_extract_properties_keys(value, full_key))
 
-    keys_of_properties_dicts = []
-    if "type" in schema:
-        if _contains_properties_key(schema):
-            # Get the subdictionary under the properties key
-            properties_subdict = _get_properties_subdict(schema)
-
-            # Check if there is a nested "properties" dict inside the current
-            # one. If so, go down one level.
-            if _contains_properties_key(properties_subdict):
-                properties_subdict = _get_properties_subdict(
-                    properties_subdict
-                )
-
-            # Add keys of deepest "properties dict" to list
-            keys_of_properties_dicts.extend(
-                [
-                    f"{parent_key}/{ky}" if parent_key else ky
-                    for ky in properties_subdict
-                ]
+    # If dictionary has "additionalProperties" key: recurse into it
+    if "additionalProperties" in input_schema:
+        result.extend(
+            _extract_properties_keys(
+                input_schema["additionalProperties"],
+                prefix,
             )
+        )
 
-            # Inspect non-properties dictionaries under this properties subdict
-            for ky, val in properties_subdict.items():
-                full_key = f"{parent_key}/{ky}" if parent_key else ky
-                keys_of_properties_dicts.extend(
-                    _extract_properties_keys(val, full_key)
-                )
-
-        elif "items" in schema:
-            # Analyse the dictionary under the "items" key
-            properties_subdict = schema["items"]
-            keys_of_properties_dicts.extend(
-                _extract_properties_keys(
-                    properties_subdict, parent_key=parent_key
-                )
+    # If dictionary has "items" key: recurse into it
+    if "items" in input_schema:
+        result.extend(
+            _extract_properties_keys(
+                input_schema["items"],
+                prefix,
             )
+        )
 
-    return sorted(keys_of_properties_dicts)
+    # Return sorted list of keys with full paths
+    return sorted(result)
