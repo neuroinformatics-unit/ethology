@@ -57,6 +57,8 @@ class ValidVIA:
             "shape_attributes": ["x", "y", "width", "height"],
         },
         init=False,
+        # with init=False the attribute is always initialized
+        # with the default value
     )
 
     # Note: the validators are applied in order
@@ -138,8 +140,8 @@ class ValidCOCO:
     schema: dict = field(
         default=_get_default_schema("COCO"),
         init=False,
-        # init=False makes the attribute to be unconditionally initialized
-        # with the specified default
+        # with init=False the attribute is always initialized
+        # with the default value
     )
 
     # The keys of "required_keys" match the 1st level keys in a COCO JSON file
