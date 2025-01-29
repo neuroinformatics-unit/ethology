@@ -14,7 +14,7 @@ Each image under `_via_img_metadata` is indexed using a unique key: FILENAME-FIL
 
 The section `_via_image_id_list` contains an ordered list of image keys using a unique key: `FILENAME-FILESIZE`, the position in the list defines the image ID.
 
-The section `_via_attributes` region attributes and file attributes, to display in VIA's UI and to classify the data.
+The section `_via_attributes` contains region attributes and file attributes, to display in VIA's UI and to classify the data.
 
 The section `_via_data_format_version` contains the version of the VIA tool used.
 
