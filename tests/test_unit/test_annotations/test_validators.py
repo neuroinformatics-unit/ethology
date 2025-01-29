@@ -110,19 +110,19 @@ def small_schema() -> dict:
 @pytest.fixture()
 def default_VIA_schema() -> dict:
     """Get default VIA schema."""
-    from ethology.annotations.json_schemas.utils import _get_default_VIA_schema
+    from ethology.annotations.json_schemas.utils import _get_default_schema
 
-    return _get_default_VIA_schema()
+    return _get_default_schema("VIA")
 
 
 @pytest.fixture()
 def default_COCO_schema() -> dict:
     """Get default COCO schema."""
     from ethology.annotations.json_schemas.utils import (
-        _get_default_COCO_schema,
+        _get_default_schema,
     )
 
-    return _get_default_COCO_schema()
+    return _get_default_schema("COCO")
 
 
 @pytest.mark.parametrize(

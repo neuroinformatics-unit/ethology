@@ -9,8 +9,7 @@ from ethology.annotations.json_schemas.utils import (
     _check_file_is_json,
     _check_file_matches_schema,
     _check_required_keys_in_dict,
-    _get_default_COCO_schema,
-    _get_default_VIA_schema,
+    _get_default_schema,
 )
 
 
@@ -47,7 +46,7 @@ class ValidVIA:
 
     path: Path = field()
     schema: dict = field(
-        default=_get_default_VIA_schema(),
+        default=_get_default_schema("VIA"),
         init=False,
     )
     required_keys: dict = field(
@@ -137,7 +136,7 @@ class ValidCOCO:
 
     path: Path = field()
     schema: dict = field(
-        default=_get_default_COCO_schema(),
+        default=_get_default_schema("COCO"),
         init=False,
         # init=False makes the attribute to be unconditionally initialized
         # with the specified default

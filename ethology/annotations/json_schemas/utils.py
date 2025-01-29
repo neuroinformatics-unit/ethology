@@ -6,20 +6,14 @@ from pathlib import Path
 import jsonschema
 
 
-def _get_default_VIA_schema() -> dict:
-    """Get the VIA schema as a dictionary."""
-    via_schema_path = Path(__file__).parent / "schemas" / "VIA_schema.json"
-    with open(via_schema_path) as file:
-        via_schema_dict = json.load(file)
-    return via_schema_dict
-
-
-def _get_default_COCO_schema() -> dict:
-    """Get the COCO schema as a dictionary."""
-    coco_schema_path = Path(__file__).parent / "schemas" / "COCO_schema.json"
-    with open(coco_schema_path) as file:
-        coco_schema_dict = json.load(file)
-    return coco_schema_dict
+def _get_default_schema(schema_name: str) -> dict:
+    """Get the default VIA or COCO schema as a dictionary."""
+    schema_path = (
+        Path(__file__).parent / "schemas" / f"{schema_name}_schema.json"
+    )
+    with open(schema_path) as file:
+        schema_dict = json.load(file)
+    return schema_dict
 
 
 def _check_file_is_json(filepath: Path):
