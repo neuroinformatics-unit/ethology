@@ -58,18 +58,14 @@ def df_bboxes_from_file(
     if isinstance(file_path, list):
         # Read multiple files
         df_all = _df_bboxes_from_multiple_files(
-            file_path,
-            format=format,
-            **kwargs,
+            file_path, format=format, **kwargs
         )
 
     else:
         # Read single VIA file
         df_all = _df_bboxes_from_single_file(
-            file_path,
-            format=format,
-            **kwargs,
-        )  #
+            file_path, format=format, **kwargs
+        )
 
     # Add list of input files as metadata
     df_all.metadata = {"input_files": file_path}
@@ -90,14 +86,13 @@ def _df_bboxes_from_multiple_files(list_filepaths, format, **kwargs):
     # NOTE: after ignore_index=True the index name is no longer "annotation_id"
     df_all = pd.concat(df_list, ignore_index=True)
 
-    # Update image_id based on the full sorted list of image_filename
+    # Update image_id based on the full sorted list of image filenames
     list_image_filenames = sorted(list(df_all["image_filename"].unique()))
     df_all["image_id"] = df_all["image_filename"].apply(
         lambda x: list_image_filenames.index(x)
     )
 
-    # Remove duplicates that may exist across input files
-    # ignore_index=True so that the resulting axis is labeled 0,1,…,n - 1.
+    # Remove duplicates
     df_all = df_all.drop_duplicates(ignore_index=True, **kwargs)
 
     # Set the index name to "annotation_id"
@@ -135,14 +130,14 @@ def _df_bboxes_from_single_file(
         return _df_bboxes_from_single_specific_file(
             file_path,
             validator=ValidVIA,
-            df_rows_from_file_fn=_df_rows_from_valid_VIA_file,
+            get_rows_from_file=_df_rows_from_valid_VIA_file,
             **kwargs,
         )
     elif format == "COCO":
         return _df_bboxes_from_single_specific_file(
             file_path,
             validator=ValidCOCO,
-            df_rows_from_file_fn=_df_rows_from_valid_COCO_file,
+            get_rows_from_file=_df_rows_from_valid_COCO_file,
             **kwargs,
         )
     else:
@@ -152,14 +147,14 @@ def _df_bboxes_from_single_file(
 def _df_bboxes_from_single_specific_file(
     file_path: Path,
     validator: type[ValidVIA] | type[ValidCOCO],
-    df_rows_from_file_fn: Callable,
+    get_rows_from_file: Callable,
     **kwargs,
 ) -> pd.DataFrame:
     # Validate file
     valid_file = validator(file_path)
 
     # Build basic dataframe
-    list_rows = df_rows_from_file_fn(valid_file.path)
+    list_rows = get_rows_from_file(valid_file.path)
     df = pd.DataFrame(list_rows)  # , index=STANDARD_BBOXES_INDEX)
 
     # set annotation_id as index
