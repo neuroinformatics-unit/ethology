@@ -185,6 +185,9 @@ def _df_rows_from_valid_VIA_file(file_path: Path) -> list[dict]:
     # Prepare data
     image_metadata_dict = data_dict["_via_img_metadata"]
     via_image_id_list = data_dict["_via_image_id_list"]
+    supercategories_dict = {}
+    if "region" in data_dict["_via_attributes"]:
+        supercategories_dict = data_dict["_via_attributes"]["region"]
 
     # Map image filenames to image_metadata_dict keys
     # the image_metadata_dict keys are <filename><filesize> strings
@@ -203,13 +206,16 @@ def _df_rows_from_valid_VIA_file(file_path: Path) -> list[dict]:
             region_shape = region["shape_attributes"]
             region_attributes = region["region_attributes"]
 
-            # takes first key of the region_attributes as supercategory,
-            # and its value as category
-            if list(region_attributes.keys()):
+            # Define supercategory and category.
+            # We take first key of the region_attributes as supercategory,
+            # and its value as category_id_str
+            if list(region_attributes.keys()) and supercategories_dict:
                 supercategory = list(region_attributes.keys())[0]
-                category = region_attributes[supercategory]
-                # remove new line characters from "category"
-                category = category.replace("\n", "")
+                category_id_str = region_attributes[supercategory]
+                category = supercategories_dict[supercategory]["options"][
+                    category_id_str
+                ]
+
             else:
                 supercategory = ""
                 category = ""
