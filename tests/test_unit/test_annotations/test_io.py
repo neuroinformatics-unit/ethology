@@ -257,3 +257,32 @@ def test_df_bboxes_from_single_specific_file(
         expected_supercategories="animal",
         expected_categories="crab",
     )
+
+
+@pytest.mark.parametrize(
+    "input_file, tested_function, expected_n_annotations",
+    [
+        ("VIA_JSON_sample_1.json", _df_rows_from_valid_VIA_file, 4440),
+        ("VIA_JSON_sample_2.json", _df_rows_from_valid_VIA_file, 3977),
+        ("COCO_JSON_sample_1.json", _df_rows_from_valid_COCO_file, 4344),
+        ("COCO_JSON_sample_2.json", _df_rows_from_valid_COCO_file, 4618),
+    ],
+)
+def test_df_rows_from_valid_file(
+    input_file: str,
+    tested_function,
+    expected_n_annotations: int,
+    annotations_test_data: dict,
+):
+    """Test the specific bounding box format readers."""
+    rows = tested_function(file_path=annotations_test_data[input_file])
+
+    # Check number of rows
+    assert len(rows) == expected_n_annotations
+
+    # Check each row contains required column data
+    for row in rows:
+        assert all(
+            key in row
+            for key in [STANDARD_BBOXES_INDEX] + STANDARD_BBOXES_COLUMNS
+        )
