@@ -116,9 +116,7 @@ def assert_dataframe(
         ),
     ],
 )
-def test_df_bboxes_from_file_delegation(
-    input_format, file_path, function_to_mock
-):
+def test_df_bboxes_from_file(input_format, file_path, function_to_mock):
     """Test that the general bounding boxes loading function delegates
     correctly.
     """
@@ -171,7 +169,7 @@ def test_df_bboxes_from_multiple_files(input_format, multiple_input_files):
         ("unsupported", None, None, False),
     ],
 )
-def test_df_bboxes_from_single_file_delegation(
+def test_df_bboxes_from_single_file(
     input_format: str, validator, row_function, no_error_expected: bool
 ):
     """Test that the _df_bboxes_from_single_file function delegates correctly
@@ -191,7 +189,7 @@ def test_df_bboxes_from_single_file_delegation(
             mock.assert_called_once_with(
                 file_path,
                 validator=validator,
-                df_rows_from_file_fn=row_function,
+                get_rows_from_file=row_function,
             )
     else:
         with pytest.raises(ValueError) as excinfo:
@@ -248,7 +246,7 @@ def test_df_bboxes_from_single_specific_file(
     df = _df_bboxes_from_single_specific_file(
         file_path=annotations_test_data[input_file],
         validator=validator,
-        df_rows_from_file_fn=row_function,
+        get_rows_from_file=row_function,
     )
 
     # Check dataframe
