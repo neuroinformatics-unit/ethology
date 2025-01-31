@@ -20,7 +20,9 @@ STANDARD_BBOXES_DF_COLUMNS = [
     "height",
     "supercategory",
     "category",
-]
+    "image_width",
+    "image_height",
+]  # if a column is not defined, it is filled with nan
 
 
 def df_bboxes_from_files(
@@ -352,6 +354,10 @@ def _df_rows_from_valid_COCO_file(file_path: Path) -> list[dict]:
         img_dict["id"]: img_dict["file_name"]
         for img_dict in data_dict["images"]
     }
+    map_image_id_to_width_height = {
+        img_dict["id"]: (img_dict["width"], img_dict["height"])
+        for img_dict in data_dict["images"]
+    }
 
     map_category_id_to_category_data = {
         cat_dict["id"]: (cat_dict["name"], cat_dict["supercategory"])
@@ -366,6 +372,8 @@ def _df_rows_from_valid_COCO_file(file_path: Path) -> list[dict]:
         # image data
         image_id = annot_dict["image_id"]
         image_filename = map_image_id_to_filename[image_id]
+        image_width = map_image_id_to_width_height[image_id][0]
+        image_height = map_image_id_to_width_height[image_id][1]
 
         # bbox data
         x_min, y_min, width, height = annot_dict["bbox"]
@@ -378,6 +386,8 @@ def _df_rows_from_valid_COCO_file(file_path: Path) -> list[dict]:
             "annotation_id": annotation_id,
             "image_filename": image_filename,
             "image_id": image_id,
+            "image_width": image_width,
+            "image_height": image_height,
             "x_min": x_min,
             "y_min": y_min,
             "width": width,
