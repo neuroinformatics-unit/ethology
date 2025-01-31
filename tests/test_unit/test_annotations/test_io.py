@@ -414,10 +414,13 @@ def test_df_rows_from_valid_VIA_file(
     assert len(rows) == expected_n_annotations
 
     # Check each row contains required column data
+    # Note that "image_width" and "image_height" are not exported to the
+    # VIA file
     for row in rows:
         assert all(
             key in row
             for key in [STANDARD_BBOXES_DF_INDEX] + STANDARD_BBOXES_DF_COLUMNS
+            if key not in ["image_width", "image_height"]
         )
 
 
