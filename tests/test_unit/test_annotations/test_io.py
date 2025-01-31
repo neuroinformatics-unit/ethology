@@ -1,5 +1,7 @@
 from collections.abc import Callable
+from contextlib import nullcontext as does_not_raise
 from pathlib import Path
+from typing import Literal
 from unittest.mock import patch
 
 import pandas as pd
@@ -108,7 +110,11 @@ def assert_dataframe(
         ),
     ],
 )
-def test_df_bboxes_from_file(input_format, file_path, function_to_mock):
+def test_df_bboxes_from_files(
+    input_format: Literal["VIA", "COCO"],
+    file_path: Path,
+    function_to_mock: str,
+):
     """Test that the general bounding boxes loading function delegates
     correctly to the single or multiple file readers.
     """
@@ -128,7 +134,9 @@ def test_df_bboxes_from_file(input_format, file_path, function_to_mock):
         "COCO",
     ],
 )
-def test_df_bboxes_from_multiple_files(input_format, multiple_input_files):
+def test_df_bboxes_from_multiple_files(
+    input_format: Literal["VIA", "COCO"], multiple_input_files: dict
+):
     """Test that the general bounding boxes loading function reads
     correctly multiple files of the supported formats.
     """
@@ -162,7 +170,10 @@ def test_df_bboxes_from_multiple_files(input_format, multiple_input_files):
     ],
 )
 def test_df_bboxes_from_single_file(
-    input_format: str, validator, row_function, no_error_expected: bool
+    input_format: Literal["VIA", "COCO"],
+    validator: type[ValidVIA] | type[ValidCOCO] | None,
+    row_function: Callable | None,
+    no_error_expected: bool,
 ):
     """Test that the ``_df_bboxes_from_single_file`` function delegates
     correctly into the specific format readers.
@@ -379,3 +390,73 @@ def test_df_bboxes_from_single_specific_file_duplicates(
         expected_supercategories="animal",
         expected_categories="crab",
     )
+
+
+@pytest.mark.parametrize(
+    "duplicates_kwargs, expected_exception",
+    [
+        ({"ignore_index": True}, pytest.raises(ValueError)),
+        ({"inplace": True}, pytest.raises(ValueError)),
+        ({"subset": "image_id"}, does_not_raise()),
+        ({"keep": "last"}, does_not_raise()),
+    ],
+)
+@pytest.mark.parametrize(
+    "input_format, filename",
+    [
+        ("VIA", "small_bboxes_duplicates_VIA.json"),
+        ("VIA", "MULTIPLE_VIA_FILES"),
+        ("COCO", "small_bboxes_duplicates_COCO.json"),
+        ("COCO", "MULTIPLE_COCO_FILES"),
+    ],
+)
+def test_df_bboxes_from_files_kwargs(
+    input_format: Literal["VIA", "COCO"],
+    filename: str | list[str],
+    duplicates_kwargs: dict,
+    expected_exception: pytest.raises,
+    annotations_test_data: dict,
+    multiple_input_files: dict,
+):
+    # Check kwargs behaviour when passing multiple files
+    if "MULTIPLE" in filename:
+        list_files = multiple_input_files[input_format]
+
+        input_files = [file["path"] for file in list_files]
+        list_n_annotations = [file["n_annotations"] for file in list_files]
+        list_n_images = [file["n_images"] for file in list_files]
+
+        expected_n_annotations = sum(list_n_annotations)
+        expected_n_images = sum(list_n_images)
+        expected_annots_per_image = None
+
+    # Check kwargs behaviour when passing a single file
+    else:
+        input_files = annotations_test_data[filename]
+        expected_n_annotations = 3
+        expected_n_images = 3
+        expected_annots_per_image = 1
+
+    # Compute dataframe and check if an error is raised
+    with expected_exception as excinfo:
+        df = df_bboxes_from_files(
+            input_files,
+            format=input_format,
+            **duplicates_kwargs,
+        )
+    if excinfo:
+        assert (
+            "argument for `pandas.DataFrame.drop_duplicates` "
+            "may not be overridden." in str(excinfo.value)
+        )
+
+    # If no error expected: check dataframe content
+    if expected_exception == does_not_raise():
+        assert_dataframe(
+            df,
+            expected_n_annotations=expected_n_annotations,
+            expected_n_images=expected_n_images,
+            expected_supercategories="animal",
+            expected_categories="crab",
+            expected_annots_per_image=expected_annots_per_image,
+        )
