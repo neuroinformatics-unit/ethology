@@ -1,5 +1,6 @@
 """Module for reading and writing manually labelled annotations."""
 
+import ast
 import json
 from collections.abc import Callable
 from pathlib import Path
@@ -7,7 +8,7 @@ from typing import Literal
 
 import pandas as pd
 
-from ethology.annotations.validators import ValidCOCO, ValidVIA
+from ethology.annotations.validators import ValidCOCO, ValidVIA, ValidVIAcsv
 
 # definition of standard bboxes dataframe
 STANDARD_BBOXES_DF_INDEX = "annotation_id"
@@ -27,7 +28,7 @@ STANDARD_BBOXES_DF_COLUMNS = [
 
 def df_bboxes_from_files(
     file_paths: Path | list[Path],
-    format: Literal["VIA", "COCO"],
+    format: Literal["VIA", "COCO", "VIAcsv"],
     images_dirs: Path | list[Path] | None = None,
     **kwargs,
 ) -> pd.DataFrame:
@@ -37,7 +38,7 @@ def df_bboxes_from_files(
     ----------
     file_paths : Path | list[Path]
         Path or list of paths to the input annotations.
-    format : Literal["VIA", "COCO"]
+    format : Literal["VIA", "COCO", "VIAcsv"]
         Format of the input annotation files.
     images_dirs : Path | list[Path], optional
         Path or list of paths to the directories containing the images.
@@ -95,7 +96,9 @@ def df_bboxes_from_files(
 
 
 def _df_bboxes_from_multiple_files(
-    list_filepaths: list[Path], format: Literal["VIA", "COCO"], **kwargs
+    list_filepaths: list[Path],
+    format: Literal["VIA", "COCO", "VIAcsv"],
+    **kwargs,
 ):
     """Read bounding boxes annotations from multiple files.
 
@@ -103,9 +106,9 @@ def _df_bboxes_from_multiple_files(
     ----------
     list_filepaths : list[Path]
         List of input annotation filepaths.
-    format : Literal["VIA", "COCO"]
+    format : Literal["VIA", "COCO", "VIAcsv"]
         Format of the input files.
-        Currently supported formats are "VIA" and "COCO".
+        Currently supported formats are "VIA", "VIAcsv" and "COCO".
     **kwargs
         Additional keyword arguments to pass to the
         ``pandas.DataFrame.drop_duplicates`` method. The ``ignore_index=True``
@@ -149,7 +152,7 @@ def _df_bboxes_from_multiple_files(
 
 
 def _df_bboxes_from_single_file(
-    file_path: Path, format: Literal["VIA", "COCO"], **kwargs
+    file_path: Path, format: Literal["VIA", "COCO", "VIAcsv"], **kwargs
 ) -> pd.DataFrame:
     """Read bounding boxes annotations from a single file.
 
@@ -157,9 +160,9 @@ def _df_bboxes_from_single_file(
     ----------
     file_path : Path
         Path to the input annotations file.
-    format : Literal["VIA", "COCO"]
+    format : Literal["VIA", "COCO", "VIAcsv"]
         Format of the input annotations file.
-        Currently supported formats are "VIA" and "COCO".
+        Currently supported formats are "VIA", "VIAcsv" and "COCO".
     **kwargs
         Additional keyword arguments to pass to the
         ``pandas.DataFrame.drop_duplicates`` method. The ``ignore_index=True``
@@ -190,13 +193,20 @@ def _df_bboxes_from_single_file(
             get_rows_from_file=_df_rows_from_valid_COCO_file,
             **kwargs,
         )
+    elif format == "VIAcsv":
+        return _df_bboxes_from_single_specific_file(
+            file_path,
+            validator=ValidVIAcsv,
+            get_rows_from_file=_df_rows_from_valid_VIA_csv_file,
+            **kwargs,
+        )
     else:
         raise ValueError(f"Unsupported format: {format}")
 
 
 def _df_bboxes_from_single_specific_file(
     file_path: Path,
-    validator: type[ValidVIA] | type[ValidCOCO],
+    validator: type[ValidVIA] | type[ValidCOCO] | type[ValidVIAcsv],
     get_rows_from_file: Callable,
     **kwargs,
 ) -> pd.DataFrame:
@@ -327,6 +337,63 @@ def _df_rows_from_valid_VIA_file(file_path: Path) -> list[dict]:
 
             # update "annotation_id"
             annotation_id += 1
+
+    return list_rows
+
+
+def _df_rows_from_valid_VIA_csv_file(file_path: Path):
+    """Extract list of rows from validated VIA CSV file.
+
+    Parameters
+    ----------
+    file_path : Path
+        Path to the validated VIA CSV file.
+
+    Returns
+    -------
+    list[dict]
+        List of rows extracted from the VIA CSV file.
+
+    """
+    # Read input csv file
+    df = pd.read_csv(file_path)
+
+    # Map image filenames to unique image IDs
+    image_filenames = sorted(df["filename"].unique())
+    map_filename_to_image_id = {f: i for i, f in enumerate(image_filenames)}
+
+    list_rows = []
+    for df_index, df_row in df.iterrows():
+        annotation_id = df_index
+
+        image_filename = df_row["filename"]
+        image_id = map_filename_to_image_id[image_filename]
+
+        region_shape_attrs = ast.literal_eval(
+            df_row["region_shape_attributes"]
+        )
+        region_attributes = ast.literal_eval(df_row["region_attributes"])
+
+        x_min = region_shape_attrs["x"]
+        y_min = region_shape_attrs["y"]
+        width = region_shape_attrs["width"]
+        height = region_shape_attrs["height"]
+
+        supercategory = list(region_attributes.keys())[0]
+        category_id = region_attributes[supercategory]
+
+        row = {
+            "annotation_id": annotation_id,
+            "image_filename": image_filename,
+            "image_id": image_id,
+            "x_min": x_min,
+            "y_min": y_min,
+            "width": width,
+            "height": height,
+            "supercategory": supercategory,
+            "category": category_id,  # category ID !
+        }
+        list_rows.append(row)
 
     return list_rows
 

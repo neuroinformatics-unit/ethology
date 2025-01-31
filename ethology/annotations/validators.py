@@ -1,8 +1,10 @@
 """Validators for supported annotation files."""
 
+import ast
 import json
 from pathlib import Path
 
+import pandas as pd
 from attrs import define, field
 
 from ethology.annotations.json_schemas.utils import (
@@ -194,4 +196,66 @@ class ValidCOCO:
                     additional_message=(
                         f" for {_singularise_err_msg(ky)} {instance_dict}"
                     ),
+                )
+
+
+@define
+class ValidVIAcsv:
+    """Class for valid VIA CSV files.
+
+    It checks the input CSV file contains the expected header and
+    represents rectangular bounding boxes.
+
+    Attributes
+    ----------
+    path : pathlib.Path
+        Path to the VIA CSV file, passed as an input.
+    required_keys : dict
+        The required keys for the VIA CSV file.
+
+    Raises
+    ------
+    ValueError
+        If the VIA CSV file is missing any of the required keys.
+
+    """
+
+    path: Path = field()
+
+    @path.validator
+    def _check_file_contains_valid_header(self, attribute, value):
+        """Ensure the VIA .csv file contains the expected header."""
+        expected_header = [
+            "filename",
+            "file_size",
+            "file_attributes",
+            "region_count",
+            "region_id",
+            "region_shape_attributes",
+            "region_attributes",
+        ]
+
+        with open(value) as f:
+            header = f.readline().strip("\n").split(",")
+            if header != expected_header:
+                raise ValueError(
+                    ".csv header row does not match the known format for "
+                    "VIA .csv files. "
+                    f"Expected {expected_header} but got {header}.",
+                )
+
+    @path.validator
+    def _check_region_shape(self, attribute, value):
+        df = pd.read_csv(value, sep=",", header=0)
+
+        for row in df.itertuples():
+            region_shape_attrs = ast.literal_eval(row.region_shape_attributes)
+
+            # check annotation is a rectangle
+            if region_shape_attrs["name"] != "rect":
+                raise ValueError(
+                    f"{row.filename} (row {row.Index}): "
+                    "bounding box shape must be 'rect' (rectangular) "
+                    "but instead got "
+                    f"'{region_shape_attrs['name']}'.",
                 )
