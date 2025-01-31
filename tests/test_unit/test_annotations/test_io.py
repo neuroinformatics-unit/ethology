@@ -280,6 +280,101 @@ def test_df_bboxes_from_single_specific_file(
 
 
 @pytest.mark.parametrize(
+    ("input_file, validator, row_function"),
+    [
+        (
+            "small_bboxes_duplicates_VIA.json",
+            ValidVIA,
+            _df_rows_from_valid_VIA_file,
+        ),
+        (
+            "small_bboxes_duplicates_COCO.json",
+            ValidCOCO,
+            _df_rows_from_valid_COCO_file,
+        ),
+    ],
+)
+def test_df_bboxes_from_single_specific_file_duplicates(
+    input_file: str,
+    validator: type[ValidVIA] | type[ValidCOCO],
+    row_function: Callable,
+    annotations_test_data: dict,
+):
+    """Test the specific bounding box format readers when the input file
+    contains duplicate annotations.
+    """
+    # Properties of input data
+    # one annotation is duplicated in the first frame
+    expected_n_annotations_w_duplicates = 4
+    expected_n_annotations_wo_duplicates = 3
+    expected_n_images = 3
+
+    # Extract rows
+    rows = row_function(file_path=annotations_test_data[input_file])
+
+    # Check total number of annotations including duplicates
+    assert len(rows) == expected_n_annotations_w_duplicates
+
+    # Compute bboxes dataframe
+    df = _df_bboxes_from_single_specific_file(
+        file_path=annotations_test_data[input_file],
+        validator=validator,
+        get_rows_from_file=row_function,
+    )
+
+    # Check dataframe has no duplicates
+    assert_dataframe(
+        df,
+        expected_n_annotations_wo_duplicates,
+        expected_n_images,
+        expected_supercategories="animal",
+        expected_categories="crab",
+    )
+
+
+@pytest.mark.parametrize(
+    ("input_file, validator, row_function, expected_exception"),
+    [
+        (
+            "small_bboxes_no_cat_VIA.json",
+            ValidVIA,
+            _df_rows_from_valid_VIA_file,
+            does_not_raise(),
+        ),
+        (
+            "small_bboxes_no_cat_COCO.json",
+            ValidCOCO,
+            _df_rows_from_valid_COCO_file,
+            pytest.raises(KeyError),
+        ),
+    ],
+)
+def test_df_bboxes_from_single_specific_file_no_cat(
+    input_file: str,
+    validator: type[ValidVIA] | type[ValidCOCO],
+    row_function: Callable,
+    expected_exception: pytest.raises,
+    annotations_test_data: dict,
+):
+    """Test the specific bounding box format readers when the input file
+    has annotations with no category.
+    """
+    # Compute bboxes dataframe with input file that has no categories
+    # (this should raise an error for COCO files)
+    with expected_exception as excinfo:
+        df = _df_bboxes_from_single_specific_file(
+            file_path=annotations_test_data[input_file],
+            validator=validator,
+            get_rows_from_file=row_function,
+        )
+
+    # If no error expected, check that the dataframe has empty categories
+    if not excinfo:
+        assert all(df.loc[:, "category"] == "")
+        assert all(df.loc[:, "supercategory"] == "")
+
+
+@pytest.mark.parametrize(
     "input_file, expected_n_annotations",
     [
         ("VIA_JSON_sample_1.json", 4440),
@@ -337,59 +432,6 @@ def test_df_rows_from_valid_COCO_file(
             key in row
             for key in [STANDARD_BBOXES_DF_INDEX] + STANDARD_BBOXES_DF_COLUMNS
         )
-
-
-@pytest.mark.parametrize(
-    ("input_file, validator, row_function"),
-    [
-        (
-            "small_bboxes_duplicates_VIA.json",
-            ValidVIA,
-            _df_rows_from_valid_VIA_file,
-        ),
-        (
-            "small_bboxes_duplicates_COCO.json",
-            ValidCOCO,
-            _df_rows_from_valid_COCO_file,
-        ),
-    ],
-)
-def test_df_bboxes_from_single_specific_file_duplicates(
-    input_file: str,
-    validator: type[ValidVIA] | type[ValidCOCO],
-    row_function: Callable,
-    annotations_test_data: dict,
-):
-    """Test the specific bounding box format readers when the input file
-    contains duplicate annotations.
-    """
-    # Properties of input data
-    # one annotation is duplicated in the first frame
-    expected_n_annotations_w_duplicates = 4
-    expected_n_annotations_wo_duplicates = 3
-    expected_n_images = 3
-
-    # Extract rows
-    rows = row_function(file_path=annotations_test_data[input_file])
-
-    # Check total number of annotations including duplicates
-    assert len(rows) == expected_n_annotations_w_duplicates
-
-    # Compute bboxes dataframe
-    df = _df_bboxes_from_single_specific_file(
-        file_path=annotations_test_data[input_file],
-        validator=validator,
-        get_rows_from_file=row_function,
-    )
-
-    # Check dataframe has no duplicates
-    assert_dataframe(
-        df,
-        expected_n_annotations_wo_duplicates,
-        expected_n_images,
-        expected_supercategories="animal",
-        expected_categories="crab",
-    )
 
 
 @pytest.mark.parametrize(
