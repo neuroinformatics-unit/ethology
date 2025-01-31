@@ -26,6 +26,7 @@ STANDARD_BBOXES_DF_COLUMNS = [
 def df_bboxes_from_files(
     file_paths: Path | list[Path],
     format: Literal["VIA", "COCO"],
+    images_dirs: Path | list[Path] | None = None,
     **kwargs,
 ) -> pd.DataFrame:
     """Read bounding boxes annotations as a dataframe.
@@ -36,6 +37,8 @@ def df_bboxes_from_files(
         Path or list of paths to the input annotations.
     format : Literal["VIA", "COCO"]
         Format of the input annotation files.
+    images_dirs : Path | list[Path], optional
+        Path or list of paths to the directories containing the images.
     **kwargs
         Additional keyword arguments to pass to the
         ``pandas.DataFrame.drop_duplicates`` method. The ``ignore_index=True``
@@ -79,8 +82,12 @@ def df_bboxes_from_files(
             file_paths, format=format, **kwargs
         )
 
-    # Add list of input files as metadata
-    df_all.metadata = {"input_files": file_paths}
+    # Add metadata
+    df_all.metadata = {
+        "input_files": file_paths,
+        "format": format,
+        "images_dirs": images_dirs,
+    }
 
     return df_all
 

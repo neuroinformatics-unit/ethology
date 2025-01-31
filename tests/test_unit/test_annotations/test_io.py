@@ -98,6 +98,14 @@ def assert_dataframe(
     ],
 )
 @pytest.mark.parametrize(
+    "images_dirs",
+    [
+        [Path("/path/to/images")],  # single directory
+        [Path("/path/to/images1"), Path("/path/to/images2")],  # multiple dirs
+        None,  # no images directories
+    ],
+)
+@pytest.mark.parametrize(
     "file_path, function_to_mock",
     [
         (
@@ -112,19 +120,28 @@ def assert_dataframe(
 )
 def test_df_bboxes_from_files(
     input_format: Literal["VIA", "COCO"],
+    images_dirs: Path | list[Path] | None,
     file_path: Path,
     function_to_mock: str,
 ):
     """Test that the general bounding boxes loading function delegates
-    correctly to the single or multiple file readers.
+    correctly to the single or multiple file readers, and check the
+    metadata is added correctly.
     """
     # Call general function and see if mocked function is called
     with patch(function_to_mock) as mock:
-        df = df_bboxes_from_files(file_path, format=input_format)
+        df = df_bboxes_from_files(
+            file_path,
+            format=input_format,
+            images_dirs=images_dirs,
+        )
         mock.assert_called_once_with(file_path, format=input_format)
 
     # Check metadata
     assert df.metadata["input_files"] == file_path
+    assert df.metadata["format"] == input_format
+    if images_dirs:
+        assert df.metadata["images_dirs"] == images_dirs
 
 
 @pytest.mark.parametrize(
