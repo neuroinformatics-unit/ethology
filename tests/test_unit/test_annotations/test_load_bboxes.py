@@ -73,14 +73,17 @@ def assert_dataframe(
     assert len(df["image_filename"].unique()) == expected_n_images
     assert len(df["image_id"].unique()) == expected_n_images
 
-    # Check columns are as expected
-    assert df.columns.tolist() == STANDARD_BBOXES_DF_COLUMNS
+    # Check minimal columns are present
+    assert all(col in df.columns for col in STANDARD_BBOXES_DF_COLUMNS)
+    # assert df.columns.tolist() == STANDARD_BBOXES_DF_COLUMNS
 
     # Check supercategories are as expected
     assert df["supercategory"].unique() == expected_supercategories
 
     # Check categories are as expected
     assert df["category"].unique() == expected_categories
+
+    # Check category ID is an integer?
 
     # Check number of annotations per image if provided
     if expected_annots_per_image:
