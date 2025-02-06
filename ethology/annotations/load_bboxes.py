@@ -26,7 +26,7 @@ STANDARD_BBOXES_DF_COLUMNS = [
 
 
 def df_bboxes_from_files(
-    file_paths: Path | list[Path] | str | list[str],
+    file_paths: Path | str | list[Path | str],
     format: Literal["VIA", "COCO"],
     images_dirs: Path | list[Path] | None = None,
     **kwargs,
@@ -95,13 +95,13 @@ def df_bboxes_from_files(
 
 
 def _df_bboxes_from_multiple_files(
-    list_filepaths: list[Path], format: Literal["VIA", "COCO"], **kwargs
+    list_filepaths: list[Path | str], format: Literal["VIA", "COCO"], **kwargs
 ):
     """Read bounding boxes annotations from multiple files.
 
     Parameters
     ----------
-    list_filepaths : list[Path]
+    list_filepaths : list[Path | str]
         List of input annotation filepaths.
     format : Literal["VIA", "COCO"]
         Format of the input files.
@@ -149,13 +149,13 @@ def _df_bboxes_from_multiple_files(
 
 
 def _df_bboxes_from_single_file(
-    file_path: Path, format: Literal["VIA", "COCO"], **kwargs
+    file_path: Path | str, format: Literal["VIA", "COCO"], **kwargs
 ) -> pd.DataFrame:
     """Read bounding boxes annotations from a single file.
 
     Parameters
     ----------
-    file_path : Path
+    file_path : Path | str
         Path to the input annotations file.
     format : Literal["VIA", "COCO"]
         Format of the input annotations file.
@@ -195,7 +195,7 @@ def _df_bboxes_from_single_file(
 
 
 def _df_bboxes_from_single_specific_file(
-    file_path: Path,
+    file_path: Path | str,
     validator: type[ValidVIA] | type[ValidCOCO],
     get_rows_from_file: Callable,
     **kwargs,
@@ -204,7 +204,7 @@ def _df_bboxes_from_single_specific_file(
 
     Parameters
     ----------
-    file_path : Path
+    file_path : Path | str
         Path to the input annotations file.
     validator : type[ValidVIA] | type[ValidCOCO]
         Validator class for the input annotations file.
