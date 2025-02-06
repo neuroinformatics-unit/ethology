@@ -236,8 +236,12 @@ def _df_bboxes_from_single_specific_file(
     df = pd.DataFrame(list_rows)
 
     # Set "annotation_id" as index
-    # (otherwise duplicate annotations are not identified as such)
+    # (otherwise duplicate annotations are not identified as such,
+    # because they have different ID)
     df = df.set_index(STANDARD_BBOXES_DF_INDEX)
+
+    # Sort by index?
+    # df = df.sort_index()
 
     # Drop duplicates and reset indices.
     # We use ignore_index=True so that the resulting axis is labeled 0,1,…,n-1.
@@ -245,7 +249,8 @@ def _df_bboxes_from_single_specific_file(
     df = df.drop_duplicates(ignore_index=True, inplace=False, **kwargs)
 
     # Reorder columns to match standard columns
-    df = df.reindex(columns=STANDARD_BBOXES_DF_COLUMNS)
+    # (removes all columns not specified in list)
+    # df = df.reindex(columns=STANDARD_BBOXES_DF_COLUMNS)
 
     # Set the index name to "annotation_id"
     df.index.name = STANDARD_BBOXES_DF_INDEX
