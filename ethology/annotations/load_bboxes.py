@@ -1,4 +1,4 @@
-"""Module for reading and writing manually labelled annotations."""
+"""Module for reading manually labelled bounding boxes."""
 
 import json
 from collections.abc import Callable
@@ -26,7 +26,7 @@ STANDARD_BBOXES_DF_COLUMNS = [
 
 
 def df_bboxes_from_files(
-    file_paths: Path | list[Path],
+    file_paths: Path | list[Path] | str | list[str],
     format: Literal["VIA", "COCO"],
     images_dirs: Path | list[Path] | None = None,
     **kwargs,
