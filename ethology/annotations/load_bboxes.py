@@ -20,9 +20,11 @@ STANDARD_BBOXES_DF_COLUMNS = [
     "height",
     "supercategory",
     "category",
-    "image_width",
-    "image_height",
-]  # if a column is not defined, it is filled with nan
+    "category_id",  # -- not mandatory?
+    # "image_width", -- not mandatory?
+    # "image_height", -- not mandatory?
+]
+# if a column is not defined, it is filled with nan
 
 
 def df_bboxes_from_files(
@@ -248,6 +250,11 @@ def _df_bboxes_from_single_specific_file(
     # Set the index name to "annotation_id"
     df.index.name = STANDARD_BBOXES_DF_INDEX
 
+    # if category_id is a string (e.g. in VIA files),
+    # cast as an int via factorization from category name
+    if df["category_id"].dtype == str:
+        df["category_id"] = df["category"].factorize(sort=True)[0]
+
     # Read as standard dataframe
     return df
 
@@ -305,9 +312,15 @@ def _df_rows_from_valid_VIA_file(file_path: Path) -> list[dict]:
                 category = supercategories_props[supercategory]["options"][
                     category_id_str
                 ]
+                # extract category ID as int if possible
+                try:
+                    category_id = int(category_id_str)
+                except ValueError:
+                    category_id = category_id_str
             else:
                 supercategory = ""
                 category = ""
+                category_id = ""  # type: ignore
 
             row = {
                 "annotation_id": annotation_id,
@@ -321,6 +334,8 @@ def _df_rows_from_valid_VIA_file(file_path: Path) -> list[dict]:
                 "height": region_shape["height"],
                 "supercategory": supercategory,
                 "category": category,
+                "category_id": category_id,
+                # VIA format does not impose category_id to be castable as int
             }
 
             list_rows.append(row)
@@ -394,6 +409,7 @@ def _df_rows_from_valid_COCO_file(file_path: Path) -> list[dict]:
             "height": height,
             "supercategory": supercategory,
             "category": category,
+            "category_id": category_id,
         }
 
         list_rows.append(row)
