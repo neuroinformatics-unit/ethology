@@ -44,7 +44,7 @@ class ValidVIA:
 
     """
 
-    path: Path = field()
+    path: Path | str = field(converter=Path)
     schema: dict = field(
         default=_get_default_schema("VIA"),
         init=False,
@@ -140,7 +140,7 @@ class ValidCOCO:
 
     """
 
-    path: Path = field()
+    path: Path | str = field(converter=Path)
     schema: dict = field(
         default=_get_default_schema("COCO"),
         init=False,
