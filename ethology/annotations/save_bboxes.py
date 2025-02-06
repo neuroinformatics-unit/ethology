@@ -3,6 +3,7 @@
 import json
 from datetime import datetime
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -85,7 +86,7 @@ def df_bboxes_to_COCO_file(df: pd.DataFrame, output_filepath: str | Path):
         )
 
     #########
-    COCO_dict = {}
+    COCO_dict: dict[str, Any] = {}
     for sections in ["images", "categories", "annotations"]:
         # Extract required columns
         df_section = df[list(map_columns_to_COCO_keys[sections].keys())].copy()
@@ -117,13 +118,11 @@ def df_bboxes_to_COCO_file(df: pd.DataFrame, output_filepath: str | Path):
     formatted_timestamp = datetime.now(pytz.utc).strftime(
         "%a %b %d %Y %H:%M:%S GMT%z"
     )
-    COCO_dict["info"] = [
-        {
-            "date_created": formatted_timestamp,
-            "description": "Bounding boxes annotations exported from ethology",
-            "url": "https://github.com/neuroinformatics-unit/ethology",
-        }
-    ]
+    COCO_dict["info"] = {
+        "date_created": formatted_timestamp,
+        "description": "Bounding boxes annotations exported from ethology",
+        "url": "https://github.com/neuroinformatics-unit/ethology",
+    }
 
     ################
     # Write to JSON file
