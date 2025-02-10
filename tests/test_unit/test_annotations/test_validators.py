@@ -308,7 +308,7 @@ def test_extract_properties_keys(
             ["images", "annotations", "categories"],
             {
                 "images": [],
-                "annotations": [],
+                "annotations": {},
                 "categories": [1, 2, 3],
             },
             "",
