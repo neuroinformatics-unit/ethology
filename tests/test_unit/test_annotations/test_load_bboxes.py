@@ -19,7 +19,7 @@ from ethology.annotations.io.load_bboxes import (
 
 
 @pytest.fixture
-def multiple_input_files(annotations_test_data: dict) -> dict:
+def multiple_files(annotations_test_data: dict) -> dict:
     """Fixture that returns for each format, a pair of annotation files
     with their number of annotations and images.
     """
@@ -48,6 +48,47 @@ def multiple_input_files(annotations_test_data: dict) -> dict:
                 "n_images": 100,
             },
         ],
+    }
+
+
+@pytest.fixture
+def multiple_files_duplicates(annotations_test_data: dict) -> dict:
+    """Fixture that returns for each format, a pair of annotation files
+    with duplicate annotations across the two files.
+    """
+    return {
+        "VIA": {
+            "files": [
+                {
+                    "path": annotations_test_data["small_bboxes_VIA.json"],
+                    "n_annotations": 3,
+                },
+                {
+                    "path": annotations_test_data[
+                        "small_bboxes_VIA_subset.json"
+                    ],
+                    "n_annotations": 2,
+                },
+            ],
+            "duplicates": 1,
+            "n_images": 3,
+        },
+        "COCO": {
+            "files": [
+                {
+                    "path": annotations_test_data["small_bboxes_COCO.json"],
+                    "n_annotations": 3,
+                },
+                {
+                    "path": annotations_test_data[
+                        "small_bboxes_COCO_subset.json"
+                    ],
+                    "n_annotations": 2,
+                },
+            ],
+            "duplicates": 1,
+            "n_images": 3,
+        },
     }
 
 
@@ -150,13 +191,13 @@ def test_from_files(
     ],
 )
 def test_from_multiple_files(
-    input_format: Literal["VIA", "COCO"], multiple_input_files: dict
+    input_format: Literal["VIA", "COCO"], multiple_files: dict
 ):
     """Test that the general bounding boxes loading function reads
     correctly multiple files of the supported formats.
     """
     # Get format and list of files
-    list_files = multiple_input_files[input_format]
+    list_files = multiple_files[input_format]
 
     # Get paths, annotations and images
     list_paths = [file["path"] for file in list_files]
@@ -414,9 +455,9 @@ def test_df_rows_from_valid_COCO_file(
     "input_format, filename",
     [
         ("VIA", "small_bboxes_duplicates_VIA.json"),
-        ("VIA", "MULTIPLE_VIA_FILES"),
+        ("VIA", "MULTIPLE_VIA_FILES_WITH_DUPLICATES"),
         ("COCO", "small_bboxes_duplicates_COCO.json"),
-        ("COCO", "MULTIPLE_COCO_FILES"),
+        ("COCO", "MULTIPLE_COCO_FILES_WITH_DUPLICATES"),
     ],
 )
 def test_from_files_kwargs(
@@ -425,18 +466,24 @@ def test_from_files_kwargs(
     duplicates_kwargs: dict,
     expected_exception: pytest.raises,
     annotations_test_data: dict,
-    multiple_input_files: dict,
+    multiple_files_duplicates: dict,
 ):
+    """Test the behaviour of the `from_files` function when passing
+    input files with duplicates (in single files or across files),
+    and different keyword-arguments to the `drop_duplicates` method.
+    """
     # Check kwargs behaviour when passing multiple files
     if "MULTIPLE" in filename:
-        list_files = multiple_input_files[input_format]
-
+        list_files = multiple_files_duplicates[input_format]["files"]
         input_files = [file["path"] for file in list_files]
-        list_n_annotations = [file["n_annotations"] for file in list_files]
-        list_n_images = [file["n_images"] for file in list_files]
 
-        expected_n_annotations = sum(list_n_annotations)
-        expected_n_images = sum(list_n_images)
+        n_duplicates = multiple_files_duplicates[input_format]["duplicates"]
+        n_total_annotations = sum(
+            [file["n_annotations"] for file in list_files]
+        )
+
+        expected_n_annotations = n_total_annotations - n_duplicates
+        expected_n_images = multiple_files_duplicates[input_format]["n_images"]
         expected_annots_per_image = None
 
     # Check kwargs behaviour when passing a single file
