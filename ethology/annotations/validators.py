@@ -212,4 +212,8 @@ class ValidCOCO:
 
         # Check for duplicate image IDs
         if n_images != len(unique_image_ids):
-            raise ValueError("The image IDs are not unique.")
+            raise ValueError(
+                "The image IDs in the input COCO file are not unique. "
+                f"There are {n_images} image entries, but only "
+                f"{len(unique_image_ids)} unique image IDs."
+            )
