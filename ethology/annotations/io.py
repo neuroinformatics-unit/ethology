@@ -80,7 +80,7 @@ def df_bboxes_from_files(
         )
 
     else:
-        # Read single VIA file
+        # Read single file
         df_all = _df_bboxes_from_single_file(
             file_paths, format=format, **kwargs
         )
@@ -289,7 +289,7 @@ def _df_rows_from_valid_VIA_file(file_path: Path) -> list[dict]:
     # Get list of rows in dataframe
     list_rows = []
     annotation_id = 0
-    # loop thru images
+    # loop through images
     for _, img_dict in image_metadata_dict.items():
         # loop thru annotations in the image
         for region in img_dict["regions"]:
