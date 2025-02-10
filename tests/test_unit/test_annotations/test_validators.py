@@ -461,7 +461,10 @@ def test_required_keys_in_provided_COCO_schema(
     ],
 )
 def test_no_categories_behaviour(
-    validator, input_file, expected_exception, annotations_test_data
+    validator: type[ValidVIA | ValidCOCO],
+    input_file: str,
+    expected_exception: pytest.raises,
+    annotations_test_data: dict,
 ):
     """Test the behaviour of the validators when the input file does not
     specify any categories.
@@ -485,7 +488,7 @@ def test_no_categories_behaviour(
         ) in str(excinfo.value)
 
 
-def test_null_category_ID_behaviour(annotations_test_data):
+def test_null_category_ID_behaviour(annotations_test_data: dict):
     """Test the behaviour of the validators when the input file contains
     annotations with null category IDs.
     """
