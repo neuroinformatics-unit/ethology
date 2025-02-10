@@ -366,7 +366,7 @@ def test_df_bboxes_from_single_specific_file_duplicates(
         ),
     ],
 )
-def test_df_bboxes_from_single_specific_file_no_cat(
+def test_df_bboxes_from_single_specific_file_no_category(
     input_file: str,
     validator: type[ValidVIA] | type[ValidCOCO],
     row_function: Callable,
