@@ -191,3 +191,30 @@ class ValidCOCO:
                         f" for {_singularise_err_msg(ky)} {instance_dict}"
                     ),
                 )
+
+    @path.validator
+    def _file_contains_unique_image_IDs(self, attribute, value):
+        """Ensure that the COCO JSON file contains unique image IDs.
+
+        When exporting to COCO format, the VIA tool attempts to extract the
+        image ID from the image filename using ``parseInt``. As a result, if
+        two or more images have the same number-based filename, the image IDs
+        can be non-unique (i.e., more image filenames than image IDs). This is
+        probably a bug in the VIA tool, but we need to check for this issue.
+        """
+        with open(value) as file:
+            data = json.load(file)
+
+        # Get number of elements in "images" list
+        n_images = len(data["images"])
+
+        # Get the image IDs
+        unique_image_ids = set([img["id"] for img in data["images"]])
+
+        # Check for duplicate image IDs
+        if n_images != len(unique_image_ids):
+            raise ValueError(
+                "The image IDs in the input COCO file are not unique. "
+                f"There are {n_images} image entries, but only "
+                f"{len(unique_image_ids)} unique image IDs."
+            )
