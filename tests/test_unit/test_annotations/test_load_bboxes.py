@@ -268,7 +268,7 @@ def test_from_single_file_unsupported():
         ),  # small COCO file
     ],
 )
-def test_from_single_specific_file(
+def test_from_single_file(
     input_file: str,
     format: Literal["VIA", "COCO"],
     expected_n_annotations: int,
