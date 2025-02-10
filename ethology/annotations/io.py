@@ -52,10 +52,10 @@ def df_bboxes_from_files(
     Returns
     -------
     pd.DataFrame
-        Bounding boxes annotations dataframe. The dataframe is indexed by
-        "annotation_id" and has the following columns: "image_filename",
-        "image_id", "x_min", "y_min", "width", "height", "supercategory",
-        "category".
+        Bounding boxes annotations dataframe. The dataframe is indexed
+        by "annotation_id" and has the following columns: "image_filename",
+        "image_id", "image_width", "image_height", "x_min", "y_min",
+        "width", "height", "supercategory", "category".
 
     See Also
     --------
@@ -119,8 +119,8 @@ def _df_bboxes_from_multiple_files(
     pd.DataFrame
         Bounding boxes annotations dataframe. The dataframe is indexed
         by "annotation_id" and has the following columns: "image_filename",
-        "image_id", "x_min", "y_min", "width", "height", "supercategory",
-        "category".
+        "image_id", "image_width", "image_height", "x_min", "y_min",
+        "width", "height", "supercategory", "category".
 
     """
     # Get list of dataframes
@@ -173,8 +173,8 @@ def _df_bboxes_from_single_file(
     pd.DataFrame
         Bounding boxes annotations dataframe. The dataframe is indexed
         by "annotation_id" and has the following columns: "image_filename",
-        "image_id", "x_min", "y_min", "width", "height", "supercategory",
-        "category".
+        "image_id", "image_width", "image_height", "x_min", "y_min",
+        "width", "height", "supercategory", "category".
 
     """
     if format == "VIA":
@@ -223,8 +223,8 @@ def _df_bboxes_from_single_specific_file(
     pd.DataFrame
         Bounding boxes annotations dataframe. The dataframe is indexed
         by "annotation_id" and has the following columns: "image_filename",
-        "image_id", "x_min", "y_min", "width", "height", "supercategory",
-        "category".
+        "image_id", "image_width", "image_height", "x_min", "y_min",
+        "width", "height", "supercategory", "category".
 
     """
     # Validate file
