@@ -69,13 +69,32 @@ def _check_required_keys_in_dict(
     data: dict,
     additional_message: str = "",
 ):
-    """Check if the required keys are present in the input dictionary."""
+    """Check if the required keys are present in the input dictionary.
+
+    It checks that the required keys are defined in the input dictionary.
+    If they are, it additionally checks that if they are dictionaries or list,
+    they do not map to empty values.
+
+    The additional_message parameter is used to provide additional context in
+    the error message for the missing keys check.
+    """
     missing_keys = set(list_required_keys) - set(data.keys())
     if missing_keys:
         raise ValueError(
             f"Required key(s) {sorted(missing_keys)} not "
             f"found{additional_message}."
         )
+    else:
+        keys_with_empty_values = [
+            key
+            for key in list_required_keys
+            if isinstance(data[key], dict | list) and not data[key]
+        ]
+        if keys_with_empty_values:
+            raise ValueError(
+                f"Empty value(s) found for the required key(s) "
+                f"{sorted(keys_with_empty_values)}."
+            )
 
 
 def _extract_properties_keys(input_schema: dict, prefix: str = "") -> list:
