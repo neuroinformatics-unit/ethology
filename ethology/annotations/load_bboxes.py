@@ -227,6 +227,7 @@ def _df_bboxes_from_single_specific_file(
         "width", "height", "supercategory", "category".
 
     """
+    print("patata")
     # Validate file
     valid_file = validator(file_path)
 

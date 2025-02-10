@@ -7,7 +7,7 @@ from unittest.mock import patch
 import pandas as pd
 import pytest
 
-from ethology.annotations.io import (
+from ethology.annotations.load_bboxes import (
     STANDARD_BBOXES_DF_COLUMNS,
     STANDARD_BBOXES_DF_INDEX,
     _df_bboxes_from_multiple_files,
@@ -362,7 +362,7 @@ def test_df_bboxes_from_single_specific_file_duplicates(
             "small_bboxes_no_cat_COCO.json",
             ValidCOCO,
             _df_rows_from_valid_COCO_file,
-            pytest.raises(KeyError),
+            pytest.raises(ValueError),
         ),
     ],
 )
