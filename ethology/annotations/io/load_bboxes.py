@@ -230,7 +230,7 @@ def _df_rows_from_valid_VIA_file(file_path: Path) -> list[dict]:
 
     # Prepare data
     image_metadata_dict = data_dict["_via_img_metadata"]
-    via_image_id_list = data_dict["_via_image_id_list"]
+    via_image_id_list = [str(x) for x in data_dict["_via_image_id_list"]]
     via_attributes = data_dict["_via_attributes"]
     supercategories_props = {}
     if "region" in via_attributes:

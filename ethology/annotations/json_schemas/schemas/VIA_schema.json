@@ -67,7 +67,10 @@
         "_via_image_id_list": {
             "type": "array",
             "items": {
-                "type": "string"
+                "type": [
+                    "integer",
+                    "string"
+                ]
             }
         },
         "_via_attributes": {
