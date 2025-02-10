@@ -504,12 +504,10 @@ def test_COCO_non_unique_image_IDs(annotations_test_data: dict):
     """Check the COCO validator throws an error when the input file contains
     non-unique image IDs.
     """
-    # Get path to test file
     filepath = annotations_test_data[
         "small_bboxes_non_unique_img_id_COCO.json"
     ]
 
-    # Throws a schema validation error because image IDs are not unique
     with pytest.raises(ValueError) as excinfo:
         _ = ValidCOCO(path=filepath)
 
