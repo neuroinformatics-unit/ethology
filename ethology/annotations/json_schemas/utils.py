@@ -72,8 +72,8 @@ def _check_required_keys_in_dict(
     """Check if the required keys are present in the input dictionary.
 
     It checks that the required keys are defined in the input dictionary.
-    If they are, it additionally checks that if they are dictionaries or list,
-    they do not map to empty values.
+    If they are defined, and they are dictionaries or lists,
+    it additionally chacks that they are not empty.
 
     The additional_message parameter is used to provide additional context in
     the error message for the missing keys check.
