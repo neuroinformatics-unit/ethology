@@ -74,7 +74,24 @@
             "type": "object",
             "properties": {
                 "region": {
-                    "type": "object"
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "object",
+                        "properties": {
+                            "default_options": {
+                                "type": "object"
+                            },
+                            "description": {
+                                "type": "string"
+                            },
+                            "options": {
+                                "type": "object"
+                            },
+                            "type": {
+                                "type": "string"
+                            }
+                        }
+                    }
                 },
                 "file": {
                     "type": "object"
