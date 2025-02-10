@@ -275,52 +275,91 @@ def test_extract_properties_keys(
 
 
 @pytest.mark.parametrize(
-    "list_required_keys, data_dict, additional_message, expected_exception",
+    (
+        "list_required_keys, input_dict, additional_message, "
+        "expected_exception, expected_message"
+    ),
     [
         (
             ["images", "annotations", "categories"],
-            {"images": "", "annotations": "", "categories": ""},
+            {
+                "images": [1, 2, 3],
+                "annotations": [1, 2, 3],
+                "categories": [1, 2, 3],
+            },
             "",
             does_not_raise(),
-        ),  # zero missing keys
+            "",
+        ),  # zero missing keys, and all keys map to non-empty values
+        (
+            ["images", "annotations", "categories"],
+            {
+                "images": [],
+                "annotations": [1, 2, 3],
+                "categories": [1, 2, 3],
+            },
+            "",
+            pytest.raises(ValueError),
+            "Empty value(s) found for the required key(s) ['images'].",
+        ),  # zero missing keys, but one ("images") maps to empty values
+        (
+            ["images", "annotations", "categories"],
+            {
+                "images": [],
+                "annotations": [],
+                "categories": [1, 2, 3],
+            },
+            "",
+            pytest.raises(ValueError),
+            (
+                "Empty value(s) found for the required key(s) "
+                "['annotations', 'images']."
+            ),
+        ),  # zero missing keys, but two keys map to empty values
         (
             ["images", "annotations", "categories"],
             {"annotations": "", "categories": ""},
             "",
             pytest.raises(ValueError),
+            "Required key(s) ['images'] not found.",
         ),  # one missing key
         (
             ["images", "annotations", "categories"],
             {"annotations": ""},
             "",
             pytest.raises(ValueError),
+            "Required key(s) ['categories', 'images'] not found.",
         ),  # two missing keys
         (
             ["images", "annotations", "categories"],
             {"annotations": "", "categories": ""},
             "FOO",
             pytest.raises(ValueError),
-        ),  # one missing key with additional message
+            "Required key(s) ['images'] not foundFOO.",
+        ),  # one missing key with additional message for missing keys
     ],
 )
 def test_check_required_keys_in_dict(
     list_required_keys: list,
-    data_dict: dict,
+    input_dict: dict,
     additional_message: str,
     expected_exception: pytest.raises,
+    expected_message: str,
 ):
-    """Test the _check_required_keys_in_dict helper function."""
+    """Test the _check_required_keys_in_dict helper function.
+
+    The check verifies that the required keys are defined in the input
+    dictionary and if they are, it checks that they do not map to empty
+    values.
+    """
     with expected_exception as excinfo:
         _check_required_keys_in_dict(
-            list_required_keys, data_dict, additional_message
+            list_required_keys, input_dict, additional_message
         )
 
+    # Check error message
     if excinfo:
-        missing_keys = set(list_required_keys) - data_dict.keys()
-        assert str(excinfo.value) == (
-            f"Required key(s) {sorted(missing_keys)} "
-            f"not found{additional_message}."
-        )
+        assert expected_message in str(excinfo.value)
 
 
 def test_check_required_properties_keys(small_schema: dict):
@@ -347,7 +386,7 @@ def test_check_required_properties_keys(small_schema: dict):
         "VIA_JSON_sample_2.json",
     ],
 )
-def test_required_keys_in_VIA_schema(
+def test_required_keys_in_provided_VIA_schema(
     input_file: str, default_VIA_schema: dict, annotations_test_data: dict
 ):
     """Check the provided VIA schema contains the ValidVIA required keys."""
@@ -385,7 +424,7 @@ def test_required_keys_in_VIA_schema(
         "COCO_JSON_sample_2.json",
     ],
 )
-def test_required_keys_in_COCO_schema(
+def test_required_keys_in_provided_COCO_schema(
     input_file: str, default_COCO_schema: dict, annotations_test_data: dict
 ):
     """Check the provided COCO schema contains the ValidCOCO required keys."""
