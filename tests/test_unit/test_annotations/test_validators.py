@@ -483,3 +483,15 @@ def test_no_categories_behaviour(
             "Empty value(s) found for the required key(s) "
             "['annotations', 'categories']"
         ) in str(excinfo.value)
+
+
+def test_null_category_ID_behaviour(annotations_test_data):
+    """Test the behaviour of the validators when the input file contains
+    annotations with null category IDs.
+    """
+    # Get path to test file
+    filepath = annotations_test_data["small_bboxes_null_catID_COCO.json"]
+
+    # Throws a schema validation error because category IDs are not integer
+    with pytest.raises(jsonschema.exceptions.ValidationError):
+        _ = ValidCOCO(path=filepath)
