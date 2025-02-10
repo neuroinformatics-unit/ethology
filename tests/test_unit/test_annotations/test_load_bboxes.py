@@ -10,12 +10,12 @@ import pytest
 from ethology.annotations.load_bboxes import (
     STANDARD_BBOXES_DF_COLUMNS,
     STANDARD_BBOXES_DF_INDEX,
-    _df_bboxes_from_multiple_files,
-    _df_bboxes_from_single_file,
-    _df_bboxes_from_single_specific_file,
-    _df_rows_from_valid_COCO_file,
-    _df_rows_from_valid_VIA_file,
-    df_bboxes_from_files,
+    _from_multiple_files,
+    _from_single_file,
+    _from_single_specific_file,
+    _from_valid_COCO_file,
+    _from_valid_VIA_file,
+    from_files,
 )
 from ethology.annotations.validators import ValidCOCO, ValidVIA
 
@@ -110,15 +110,15 @@ def assert_dataframe(
     [
         (
             Path("/path/to/file"),  # single file
-            "ethology.annotations.load_bboxes._df_bboxes_from_single_file",
+            "ethology.annotations.load_bboxes._from_single_file",
         ),
         (
             [Path("/path/to/file1"), Path("/path/to/file2")],  # multiple files
-            "ethology.annotations.load_bboxes._df_bboxes_from_multiple_files",
+            "ethology.annotations.load_bboxes._from_multiple_files",
         ),
     ],
 )
-def test_df_bboxes_from_files(
+def test_from_files(
     input_format: Literal["VIA", "COCO"],
     images_dirs: Path | list[Path] | None,
     file_path: Path,
@@ -130,7 +130,7 @@ def test_df_bboxes_from_files(
     """
     # Call general function and see if mocked function is called
     with patch(function_to_mock) as mock:
-        df = df_bboxes_from_files(
+        df = from_files(
             file_path,
             format=input_format,
             images_dirs=images_dirs,
@@ -151,7 +151,7 @@ def test_df_bboxes_from_files(
         "COCO",
     ],
 )
-def test_df_bboxes_from_multiple_files(
+def test_from_multiple_files(
     input_format: Literal["VIA", "COCO"], multiple_input_files: dict
 ):
     """Test that the general bounding boxes loading function reads
@@ -166,7 +166,7 @@ def test_df_bboxes_from_multiple_files(
     list_n_images = [file["n_images"] for file in list_files]
 
     # Read all files as a dataframe
-    df_all = _df_bboxes_from_multiple_files(list_paths, format=input_format)
+    df_all = _from_multiple_files(list_paths, format=input_format)
 
     # Check dataframe
     assert_dataframe(
@@ -181,31 +181,31 @@ def test_df_bboxes_from_multiple_files(
 @pytest.mark.parametrize(
     "input_format, validator, row_function, no_error_expected",
     [
-        ("VIA", ValidVIA, _df_rows_from_valid_VIA_file, True),
-        ("COCO", ValidCOCO, _df_rows_from_valid_COCO_file, True),
+        ("VIA", ValidVIA, _from_valid_VIA_file, True),
+        ("COCO", ValidCOCO, _from_valid_COCO_file, True),
         ("unsupported", None, None, False),
     ],
 )
-def test_df_bboxes_from_single_file(
+def test_from_single_file(
     input_format: Literal["VIA", "COCO"],
     validator: type[ValidVIA] | type[ValidCOCO] | None,
     row_function: Callable | None,
     no_error_expected: bool,
 ):
-    """Test that the ``_df_bboxes_from_single_file`` function delegates
+    """Test that the ``_from_single_file`` function delegates
     correctly into the specific format readers.
     """
     file_path = Path("/mock/path/to/file")
     function_to_mock = (
-        "ethology.annotations.load_bboxes._df_bboxes_from_single_specific_file"
+        "ethology.annotations.load_bboxes._from_single_specific_file"
     )
 
     # If the format is supported, check that when calling
-    # `_df_bboxes_from_single_file`, `_df_bboxes_from_single_specific_file` is
+    # `_from_single_file`, `_from_single_specific_file` is
     # called under the hood with the correct arguments
     if no_error_expected:
         with patch(function_to_mock) as mock:
-            _df_bboxes_from_single_file(file_path, input_format)
+            _from_single_file(file_path, input_format)
             mock.assert_called_once_with(
                 file_path,
                 validator=validator,
@@ -214,7 +214,7 @@ def test_df_bboxes_from_single_file(
     # If the format is not supported, check that an error is raised
     else:
         with pytest.raises(ValueError) as excinfo:
-            _df_bboxes_from_single_file(file_path, input_format)
+            _from_single_file(file_path, input_format)
         assert "Unsupported format" in str(excinfo.value)
 
 
@@ -227,48 +227,48 @@ def test_df_bboxes_from_single_file(
         (
             "VIA_JSON_sample_1.json",
             ValidVIA,
-            _df_rows_from_valid_VIA_file,
+            _from_valid_VIA_file,
             4440,
             50,
         ),  # medium VIA file
         (
             "VIA_JSON_sample_2.json",
             ValidVIA,
-            _df_rows_from_valid_VIA_file,
+            _from_valid_VIA_file,
             3977,
             50,
         ),  # medium VIA file
         (
             "small_bboxes_VIA.json",
             ValidVIA,
-            _df_rows_from_valid_VIA_file,
+            _from_valid_VIA_file,
             3,
             3,
         ),  # small VIA file
         (
             "COCO_JSON_sample_1.json",
             ValidCOCO,
-            _df_rows_from_valid_COCO_file,
+            _from_valid_COCO_file,
             4344,
             100,
         ),  # medium COCO file
         (
             "COCO_JSON_sample_2.json",
             ValidCOCO,
-            _df_rows_from_valid_COCO_file,
+            _from_valid_COCO_file,
             4618,
             100,
         ),  # medium COCO file
         (
             "small_bboxes_COCO.json",
             ValidCOCO,
-            _df_rows_from_valid_COCO_file,
+            _from_valid_COCO_file,
             3,
             3,
         ),  # small COCO file
     ],
 )
-def test_df_bboxes_from_single_specific_file(
+def test_from_single_specific_file(
     input_file: str,
     validator: type[ValidVIA] | type[ValidCOCO],
     row_function: Callable,
@@ -278,7 +278,7 @@ def test_df_bboxes_from_single_specific_file(
 ):
     """Test the specific bounding box format readers."""
     # Compute bboxes dataframe from a single file
-    df = _df_bboxes_from_single_specific_file(
+    df = _from_single_specific_file(
         file_path=annotations_test_data[input_file],
         validator=validator,
         get_rows_from_file=row_function,
@@ -302,16 +302,16 @@ def test_df_bboxes_from_single_specific_file(
         (
             "small_bboxes_duplicates_VIA.json",
             ValidVIA,
-            _df_rows_from_valid_VIA_file,
+            _from_valid_VIA_file,
         ),
         (
             "small_bboxes_duplicates_COCO.json",
             ValidCOCO,
-            _df_rows_from_valid_COCO_file,
+            _from_valid_COCO_file,
         ),
     ],
 )
-def test_df_bboxes_from_single_specific_file_duplicates(
+def test_from_single_specific_file_duplicates(
     input_file: str,
     validator: type[ValidVIA] | type[ValidCOCO],
     row_function: Callable,
@@ -333,7 +333,7 @@ def test_df_bboxes_from_single_specific_file_duplicates(
     assert len(rows) == expected_n_annotations_w_duplicates
 
     # Compute bboxes dataframe
-    df = _df_bboxes_from_single_specific_file(
+    df = _from_single_specific_file(
         file_path=annotations_test_data[input_file],
         validator=validator,
         get_rows_from_file=row_function,
@@ -355,18 +355,18 @@ def test_df_bboxes_from_single_specific_file_duplicates(
         (
             "small_bboxes_no_cat_VIA.json",
             ValidVIA,
-            _df_rows_from_valid_VIA_file,
+            _from_valid_VIA_file,
             does_not_raise(),
         ),
         (
             "small_bboxes_no_cat_COCO.json",
             ValidCOCO,
-            _df_rows_from_valid_COCO_file,
+            _from_valid_COCO_file,
             pytest.raises(ValueError),
         ),
     ],
 )
-def test_df_bboxes_from_single_specific_file_no_category(
+def test_from_single_specific_file_no_category(
     input_file: str,
     validator: type[ValidVIA] | type[ValidCOCO],
     row_function: Callable,
@@ -379,7 +379,7 @@ def test_df_bboxes_from_single_specific_file_no_category(
     # Compute bboxes dataframe with input file that has no categories
     # (this should raise an error for COCO files)
     with expected_exception as excinfo:
-        df = _df_bboxes_from_single_specific_file(
+        df = _from_single_specific_file(
             file_path=annotations_test_data[input_file],
             validator=validator,
             get_rows_from_file=row_function,
@@ -406,9 +406,7 @@ def test_df_rows_from_valid_VIA_file(
     annotations_test_data: dict,
 ):
     """Test the extraction of rows from a valid VIA file."""
-    rows = _df_rows_from_valid_VIA_file(
-        file_path=annotations_test_data[input_file]
-    )
+    rows = _from_valid_VIA_file(file_path=annotations_test_data[input_file])
 
     # Check number of rows
     assert len(rows) == expected_n_annotations
@@ -439,9 +437,7 @@ def test_df_rows_from_valid_COCO_file(
     annotations_test_data: dict,
 ):
     """Test the extraction of rows from a valid COCO file."""
-    rows = _df_rows_from_valid_COCO_file(
-        file_path=annotations_test_data[input_file]
-    )
+    rows = _from_valid_COCO_file(file_path=annotations_test_data[input_file])
 
     # Check number of rows
     assert len(rows) == expected_n_annotations
@@ -472,7 +468,7 @@ def test_df_rows_from_valid_COCO_file(
         ("COCO", "MULTIPLE_COCO_FILES"),
     ],
 )
-def test_df_bboxes_from_files_kwargs(
+def test_from_files_kwargs(
     input_format: Literal["VIA", "COCO"],
     filename: str | list[str],
     duplicates_kwargs: dict,
@@ -501,7 +497,7 @@ def test_df_bboxes_from_files_kwargs(
 
     # Compute dataframe and check if an error is raised
     with expected_exception as excinfo:
-        df = df_bboxes_from_files(
+        df = from_files(
             input_files,
             format=input_format,
             **duplicates_kwargs,

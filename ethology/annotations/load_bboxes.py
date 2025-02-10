@@ -25,7 +25,7 @@ STANDARD_BBOXES_DF_COLUMNS = [
 ]  # if a column is not defined, it is filled with nan
 
 
-def df_bboxes_from_files(
+def from_files(
     file_paths: Path | list[Path],
     format: Literal["VIA", "COCO"],
     images_dirs: Path | list[Path] | None = None,
@@ -75,15 +75,11 @@ def df_bboxes_from_files(
 
     if isinstance(file_paths, list):
         # Read multiple files
-        df_all = _df_bboxes_from_multiple_files(
-            file_paths, format=format, **kwargs
-        )
+        df_all = _from_multiple_files(file_paths, format=format, **kwargs)
 
     else:
         # Read single file
-        df_all = _df_bboxes_from_single_file(
-            file_paths, format=format, **kwargs
-        )
+        df_all = _from_single_file(file_paths, format=format, **kwargs)
 
     # Add metadata
     df_all.metadata = {
@@ -95,7 +91,7 @@ def df_bboxes_from_files(
     return df_all
 
 
-def _df_bboxes_from_multiple_files(
+def _from_multiple_files(
     list_filepaths: list[Path], format: Literal["VIA", "COCO"], **kwargs
 ):
     """Read bounding boxes annotations from multiple files.
@@ -125,8 +121,7 @@ def _df_bboxes_from_multiple_files(
     """
     # Get list of dataframes
     df_list = [
-        _df_bboxes_from_single_file(file, format=format)
-        for file in list_filepaths
+        _from_single_file(file, format=format) for file in list_filepaths
     ]
 
     # Concatenate with ignore_index=True,
@@ -149,7 +144,7 @@ def _df_bboxes_from_multiple_files(
     return df_all
 
 
-def _df_bboxes_from_single_file(
+def _from_single_file(
     file_path: Path, format: Literal["VIA", "COCO"], **kwargs
 ) -> pd.DataFrame:
     """Read bounding boxes annotations from a single file.
@@ -178,24 +173,24 @@ def _df_bboxes_from_single_file(
 
     """
     if format == "VIA":
-        return _df_bboxes_from_single_specific_file(
+        return _from_single_specific_file(
             file_path,
             validator=ValidVIA,
-            get_rows_from_file=_df_rows_from_valid_VIA_file,
+            get_rows_from_file=_from_valid_VIA_file,
             **kwargs,
         )
     elif format == "COCO":
-        return _df_bboxes_from_single_specific_file(
+        return _from_single_specific_file(
             file_path,
             validator=ValidCOCO,
-            get_rows_from_file=_df_rows_from_valid_COCO_file,
+            get_rows_from_file=_from_valid_COCO_file,
             **kwargs,
         )
     else:
         raise ValueError(f"Unsupported format: {format}")
 
 
-def _df_bboxes_from_single_specific_file(
+def _from_single_specific_file(
     file_path: Path,
     validator: type[ValidVIA] | type[ValidCOCO],
     get_rows_from_file: Callable,
@@ -254,7 +249,7 @@ def _df_bboxes_from_single_specific_file(
     return df
 
 
-def _df_rows_from_valid_VIA_file(file_path: Path) -> list[dict]:
+def _from_valid_VIA_file(file_path: Path) -> list[dict]:
     """Extract list of rows from a validated VIA JSON file.
 
     Parameters
@@ -333,7 +328,7 @@ def _df_rows_from_valid_VIA_file(file_path: Path) -> list[dict]:
     return list_rows
 
 
-def _df_rows_from_valid_COCO_file(file_path: Path) -> list[dict]:
+def _from_valid_COCO_file(file_path: Path) -> list[dict]:
     """Extract list of rows from a validated COCO JSON file.
 
     Parameters
