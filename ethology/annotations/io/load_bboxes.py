@@ -79,7 +79,7 @@ def from_files(
         df_all = _from_single_file(file_paths, format=format, **kwargs)
 
     # Add metadata
-    df_all.metadata = {
+    df_all.attrs = {
         "input_files": file_paths,
         "format": format,
         "images_dirs": images_dirs,

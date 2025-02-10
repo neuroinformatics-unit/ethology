@@ -136,10 +136,10 @@ def test_from_files(
         mock.assert_called_once_with(file_path, format=input_format)
 
     # Check metadata
-    assert df.metadata["input_files"] == file_path
-    assert df.metadata["format"] == input_format
+    assert df.attrs["input_files"] == file_path
+    assert df.attrs["format"] == input_format
     if images_dirs:
-        assert df.metadata["images_dirs"] == images_dirs
+        assert df.attrs["images_dirs"] == images_dirs
 
 
 @pytest.mark.parametrize(
