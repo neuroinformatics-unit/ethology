@@ -197,8 +197,9 @@ class ValidCOCO:
         """Ensure that the COCO JSON file contains unique image IDs.
 
         When exporting to COCO format, the VIA tool attempts to extract the
-        image ID from the filename using ``parseInt``. If two images have the
-        same number-based filename, the image IDs can be duplicated. This is
+        image ID from the image filename using ``parseInt``. As a result, if
+        two or more images have the same number-based filename, the image IDs
+        can be non-unique (i.e., more image filenames than image IDs). This is
         probably a bug in the VIA tool, but we need to check for this issue.
         """
         with open(value) as file:
