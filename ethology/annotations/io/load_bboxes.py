@@ -294,13 +294,20 @@ def _df_rows_from_valid_COCO_file(file_path: Path) -> list[dict]:
         data_dict = json.load(file)
 
     # Prepare data
-    map_image_id_to_filename = {
-        img_dict["id"]: img_dict["file_name"]
-        for img_dict in data_dict["images"]
+    # We define image_id_ethology as the 0-based index of the image in the
+    # "images" list of the COCO JSON file. The following assumes the number of
+    # unique image_ids in the input COCO file matches the number of elements
+    # in the "images" list.
+    map_img_id_coco_to_ethology = {
+        img_dict["id"]: idx for idx, img_dict in enumerate(data_dict["images"])
     }
-    map_image_id_to_width_height = {
-        img_dict["id"]: (img_dict["width"], img_dict["height"])
-        for img_dict in data_dict["images"]
+    map_img_id_ethology_to_filename = {
+        idx: img_dict["file_name"]
+        for idx, img_dict in enumerate(data_dict["images"])
+    }
+    map_img_id_ethology_to_wh = {
+        idx: (img_dict["width"], img_dict["height"])
+        for idx, img_dict in enumerate(data_dict["images"])
     }
 
     map_category_id_to_category_data = {
@@ -314,10 +321,12 @@ def _df_rows_from_valid_COCO_file(file_path: Path) -> list[dict]:
         annotation_id = annot_dict["id"]
 
         # image data
-        image_id = annot_dict["image_id"]
-        image_filename = map_image_id_to_filename[image_id]
-        image_width = map_image_id_to_width_height[image_id][0]
-        image_height = map_image_id_to_width_height[image_id][1]
+        img_id_coco = annot_dict["image_id"]
+        img_id_ethology = map_img_id_coco_to_ethology[img_id_coco]
+
+        image_filename = map_img_id_ethology_to_filename[img_id_ethology]
+        image_width = map_img_id_ethology_to_wh[img_id_ethology][0]
+        image_height = map_img_id_ethology_to_wh[img_id_ethology][1]
 
         # bbox data
         x_min, y_min, width, height = annot_dict["bbox"]
@@ -329,7 +338,7 @@ def _df_rows_from_valid_COCO_file(file_path: Path) -> list[dict]:
         row = {
             "annotation_id": annotation_id,
             "image_filename": image_filename,
-            "image_id": image_id,
+            "image_id": img_id_ethology,
             "image_width": image_width,
             "image_height": image_height,
             "x_min": x_min,
