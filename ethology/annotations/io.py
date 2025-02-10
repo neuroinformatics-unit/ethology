@@ -36,11 +36,12 @@ def df_bboxes_from_files(
     Parameters
     ----------
     file_paths : Path | list[Path]
-        Path or list of paths to the input annotations.
+        Path or list of paths to the input annotation files.
     format : Literal["VIA", "COCO"]
         Format of the input annotation files.
     images_dirs : Path | list[Path], optional
-        Path or list of paths to the directories containing the images.
+        Path or list of paths to the directories containing the images the
+        annotations refer to.
     **kwargs
         Additional keyword arguments to pass to the
         ``pandas.DataFrame.drop_duplicates`` method. The ``ignore_index=True``
@@ -102,9 +103,9 @@ def _df_bboxes_from_multiple_files(
     Parameters
     ----------
     list_filepaths : list[Path]
-        List of input annotation filepaths.
+        List of paths to the input annotation files
     format : Literal["VIA", "COCO"]
-        Format of the input files.
+        Format of the input annotation files.
         Currently supported formats are "VIA" and "COCO".
     **kwargs
         Additional keyword arguments to pass to the
@@ -156,9 +157,9 @@ def _df_bboxes_from_single_file(
     Parameters
     ----------
     file_path : Path
-        Path to the input annotations file.
+        Path to the input annotation file.
     format : Literal["VIA", "COCO"]
-        Format of the input annotations file.
+        Format of the input annotation file.
         Currently supported formats are "VIA" and "COCO".
     **kwargs
         Additional keyword arguments to pass to the
@@ -205,11 +206,11 @@ def _df_bboxes_from_single_specific_file(
     Parameters
     ----------
     file_path : Path
-        Path to the input annotations file.
+        Path to the input annotation file.
     validator : type[ValidVIA] | type[ValidCOCO]
-        Validator class for the input annotations file.
+        Validator class for the input annotation file.
     get_rows_from_file : Callable
-        Function to extract rows from the validated input annotations file.
+        Function to extract rows from the validated input annotation file.
     **kwargs
         Additional keyword arguments to pass to the
         ``pandas.DataFrame.drop_duplicates`` method. The ``ignore_index=True``
@@ -253,7 +254,7 @@ def _df_bboxes_from_single_specific_file(
 
 
 def _df_rows_from_valid_VIA_file(file_path: Path) -> list[dict]:
-    """Extract list of rows from validated VIA JSON file.
+    """Extract list of rows from a validated VIA JSON file.
 
     Parameters
     ----------
@@ -263,7 +264,7 @@ def _df_rows_from_valid_VIA_file(file_path: Path) -> list[dict]:
     Returns
     -------
     list[dict]
-        List of rows extracted from the VIA JSON file.
+        List of rows extracted from the validated VIA JSON file.
 
     """
     # Read validated json as dict
@@ -332,7 +333,7 @@ def _df_rows_from_valid_VIA_file(file_path: Path) -> list[dict]:
 
 
 def _df_rows_from_valid_COCO_file(file_path: Path) -> list[dict]:
-    """Extract list of rows from validated COCO JSON file.
+    """Extract list of rows from a validated COCO JSON file.
 
     Parameters
     ----------
@@ -342,7 +343,7 @@ def _df_rows_from_valid_COCO_file(file_path: Path) -> list[dict]:
     Returns
     -------
     list[dict]
-        List of rows extracted from the COCO JSON file.
+        List of rows extracted from the validated COCO JSON file.
 
     """
     # Read validated json as dict
