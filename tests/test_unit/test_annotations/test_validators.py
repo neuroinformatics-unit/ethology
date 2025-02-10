@@ -118,9 +118,7 @@ def default_VIA_schema() -> dict:
 @pytest.fixture()
 def default_COCO_schema() -> dict:
     """Get default COCO schema."""
-    from ethology.annotations.json_schemas.utils import (
-        _get_default_schema,
-    )
+    from ethology.annotations.json_schemas.utils import _get_default_schema
 
     return _get_default_schema("COCO")
 
@@ -445,3 +443,39 @@ def test_required_keys_in_provided_COCO_schema(
         required_properties_keys,
         default_COCO_schema,
     )
+
+
+@pytest.mark.parametrize(
+    "validator, input_file, expected_exception",
+    [
+        (
+            ValidCOCO,
+            "small_bboxes_no_cat_COCO.json",
+            pytest.raises(ValueError),
+        ),
+        (ValidVIA, "small_bboxes_no_cat_VIA.json", does_not_raise()),
+    ],
+)
+def test_no_categories_behaviour(
+    validator, input_file, expected_exception, annotations_test_data
+):
+    """Test the behaviour of the validators when the input file does not
+    specify any categories.
+
+    If annotations are exported as a COCO file in the VIA tool, and no
+    categories have been defined the required keys 'annotations' and
+    'categories' map to empty values.
+
+    If annotations are exported as a VIA file in the VIA tool, and no
+    categories have been defined, there should be no error
+    """
+    filepath = annotations_test_data[input_file]
+
+    with expected_exception as excinfo:
+        _ = validator(path=filepath)
+
+    if excinfo:
+        assert (
+            "Empty value(s) found for the required key(s) "
+            "['annotations', 'categories']"
+        ) in str(excinfo.value)
