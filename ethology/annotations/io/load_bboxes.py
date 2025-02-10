@@ -1,7 +1,6 @@
 """Module for reading and writing manually labelled annotations."""
 
 import json
-from collections.abc import Callable
 from pathlib import Path
 from typing import Literal
 
@@ -73,12 +72,10 @@ def from_files(
                 "`pandas.DataFrame.drop_duplicates` may not be overridden."
             )
 
+    # Delegate to reader of either a single file or multiple files
     if isinstance(file_paths, list):
-        # Read multiple files
         df_all = _from_multiple_files(file_paths, format=format, **kwargs)
-
     else:
-        # Read single file
         df_all = _from_single_file(file_paths, format=format, **kwargs)
 
     # Add metadata
@@ -147,7 +144,9 @@ def _from_multiple_files(
 
 
 def _from_single_file(
-    file_path: Path | str, format: Literal["VIA", "COCO"], **kwargs
+    file_path: Path | str,
+    format: Literal["VIA", "COCO"],
+    **kwargs,
 ) -> pd.DataFrame:
     """Read bounding boxes annotations from a single file.
 
@@ -174,56 +173,17 @@ def _from_single_file(
         "width", "height", "supercategory", "category".
 
     """
+    # Choose the appropriate validator and row-extraction function
+    validator: type[ValidVIA | ValidCOCO]
     if format == "VIA":
-        return _from_single_specific_file(
-            file_path,
-            validator=ValidVIA,
-            get_rows_from_file=_df_rows_from_valid_VIA_file,
-            **kwargs,
-        )
+        validator = ValidVIA
+        get_rows_from_file = _df_rows_from_valid_VIA_file
     elif format == "COCO":
-        return _from_single_specific_file(
-            file_path,
-            validator=ValidCOCO,
-            get_rows_from_file=_df_rows_from_valid_COCO_file,
-            **kwargs,
-        )
+        validator = ValidCOCO
+        get_rows_from_file = _df_rows_from_valid_COCO_file
     else:
         raise ValueError(f"Unsupported format: {format}")
 
-
-def _from_single_specific_file(
-    file_path: Path | str,
-    validator: type[ValidVIA] | type[ValidCOCO],
-    get_rows_from_file: Callable,
-    **kwargs,
-) -> pd.DataFrame:
-    """Read bounding boxes annotations from a single specific file.
-
-    Parameters
-    ----------
-    file_path : Path | str
-        Path to the input annotation file.
-    validator : type[ValidVIA] | type[ValidCOCO]
-        Validator class for the input annotation file.
-    get_rows_from_file : Callable
-        Function to extract rows from the validated input annotation file.
-    **kwargs
-        Additional keyword arguments to pass to the
-        ``pandas.DataFrame.drop_duplicates`` method. The ``ignore_index=True``
-        argument is always applied to force an index reset, and the ``inplace``
-        argument is set to ``False`` and cannot be overridden. The settings
-        apply if one or multiple files are read.
-
-    Returns
-    -------
-    pd.DataFrame
-        Bounding boxes annotations dataframe. The dataframe is indexed
-        by "annotation_id" and has the following columns: "image_filename",
-        "image_id", "image_width", "image_height", "x_min", "y_min",
-        "width", "height", "supercategory", "category".
-
-    """
     # Validate file
     valid_file = validator(file_path)
 
