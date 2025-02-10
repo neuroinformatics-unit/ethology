@@ -110,11 +110,11 @@ def assert_dataframe(
     [
         (
             Path("/path/to/file"),  # single file
-            "ethology.annotations.io._df_bboxes_from_single_file",
+            "ethology.annotations.load_bboxes._df_bboxes_from_single_file",
         ),
         (
             [Path("/path/to/file1"), Path("/path/to/file2")],  # multiple files
-            "ethology.annotations.io._df_bboxes_from_multiple_files",
+            "ethology.annotations.load_bboxes._df_bboxes_from_multiple_files",
         ),
     ],
 )
@@ -197,7 +197,7 @@ def test_df_bboxes_from_single_file(
     """
     file_path = Path("/mock/path/to/file")
     function_to_mock = (
-        "ethology.annotations.io._df_bboxes_from_single_specific_file"
+        "ethology.annotations.load_bboxes._df_bboxes_from_single_specific_file"
     )
 
     # If the format is supported, check that when calling
