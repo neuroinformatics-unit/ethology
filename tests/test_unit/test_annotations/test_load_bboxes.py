@@ -10,11 +10,11 @@ import pytest
 from ethology.annotations.io.load_bboxes import (
     STANDARD_BBOXES_DF_COLUMNS,
     STANDARD_BBOXES_DF_INDEX,
+    _df_rows_from_valid_COCO_file,
+    _df_rows_from_valid_VIA_file,
     _from_multiple_files,
     _from_single_file,
     _from_single_specific_file,
-    _from_valid_COCO_file,
-    _from_valid_VIA_file,
     from_files,
 )
 from ethology.annotations.validators import ValidCOCO, ValidVIA
@@ -120,7 +120,7 @@ def assert_dataframe(
 )
 def test_from_files(
     input_format: Literal["VIA", "COCO"],
-    images_dirs: Path | list[Path] | None,
+    images_dirs: Path | str | list[Path | str] | None,
     file_path: Path,
     function_to_mock: str,
 ):
@@ -181,8 +181,8 @@ def test_from_multiple_files(
 @pytest.mark.parametrize(
     "input_format, validator, row_function, no_error_expected",
     [
-        ("VIA", ValidVIA, _from_valid_VIA_file, True),
-        ("COCO", ValidCOCO, _from_valid_COCO_file, True),
+        ("VIA", ValidVIA, _df_rows_from_valid_VIA_file, True),
+        ("COCO", ValidCOCO, _df_rows_from_valid_COCO_file, True),
         ("unsupported", None, None, False),
     ],
 )
@@ -227,42 +227,42 @@ def test_from_single_file(
         (
             "VIA_JSON_sample_1.json",
             ValidVIA,
-            _from_valid_VIA_file,
+            _df_rows_from_valid_VIA_file,
             4440,
             50,
         ),  # medium VIA file
         (
             "VIA_JSON_sample_2.json",
             ValidVIA,
-            _from_valid_VIA_file,
+            _df_rows_from_valid_VIA_file,
             3977,
             50,
         ),  # medium VIA file
         (
             "small_bboxes_VIA.json",
             ValidVIA,
-            _from_valid_VIA_file,
+            _df_rows_from_valid_VIA_file,
             3,
             3,
         ),  # small VIA file
         (
             "COCO_JSON_sample_1.json",
             ValidCOCO,
-            _from_valid_COCO_file,
+            _df_rows_from_valid_COCO_file,
             4344,
             100,
         ),  # medium COCO file
         (
             "COCO_JSON_sample_2.json",
             ValidCOCO,
-            _from_valid_COCO_file,
+            _df_rows_from_valid_COCO_file,
             4618,
             100,
         ),  # medium COCO file
         (
             "small_bboxes_COCO.json",
             ValidCOCO,
-            _from_valid_COCO_file,
+            _df_rows_from_valid_COCO_file,
             3,
             3,
         ),  # small COCO file
@@ -302,12 +302,12 @@ def test_from_single_specific_file(
         (
             "small_bboxes_duplicates_VIA.json",
             ValidVIA,
-            _from_valid_VIA_file,
+            _df_rows_from_valid_VIA_file,
         ),
         (
             "small_bboxes_duplicates_COCO.json",
             ValidCOCO,
-            _from_valid_COCO_file,
+            _df_rows_from_valid_COCO_file,
         ),
     ],
 )
@@ -355,13 +355,13 @@ def test_from_single_specific_file_duplicates(
         (
             "small_bboxes_no_cat_VIA.json",
             ValidVIA,
-            _from_valid_VIA_file,
+            _df_rows_from_valid_VIA_file,
             does_not_raise(),
         ),
         (
             "small_bboxes_no_cat_COCO.json",
             ValidCOCO,
-            _from_valid_COCO_file,
+            _df_rows_from_valid_COCO_file,
             pytest.raises(ValueError),
         ),
     ],
@@ -406,7 +406,9 @@ def test_df_rows_from_valid_VIA_file(
     annotations_test_data: dict,
 ):
     """Test the extraction of rows from a valid VIA file."""
-    rows = _from_valid_VIA_file(file_path=annotations_test_data[input_file])
+    rows = _df_rows_from_valid_VIA_file(
+        file_path=annotations_test_data[input_file]
+    )
 
     # Check number of rows
     assert len(rows) == expected_n_annotations
@@ -437,7 +439,9 @@ def test_df_rows_from_valid_COCO_file(
     annotations_test_data: dict,
 ):
     """Test the extraction of rows from a valid COCO file."""
-    rows = _from_valid_COCO_file(file_path=annotations_test_data[input_file])
+    rows = _df_rows_from_valid_COCO_file(
+        file_path=annotations_test_data[input_file]
+    )
 
     # Check number of rows
     assert len(rows) == expected_n_annotations

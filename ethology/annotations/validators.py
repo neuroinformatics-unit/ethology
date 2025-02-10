@@ -23,7 +23,7 @@ class ValidVIA:
 
     Attributes
     ----------
-    path : pathlib.Path
+    path : Path | str
         Path to the VIA JSON file, passed as an input.
     schema : dict
         The JSON schema is set to the default VIA schema.
@@ -44,7 +44,7 @@ class ValidVIA:
 
     """
 
-    path: Path = field()
+    path: Path | str = field(converter=Path)
     schema: dict = field(
         default=_get_default_schema("VIA"),
         init=False,
@@ -115,7 +115,7 @@ class ValidCOCO:
 
     Attributes
     ----------
-    path : pathlib.Path
+    path : Path | str
         Path to the COCO JSON file, passed as an input.
     schema : dict
         The JSON schema is set to the default COCO schema.
@@ -136,7 +136,7 @@ class ValidCOCO:
 
     """
 
-    path: Path = field()
+    path: Path | str = field(converter=Path)
     schema: dict = field(
         default=_get_default_schema("COCO"),
         init=False,

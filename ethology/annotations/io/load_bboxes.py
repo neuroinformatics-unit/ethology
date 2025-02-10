@@ -26,20 +26,20 @@ STANDARD_BBOXES_DF_COLUMNS = [
 
 
 def from_files(
-    file_paths: Path | list[Path],
+    file_paths: Path | str | list[Path | str],
     format: Literal["VIA", "COCO"],
-    images_dirs: Path | list[Path] | None = None,
+    images_dirs: Path | str | list[Path | str] | None = None,
     **kwargs,
 ) -> pd.DataFrame:
     """Read bounding boxes annotations as a dataframe.
 
     Parameters
     ----------
-    file_paths : Path | list[Path]
+    file_paths : Path | str | list[Path | str]
         Path or list of paths to the input annotation files.
     format : Literal["VIA", "COCO"]
         Format of the input annotation files.
-    images_dirs : Path | list[Path], optional
+    images_dirs : Path | str | list[Path | str], optional
         Path or list of paths to the directories containing the images the
         annotations refer to.
     **kwargs
@@ -92,13 +92,15 @@ def from_files(
 
 
 def _from_multiple_files(
-    list_filepaths: list[Path], format: Literal["VIA", "COCO"], **kwargs
+    list_filepaths: list[Path | str],
+    format: Literal["VIA", "COCO"],
+    **kwargs,
 ):
     """Read bounding boxes annotations from multiple files.
 
     Parameters
     ----------
-    list_filepaths : list[Path]
+    list_filepaths : list[Path | str]
         List of paths to the input annotation files
     format : Literal["VIA", "COCO"]
         Format of the input annotation files.
@@ -145,13 +147,13 @@ def _from_multiple_files(
 
 
 def _from_single_file(
-    file_path: Path, format: Literal["VIA", "COCO"], **kwargs
+    file_path: Path | str, format: Literal["VIA", "COCO"], **kwargs
 ) -> pd.DataFrame:
     """Read bounding boxes annotations from a single file.
 
     Parameters
     ----------
-    file_path : Path
+    file_path : Path | str
         Path to the input annotation file.
     format : Literal["VIA", "COCO"]
         Format of the input annotation file.
@@ -176,14 +178,14 @@ def _from_single_file(
         return _from_single_specific_file(
             file_path,
             validator=ValidVIA,
-            get_rows_from_file=_from_valid_VIA_file,
+            get_rows_from_file=_df_rows_from_valid_VIA_file,
             **kwargs,
         )
     elif format == "COCO":
         return _from_single_specific_file(
             file_path,
             validator=ValidCOCO,
-            get_rows_from_file=_from_valid_COCO_file,
+            get_rows_from_file=_df_rows_from_valid_COCO_file,
             **kwargs,
         )
     else:
@@ -191,7 +193,7 @@ def _from_single_file(
 
 
 def _from_single_specific_file(
-    file_path: Path,
+    file_path: Path | str,
     validator: type[ValidVIA] | type[ValidCOCO],
     get_rows_from_file: Callable,
     **kwargs,
@@ -200,7 +202,7 @@ def _from_single_specific_file(
 
     Parameters
     ----------
-    file_path : Path
+    file_path : Path | str
         Path to the input annotation file.
     validator : type[ValidVIA] | type[ValidCOCO]
         Validator class for the input annotation file.
@@ -222,7 +224,6 @@ def _from_single_specific_file(
         "width", "height", "supercategory", "category".
 
     """
-    print("patata")
     # Validate file
     valid_file = validator(file_path)
 
@@ -249,8 +250,8 @@ def _from_single_specific_file(
     return df
 
 
-def _from_valid_VIA_file(file_path: Path) -> list[dict]:
-    """Extract list of rows from a validated VIA JSON file.
+def _df_rows_from_valid_VIA_file(file_path: Path) -> list[dict]:
+    """Extract list of dataframe rows from a validated VIA JSON file.
 
     Parameters
     ----------
@@ -260,7 +261,7 @@ def _from_valid_VIA_file(file_path: Path) -> list[dict]:
     Returns
     -------
     list[dict]
-        List of rows extracted from the validated VIA JSON file.
+        List of dataframe rows extracted from the validated VIA JSON file.
 
     """
     # Read validated json as dict
@@ -328,8 +329,8 @@ def _from_valid_VIA_file(file_path: Path) -> list[dict]:
     return list_rows
 
 
-def _from_valid_COCO_file(file_path: Path) -> list[dict]:
-    """Extract list of rows from a validated COCO JSON file.
+def _df_rows_from_valid_COCO_file(file_path: Path) -> list[dict]:
+    """Extract list of dataframe rows from a validated COCO JSON file.
 
     Parameters
     ----------
@@ -339,7 +340,7 @@ def _from_valid_COCO_file(file_path: Path) -> list[dict]:
     Returns
     -------
     list[dict]
-        List of rows extracted from the validated COCO JSON file.
+        List of dataframe rows extracted from the validated COCO JSON file.
 
     """
     # Read validated json as dict
