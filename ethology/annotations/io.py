@@ -46,7 +46,7 @@ def df_bboxes_from_files(
         Additional keyword arguments to pass to the
         ``pandas.DataFrame.drop_duplicates`` method. The ``ignore_index=True``
         argument is always applied to force an index reset, and the ``inplace``
-        argument is set to `False` and cannot be overridden. The settings
+        argument is set to ``False`` and cannot be overridden. The settings
         apply if one or multiple files are read.
 
     Returns
@@ -111,7 +111,7 @@ def _df_bboxes_from_multiple_files(
         Additional keyword arguments to pass to the
         ``pandas.DataFrame.drop_duplicates`` method. The ``ignore_index=True``
         argument is always applied to force an index reset, and the ``inplace``
-        argument is set to `False` and cannot be overridden. The settings
+        argument is set to ``False`` and cannot be overridden. The settings
         apply if one or multiple files are read.
 
     Returns
@@ -165,7 +165,7 @@ def _df_bboxes_from_single_file(
         Additional keyword arguments to pass to the
         ``pandas.DataFrame.drop_duplicates`` method. The ``ignore_index=True``
         argument is always applied to force an index reset, and the ``inplace``
-        argument is set to `False` and cannot be overridden. The settings
+        argument is set to ``False`` and cannot be overridden. The settings
         apply if one or multiple files are read.
 
     Returns
@@ -215,7 +215,7 @@ def _df_bboxes_from_single_specific_file(
         Additional keyword arguments to pass to the
         ``pandas.DataFrame.drop_duplicates`` method. The ``ignore_index=True``
         argument is always applied to force an index reset, and the ``inplace``
-        argument is set to `False` and cannot be overridden. The settings
+        argument is set to ``False`` and cannot be overridden. The settings
         apply if one or multiple files are read.
 
     Returns
