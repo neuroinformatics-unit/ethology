@@ -236,7 +236,7 @@ def test_from_single_file_unsupported():
         ("small_bboxes_COCO.json", "COCO"),  # small COCO file
     ],
 )
-def test_from_single_file(  # --------------> remove format?
+def test_from_single_file(
     input_file: str,
     format: Literal["VIA", "COCO"],
     annotations_test_data: dict,
@@ -471,3 +471,30 @@ def test_from_files_duplicates(
         expected_categories="crab",
         expected_annots_per_image=expected_annots_per_image,
     )
+
+
+@pytest.mark.parametrize(
+    "input_file, format",
+    [
+        ("small_bboxes_non_unique_img_filename_VIA.json", "VIA"),
+        ("small_bboxes_non_unique_img_id_COCO.json", "COCO"),
+    ],
+)
+def test_from_files_images_dir_warning(
+    input_file: str,
+    format: Literal["VIA", "COCO"],
+    annotations_test_data: dict,
+    caplog: pytest.LogCaptureFixture,
+):
+    # Get path to file
+    file_path = annotations_test_data[input_file]
+
+    # Read dataframe
+    _ = from_files(file_path, format=format, images_dirs="/path/to/images")
+
+    # Assert that the warning message is as expected
+    assert caplog.records[0].message == (
+        "WARNING: Image directories have been provided, "
+        "but image filenames in the annotations dataframe are not unique."
+    )
+    assert caplog.records[0].levelname == "WARNING"

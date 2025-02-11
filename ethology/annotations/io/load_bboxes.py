@@ -7,6 +7,7 @@ from typing import Literal
 import pandas as pd
 
 from ethology.annotations.validators import ValidCOCO, ValidVIA
+from ethology.logging import log_warning
 
 # definition of standard bboxes dataframe
 STANDARD_BBOXES_DF_INDEX = "annotation_id"
@@ -71,6 +72,13 @@ def from_files(
         "annotation_format": format,
         "images_directories": images_dirs,
     }
+
+    if images_dirs and len(set(df_all["image_filename"])) != df_all.shape[0]:
+        log_warning(
+            "Image directories have been provided, but image filenames in the "
+            "annotations dataframe are not unique.",
+            logger_name="ethology",
+        )
 
     return df_all
 
