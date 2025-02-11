@@ -494,7 +494,7 @@ def test_from_files_images_dir_warning(
 
     # Assert that the warning message is as expected
     assert caplog.records[0].message == (
-        "WARNING: Image directories have been provided, "
+        "Image directories have been provided, "
         "but image filenames in the annotations dataframe are not unique."
     )
     assert caplog.records[0].levelname == "WARNING"
