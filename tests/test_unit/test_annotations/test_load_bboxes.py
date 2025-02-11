@@ -1,3 +1,4 @@
+import json
 from contextlib import nullcontext as does_not_raise
 from pathlib import Path
 from typing import Literal
@@ -6,7 +7,6 @@ from unittest.mock import patch
 import pandas as pd
 import pytest
 
-import ethology
 from ethology.annotations.io.load_bboxes import (
     STANDARD_BBOXES_DF_COLUMNS,
     STANDARD_BBOXES_DF_INDEX,
@@ -18,35 +18,43 @@ from ethology.annotations.io.load_bboxes import (
 )
 
 
+def count_imgs_and_annots_in_input_file(
+    file_path: Path, format: Literal["VIA", "COCO"]
+) -> tuple[int, int]:
+    """Compute the number of images and annotations in input file.
+
+    Note that this function does not check for duplicates, so all
+    counts are including any possible duplicates.
+    """
+    with open(file_path) as f:
+        data = json.load(f)
+
+    if format == "VIA":
+        n_images = len(data["_via_img_metadata"])
+        n_annotations = sum(
+            len(img_dict["regions"]) if "regions" in img_dict else 0
+            for img_dict in data["_via_img_metadata"].values()
+        )
+    elif format == "COCO":
+        n_images = len(data["images"])
+        n_annotations = len(data["annotations"])
+    else:
+        raise ValueError("Unsupported format")
+
+    return n_images, n_annotations
+
+
 @pytest.fixture
 def multiple_files(annotations_test_data: dict) -> dict:
-    """Fixture that returns for each format, a pair of annotation files
-    with their number of annotations and images.
-    """
+    """Fixture that returns for each format, a pair of annotation files."""
     return {
         "VIA": [
-            {
-                "path": annotations_test_data["VIA_JSON_sample_1.json"],
-                "n_annotations": 4440,
-                "n_images": 50,
-            },
-            {
-                "path": annotations_test_data["VIA_JSON_sample_2.json"],
-                "n_annotations": 3977,
-                "n_images": 50,
-            },
+            annotations_test_data["VIA_JSON_sample_1.json"],
+            annotations_test_data["VIA_JSON_sample_2.json"],
         ],
         "COCO": [
-            {
-                "path": annotations_test_data["COCO_JSON_sample_1.json"],
-                "n_annotations": 4344,
-                "n_images": 100,
-            },
-            {
-                "path": annotations_test_data["COCO_JSON_sample_2.json"],
-                "n_annotations": 4618,
-                "n_images": 100,
-            },
+            annotations_test_data["COCO_JSON_sample_1.json"],
+            annotations_test_data["COCO_JSON_sample_2.json"],
         ],
     }
 
@@ -59,35 +67,20 @@ def multiple_files_duplicates(annotations_test_data: dict) -> dict:
     return {
         "VIA": {
             "files": [
-                {
-                    "path": annotations_test_data["small_bboxes_VIA.json"],
-                    "n_annotations": 3,
-                },
-                {
-                    "path": annotations_test_data[
-                        "small_bboxes_VIA_subset.json"
-                    ],
-                    "n_annotations": 2,
-                    # both annotations appear in "small_bboxes_VIA.json" too
-                },
+                annotations_test_data["small_bboxes_VIA.json"],
+                annotations_test_data[
+                    "small_bboxes_VIA_subset.json"
+                ],  # both annotations appear in "small_bboxes_VIA.json" too
             ],
             "duplicates": 2,
             "n_images": 3,
         },
         "COCO": {
             "files": [
-                {
-                    "path": annotations_test_data["small_bboxes_COCO.json"],
-                    "n_annotations": 3,
-                },
-                {
-                    "path": annotations_test_data[
-                        "small_bboxes_COCO_subset_plus.json"
-                    ],
-                    "n_annotations": 3,
-                    # two annotations appear in "small_bboxes_COCO.json" too,
-                    # the third one is new
-                },
+                annotations_test_data["small_bboxes_COCO.json"],
+                annotations_test_data["small_bboxes_COCO_subset_plus.json"],
+                # two annotations appear in "small_bboxes_COCO.json" too,
+                # the third one is new
             ],
             "duplicates": 2,
             "n_images": 3,
@@ -197,15 +190,21 @@ def test_from_multiple_files(
     input_format: Literal["VIA", "COCO"], multiple_files: dict
 ):
     """Test that the general bounding boxes loading function reads
-    correctly multiple files of the supported formats.
+    correctly multiple files of the supported formats without any
+    duplicates.
     """
-    # Get format and list of files
-    list_files = multiple_files[input_format]
+    # Get list of paths
+    list_paths = multiple_files[input_format]
 
-    # Get paths, annotations and images
-    list_paths = [file["path"] for file in list_files]
-    list_n_annotations = [file["n_annotations"] for file in list_files]
-    list_n_images = [file["n_images"] for file in list_files]
+    # Compute total number of annotations and images
+    n_images = sum(
+        count_imgs_and_annots_in_input_file(file, format=input_format)[0]
+        for file in list_paths
+    )
+    n_annotations = sum(
+        count_imgs_and_annots_in_input_file(file, format=input_format)[1]
+        for file in list_paths
+    )
 
     # Read all files as a dataframe
     df_all = _from_multiple_files(list_paths, format=input_format)
@@ -213,8 +212,8 @@ def test_from_multiple_files(
     # Check dataframe
     assert_dataframe(
         df_all,
-        expected_n_annotations=sum(list_n_annotations),
-        expected_n_images=sum(list_n_images),
+        expected_n_annotations=n_annotations,
+        expected_n_images=n_images,
         expected_supercategories="animal",
         expected_categories="crab",
     )
@@ -231,51 +230,19 @@ def test_from_single_file_unsupported():
 
 
 @pytest.mark.parametrize(
-    ("input_file, format, expected_n_annotations, expected_n_images"),
+    ("input_file, format"),
     [
-        (
-            "VIA_JSON_sample_1.json",
-            "VIA",
-            4440,
-            50,
-        ),  # medium VIA file
-        (
-            "VIA_JSON_sample_2.json",
-            "VIA",
-            3977,
-            50,
-        ),  # medium VIA file
-        (
-            "small_bboxes_VIA.json",
-            "VIA",
-            3,
-            3,
-        ),  # small VIA file
-        (
-            "COCO_JSON_sample_1.json",
-            "COCO",
-            4344,
-            100,
-        ),  # medium COCO file
-        (
-            "COCO_JSON_sample_2.json",
-            "COCO",
-            4618,
-            100,
-        ),  # medium COCO file
-        (
-            "small_bboxes_COCO.json",
-            "COCO",
-            3,
-            3,
-        ),  # small COCO file
+        ("VIA_JSON_sample_1.json", "VIA"),  # medium VIA file
+        ("VIA_JSON_sample_2.json", "VIA"),  # medium VIA file
+        ("small_bboxes_VIA.json", "VIA"),  # small VIA file
+        ("COCO_JSON_sample_1.json", "COCO"),  # medium COCO file
+        ("COCO_JSON_sample_2.json", "COCO"),  # medium COCO file
+        ("small_bboxes_COCO.json", "COCO"),  # small COCO file
     ],
 )
 def test_from_single_file(
     input_file: str,
     format: Literal["VIA", "COCO"],
-    expected_n_annotations: int,
-    expected_n_images: int,
     annotations_test_data: dict,
 ):
     """Test the specific bounding box format readers."""
@@ -285,8 +252,16 @@ def test_from_single_file(
         format=format,
     )
 
+    # Compute number of annotations and images in input file
+    expected_n_images, expected_n_annotations = (
+        count_imgs_and_annots_in_input_file(
+            file_path=annotations_test_data[input_file],
+            format=format,
+        )
+    )
+
     # Check dataframe
-    # (we only check annotations per image in small datasets)
+    # (we only check annotations per image for the small datasets)
     assert_dataframe(
         df,
         expected_n_annotations,
@@ -302,7 +277,7 @@ def test_from_single_file(
     [
         ("small_bboxes_duplicates_VIA.json", "VIA"),
         ("small_bboxes_duplicates_COCO.json", "COCO"),
-    ],
+    ],  # in both, one annotation is duplicated in the first frame
 )
 def test_from_single_file_duplicates(
     input_file: str,
@@ -313,20 +288,11 @@ def test_from_single_file_duplicates(
     contains duplicate annotations.
     """
     # Properties of input data
-    # one annotation is duplicated in the first frame
-    expected_n_annotations_w_duplicates = 4
-    expected_n_annotations_wo_duplicates = 3
-    expected_n_images = 3
-
-    # Extract rows
-    row_function = getattr(
-        ethology.annotations.io.load_bboxes,
-        f"_df_rows_from_valid_{format}_file",
+    filepath = annotations_test_data[input_file]
+    expected_n_images, expected_n_annotations_w_duplicates = (
+        count_imgs_and_annots_in_input_file(filepath, format=format)
     )
-    rows = row_function(file_path=annotations_test_data[input_file])
-
-    # Check total number of annotations including duplicates
-    assert len(rows) == expected_n_annotations_w_duplicates
+    n_duplicates = 1
 
     # Compute bboxes dataframe
     df = _from_single_file(
@@ -337,8 +303,9 @@ def test_from_single_file_duplicates(
     # Check dataframe has no duplicates
     assert_dataframe(
         df,
-        expected_n_annotations_wo_duplicates,
-        expected_n_images,
+        expected_n_annotations=expected_n_annotations_w_duplicates
+        - n_duplicates,
+        expected_n_images=expected_n_images,
         expected_supercategories="animal",
         expected_categories="crab",
     )
@@ -376,81 +343,82 @@ def test_from_single_file_no_category(
             format=format,
         )
 
+    # Check that the error message is as expected
+    if excinfo:
+        assert (
+            "Empty value(s) found for the required key(s) "
+            "['annotations', 'categories']." in str(excinfo.value)
+        )
     # If no error expected, check that the dataframe has empty categories
-    if not excinfo:
+    else:
         assert all(df.loc[:, "category"] == "")
         assert all(df.loc[:, "supercategory"] == "")
 
 
 @pytest.mark.parametrize(
-    "input_file, expected_n_annotations",
+    "input_file",
     [
-        ("VIA_JSON_sample_1.json", 4440),
-        ("VIA_JSON_sample_2.json", 3977),
-        ("small_bboxes_VIA.json", 3),
-        ("small_bboxes_duplicates_VIA.json", 4),  # contains duplicates
+        "VIA_JSON_sample_1.json",
+        "VIA_JSON_sample_2.json",
+        "small_bboxes_VIA.json",
+        "small_bboxes_duplicates_VIA.json",  # contains duplicates
+        "COCO_JSON_sample_1.json",
+        "COCO_JSON_sample_2.json",
+        "small_bboxes_COCO.json",
+        "small_bboxes_duplicates_COCO.json",  # contains duplicates
     ],
 )
-def test_df_rows_from_valid_VIA_file(
+def test_df_rows_from_valid_file(
     input_file: str,
-    expected_n_annotations: int,
     annotations_test_data: dict,
 ):
-    """Test the extraction of rows from a valid VIA file."""
-    rows = _df_rows_from_valid_VIA_file(
-        file_path=annotations_test_data[input_file]
-    )
+    """Test the extraction of rows from a valid input file."""
+    # Determine format and row function to test
+    format: Literal["VIA", "COCO"]
+    if "VIA" in input_file:
+        format = "VIA"
+        row_function_to_test = _df_rows_from_valid_VIA_file
+    elif "COCO" in input_file:
+        format = "COCO"
+        row_function_to_test = _df_rows_from_valid_COCO_file
+    else:
+        raise ValueError("Unsupported format")
 
-    # Check number of rows
+    # Extract rows from file
+    filepath = annotations_test_data[input_file]
+    rows = row_function_to_test(filepath)
+
+    # Check there are as many rows as annotations
+    _, expected_n_annotations = count_imgs_and_annots_in_input_file(
+        filepath, format=format
+    )
     assert len(rows) == expected_n_annotations
 
     # Check each row contains required column data
     # Note that "image_width" and "image_height" are not exported to the
     # VIA file
-    for row in rows:
-        assert all(
-            key in row
-            for key in [STANDARD_BBOXES_DF_INDEX] + STANDARD_BBOXES_DF_COLUMNS
+    required_keys = [STANDARD_BBOXES_DF_INDEX] + STANDARD_BBOXES_DF_COLUMNS
+    if format == "VIA":
+        required_keys = [
+            key
+            for key in required_keys
             if key not in ["image_width", "image_height"]
-        )
-
-
-@pytest.mark.parametrize(
-    "input_file, expected_n_annotations",
-    [
-        ("COCO_JSON_sample_1.json", 4344),
-        ("COCO_JSON_sample_2.json", 4618),
-        ("small_bboxes_COCO.json", 3),
-        ("small_bboxes_duplicates_COCO.json", 4),  # contains duplicates
-    ],
-)
-def test_df_rows_from_valid_COCO_file(
-    input_file: str,
-    expected_n_annotations: int,
-    annotations_test_data: dict,
-):
-    """Test the extraction of rows from a valid COCO file."""
-    rows = _df_rows_from_valid_COCO_file(
-        file_path=annotations_test_data[input_file]
-    )
-
-    # Check number of rows
-    assert len(rows) == expected_n_annotations
-
-    # Check each row contains required column data
-    for row in rows:
-        assert all(
-            key in row
-            for key in [STANDARD_BBOXES_DF_INDEX] + STANDARD_BBOXES_DF_COLUMNS
-        )
+        ]
+    assert all([key in row for key in required_keys for row in rows])
 
 
 @pytest.mark.parametrize(
     "input_format, filename",
     [
-        ("VIA", "small_bboxes_duplicates_VIA.json"),
+        (
+            "VIA",
+            "small_bboxes_duplicates_VIA.json",
+        ),  # one annotation is duplicated in the first frame
         ("VIA", "MULTIPLE_VIA_FILES_WITH_DUPLICATES"),
-        ("COCO", "small_bboxes_duplicates_COCO.json"),
+        (
+            "COCO",
+            "small_bboxes_duplicates_COCO.json",
+        ),  # one annotation is duplicated in the first frame
         ("COCO", "MULTIPLE_COCO_FILES_WITH_DUPLICATES"),
     ],
 )
@@ -463,25 +431,32 @@ def test_from_files_duplicates(
     """Test the behaviour of the `from_files` function when passing
     input files with duplicates (in single files or across files).
     """
-    # Check kwargs behaviour when passing multiple files
+    # Get expected size of dataframe when passing multiple files with
+    # duplicates
     if "MULTIPLE" in filename:
-        list_files = multiple_files_duplicates[input_format]["files"]
-        input_files = [file["path"] for file in list_files]
-
+        # Get input data
+        input_files = multiple_files_duplicates[input_format]["files"]
         n_duplicates = multiple_files_duplicates[input_format]["duplicates"]
-        n_total_annotations = sum(
-            [file["n_annotations"] for file in list_files]
-        )
+        n_unique_images = multiple_files_duplicates[input_format]["n_images"]
 
-        expected_n_annotations = n_total_annotations - n_duplicates
-        expected_n_images = multiple_files_duplicates[input_format]["n_images"]
+        # Compute number of annotations, with and without duplicates
+        n_total_annotations = sum(
+            [
+                count_imgs_and_annots_in_input_file(file, input_format)[1]
+                for file in input_files
+            ]
+        )
+        n_unique_annotations = n_total_annotations - n_duplicates
         expected_annots_per_image = None
 
-    # Check kwargs behaviour when passing a single file
+    # Get expected size of dataframe when passing a single file with duplicates
     else:
         input_files = annotations_test_data[filename]
-        expected_n_annotations = 3
-        expected_n_images = 3
+        n_duplicates = 1
+        n_unique_images, n_total_annotations = (
+            count_imgs_and_annots_in_input_file(input_files, input_format)
+        )
+        n_unique_annotations = n_total_annotations - n_duplicates
         expected_annots_per_image = 1
 
     # Compute dataframe
@@ -493,8 +468,8 @@ def test_from_files_duplicates(
     # Check dataframe content is as expected
     assert_dataframe(
         df,
-        expected_n_annotations=expected_n_annotations,
-        expected_n_images=expected_n_images,
+        expected_n_annotations=n_unique_annotations,
+        expected_n_images=n_unique_images,
         expected_supercategories="animal",
         expected_categories="crab",
         expected_annots_per_image=expected_annots_per_image,
