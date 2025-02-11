@@ -28,7 +28,6 @@ def from_files(
     file_paths: Path | str | list[Path | str],
     format: Literal["VIA", "COCO"],
     images_dirs: Path | str | list[Path | str] | None = None,
-    **kwargs,
 ) -> pd.DataFrame:
     """Read bounding boxes annotations as a dataframe.
 
@@ -41,12 +40,6 @@ def from_files(
     images_dirs : Path | str | list[Path | str], optional
         Path or list of paths to the directories containing the images the
         annotations refer to.
-    **kwargs
-        Additional keyword arguments to pass to the
-        ``pandas.DataFrame.drop_duplicates`` method. The ``ignore_index=True``
-        argument is always applied to force an index reset, and the ``inplace``
-        argument is set to ``False`` and cannot be overridden. The settings
-        apply if one or multiple files are read.
 
     Returns
     -------
@@ -64,19 +57,11 @@ def from_files(
     removed.
 
     """
-    # Check kwargs that are forwarded to drop_duplicates
-    for fixed_kwargs in ["ignore_index", "inplace"]:
-        if fixed_kwargs in kwargs:
-            raise ValueError(
-                f"The '{fixed_kwargs}' argument for "
-                "`pandas.DataFrame.drop_duplicates` may not be overridden."
-            )
-
     # Delegate to reader of either a single file or multiple files
     if isinstance(file_paths, list):
-        df_all = _from_multiple_files(file_paths, format=format, **kwargs)
+        df_all = _from_multiple_files(file_paths, format=format)
     else:
-        df_all = _from_single_file(file_paths, format=format, **kwargs)
+        df_all = _from_single_file(file_paths, format=format)
 
     # Add metadata
     df_all.attrs = {
@@ -89,9 +74,7 @@ def from_files(
 
 
 def _from_multiple_files(
-    list_filepaths: list[Path | str],
-    format: Literal["VIA", "COCO"],
-    **kwargs,
+    list_filepaths: list[Path | str], format: Literal["VIA", "COCO"]
 ):
     """Read bounding boxes annotations from multiple files.
 
@@ -102,12 +85,6 @@ def _from_multiple_files(
     format : Literal["VIA", "COCO"]
         Format of the input annotation files.
         Currently supported formats are "VIA" and "COCO".
-    **kwargs
-        Additional keyword arguments to pass to the
-        ``pandas.DataFrame.drop_duplicates`` method. The ``ignore_index=True``
-        argument is always applied to force an index reset, and the ``inplace``
-        argument is set to ``False`` and cannot be overridden. The settings
-        apply if one or multiple files are read.
 
     Returns
     -------
@@ -136,7 +113,7 @@ def _from_multiple_files(
     )
 
     # Remove duplicates that may exist across files
-    df_all = df_all.drop_duplicates(ignore_index=True, inplace=False, **kwargs)
+    df_all = df_all.drop_duplicates(ignore_index=True, inplace=False)
 
     # Set the index name back to "annotation_id"
     df_all.index.name = STANDARD_BBOXES_DF_INDEX
@@ -145,9 +122,7 @@ def _from_multiple_files(
 
 
 def _from_single_file(
-    file_path: Path | str,
-    format: Literal["VIA", "COCO"],
-    **kwargs,
+    file_path: Path | str, format: Literal["VIA", "COCO"]
 ) -> pd.DataFrame:
     """Read bounding boxes annotations from a single file.
 
@@ -158,12 +133,6 @@ def _from_single_file(
     format : Literal["VIA", "COCO"]
         Format of the input annotation file.
         Currently supported formats are "VIA" and "COCO".
-    **kwargs
-        Additional keyword arguments to pass to the
-        ``pandas.DataFrame.drop_duplicates`` method. The ``ignore_index=True``
-        argument is always applied to force an index reset, and the ``inplace``
-        argument is set to ``False`` and cannot be overridden. The settings
-        apply if one or multiple files are read.
 
     Returns
     -------
@@ -199,7 +168,7 @@ def _from_single_file(
     # Drop duplicates and reset indices.
     # We use ignore_index=True so that the resulting axis is labeled 0,1,…,n-1.
     # NOTE: after this the index name is no longer "annotation_id"
-    df = df.drop_duplicates(ignore_index=True, inplace=False, **kwargs)
+    df = df.drop_duplicates(ignore_index=True, inplace=False)
 
     # Reorder columns to match standard columns
     df = df.reindex(columns=STANDARD_BBOXES_DF_COLUMNS)
