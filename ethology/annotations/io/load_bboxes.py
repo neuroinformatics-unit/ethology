@@ -120,7 +120,8 @@ def _from_multiple_files(
     """
     # Get list of dataframes
     df_list = [
-        _from_single_file(file, format=format) for file in list_filepaths
+        _from_single_file(file_path=file, format=format)
+        for file in list_filepaths
     ]
 
     # Concatenate with ignore_index=True,
@@ -128,16 +129,16 @@ def _from_multiple_files(
     # NOTE: after ignore_index=True the index name is no longer "annotation_id"
     df_all = pd.concat(df_list, ignore_index=True)
 
-    # Update image_id based on the full sorted list of image filenames
+    # Update "image_id" based on the full sorted list of image filenames
     list_image_filenames = sorted(list(df_all["image_filename"].unique()))
     df_all["image_id"] = df_all["image_filename"].apply(
         lambda x: list_image_filenames.index(x)
     )
 
-    # Remove duplicates
+    # Remove duplicates that may exist across files
     df_all = df_all.drop_duplicates(ignore_index=True, inplace=False, **kwargs)
 
-    # Set the index name to "annotation_id"
+    # Set the index name back to "annotation_id"
     df_all.index.name = STANDARD_BBOXES_DF_INDEX
 
     return df_all
