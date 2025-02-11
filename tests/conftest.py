@@ -66,7 +66,7 @@ def get_paths_test_data() -> Callable[[dict, str], dict]:
 
     This fixture is a factory of fixtures. It returns a function that can be
     used to create a fixture that is a dictionary holding the paths under the
-    given `subdir_name`.
+    given ``subdir_name``.
     """
 
     def _get_paths_test_data(
@@ -92,9 +92,9 @@ def get_paths_test_data() -> Callable[[dict, str], dict]:
         -----
         The name of the subdirectories is intended to match a testing module.
         For example, to get the paths of the files used to test the annotations
-        module, we call `get_paths_test_data(pooch_registry,
-        "test_annotations")`. This assumes that in the GIN repository there is
-        a subdirectory named `test_annotations` under the `test_data`
+        module, we call ``get_paths_test_data(pooch_registry,
+        "test_annotations")``. This assumes that in the GIN repository there is
+        a subdirectory named ``test_annotations`` under the ``test_data``
         directory with the relevant files.
 
         """
