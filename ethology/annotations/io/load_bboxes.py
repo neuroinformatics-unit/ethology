@@ -47,7 +47,9 @@ def from_files(
         Bounding boxes annotations dataframe. The dataframe is indexed
         by "annotation_id" and has the following columns: "image_filename",
         "image_id", "image_width", "image_height", "x_min", "y_min",
-        "width", "height", "supercategory", "category".
+        "width", "height", "supercategory", "category". It also has the
+        following attributes: "annotation_files", "annotation_format",
+        "images_directories".
 
     See Also
     --------
@@ -65,9 +67,9 @@ def from_files(
 
     # Add metadata
     df_all.attrs = {
-        "input_files": file_paths,
-        "format": format,
-        "images_dirs": images_dirs,
+        "annotation_files": file_paths,
+        "annotation_format": format,
+        "images_directories": images_dirs,
     }
 
     return df_all
