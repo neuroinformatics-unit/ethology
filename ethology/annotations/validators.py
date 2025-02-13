@@ -23,7 +23,7 @@ class ValidVIA:
 
     Attributes
     ----------
-    path : pathlib.Path
+    path : Path | str
         Path to the VIA JSON file, passed as an input.
     schema : dict
         The JSON schema is set to the default VIA schema.
@@ -44,20 +44,16 @@ class ValidVIA:
 
     """
 
-    path: Path | str = field(converter=Path)
+    path: Path = field(converter=Path)
     schema: dict = field(
         default=_get_default_schema("VIA"),
         init=False,
     )
     required_keys: dict = field(
         default={
-            "main": [
-                "_via_img_metadata",
-                "_via_image_id_list",
-                "_via_attributes",
-            ],
-            "images": ["filename", "regions"],
-            "regions": ["shape_attributes", "region_attributes"],
+            "main": ["_via_img_metadata", "_via_image_id_list"],
+            "images": ["filename"],
+            "regions": ["shape_attributes"],
             "shape_attributes": ["x", "y", "width", "height"],
         },
         init=False,
@@ -119,7 +115,7 @@ class ValidCOCO:
 
     Attributes
     ----------
-    path : pathlib.Path
+    path : Path | str
         Path to the COCO JSON file, passed as an input.
     schema : dict
         The JSON schema is set to the default COCO schema.
@@ -140,7 +136,7 @@ class ValidCOCO:
 
     """
 
-    path: Path | str = field(converter=Path)
+    path: Path = field(converter=Path)
     schema: dict = field(
         default=_get_default_schema("COCO"),
         init=False,
@@ -195,3 +191,30 @@ class ValidCOCO:
                         f" for {_singularise_err_msg(ky)} {instance_dict}"
                     ),
                 )
+
+    @path.validator
+    def _file_contains_unique_image_IDs(self, attribute, value):
+        """Ensure that the COCO JSON file contains unique image IDs.
+
+        When exporting to COCO format, the VIA tool attempts to extract the
+        image ID from the image filename using ``parseInt``. As a result, if
+        two or more images have the same number-based filename, the image IDs
+        can be non-unique (i.e., more image filenames than image IDs). This is
+        probably a bug in the VIA tool, but we need to check for this issue.
+        """
+        with open(value) as file:
+            data = json.load(file)
+
+        # Get number of elements in "images" list
+        n_images = len(data["images"])
+
+        # Get the image IDs
+        unique_image_ids = set([img["id"] for img in data["images"]])
+
+        # Check for duplicate image IDs
+        if n_images != len(unique_image_ids):
+            raise ValueError(
+                "The image IDs in the input COCO file are not unique. "
+                f"There are {n_images} image entries, but only "
+                f"{len(unique_image_ids)} unique image IDs."
+            )
