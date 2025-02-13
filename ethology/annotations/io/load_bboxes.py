@@ -294,17 +294,19 @@ def _df_rows_from_valid_COCO_file(file_path: Path) -> list[dict]:
     # unique image_ids in the input COCO file matches the number of elements
     # in the "images" list.
     map_img_id_coco_to_ethology = {
-        img_dict["id"]: idx for idx, img_dict in enumerate(data_dict["images"])
+        img_dict["id"]: idx
+        for idx, img_dict in enumerate(
+            sorted(data_dict["images"], key=lambda x: x["file_name"])
+        )
     }
-    map_img_id_ethology_to_filename = {
-        idx: img_dict["file_name"]
-        for idx, img_dict in enumerate(data_dict["images"])
+    map_img_id_coco_to_filename = {
+        img_dict["id"]: img_dict["file_name"]
+        for img_dict in data_dict["images"]
     }
-    map_img_id_ethology_to_wh = {
-        idx: (img_dict["width"], img_dict["height"])
-        for idx, img_dict in enumerate(data_dict["images"])
+    map_img_id_coco_to_width_height = {
+        img_dict["id"]: (img_dict["width"], img_dict["height"])
+        for img_dict in data_dict["images"]
     }
-
     map_category_id_to_category_data = {
         cat_dict["id"]: (cat_dict["name"], cat_dict["supercategory"])
         for cat_dict in data_dict["categories"]
@@ -317,11 +319,13 @@ def _df_rows_from_valid_COCO_file(file_path: Path) -> list[dict]:
 
         # image data
         img_id_coco = annot_dict["image_id"]
-        img_id_ethology = map_img_id_coco_to_ethology[img_id_coco]
+        image_filename = map_img_id_coco_to_filename[img_id_coco]
+        image_width, image_height = map_img_id_coco_to_width_height[
+            img_id_coco
+        ]
 
-        image_filename = map_img_id_ethology_to_filename[img_id_ethology]
-        image_width = map_img_id_ethology_to_wh[img_id_ethology][0]
-        image_height = map_img_id_ethology_to_wh[img_id_ethology][1]
+        # compute image ID following ethology convention
+        img_id_ethology = map_img_id_coco_to_ethology[img_id_coco]
 
         # bbox data
         x_min, y_min, width, height = annot_dict["bbox"]
