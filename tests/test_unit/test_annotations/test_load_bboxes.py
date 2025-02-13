@@ -471,3 +471,52 @@ def test_from_files_duplicates(
         expected_categories="crab",
         expected_annots_per_image=expected_annots_per_image,
     )
+
+
+@pytest.mark.parametrize(
+    "format",
+    [
+        "VIA",
+        "COCO",
+    ],
+)
+def test_image_id_assignment(format, annotations_test_data):
+    """Test if the bboxes dataframe image_id is assigned based on the
+    alphabetically sorted list of filenames.
+    """
+    # Get path to file
+    filepath = annotations_test_data[f"small_bboxes_image_id_{format}.json"]
+
+    # Read data
+    df = from_files(filepath, format=format)
+
+    # Get image_id and filename pairs from the input data file
+    with open(filepath) as f:
+        data = json.load(f)
+
+    # Compute expected image ID - filename pairs if ID computed alphabetically
+    pairs_img_id_to_filename_alphabetical = {
+        id: file
+        for id, file in enumerate(sorted(df["image_filename"].tolist()))
+    }
+
+    # Check image ID in input data file is not assigned alphabetically
+    if format == "VIA":
+        list_via_images = data["_via_image_id_list"]
+        pairs_img_id_to_filename_in = {
+            list_via_images.index(img_via_ky): img_dict["filename"]
+            for img_via_ky, img_dict in data["_via_img_metadata"].items()
+        }
+    elif format == "COCO":
+        pairs_img_id_to_filename_in = {
+            img_dict["id"]: img_dict["file_name"]
+            for img_dict in data["images"]
+        }
+    assert pairs_img_id_to_filename_in != pairs_img_id_to_filename_alphabetical
+
+    # Check image_id in dataframe is assigned alphabetically
+    pairs_img_id_filename_out = {
+        id: file
+        for file, id in zip(df["image_filename"], df["image_id"], strict=True)
+    }
+    assert pairs_img_id_filename_out == pairs_img_id_to_filename_alphabetical
