@@ -194,10 +194,7 @@ def _from_single_file(
     # Fix category_id for VIA files if required
     # Cast as an int if possible, otherwise factorize it
     if format == "VIA" and not df["category_id"].isna().all():
-        try:
-            df["category_id"] = df["category_id"].astype(int)
-        except ValueError:
-            df["category_id"] = df["category"].factorize(sort=True)[0]
+        df = _VIA_category_id_as_int(df)
 
     # Reorder columns to match standard columns
     # If columns dont exist they are filled with nan / na values
@@ -373,3 +370,24 @@ def _df_rows_from_valid_COCO_file(file_path: Path) -> list[dict]:
         list_rows.append(row)
 
     return list_rows
+
+
+def _VIA_category_id_as_int(df: pd.DataFrame) -> pd.DataFrame:
+    """Convert category_id to int if possible, otherwise factorize it.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Bounding boxes annotations dataframe.
+
+    Returns
+    -------
+    pd.DataFrame
+        Bounding boxes annotations dataframe with "category_id" as int.
+
+    """
+    try:
+        df["category_id"] = df["category_id"].astype(int)
+    except ValueError:
+        df["category_id"] = df["category"].factorize(sort=True)[0]
+    return df
