@@ -597,3 +597,50 @@ def test_category_id_extraction(
     elif input_category_type == "string_category":
         assert df["category_id"].dtype == int
         assert all(df["category_id"] == df["category"].factorize()[0])
+
+
+@pytest.mark.parametrize(
+    "input_file_type, format",
+    [
+        ("single", "VIA"),  # ----> need a different one to test this
+        ("multiple", "VIA"),
+        ("single", "COCO"),
+        ("multiple", "COCO"),
+    ],
+)
+def test_sorted_annotations_by_image_filename(
+    input_file_type: str,
+    format: Literal["VIA", "COCO"],
+    annotations_test_data: dict,
+    # multiple_files: dict,
+):
+    """Test that the annotations are sorted by image filename.
+
+    We use the small_bboxes_image_id_ data because the image filenames are not
+    sorted in the original files.
+    """
+    # Get input file(s)
+    if input_file_type == "single":
+        input_filepaths = annotations_test_data[
+            f"small_bboxes_image_id_{format}.json"
+        ]
+    elif input_file_type == "multiple":
+        # they should be loaded in this order for the image filemanes to not
+        # be sorted alphabetically across the files
+        input_files = (
+            ["VIA_JSON_sample_2.json", "VIA_JSON_sample_1.json"]
+            if format == "VIA"
+            else ["COCO_JSON_sample_1.json", "COCO_JSON_sample_2.json"]
+        )
+        input_filepaths = [annotations_test_data[file] for file in input_files]
+
+    # Compute bboxes dataframe
+    df = from_files(
+        file_paths=input_filepaths,
+        format=format,
+    )
+
+    # Check that the annotations are sorted by image filename
+    assert df["image_filename"].to_list() == sorted(
+        df["image_filename"].to_list()
+    )
