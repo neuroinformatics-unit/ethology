@@ -19,9 +19,10 @@ STANDARD_BBOXES_DF_COLUMNS = [
     "height",
     "supercategory",
     "category",
+    "category_id",
     "image_width",
     "image_height",
-]  # if a column is not defined, it is filled with nan
+]
 
 
 def from_files(
@@ -346,6 +347,7 @@ def _df_rows_from_valid_COCO_file(file_path: Path) -> list[dict]:
             "height": height,
             "supercategory": supercategory,
             "category": category,
+            "category_id": category_id,
         }
 
         list_rows.append(row)
