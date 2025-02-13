@@ -118,8 +118,8 @@ def _from_multiple_files(
         for file in list_filepaths
     ]
 
-    # Concatenate with ignore_index=True,
-    # so that the resulting axis is labeled 0,1,…,n - 1.
+    # Concatenate and reindex
+    # the resulting axis is labeled 0,1,…,n - 1.
     # NOTE: after ignore_index=True the index name is no longer "annotation_id"
     df_all = pd.concat(df_list, ignore_index=True)
 
@@ -130,7 +130,10 @@ def _from_multiple_files(
         lambda x: list_image_filenames.index(x)
     )
 
-    # Remove duplicates that may exist across files
+    # Sort by image_filename
+    df_all = df_all.sort_values(by=["image_filename"])
+
+    # Remove duplicates that may exist across files and reindex
     df_all = df_all.drop_duplicates(ignore_index=True, inplace=False)
 
     # Set the index name back to "annotation_id"
@@ -172,27 +175,24 @@ def _from_single_file(
     else:
         raise ValueError(f"Unsupported format: {format}")
 
-    # Validate file
-    valid_file = validator(file_path)
-
     # Build dataframe from extracted rows
+    valid_file = validator(file_path)
     list_rows = get_rows_from_file(valid_file.path)
     df = pd.DataFrame(list_rows)
 
-    # Set "annotation_id" as index
-    # (otherwise duplicate annotations are not identified as such)
-    df = df.set_index(STANDARD_BBOXES_DF_INDEX)
+    # Sort by annotation_id and image_filename
+    df = df.sort_values(by=["annotation_id", "image_filename"])
 
-    # Sort by index / annotation ID?
-    # df = df.sort_index()
+    # Drop duplicates and reindex
+    # The resulting axis is labeled 0,1,…,n-1.
+    df = df.drop_duplicates(
+        subset=[col for col in df.columns if col != "annotation_id"],
+        ignore_index=True,
+        inplace=False,
+    )
 
-    # Drop duplicates and reset indices.
-    # We use ignore_index=True so that the resulting axis is labeled 0,1,…,n-1.
-    # NOTE: after this the index name is no longer "annotation_id"
-    df = df.drop_duplicates(ignore_index=True, inplace=False)
-
-    # In VIA files, the category_id is a string or can be unset.
-    # Here we cast it to an int if possible, otherwise factorize it.
+    # Fix category_id for VIA files if required
+    # Cast as an int if possible, otherwise factorize it
     if format == "VIA" and not df["category_id"].isna().all():
         try:
             df["category_id"] = df["category_id"].astype(int)
@@ -200,14 +200,12 @@ def _from_single_file(
             df["category_id"] = df["category"].factorize(sort=True)[0]
 
     # Reorder columns to match standard columns
-    # if prescribed columns dont exist they are
-    # filled with nan / na values
-    df = df.reindex(columns=STANDARD_BBOXES_DF_COLUMNS)
+    # If columns dont exist they are filled with nan / na values
+    df = df.reindex(columns=STANDARD_BBOXES_DF_COLUMNS + ["annotation_id"])
 
     # Set the index name to "annotation_id"
-    df.index.name = STANDARD_BBOXES_DF_INDEX
+    df = df.set_index(STANDARD_BBOXES_DF_INDEX)
 
-    # Read as standard dataframe
     return df
 
 
