@@ -548,3 +548,52 @@ def test_dataframe_from_same_annotations(annotations_test_data: dict):
     assert df_via.drop(columns=["image_width", "image_height"]).equals(
         df_coco.drop(columns=["image_width", "image_height"])
     )
+
+
+@pytest.mark.parametrize(
+    "input_file, format, input_category_type",
+    [
+        (
+            "small_bboxes_no_cat_VIA.json",
+            "VIA",
+            "empty",
+        ),  # no category in VIA file
+        (
+            "small_bboxes_VIA.json",
+            "VIA",
+            "string_integer",
+        ),  # category ID is a string ("1")
+        (
+            "VIA_JSON_sample_1.json",
+            "VIA",
+            "string_category",
+        ),  # category ID is a string ("crab")
+        (
+            "small_bboxes_COCO.json",
+            "COCO",
+            "integer",
+        ),  # category ID is an integer (1)
+    ],
+)
+def test_category_id_extraction(
+    input_file: str,
+    format: Literal["VIA", "COCO"],
+    input_category_type: str,
+    annotations_test_data: dict,
+):
+    """Test that the category_id is extracted correctly from the input file."""
+    df = _from_single_file(
+        file_path=annotations_test_data[input_file],
+        format=format,
+    )
+
+    if input_category_type == "empty":
+        assert df["category_id"].isna().all()
+
+    elif input_category_type in ["string_integer", "integer"]:
+        assert df["category_id"].dtype == int
+        assert df["category_id"].unique() == [1]
+
+    elif input_category_type == "string_category":
+        assert df["category_id"].dtype == int
+        assert all(df["category_id"] == df["category"].factorize()[0])
