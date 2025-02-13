@@ -122,7 +122,8 @@ def _from_multiple_files(
     # NOTE: after ignore_index=True the index name is no longer "annotation_id"
     df_all = pd.concat(df_list, ignore_index=True)
 
-    # Update "image_id" based on the full sorted list of image filenames
+    # Update "image_id" based on the alphabetically sorted list of unique image
+    # filenames across all input files
     list_image_filenames = sorted(list(df_all["image_filename"].unique()))
     df_all["image_id"] = df_all["image_filename"].apply(
         lambda x: list_image_filenames.index(x)
@@ -216,18 +217,14 @@ def _df_rows_from_valid_VIA_file(file_path: Path) -> list[dict]:
 
     # Prepare data
     image_metadata_dict = data_dict["_via_img_metadata"]
-    via_image_id_list = [str(x) for x in data_dict["_via_image_id_list"]]
+    list_sorted_filenames = sorted(
+        [img_dict["filename"] for img_dict in image_metadata_dict.values()]
+    )
+
     via_attributes = data_dict["_via_attributes"]
     supercategories_props = {}
     if "region" in via_attributes:
         supercategories_props = via_attributes["region"]
-
-    # Map image filenames to the image keys used by VIA
-    # the VIA keys are <filename><filesize> strings
-    map_filename_to_via_img_id = {
-        img_dict["filename"]: ky
-        for ky, img_dict in image_metadata_dict.items()
-    }
 
     # Get list of rows in dataframe
     list_rows = []
@@ -256,9 +253,7 @@ def _df_rows_from_valid_VIA_file(file_path: Path) -> list[dict]:
             row = {
                 "annotation_id": annotation_id,
                 "image_filename": img_dict["filename"],
-                "image_id": via_image_id_list.index(
-                    map_filename_to_via_img_id[img_dict["filename"]]
-                ),  # integer based on the VIA image ID
+                "image_id": list_sorted_filenames.index(img_dict["filename"]),
                 "x_min": region_shape["x"],
                 "y_min": region_shape["y"],
                 "width": region_shape["width"],
