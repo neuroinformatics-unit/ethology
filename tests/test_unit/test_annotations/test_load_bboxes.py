@@ -236,7 +236,7 @@ def test_from_single_file_unsupported():
         ("small_bboxes_COCO.json", "COCO"),  # small COCO file
     ],
 )
-def test_from_single_file(  # --------------> remove format?
+def test_from_single_file(
     input_file: str,
     format: Literal["VIA", "COCO"],
     annotations_test_data: dict,
@@ -269,14 +269,13 @@ def test_from_single_file(  # --------------> remove format?
 
 
 @pytest.mark.parametrize(
-    ("input_file, format"),
+    ("format"),
     [
-        ("small_bboxes_duplicates_VIA.json", "VIA"),
-        ("small_bboxes_duplicates_COCO.json", "COCO"),
-    ],  # in both, one annotation is duplicated in the first frame
+        "VIA",
+        "COCO",
+    ],
 )
 def test_from_single_file_duplicates(
-    input_file: str,
     format: Literal["VIA", "COCO"],
     annotations_test_data: dict,
 ):
@@ -284,7 +283,9 @@ def test_from_single_file_duplicates(
     contains duplicate annotations.
     """
     # Properties of input data
-    filepath = annotations_test_data[input_file]
+    # in the "small_bboxes_duplicates_" files, one annotation is duplicated
+    # in the first frame
+    filepath = annotations_test_data[f"small_bboxes_duplicates_{format}.json"]
     expected_n_images, expected_n_annotations_w_duplicates = (
         count_imgs_and_annots_in_input_file(filepath, format=format)
     )
@@ -292,7 +293,9 @@ def test_from_single_file_duplicates(
 
     # Compute bboxes dataframe
     df = _from_single_file(
-        file_path=annotations_test_data[input_file],
+        file_path=annotations_test_data[
+            f"small_bboxes_duplicates_{format}.json"
+        ],
         format=format,
     )
 
@@ -308,22 +311,19 @@ def test_from_single_file_duplicates(
 
 
 @pytest.mark.parametrize(
-    ("input_file, format, expected_exception"),
+    ("format, expected_exception"),
     [
         (
-            "small_bboxes_no_cat_VIA.json",
             "VIA",
             does_not_raise(),
         ),
         (
-            "small_bboxes_no_cat_COCO.json",
             "COCO",
             pytest.raises(ValueError),
         ),
     ],
 )
 def test_from_single_file_no_category(
-    input_file: str,
     format: Literal["VIA", "COCO"],
     expected_exception: pytest.raises,
     annotations_test_data: dict,
@@ -335,7 +335,9 @@ def test_from_single_file_no_category(
     # (this should raise an error for COCO files)
     with expected_exception as excinfo:
         df = _from_single_file(
-            file_path=annotations_test_data[input_file],
+            file_path=annotations_test_data[
+                f"small_bboxes_no_cat_{format}.json"
+            ],
             format=format,
         )
 
@@ -480,7 +482,9 @@ def test_from_files_duplicates(
         "COCO",
     ],
 )
-def test_image_id_assignment(format, annotations_test_data):
+def test_image_id_assignment(
+    format: Literal["VIA", "COCO"], annotations_test_data: dict
+):
     """Test if the bboxes dataframe image_id is assigned based on the
     alphabetically sorted list of filenames.
     """
