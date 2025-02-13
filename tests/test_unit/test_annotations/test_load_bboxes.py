@@ -349,8 +349,9 @@ def test_from_single_file_no_category(
         )
     # If no error expected, check that the dataframe has empty categories
     else:
-        assert all(df.loc[:, "category"] == "")
-        assert all(df.loc[:, "supercategory"] == "")
+        assert df["category"].isna().all()
+        assert df["supercategory"].isna().all()
+        assert df["category_id"].isna().all()
 
 
 @pytest.mark.parametrize(

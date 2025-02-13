@@ -22,7 +22,7 @@ STANDARD_BBOXES_DF_COLUMNS = [
     "category_id",
     "image_width",
     "image_height",
-]
+]  # superset of columns in the standard dataframe
 
 
 def from_files(
@@ -183,12 +183,25 @@ def _from_single_file(
     # (otherwise duplicate annotations are not identified as such)
     df = df.set_index(STANDARD_BBOXES_DF_INDEX)
 
+    # Sort by index / annotation ID?
+    # df = df.sort_index()
+
     # Drop duplicates and reset indices.
     # We use ignore_index=True so that the resulting axis is labeled 0,1,…,n-1.
     # NOTE: after this the index name is no longer "annotation_id"
     df = df.drop_duplicates(ignore_index=True, inplace=False)
 
+    # In VIA files, the category_id is a string or can be unset.
+    # Here we cast it to an int if possible, otherwise factorize it.
+    if format == "VIA" and not df["category_id"].isna().all():
+        try:
+            df["category_id"] = df["category_id"].astype(int)
+        except ValueError:
+            df["category_id"] = df["category"].factorize(sort=True)[0]
+
     # Reorder columns to match standard columns
+    # if prescribed columns dont exist they are
+    # filled with nan / na values
     df = df.reindex(columns=STANDARD_BBOXES_DF_COLUMNS)
 
     # Set the index name to "annotation_id"
@@ -223,9 +236,11 @@ def _df_rows_from_valid_VIA_file(file_path: Path) -> list[dict]:
     )
 
     via_attributes = data_dict["_via_attributes"]
-    supercategories_props = {}
+
+    # Get supercategories and categories
+    supercategories_dict = {}
     if "region" in via_attributes:
-        supercategories_props = via_attributes["region"]
+        supercategories_dict = via_attributes["region"]
 
     # Get list of rows in dataframe
     list_rows = []
@@ -239,17 +254,22 @@ def _df_rows_from_valid_VIA_file(file_path: Path) -> list[dict]:
             region_attributes = region["region_attributes"]
 
             # Define supercategory and category.
-            # We take first key in "region_attributes" as the supercategory,
-            # and its value as category_id_str
-            if region_attributes and supercategories_props:
+            # A region (bbox) can have multiple supercategories.
+            # We only consider the first supercategory in alphabetical order.
+            if region_attributes and supercategories_dict:
+                # bbox data
                 supercategory = sorted(list(region_attributes.keys()))[0]
                 category_id_str = region_attributes[supercategory]
-                category = supercategories_props[supercategory]["options"][
+
+                # map to category name
+                category = supercategories_dict[supercategory]["options"][
                     category_id_str
                 ]
+            # If not defined, set to None
             else:
-                supercategory = ""
-                category = ""
+                supercategory = None
+                category = None
+                category_id_str = None
 
             row = {
                 "annotation_id": annotation_id,
@@ -261,6 +281,8 @@ def _df_rows_from_valid_VIA_file(file_path: Path) -> list[dict]:
                 "height": region_shape["height"],
                 "supercategory": supercategory,
                 "category": category,
+                "category_id": category_id_str,
+                # in VIA files, the category_id is a string
             }
 
             list_rows.append(row)
