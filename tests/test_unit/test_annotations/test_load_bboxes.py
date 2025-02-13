@@ -524,3 +524,26 @@ def test_image_id_assignment(
         for file, id in zip(df["image_filename"], df["image_id"], strict=True)
     }
     assert pairs_img_id_filename_out == pairs_img_id_to_filename_alphabetical
+
+
+def test_dataframe_from_same_annotations(annotations_test_data: dict):
+    """Test whether the same annotations exported to VIA and COCO formats
+    produce the same dataframe, except for the image width and height columns.
+
+    We use the `_subset` files because we know they contain the
+    same annotations.
+    """
+    # Read data into dataframes
+    df_via = from_files(
+        annotations_test_data["small_bboxes_VIA_subset.json"],
+        format="VIA",
+    )
+    df_coco = from_files(
+        annotations_test_data["small_bboxes_COCO_subset.json"],
+        format="COCO",
+    )
+
+    # Compare dataframes excluding `image_width`, `image_height` columns
+    assert df_via.drop(columns=["image_width", "image_height"]).equals(
+        df_coco.drop(columns=["image_width", "image_height"])
+    )
