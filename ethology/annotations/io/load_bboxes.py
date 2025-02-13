@@ -180,8 +180,8 @@ def _from_single_file(
     list_rows = get_rows_from_file(valid_file.path)
     df = pd.DataFrame(list_rows)
 
-    # Sort by annotation_id and image_filename
-    df = df.sort_values(by=["annotation_id", "image_filename"])
+    # Sort annotations by image_filename
+    df = df.sort_values(by=["image_filename"])
 
     # Drop duplicates and reindex
     # The resulting axis is labeled 0,1,…,n-1.
