@@ -44,6 +44,35 @@ def count_imgs_and_annots_in_input_file(
     return n_images, n_annotations
 
 
+def get_list_images(
+    file_path: Path | list[Path], format: Literal["VIA", "COCO"]
+) -> list:
+    """Extract list of image files from input annotation file."""
+    # Read input data as dict
+    list_data = []
+    if isinstance(file_path, list):
+        for file in file_path:
+            with open(file) as f:
+                list_data.append(json.load(f))
+    else:
+        with open(file_path) as f:
+            list_data.append(json.load(f))
+
+    # Extract list of images ordered as in the input data
+    if format == "VIA":
+        return [
+            img["filename"]
+            for data in list_data
+            for img in data["_via_img_metadata"].values()
+        ]
+    elif format == "COCO":
+        return [
+            img["file_name"] for data in list_data for img in data["images"]
+        ]
+    else:
+        raise ValueError("Unsupported format")
+
+
 @pytest.fixture
 def multiple_files(annotations_test_data: dict) -> dict:
     """Fixture that returns for each format, a pair of annotation files."""
@@ -602,7 +631,6 @@ def test_category_id_extraction(
 @pytest.mark.parametrize(
     "input_file_type, format",
     [
-        ("single", "VIA"),  # ----> need a different one to test this
         ("multiple", "VIA"),
         ("single", "COCO"),
         ("multiple", "COCO"),
@@ -616,8 +644,12 @@ def test_sorted_annotations_by_image_filename(
 ):
     """Test that the annotations are sorted by image filename.
 
-    We use the small_bboxes_image_id_ data because the image filenames are not
-    sorted in the original files.
+    We use the `small_bboxes_image_id_COCO` data because the list of
+    image filenames is not sorted.
+
+    We don't test with a single VIA file because the VIA tool always
+    outputs the image dictionaries under `_via_img_metadata` sorted by
+    filename.
     """
     # Get input file(s)
     if input_file_type == "single":
@@ -625,22 +657,21 @@ def test_sorted_annotations_by_image_filename(
             f"small_bboxes_image_id_{format}.json"
         ]
     elif input_file_type == "multiple":
-        # they should be loaded in this order for the image filemanes to not
-        # be sorted alphabetically across the files
         input_files = (
             ["VIA_JSON_sample_2.json", "VIA_JSON_sample_1.json"]
             if format == "VIA"
             else ["COCO_JSON_sample_1.json", "COCO_JSON_sample_2.json"]
-        )
+        )  # load in this order so that the image filenames are not sorted
         input_filepaths = [annotations_test_data[file] for file in input_files]
 
-    # Compute bboxes dataframe
-    df = from_files(
-        file_paths=input_filepaths,
-        format=format,
-    )
+    # Check list of images as they are in the input data are unsorted
+    list_input_images = get_list_images(input_filepaths, format=format)
+    assert list_input_images != sorted(list_input_images)
 
-    # Check that the annotations are sorted by image filename
+    # Compute bboxes dataframe
+    df = from_files(file_paths=input_filepaths, format=format)
+
+    # Check that the annotations in the dataframe are sorted by image filename
     assert df["image_filename"].to_list() == sorted(
         df["image_filename"].to_list()
     )
