@@ -578,36 +578,43 @@ def test_dataframe_from_same_annotations(annotations_test_data: dict):
         df_coco.drop(columns=["image_width", "image_height"])
     )
 
-
 @pytest.mark.parametrize(
-    "input_file, format, input_category_type",
+    "input_file, format, case_category_id, expected_category_id",
     [
         (
             "small_bboxes_no_cat_VIA.json",
             "VIA",
             "empty",
-        ),  # no category in VIA file
+            None,
+        ),  # no category in VIA file --> should be None in df
         (
             "small_bboxes_VIA.json",
             "VIA",
             "string_integer",
-        ),  # category ID is a string ("1")
+            1,
+        ),  # category ID is a string ("1") ---> should be 1 in df
+        # VIA category IDs are retained
         (
             "VIA_JSON_sample_1.json",
             "VIA",
             "string_category",
-        ),  # category ID is a string ("crab")
+            0,
+        ),  # category ID is a string ("crab") ---> should be factorized
         (
             "small_bboxes_COCO.json",
             "COCO",
             "integer",
-        ),  # category ID is an integer (1)
+            0,
+        ),  # category ID is an integer (1) ---> should be 0 in df
+        # COCO category IDs are always 1-based indices, and transformed to
+        # 0-based indices when read into df
     ],
 )
 def test_category_id_extraction(
     input_file: str,
     format: Literal["VIA", "COCO"],
-    input_category_type: str,
+    case_category_id: str,
+    expected_category_id: int | None,
     annotations_test_data: dict,
 ):
     """Test that the category_id is extracted correctly from the input file."""
@@ -616,15 +623,16 @@ def test_category_id_extraction(
         format=format,
     )
 
-    if input_category_type == "empty":
-        assert df["category_id"].isna().all()
+    if case_category_id == "empty":
+        df["category_id"].apply(lambda x: x is expected_category_id).all()
 
-    elif input_category_type in ["string_integer", "integer"]:
+    elif case_category_id in ["string_integer", "integer"]:
         assert df["category_id"].dtype == int
-        assert df["category_id"].unique() == [1]
+        assert df["category_id"].unique() == [expected_category_id]
 
-    elif input_category_type == "string_category":
+    elif case_category_id == "string_category":
         assert df["category_id"].dtype == int
+        assert df["category_id"].unique() == [expected_category_id]
         assert all(df["category_id"] == df["category"].factorize()[0])
 
 
