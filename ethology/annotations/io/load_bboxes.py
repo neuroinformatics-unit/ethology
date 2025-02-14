@@ -19,9 +19,10 @@ STANDARD_BBOXES_DF_COLUMNS = [
     "height",
     "supercategory",
     "category",
+    "category_id",
     "image_width",
     "image_height",
-]  # if a column is not defined, it is filled with nan
+]  # superset of columns in the standard dataframe
 
 
 def from_files(
@@ -47,7 +48,9 @@ def from_files(
         Bounding boxes annotations dataframe. The dataframe is indexed
         by "annotation_id" and has the following columns: "image_filename",
         "image_id", "image_width", "image_height", "x_min", "y_min",
-        "width", "height", "supercategory", "category".
+        "width", "height", "supercategory", "category", "category_id". The
+        "category_id" column is always a 0-based integer, except for VIA files
+        where the values specified in the input file are retained.
 
     See Also
     --------
@@ -92,7 +95,7 @@ def _from_multiple_files(
         Bounding boxes annotations dataframe. The dataframe is indexed
         by "annotation_id" and has the following columns: "image_filename",
         "image_id", "image_width", "image_height", "x_min", "y_min",
-        "width", "height", "supercategory", "category".
+        "width", "height", "supercategory", "category", "category_id".
 
     """
     # Get list of dataframes
@@ -101,8 +104,8 @@ def _from_multiple_files(
         for file in list_filepaths
     ]
 
-    # Concatenate with ignore_index=True,
-    # so that the resulting axis is labeled 0,1,…,n - 1.
+    # Concatenate and reindex
+    # the resulting axis is labeled 0,1,…,n - 1.
     # NOTE: after ignore_index=True the index name is no longer "annotation_id"
     df_all = pd.concat(df_list, ignore_index=True)
 
@@ -112,7 +115,10 @@ def _from_multiple_files(
         lambda x: list_image_filenames.index(x)
     )
 
-    # Remove duplicates that may exist across files
+    # Sort by image_filename
+    df_all = df_all.sort_values(by=["image_filename"])
+
+    # Remove duplicates that may exist across files and reindex
     df_all = df_all.drop_duplicates(ignore_index=True, inplace=False)
 
     # Set the index name back to "annotation_id"
@@ -140,7 +146,7 @@ def _from_single_file(
         Bounding boxes annotations dataframe. The dataframe is indexed
         by "annotation_id" and has the following columns: "image_filename",
         "image_id", "image_width", "image_height", "x_min", "y_min",
-        "width", "height", "supercategory", "category".
+        "width", "height", "supercategory", "category", "category_id".
 
     """
     # Choose the appropriate validator and row-extraction function
@@ -154,29 +160,34 @@ def _from_single_file(
     else:
         raise ValueError(f"Unsupported format: {format}")
 
-    # Validate file
-    valid_file = validator(file_path)
-
     # Build dataframe from extracted rows
+    valid_file = validator(file_path)
     list_rows = get_rows_from_file(valid_file.path)
     df = pd.DataFrame(list_rows)
 
-    # Set "annotation_id" as index
-    # (otherwise duplicate annotations are not identified as such)
-    df = df.set_index(STANDARD_BBOXES_DF_INDEX)
+    # Sort annotations by image_filename
+    df = df.sort_values(by=["image_filename"])
 
-    # Drop duplicates and reset indices.
-    # We use ignore_index=True so that the resulting axis is labeled 0,1,…,n-1.
-    # NOTE: after this the index name is no longer "annotation_id"
-    df = df.drop_duplicates(ignore_index=True, inplace=False)
+    # Drop duplicates and reindex
+    # The resulting axis is labeled 0,1,…,n-1.
+    df = df.drop_duplicates(
+        subset=[col for col in df.columns if col != "annotation_id"],
+        ignore_index=True,
+        inplace=False,
+    )
+
+    # Fix category_id for VIA files if required
+    # Cast as an int if possible, otherwise factorize it
+    if format == "VIA" and not df["category_id"].isna().all():
+        df = _VIA_category_id_as_int(df)
 
     # Reorder columns to match standard columns
-    df = df.reindex(columns=STANDARD_BBOXES_DF_COLUMNS)
+    # If columns dont exist they are filled with nan / na values
+    df = df.reindex(columns=STANDARD_BBOXES_DF_COLUMNS + ["annotation_id"])
 
     # Set the index name to "annotation_id"
-    df.index.name = STANDARD_BBOXES_DF_INDEX
+    df = df.set_index(STANDARD_BBOXES_DF_INDEX)
 
-    # Read as standard dataframe
     return df
 
 
@@ -202,9 +213,11 @@ def _df_rows_from_valid_VIA_file(file_path: Path) -> list[dict]:
     image_metadata_dict = data_dict["_via_img_metadata"]
     via_image_id_list = [str(x) for x in data_dict["_via_image_id_list"]]
     via_attributes = data_dict["_via_attributes"]
-    supercategories_props = {}
+
+    # Get supercategories and categories
+    supercategories_dict = {}
     if "region" in via_attributes:
-        supercategories_props = via_attributes["region"]
+        supercategories_dict = via_attributes["region"]
 
     # Map image filenames to the image keys used by VIA
     # the VIA keys are <filename><filesize> strings
@@ -225,17 +238,22 @@ def _df_rows_from_valid_VIA_file(file_path: Path) -> list[dict]:
             region_attributes = region["region_attributes"]
 
             # Define supercategory and category.
-            # We take first key in "region_attributes" as the supercategory,
-            # and its value as category_id_str
-            if region_attributes and supercategories_props:
+            # A region (bbox) can have multiple supercategories.
+            # We only consider the first supercategory in alphabetical order.
+            if region_attributes and supercategories_dict:
+                # bbox data
                 supercategory = sorted(list(region_attributes.keys()))[0]
                 category_id_str = region_attributes[supercategory]
-                category = supercategories_props[supercategory]["options"][
+
+                # map to category name
+                category = supercategories_dict[supercategory]["options"][
                     category_id_str
                 ]
+            # If not defined, set to None
             else:
-                supercategory = ""
-                category = ""
+                supercategory = None
+                category = None
+                category_id_str = None
 
             row = {
                 "annotation_id": annotation_id,
@@ -249,6 +267,8 @@ def _df_rows_from_valid_VIA_file(file_path: Path) -> list[dict]:
                 "height": region_shape["height"],
                 "supercategory": supercategory,
                 "category": category,
+                "category_id": category_id_str,
+                # in VIA files, the category_id is a string
             }
 
             list_rows.append(row)
@@ -322,8 +342,31 @@ def _df_rows_from_valid_COCO_file(file_path: Path) -> list[dict]:
             "height": height,
             "supercategory": supercategory,
             "category": category,
+            "category_id": category_id - 1,
+            # in COCO files, the category_id is always a 1-based integer
         }
 
         list_rows.append(row)
 
     return list_rows
+
+
+def _VIA_category_id_as_int(df: pd.DataFrame) -> pd.DataFrame:
+    """Convert category_id to int if possible, otherwise factorize it.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Bounding boxes annotations dataframe.
+
+    Returns
+    -------
+    pd.DataFrame
+        Bounding boxes annotations dataframe with "category_id" as int.
+
+    """
+    try:
+        df["category_id"] = df["category_id"].astype(int)
+    except ValueError:
+        df["category_id"] = df["category"].factorize(sort=True)[0]
+    return df
