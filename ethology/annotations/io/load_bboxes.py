@@ -364,7 +364,8 @@ def _df_rows_from_valid_COCO_file(file_path: Path) -> list[dict]:
             "height": height,
             "supercategory": supercategory,
             "category": category,
-            "category_id": category_id,
+            "category_id": category_id - 1,
+            # in COCO files, the category_id is always a 1-based integer
         }
 
         list_rows.append(row)
