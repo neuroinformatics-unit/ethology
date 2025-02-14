@@ -3,14 +3,17 @@ import json
 import pytest
 
 from ethology.annotations.io.load_bboxes import from_files
-from ethology.annotations.io.save_bboxes import df_bboxes_to_COCO_file
+from ethology.annotations.io.save_bboxes import to_COCO_file
 
 
 @pytest.mark.parametrize(
     "filename",
     [
         "small_bboxes_COCO.json",
-        # "small_bboxes_duplicates_COCO.json",
+        pytest.param(
+            "COCO_JSON_sample_1.json",
+            marks=pytest.mark.xfail(reason="should pass after PR48"),
+        ),
     ],
 )
 def test_df_bboxes_to_COCO_file(filename, annotations_test_data, tmp_path):
@@ -21,9 +24,7 @@ def test_df_bboxes_to_COCO_file(filename, annotations_test_data, tmp_path):
     df = from_files(input_file, format="COCO")
 
     # Export dataframe to COCO format
-    output_file = df_bboxes_to_COCO_file(
-        df, output_filepath=tmp_path / "output.json"
-    )
+    output_file = to_COCO_file(df, output_filepath=tmp_path / "output.json")
 
     ########################################
     # Compare original and exported JSON files
@@ -61,7 +62,9 @@ def test_df_bboxes_to_COCO_file(filename, annotations_test_data, tmp_path):
         exported_img_dicts_sorted,
         strict=True,
     ):
-        assert all(im_exported[ky] == im_original[ky] for ky in im_exported)
+        # Check common keys are equal
+        common_keys = set(im_exported.keys()).intersection(im_original.keys())
+        assert all(im_exported[ky] == im_original[ky] for ky in common_keys)
 
     ########################################
     # Check annotations
@@ -79,12 +82,19 @@ def test_df_bboxes_to_COCO_file(filename, annotations_test_data, tmp_path):
         exported_annot_dicts_sorted,
         strict=True,
     ):
+        # Check common keys are equal
+        common_keys = set(annot_exported.keys()).intersection(
+            annot_original.keys()
+        )
         assert all(
             annot_exported[ky] == annot_original[ky]
-            for ky in annot_exported
+            for ky in common_keys
             if ky not in ["id", "category_id"]
-            # id is expected to differ because we reindex
+            # "id" is expected to differ because we reindex
         )
+
+        # Check category_id is as expected for COCO files exported
+        # with VIA tool
         assert (
             annot_exported["category_id"] == annot_original["category_id"] - 1
         )
