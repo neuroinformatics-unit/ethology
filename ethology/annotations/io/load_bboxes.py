@@ -52,7 +52,8 @@ def from_files(
         following attributes: "annotation_files", "annotation_format",
         "images_directories". The "image_id" is assigned based
         on the alphabetically sorted list of unique image filenames across all
-        input files.
+        input files. The "category_id" column is always a 0-based integer, 
+        except for VIA files where the values specified in the input file are retained.
 
     Notes
     -----
@@ -109,7 +110,7 @@ def _from_multiple_files(
         Bounding boxes annotations dataframe. The dataframe is indexed
         by "annotation_id" and has the following columns: "image_filename",
         "image_id", "image_width", "image_height", "x_min", "y_min",
-        "width", "height", "supercategory", "category".
+        "width", "height", "supercategory", "category", "category_id".
 
     """
     # Get list of dataframes
@@ -161,7 +162,7 @@ def _from_single_file(
         Bounding boxes annotations dataframe. The dataframe is indexed
         by "annotation_id" and has the following columns: "image_filename",
         "image_id", "image_width", "image_height", "x_min", "y_min",
-        "width", "height", "supercategory", "category".
+        "width", "height", "supercategory", "category", "category_id".
 
     """
     # Choose the appropriate validator and row-extraction function
