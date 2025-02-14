@@ -2,8 +2,8 @@ import json
 
 import pytest
 
-from ethology.annotations.load_bboxes import df_bboxes_from_files
-from ethology.annotations.save_bboxes import df_bboxes_to_COCO_file
+from ethology.annotations.io.load_bboxes import from_files
+from ethology.annotations.io.save_bboxes import df_bboxes_to_COCO_file
 
 
 @pytest.mark.parametrize(
@@ -18,7 +18,7 @@ def test_df_bboxes_to_COCO_file(filename, annotations_test_data, tmp_path):
     input_file = annotations_test_data[filename]
 
     # Read as bboxes dataframe
-    df = df_bboxes_from_files(input_file, format="COCO")
+    df = from_files(input_file, format="COCO")
 
     # Export dataframe to COCO format
     output_file = df_bboxes_to_COCO_file(
@@ -35,7 +35,15 @@ def test_df_bboxes_to_COCO_file(filename, annotations_test_data, tmp_path):
 
     ########################################
     # Check categories dictionaries match
-    assert original_data["categories"] == exported_data["categories"]
+    for categories_original, categories_exported in zip(
+        original_data["categories"], exported_data["categories"], strict=True
+    ):
+        assert categories_original["id"] - 1 == categories_exported["id"]
+        assert categories_original["name"] == categories_exported["name"]
+        assert (
+            categories_original["supercategory"]
+            == categories_exported["supercategory"]
+        )
 
     ########################################
     # Check images dictionaries match
@@ -74,5 +82,9 @@ def test_df_bboxes_to_COCO_file(filename, annotations_test_data, tmp_path):
         assert all(
             annot_exported[ky] == annot_original[ky]
             for ky in annot_exported
-            if ky != "id"  # id is expected to differ because we reindex
+            if ky not in ["id", "category_id"]
+            # id is expected to differ because we reindex
+        )
+        assert (
+            annot_exported["category_id"] == annot_original["category_id"] - 1
         )
