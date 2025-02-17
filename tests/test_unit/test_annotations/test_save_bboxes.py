@@ -7,6 +7,8 @@ import pytest
 
 from ethology.annotations.io.load_bboxes import from_files
 from ethology.annotations.io.save_bboxes import (
+    STANDARD_BBOXES_DF_COLUMNS_TO_COCO,
+    _create_COCO_dict,
     _fill_in_COCO_required_data,
     _validate_df_bboxes,
     to_COCO_file,
@@ -159,6 +161,30 @@ def test_fill_in_COCO_required_data(
         )
     else:
         assert df_full[columns_to_drop].equals(df_output[columns_to_drop])
+
+
+def test_create_COCO_dict(sample_bboxes_df):
+    """Test _create_COCO_dict creates a dictionary as expected."""
+    # Prepare input data
+    df = sample_bboxes_df()
+    df["annotation_id"] = df.index  # add "annotation_id" column
+
+    # Extract COCO dictionary
+    COCO_dict = _create_COCO_dict(df)
+
+    # Check type and sections
+    assert isinstance(COCO_dict, dict)
+    assert all(x in COCO_dict for x in ["images", "categories", "annotations"])
+
+    # Check keys in each section
+    for section, section_mapping in STANDARD_BBOXES_DF_COLUMNS_TO_COCO.items():
+        assert all(
+            [
+                x in elem
+                for elem in COCO_dict[section]
+                for x in section_mapping.values()
+            ]
+        )
 
 
 @pytest.mark.parametrize(
