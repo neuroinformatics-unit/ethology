@@ -9,10 +9,32 @@ import numpy as np
 import pandas as pd
 import pytz
 
-from ethology.annotations.io.load_bboxes import (
-    STANDARD_BBOXES_DF_INDEX,
-)
+from ethology.annotations.io.load_bboxes import STANDARD_BBOXES_DF_INDEX
 from ethology.annotations.validators import ValidCOCO
+
+# Mapping of dataframe columns to COCO keys
+STANDARD_BBOXES_DF_COLUMNS_TO_COCO = {
+    "images": {
+        "image_id": "id",
+        "image_filename": "file_name",
+        "image_width": "width",
+        "image_height": "height",
+    },
+    "categories": {
+        "category_id": "id",
+        "category": "name",
+        "supercategory": "supercategory",
+    },
+    "annotations": {
+        "annotation_id": "id",
+        "area": "area",
+        "bbox": "bbox",
+        "image_id": "image_id",
+        "category_id": "category_id",
+        "iscrowd": "iscrowd",
+        "segmentation": "segmentation",
+    },
+}
 
 
 def _validate_df_bboxes(df: pd.DataFrame):
@@ -38,7 +60,7 @@ def _validate_df_bboxes(df: pd.DataFrame):
 
 
 def _fill_in_COCO_required_data(df: pd.DataFrame) -> pd.DataFrame:
-    """Fill in bounding boxes dataframe with any COCO required data."""
+    """Return the bboxes input dataframe with any COCO required data added."""
     # Add annotation_id as column
     df["annotation_id"] = df.index
 
@@ -88,40 +110,16 @@ def _fill_in_COCO_required_data(df: pd.DataFrame) -> pd.DataFrame:
 
 def _create_COCO_dict(df: pd.DataFrame) -> dict:
     """Extract COCO dictionary from a bounding boxes dataframe."""
-    # Map dataframe columns to COCO fields for renaming
-    map_df_columns_to_COCO_keys = {
-        "images": {
-            "image_id": "id",
-            "image_filename": "file_name",
-            "image_width": "width",
-            "image_height": "height",
-        },
-        "categories": {
-            "category_id": "id",
-            "category": "name",
-            "supercategory": "supercategory",
-        },
-        "annotations": {
-            "annotation_id": "id",
-            "area": "area",
-            "bbox": "bbox",
-            "image_id": "image_id",
-            "category_id": "category_id",
-            "iscrowd": "iscrowd",
-            "segmentation": "segmentation",
-        },
-    }
-
     COCO_dict: dict[str, Any] = {}
     for sections in ["images", "categories", "annotations"]:
         # Extract required columns
         df_section = df[
-            list(map_df_columns_to_COCO_keys[sections].keys())
+            list(STANDARD_BBOXES_DF_COLUMNS_TO_COCO[sections].keys())
         ].copy()
 
         # Rename columns to COCO standard
         df_section = df_section.rename(
-            columns=map_df_columns_to_COCO_keys[sections]
+            columns=STANDARD_BBOXES_DF_COLUMNS_TO_COCO[sections]
         )
 
         # Extract rows as lists of dictionaries
