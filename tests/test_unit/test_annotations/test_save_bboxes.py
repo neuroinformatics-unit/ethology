@@ -1,9 +1,73 @@
 import json
+from contextlib import nullcontext as does_not_raise
 
+import pandas as pd
 import pytest
 
 from ethology.annotations.io.load_bboxes import from_files
-from ethology.annotations.io.save_bboxes import to_COCO_file
+from ethology.annotations.io.save_bboxes import (
+    _validate_df_bboxes,
+    to_COCO_file,
+)
+
+
+@pytest.mark.parametrize(
+    "df, expected_exception, expected_error_message",
+    [
+        (
+            [],
+            pytest.raises(TypeError),
+            "Expected a pandas DataFrame, but got <class 'list'>.",
+        ),
+        (
+            pd.DataFrame(),
+            pytest.raises(ValueError),
+            "Expected index name to be 'annotation_id', but got 'None'.",
+        ),
+        (
+            pd.DataFrame({"annotation_id": [1, 2, 3]}).set_index(
+                "annotation_id"
+            ),
+            pytest.raises(ValueError),
+            "Required bounding box coordinates "
+            "'x_min', 'y_min', 'width', 'height', are not present in "
+            "the dataframe.",
+        ),
+        (
+            pd.DataFrame(
+                {
+                    "annotation_id": {0: 0, 1: 1, 2: 2},
+                    "image_filename": {
+                        0: "00000.jpg",
+                        1: "00083.jpg",
+                        2: "00166.jpg",
+                    },
+                    "image_id": {0: 0, 1: 83, 2: 166},
+                    "x_min": {0: 963, 1: 376, 2: 458},
+                    "y_min": {0: 283, 1: 314, 2: 329},
+                    "width": {0: 302, 1: 301, 2: 301},
+                    "height": {0: 172, 1: 123, 2: 131},
+                    "supercategory": {0: "animal", 1: "animal", 2: "animal"},
+                    "category": {0: "crab", 1: "crab", 2: "crab"},
+                    "image_width": {0: 1280, 1: 1280, 2: 1280},
+                    "image_height": {0: 720, 1: 720, 2: 720},
+                }
+            ).set_index("annotation_id"),  # data from "small_bboxes_COCO.json"
+            does_not_raise(),
+            "",
+        ),
+    ],
+)
+def test_validate_df_bboxes(
+    df: pd.DataFrame,
+    expected_exception: pytest.raises,
+    expected_error_message: str,
+):
+    """Test _validate_df_bboxes throws the expected errors."""
+    with expected_exception as excinfo:
+        _validate_df_bboxes(df)
+    if excinfo:
+        assert expected_error_message == str(excinfo.value)
 
 
 @pytest.mark.parametrize(
