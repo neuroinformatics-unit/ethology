@@ -1,6 +1,7 @@
 import json
 from collections.abc import Callable
 from contextlib import nullcontext as does_not_raise
+from pathlib import Path
 
 import pandas as pd
 import pytest
@@ -13,6 +14,41 @@ from ethology.annotations.io.save_bboxes import (
     _validate_df_bboxes,
     to_COCO_file,
 )
+
+
+def read_JSON_as_dict(file_path: str | Path) -> dict:
+    with open(file_path) as file:
+        return json.load(file)
+
+
+def assert_list_of_dicts_match(
+    dicts_1_unsorted: list,
+    dicts_2_unsorted: list,
+    key_to_sort_by: str,
+    keys_to_exclude: list | None = None,
+):
+    """Assert two lists of dictionaries are equal after sorting by a key.
+
+    Some keys can be excluded from the comparison via the `keys_to_exclude`
+    parameter.
+    """
+    # Sort list of dictionaries
+    list_dicts_1 = sorted(dicts_1_unsorted, key=lambda x: x[key_to_sort_by])
+    list_dicts_2 = sorted(dicts_2_unsorted, key=lambda x: x[key_to_sort_by])
+
+    # Prepare list of keys to exclude from comparison
+    if keys_to_exclude is None:
+        keys_to_exclude = []
+
+    # Compare each dictionary in the lists
+    for dict_1, dict_2 in zip(list_dicts_1, list_dicts_2, strict=True):
+        # Extract common keys
+        common_keys = set(dict_1.keys()).intersection(dict_2.keys())
+        assert all(
+            dict_1[ky] == dict_2[ky]
+            for ky in common_keys
+            if ky not in keys_to_exclude
+        )
 
 
 @pytest.fixture
@@ -207,75 +243,53 @@ def test_df_bboxes_to_COCO_file(filename, annotations_test_data, tmp_path):
     # Export dataframe to COCO format
     output_file = to_COCO_file(df, output_filepath=tmp_path / "output.json")
 
-    ########################################
-    # Compare original and exported JSON files
-    with open(input_file) as file:
-        original_data = json.load(file)
+    input_dict = read_JSON_as_dict(input_file)
+    output_dict = read_JSON_as_dict(output_file)
 
-    with open(output_file) as file:
-        exported_data = json.load(file)
-
-    ########################################
-    # Check categories dictionaries match
-    for categories_original, categories_exported in zip(
-        original_data["categories"], exported_data["categories"], strict=True
-    ):
-        assert categories_original["id"] - 1 == categories_exported["id"]
-        assert categories_original["name"] == categories_exported["name"]
-        assert (
-            categories_original["supercategory"]
-            == categories_exported["supercategory"]
-        )
-
-    ########################################
-    # Check images dictionaries match
-    # Sort dicts in list of image dictionaries based on file_name
-    original_img_dicts_sorted = sorted(
-        original_data["images"], key=lambda x: x["file_name"]
-    )
-    exported_img_dicts_sorted = sorted(
-        exported_data["images"], key=lambda x: x["file_name"]
+    # Check lists of "categories" dictionaries match
+    assert_list_of_dicts_match(
+        input_dict["categories"],
+        output_dict["categories"],
+        key_to_sort_by="id",
+        keys_to_exclude=["id"],  # "id" is expected to be different
     )
 
-    # Compare the two lists of dictionaries
-    for im_original, im_exported in zip(
-        original_img_dicts_sorted,
-        exported_img_dicts_sorted,
-        strict=True,
-    ):
-        # Check common keys are equal
-        common_keys = set(im_exported.keys()).intersection(im_original.keys())
-        assert all(im_exported[ky] == im_original[ky] for ky in common_keys)
+    # Check category "id" is as expected for COCO files exported
+    # with VIA tool
 
-    ########################################
-    # Check annotations
-    # Sort annotations based on id
-    exported_annot_dicts_sorted = sorted(
-        exported_data["annotations"], key=lambda x: x["id"]
-    )
-    original_annot_dicts_sorted = sorted(
-        original_data["annotations"], key=lambda x: x["id"]
+    # Check lists of "images" dictionaries match
+    assert_list_of_dicts_match(
+        input_dict["images"],
+        output_dict["images"],
+        key_to_sort_by="file_name",
+        keys_to_exclude=None,
     )
 
-    # Compare the two lists of dictionaries
-    for annot_original, annot_exported in zip(
-        original_annot_dicts_sorted,
-        exported_annot_dicts_sorted,
-        strict=True,
-    ):
-        # Check common keys are equal
-        common_keys = set(annot_exported.keys()).intersection(
-            annot_original.keys()
-        )
-        assert all(
-            annot_exported[ky] == annot_original[ky]
-            for ky in common_keys
-            if ky not in ["id", "category_id"]
-            # "id" is expected to differ because we reindex
-        )
+    # Check lists of "annotations" dictionaries match
+    assert_list_of_dicts_match(
+        input_dict["annotations"],
+        output_dict["annotations"],
+        key_to_sort_by="id",
+        keys_to_exclude=["id", "category_id"],
+    )
 
-        # Check category_id is as expected for COCO files exported
-        # with VIA tool
-        assert (
-            annot_exported["category_id"] == annot_original["category_id"] - 1
+    # Check category_id is as expected for COCO files exported
+    # with VIA tool
+    # under categories
+    assert all(
+        categories_out["id"] == categories_in["id"] - 1
+        for categories_in, categories_out in zip(
+            input_dict["categories"],
+            output_dict["categories"],
+            strict=True,
         )
+    )
+    # under annotations
+    assert all(
+        annotations_out["category_id"] == annotations_in["category_id"] - 1
+        for annotations_in, annotations_out in zip(
+            input_dict["annotations"],
+            output_dict["annotations"],
+            strict=True,
+        )
+    )
