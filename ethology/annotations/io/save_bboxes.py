@@ -174,7 +174,7 @@ def to_COCO_file(df: pd.DataFrame, output_filepath: str | Path):
 
     # Write to JSON file
     with open(output_filepath, "w") as f:
-        json.dump(COCO_dict, f, sort_keys=True, indent=4)
+        json.dump(COCO_dict, f, sort_keys=True, indent=2)
 
     # Check if output file is a valid COCO for ethology
     ValidCOCO(output_filepath)
