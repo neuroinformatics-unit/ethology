@@ -144,7 +144,21 @@ def _create_COCO_dict(df: pd.DataFrame) -> dict:
 
 
 def to_COCO_file(df: pd.DataFrame, output_filepath: str | Path):
-    """Write bounding boxes annotations to a COCO JSON file."""
+    """Write bounding boxes annotations to a COCO JSON file.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Bounding boxes annotations dataframe.
+    output_filepath : str or Path
+        Output file path.
+
+    Returns
+    -------
+    output_filepath : str
+        Output file path.
+
+    """
     # Validate input dataframe
     _validate_df_bboxes(df)
 
