@@ -28,28 +28,28 @@ def check_dict_in_list_of_dicts(
     """Check if a dictionary is in a list of dictionaries, considering only
     certain keys in the comparison.
     """
-    # Extract common keys between input and first dictionary in list
+    # Prepare list of keys for comparison
+    # (we assume all dictionaries in the list have the same keys as the first)
     common_keys = set(input_dict.keys()).intersection(list_dicts[0].keys())
+    keys_to_exclude = keys_to_exclude or []
+    keys_to_compare = common_keys.difference(keys_to_exclude)
 
-    # Prepare list of keys to exclude from comparison
-    if keys_to_exclude is None:
-        keys_to_exclude = []
+    # Define modified list removing keys to exclude and non-common keys
+    list_dicts_modif = [{k: d[k] for k in keys_to_compare} for d in list_dicts]
+    input_dict_modif = {k: input_dict[k] for k in keys_to_compare}
 
     # Check if input dictionary is in the list of dictionaries
-    return any(
-        all(
-            input_dict[key] == dict_[key]
-            for key in common_keys
-            if key not in keys_to_exclude
-        )
-        for dict_ in list_dicts
-    )
+    return input_dict_modif in list_dicts_modif
 
 
 def assert_list_of_dicts_match(
     list_dicts_1: list, list_dicts_2: list, keys_to_exclude: list | None = None
 ):
-    """Assert two lists of dictionaries are equal."""
+    """Assert two lists of dictionaries are equal.
+
+    We do this by checking that both lists are the same length, and
+    each dictionary in list 1 exists in list 2.
+    """
     # Check same length
     assert len(list_dicts_1) == len(list_dicts_2)
 
