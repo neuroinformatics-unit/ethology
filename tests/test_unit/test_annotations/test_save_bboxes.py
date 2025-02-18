@@ -17,6 +17,7 @@ from ethology.annotations.io.save_bboxes import (
 
 
 def read_JSON_as_dict(file_path: str | Path) -> dict:
+    """Read a JSON file and return its content as a dictionary."""
     with open(file_path) as file:
         return json.load(file)
 
@@ -52,14 +53,21 @@ def assert_list_of_dicts_match(
 
 
 @pytest.fixture
-def sample_bboxes_df():
-    """Return a sample bboxes dataframe with the specified columns dropped.
+def sample_bboxes_df() -> Callable:
+    """Return a factory function for a sample bboxes dataframe.
 
-    The original dataframe is from "small_bboxes_COCO.json" data with the
-    relevant columns for COCO export added.
+    The factory function can be called with the `columns_to_drop` parameter
     """
 
-    def _sample_bboxes_df_drop(columns_to_drop: list | None = None):
+    def _sample_bboxes_df_drop(
+        columns_to_drop: list | None = None,
+    ) -> pd.DataFrame:
+        """Return a sample bboxes dataframe with the specified columns dropped.
+
+        The original dataframe is from "small_bboxes_COCO.json" data with the
+        relevant columns for COCO export added. The index is set to
+        "annotation_id".
+        """
         df = pd.DataFrame(
             {
                 "annotation_id": {0: 0, 1: 1, 2: 2},
@@ -93,6 +101,7 @@ def sample_bboxes_df():
             }
         ).set_index("annotation_id")
 
+        # Drop columns if specified
         if columns_to_drop:
             return df.drop(columns=columns_to_drop)
         else:
@@ -136,7 +145,9 @@ def test_validate_df_bboxes(
     expected_error_message: str,
     request: pytest.FixtureRequest,
 ):
-    """Test _validate_df_bboxes throws the expected errors."""
+    """Test the validation function for the bboxes dataframe throws the
+    expected errors.
+    """
     if not expected_error_message:
         df_factory = request.getfixturevalue(df)
         df = df_factory()
@@ -161,7 +172,9 @@ def test_validate_df_bboxes(
 def test_fill_in_COCO_required_data(
     columns_to_drop: list, sample_bboxes_df: Callable
 ):
-    """Test _fill_in_COCO_required_data fills in missing columns."""
+    """Test the fill-in function for exporting to COCO fills in any
+    columns required by COCO that may be missing.
+    """
     # Get dataframe with dropped columns
     df_full = sample_bboxes_df()
     df_input = sample_bboxes_df(columns_to_drop=columns_to_drop)
@@ -199,11 +212,13 @@ def test_fill_in_COCO_required_data(
         assert df_full[columns_to_drop].equals(df_output[columns_to_drop])
 
 
-def test_create_COCO_dict(sample_bboxes_df):
-    """Test _create_COCO_dict creates a dictionary as expected."""
+def test_create_COCO_dict(sample_bboxes_df: Callable):
+    """Test that the function that transforms the modified bboxes dataframe to
+    a COCO dictionary creates a dictionary as expected.
+    """
     # Prepare input data
     df = sample_bboxes_df()
-    df["annotation_id"] = df.index  # add "annotation_id" column
+    df["annotation_id"] = df.index  # required to extract the COCO dict
 
     # Extract COCO dictionary
     COCO_dict = _create_COCO_dict(df)
@@ -233,7 +248,9 @@ def test_create_COCO_dict(sample_bboxes_df):
         ),
     ],
 )
-def test_df_bboxes_to_COCO_file(filename, annotations_test_data, tmp_path):
+def test_df_bboxes_to_COCO_file(
+    filename: str, annotations_test_data: dict, tmp_path: Path
+):
     # Get input JSON file
     input_file = annotations_test_data[filename]
 
@@ -254,9 +271,6 @@ def test_df_bboxes_to_COCO_file(filename, annotations_test_data, tmp_path):
         keys_to_exclude=["id"],  # "id" is expected to be different
     )
 
-    # Check category "id" is as expected for COCO files exported
-    # with VIA tool
-
     # Check lists of "images" dictionaries match
     assert_list_of_dicts_match(
         input_dict["images"],
@@ -273,8 +287,7 @@ def test_df_bboxes_to_COCO_file(filename, annotations_test_data, tmp_path):
         keys_to_exclude=["id", "category_id"],
     )
 
-    # Check category_id is as expected for COCO files exported
-    # with VIA tool
+    # Check category_id is as expected for COCO files exported with VIA tool
     # under categories
     assert all(
         categories_out["id"] == categories_in["id"] - 1
