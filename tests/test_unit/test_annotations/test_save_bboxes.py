@@ -22,34 +22,42 @@ def read_JSON_as_dict(file_path: str | Path) -> dict:
         return json.load(file)
 
 
-def assert_list_of_dicts_match(
-    dicts_1_unsorted: list,
-    dicts_2_unsorted: list,
-    key_to_sort_by: str,
-    keys_to_exclude: list | None = None,
-):
-    """Assert two lists of dictionaries are equal after sorting by a key.
-
-    Some keys can be excluded from the comparison via the `keys_to_exclude`
-    parameter.
+def check_dict_in_list_of_dicts(
+    input_dict: dict, list_dicts: list, keys_to_exclude: list | None = None
+) -> bool:
+    """Check if a dictionary is in a list of dictionaries, considering only
+    certain keys in the comparison.
     """
-    # Sort list of dictionaries
-    list_dicts_1 = sorted(dicts_1_unsorted, key=lambda x: x[key_to_sort_by])
-    list_dicts_2 = sorted(dicts_2_unsorted, key=lambda x: x[key_to_sort_by])
+    # Extract common keys between input and first dictionary in list
+    common_keys = set(input_dict.keys()).intersection(list_dicts[0].keys())
 
     # Prepare list of keys to exclude from comparison
     if keys_to_exclude is None:
         keys_to_exclude = []
 
-    # Compare each dictionary in the lists
-    for dict_1, dict_2 in zip(list_dicts_1, list_dicts_2, strict=True):
-        # Extract common keys
-        common_keys = set(dict_1.keys()).intersection(dict_2.keys())
-        assert all(
-            dict_1[ky] == dict_2[ky]
-            for ky in common_keys
-            if ky not in keys_to_exclude
+    # Check if input dictionary is in the list of dictionaries
+    return any(
+        all(
+            input_dict[key] == dict_[key]
+            for key in common_keys
+            if key not in keys_to_exclude
         )
+        for dict_ in list_dicts
+    )
+
+
+def assert_list_of_dicts_match(
+    list_dicts_1: list, list_dicts_2: list, keys_to_exclude: list | None = None
+):
+    """Assert two lists of dictionaries are equal."""
+    # Check same length
+    assert len(list_dicts_1) == len(list_dicts_2)
+
+    # Check each dictionary in list 1 is in list 2
+    assert all(
+        check_dict_in_list_of_dicts(dict_1, list_dicts_2, keys_to_exclude)
+        for dict_1 in list_dicts_1
+    )
 
 
 @pytest.fixture
@@ -242,10 +250,11 @@ def test_create_COCO_dict(sample_bboxes_df: Callable):
     "filename",
     [
         "small_bboxes_COCO.json",
-        pytest.param(
-            "COCO_JSON_sample_1.json",
-            marks=pytest.mark.xfail(reason="should pass after PR48"),
-        ),
+        "COCO_JSON_sample_1.json",
+        # pytest.param(
+        #     "COCO_JSON_sample_1.json",
+        #     marks=pytest.mark.xfail(reason="should pass after PR48"),
+        # ),
     ],
 )
 def test_df_bboxes_to_COCO_file(
@@ -267,7 +276,6 @@ def test_df_bboxes_to_COCO_file(
     assert_list_of_dicts_match(
         input_dict["categories"],
         output_dict["categories"],
-        key_to_sort_by="id",
         keys_to_exclude=["id"],  # "id" is expected to be different
     )
 
@@ -275,16 +283,15 @@ def test_df_bboxes_to_COCO_file(
     assert_list_of_dicts_match(
         input_dict["images"],
         output_dict["images"],
-        key_to_sort_by="file_name",
         keys_to_exclude=None,
     )
 
     # Check lists of "annotations" dictionaries match
+    # check same length
     assert_list_of_dicts_match(
         input_dict["annotations"],
         output_dict["annotations"],
-        key_to_sort_by="id",
-        keys_to_exclude=["id", "category_id"],
+        keys_to_exclude=["id", "image_id", "category_id"],
     )
 
     # Check category_id is as expected for COCO files exported with VIA tool
