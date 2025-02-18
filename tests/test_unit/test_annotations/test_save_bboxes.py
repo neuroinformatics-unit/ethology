@@ -251,10 +251,6 @@ def test_create_COCO_dict(sample_bboxes_df: Callable):
     [
         "small_bboxes_COCO.json",
         "COCO_JSON_sample_1.json",
-        # pytest.param(
-        #     "COCO_JSON_sample_1.json",
-        #     marks=pytest.mark.xfail(reason="should pass after PR48"),
-        # ),
     ],
 )
 def test_df_bboxes_to_COCO_file(
@@ -291,7 +287,7 @@ def test_df_bboxes_to_COCO_file(
     assert_list_of_dicts_match(
         input_dict["annotations"],
         output_dict["annotations"],
-        keys_to_exclude=["id", "image_id", "category_id"],
+        keys_to_exclude=["id", "category_id"],
     )
 
     # Check category_id is as expected for COCO files exported with VIA tool
