@@ -1,9 +1,9 @@
 # How to Contribute
 
-## Creating a development environment
+## Create a development environment
 
-We recommended to use [conda](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html) to create a
-development environment for `ethology`. In the following, we assume you have
+We recommended using [conda](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html) to create a
+development environment. In the following, we assume you have
 `conda` installed.
 
 To install `ethology` for development, first create and activate a `conda` environment:
@@ -17,6 +17,7 @@ Then install the development version of `ethology` by cloning the GitHub reposit
 and pip-installing it in editable mode with the required dependencies:
 
 ```sh
+# clone the repository
 git clone https://github.com/neuroinformatics-unit/ethology.git
 
 # then run from within the repository root folder:
@@ -35,7 +36,7 @@ Pre-commit hooks are a set of tools that run automatically before each commit an
 
 ## Pull requests
 
-In all cases, please submit code to the main repository via a pull request (PR).
+Please submit code to the main repository with a pull request (PR).
 We follow our sister project [movement](https://github.com/neuroinformatics-unit/movement/blob/main/CONTRIBUTING.md) and adhere to the same conventions:
 
 - Please submit _draft_ PRs as early as possible to allow for discussion.
@@ -63,13 +64,13 @@ A typical contribution workflow would be as follows:
 
 ## Formatting and pre-commit hooks
 
-Running `pre-commit install` will set up our [pre-commit hooks](https://pre-commit.com/) to ensure a consistent formatting style. Currently, these include:
-* running [ruff](https://github.com/astral-sh/ruff), which does a number of jobs, including code linting and auto-formatting.
-* running [mypy](https://mypy.readthedocs.io/en/stable/index.html), which does static type checking.
-* running [check-manifest](https://github.com/mgedmin/check-manifest), to ensure that the right files are included in the pip package.
-* ruunning [codespell](https://github.com/codespell-project/codespell) to check for common misspellings.
+Running `pre-commit install` will set up our [pre-commit hooks](https://pre-commit.com/) - these are useful to ensure a consistent formatting style. Currently, our hooks run:
+* [ruff](https://github.com/astral-sh/ruff), which does a number of jobs, including code linting and auto-formatting.
+* [mypy](https://mypy.readthedocs.io/en/stable/index.html), which does static type checking.
+* [check-manifest](https://github.com/mgedmin/check-manifest), to ensure that the right files are included in the pip package.
+* [codespell](https://github.com/codespell-project/codespell) to check for common misspellings.
 
-You may run the pre-commit hooks manually at any time using one of the following commands before committing:
+You may also run the pre-commit hooks manually at any time using one of the following commands before committing:
 ```sh
 pre-commit run  # applies to the staged files
 pre-commit run -a  # applies to all files in the repository
@@ -78,14 +79,14 @@ pre-commit run -a  # applies to all files in the repository
 To run the pre-commit hooks individually, you can run the following from the root of the repository:
 ```sh
 ruff .
-mypy -p movement
+mypy -p ethology
 check-manifest
 codespell
 ```
 
 Some problems will be automatically fixed by the hooks. In this case, you should stage the auto-fixed changes and run the hooks again to ensure that there are no further issues:
 ```sh
-git add .
+git add .  # stage all changes
 pre-commit run
 ```
 
@@ -143,7 +144,7 @@ git push --follow-tags
 ```
 Alternatively, you can also use the GitHub web interface to create a new release and tag.
 
-The addition of a GitHub tag triggers the package's deployment to PyPI.
+The addition of a GitHub tag triggers the package's deployment to PyPI (see the [continuous integration](#continuous-integration) section).
 The version number is automatically determined from the latest tag on the _main_ branch.
 
 ## Test data
@@ -169,10 +170,16 @@ To add a new file, you will need to:
 1. Create a [GIN](https://gin.g-node.org/) account
 2. Ask to be added as a collaborator on the [ethology data repository](https://gin.g-node.org/neuroinformatics/ethology-test-data) (if not already)
 3. Download the [GIN CLI](https://gin.g-node.org/G-Node/Info/wiki/GIN+CLI+Setup#quickstart) and set it up with your GIN credentials, by running `gin login` in a terminal.
-4. Clone the movement data repository to your local machine, by running `gin get neuroinformatics/ethology-test-data` in a terminal.
-5. Add your new files as appropriate. Please follow the instructions in the README and the existing file naming conventions as closely as possible.
+4. Clone the `ethology` data repository to your local machine, by running `gin get neuroinformatics/ethology-test-data` in a terminal.
+5. Add your new files as appropriate. Please follow the instructions in the [README](https://gin.g-node.org/neuroinformatics/ethology-test-data/src/master/README.md) and the existing file naming conventions as closely as possible.
 6. Determine the sha256 checksum hash of each new file. You can do this in a terminal by running:
-    ::::{tab-set}
+    ```bash
+    sha256sum <filename>  # in Ubuntu
+    shasum -a 256 <filename>  # in MacOS
+    certutil -hashfile <filename> SHA256  # in Windows
+    ```
+
+    <!-- ::::{tab-set}
     :::{tab-item} Ubuntu
     ```bash
     sha256sum <filename>
@@ -190,7 +197,8 @@ To add a new file, you will need to:
     certutil -hashfile <filename> SHA256
     ```
     :::
-    ::::
+    :::: -->
+
     For convenience, we've included a `get_sha256_hashes.py` script in the [ethology data repository](https://gin.g-node.org/neuroinformatics/ethology-test-data). If you run this from the root of the data repository, within a Python environment with `ethology` installed, it will calculate the sha256 hashes for all files in the `test_data` folder and write them to the file named `files-registry.txt`.
 
 7. Commit a specific file with `gin commit -m <message> <filename>`, or `gin commit -m <message> .` to commit all changes.
