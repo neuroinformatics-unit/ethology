@@ -51,7 +51,7 @@ class ValidVIA:
     )
     required_keys: dict = field(
         default={
-            "main": ["_via_img_metadata", "_via_image_id_list"],
+            "main": ["_via_img_metadata", "_via_attributes"],
             "images": ["filename"],
             "regions": ["shape_attributes"],
             "shape_attributes": ["x", "y", "width", "height"],

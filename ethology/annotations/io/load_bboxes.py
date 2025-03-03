@@ -122,7 +122,8 @@ def _from_multiple_files(
     # NOTE: after ignore_index=True the index name is no longer "annotation_id"
     df_all = pd.concat(df_list, ignore_index=True)
 
-    # Update "image_id" based on the full sorted list of image filenames
+    # Update "image_id" based on the alphabetically sorted list of unique image
+    # filenames across all input files
     list_image_filenames = sorted(list(df_all["image_filename"].unique()))
     df_all["image_id"] = df_all["image_filename"].apply(
         lambda x: list_image_filenames.index(x)
@@ -216,18 +217,14 @@ def _df_rows_from_valid_VIA_file(file_path: Path) -> list[dict]:
 
     # Prepare data
     image_metadata_dict = data_dict["_via_img_metadata"]
-    via_image_id_list = [str(x) for x in data_dict["_via_image_id_list"]]
+    list_sorted_filenames = sorted(
+        [img_dict["filename"] for img_dict in image_metadata_dict.values()]
+    )
+
     via_attributes = data_dict["_via_attributes"]
     supercategories_props = {}
     if "region" in via_attributes:
         supercategories_props = via_attributes["region"]
-
-    # Map image filenames to the image keys used by VIA
-    # the VIA keys are <filename><filesize> strings
-    map_filename_to_via_img_id = {
-        img_dict["filename"]: ky
-        for ky, img_dict in image_metadata_dict.items()
-    }
 
     # Get list of rows in dataframe
     list_rows = []
@@ -256,9 +253,7 @@ def _df_rows_from_valid_VIA_file(file_path: Path) -> list[dict]:
             row = {
                 "annotation_id": annotation_id,
                 "image_filename": img_dict["filename"],
-                "image_id": via_image_id_list.index(
-                    map_filename_to_via_img_id[img_dict["filename"]]
-                ),  # integer based on the VIA image ID
+                "image_id": list_sorted_filenames.index(img_dict["filename"]),
                 "x_min": region_shape["x"],
                 "y_min": region_shape["y"],
                 "width": region_shape["width"],
@@ -294,15 +289,24 @@ def _df_rows_from_valid_COCO_file(file_path: Path) -> list[dict]:
         data_dict = json.load(file)
 
     # Prepare data
-    map_image_id_to_filename = {
+    # We define image_id_ethology as the 0-based index of the image in the
+    # "images" list of the COCO JSON file. The following assumes the number of
+    # unique image_ids in the input COCO file matches the number of elements
+    # in the "images" list.
+    map_img_id_coco_to_ethology = {
+        img_dict["id"]: idx
+        for idx, img_dict in enumerate(
+            sorted(data_dict["images"], key=lambda x: x["file_name"])
+        )
+    }
+    map_img_id_coco_to_filename = {
         img_dict["id"]: img_dict["file_name"]
         for img_dict in data_dict["images"]
     }
-    map_image_id_to_width_height = {
+    map_img_id_coco_to_width_height = {
         img_dict["id"]: (img_dict["width"], img_dict["height"])
         for img_dict in data_dict["images"]
     }
-
     map_category_id_to_category_data = {
         cat_dict["id"]: (cat_dict["name"], cat_dict["supercategory"])
         for cat_dict in data_dict["categories"]
@@ -314,10 +318,14 @@ def _df_rows_from_valid_COCO_file(file_path: Path) -> list[dict]:
         annotation_id = annot_dict["id"]
 
         # image data
-        image_id = annot_dict["image_id"]
-        image_filename = map_image_id_to_filename[image_id]
-        image_width = map_image_id_to_width_height[image_id][0]
-        image_height = map_image_id_to_width_height[image_id][1]
+        img_id_coco = annot_dict["image_id"]
+        image_filename = map_img_id_coco_to_filename[img_id_coco]
+        image_width, image_height = map_img_id_coco_to_width_height[
+            img_id_coco
+        ]
+
+        # compute image ID following ethology convention
+        img_id_ethology = map_img_id_coco_to_ethology[img_id_coco]
 
         # bbox data
         x_min, y_min, width, height = annot_dict["bbox"]
@@ -329,7 +337,7 @@ def _df_rows_from_valid_COCO_file(file_path: Path) -> list[dict]:
         row = {
             "annotation_id": annotation_id,
             "image_filename": image_filename,
-            "image_id": image_id,
+            "image_id": img_id_ethology,
             "image_width": image_width,
             "image_height": image_height,
             "x_min": x_min,
