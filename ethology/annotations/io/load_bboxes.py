@@ -29,7 +29,7 @@ def from_files(
     format: Literal["VIA", "COCO"],
     images_dirs: Path | str | list[Path | str] | None = None,
 ) -> pd.DataFrame:
-    """Read bounding boxes annotations as a dataframe.
+    """Read input annotation files as a bboxes dataframe.
 
     Parameters
     ----------
@@ -47,7 +47,23 @@ def from_files(
         Bounding boxes annotations dataframe. The dataframe is indexed
         by "annotation_id" and has the following columns: "image_filename",
         "image_id", "image_width", "image_height", "x_min", "y_min",
-        "width", "height", "supercategory", "category".
+        "width", "height", "supercategory", "category". It also has the
+        following attributes: "annotation_files", "annotation_format",
+        "images_directories". The "image_id" is assigned based
+        on the alphabetically sorted list of unique image filenames across all
+        input files.
+
+    Notes
+    -----
+    We use image filenames' to assign IDs to images, so if two images have the
+    same name but are in different input annotation files, they will be
+    assigned the same image ID and their annotations will be merged.
+
+    If this behaviour is not desired, and you would like to assign different
+    image IDs to images that have the same name but appear in different input
+    annotation files, you can either make the image filenames distinct before
+    loading the data, or you can load the data from each file
+    as a separate dataframe, and then concatenate them as desired.
 
     See Also
     --------
@@ -65,9 +81,9 @@ def from_files(
 
     # Add metadata
     df_all.attrs = {
-        "input_files": file_paths,
-        "format": format,
-        "images_dirs": images_dirs,
+        "annotation_files": file_paths,
+        "annotation_format": format,
+        "images_directories": images_dirs,
     }
 
     return df_all
