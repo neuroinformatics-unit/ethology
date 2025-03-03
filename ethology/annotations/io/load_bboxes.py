@@ -52,8 +52,9 @@ def from_files(
         following attributes: "annotation_files", "annotation_format",
         "images_directories". The "image_id" is assigned based
         on the alphabetically sorted list of unique image filenames across all
-        input files. The "category_id" column is always a 0-based integer, 
-        except for VIA files where the values specified in the input file are retained.
+        input files. The "category_id" column is always a 0-based integer,
+        except for VIA files where the values specified in the input file
+        are retained.
 
     Notes
     -----
@@ -333,9 +334,7 @@ def _df_rows_from_valid_COCO_file(file_path: Path) -> list[dict]:
 
     # Build standard dataframe
     list_rows = []
-    for annot_dict in data_dict["annotations"]:
-        annotation_id = annot_dict["id"]
-
+    for annot_id, annot_dict in enumerate(data_dict["annotations"]):
         # image data
         img_id_coco = annot_dict["image_id"]
         image_filename = map_img_id_coco_to_filename[img_id_coco]
@@ -354,7 +353,7 @@ def _df_rows_from_valid_COCO_file(file_path: Path) -> list[dict]:
         category, supercategory = map_category_id_to_category_data[category_id]
 
         row = {
-            "annotation_id": annotation_id,
+            "annotation_id": annot_id,
             "image_filename": image_filename,
             "image_id": img_id_ethology,
             "image_width": image_width,
