@@ -573,10 +573,14 @@ def test_dataframe_from_same_annotations(annotations_test_data: dict):
         format="COCO",
     )
 
-    # Compare dataframes excluding `image_width`, `image_height` columns
-    assert df_via.drop(columns=["image_width", "image_height"]).equals(
-        df_coco.drop(columns=["image_width", "image_height"])
+    # Compare dataframes excluding `image_width`, `image_height` and
+    # `category_id` columns
+    assert df_via.drop(
+        columns=["image_width", "image_height", "category_id"]
+    ).equals(
+        df_coco.drop(columns=["image_width", "image_height", "category_id"])
     )
+
 
 @pytest.mark.parametrize(
     "input_file, format, case_category_id, expected_category_id",
