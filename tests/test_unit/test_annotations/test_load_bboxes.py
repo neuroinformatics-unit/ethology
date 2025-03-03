@@ -44,6 +44,35 @@ def count_imgs_and_annots_in_input_file(
     return n_images, n_annotations
 
 
+def get_list_images(
+    file_path: Path | list[Path], format: Literal["VIA", "COCO"]
+) -> list:
+    """Extract list of image files from input annotation file."""
+    # Read input data as dict
+    list_data = []
+    if isinstance(file_path, list):
+        for file in file_path:
+            with open(file) as f:
+                list_data.append(json.load(f))
+    else:
+        with open(file_path) as f:
+            list_data.append(json.load(f))
+
+    # Extract list of images ordered as in the input data
+    if format == "VIA":
+        return [
+            img["filename"]
+            for data in list_data
+            for img in data["_via_img_metadata"].values()
+        ]
+    elif format == "COCO":
+        return [
+            img["file_name"] for data in list_data for img in data["images"]
+        ]
+    else:
+        raise ValueError("Unsupported format")
+
+
 @pytest.fixture
 def multiple_files(annotations_test_data: dict) -> dict:
     """Fixture that returns for each format, a pair of annotation files."""
@@ -349,8 +378,9 @@ def test_from_single_file_no_category(
         )
     # If no error expected, check that the dataframe has empty categories
     else:
-        assert all(df.loc[:, "category"] == "")
-        assert all(df.loc[:, "supercategory"] == "")
+        assert df["category"].isna().all()
+        assert df["supercategory"].isna().all()
+        assert df["category_id"].isna().all()
 
 
 @pytest.mark.parametrize(
@@ -543,7 +573,117 @@ def test_dataframe_from_same_annotations(annotations_test_data: dict):
         format="COCO",
     )
 
-    # Compare dataframes excluding `image_width`, `image_height` columns
-    assert df_via.drop(columns=["image_width", "image_height"]).equals(
-        df_coco.drop(columns=["image_width", "image_height"])
+    # Compare dataframes excluding `image_width`, `image_height` and
+    # `category_id` columns
+    assert df_via.drop(
+        columns=["image_width", "image_height", "category_id"]
+    ).equals(
+        df_coco.drop(columns=["image_width", "image_height", "category_id"])
+    )
+
+
+@pytest.mark.parametrize(
+    "input_file, format, case_category_id, expected_category_id",
+    [
+        (
+            "small_bboxes_no_cat_VIA.json",
+            "VIA",
+            "empty",
+            None,
+        ),  # no category in VIA file --> should be None in df
+        (
+            "small_bboxes_VIA.json",
+            "VIA",
+            "string_integer",
+            1,
+        ),  # category ID is a string ("1") ---> should be 1 in df
+        # VIA category IDs are retained
+        (
+            "VIA_JSON_sample_1.json",
+            "VIA",
+            "string_category",
+            0,
+        ),  # category ID is a string ("crab") ---> should be factorized
+        (
+            "small_bboxes_COCO.json",
+            "COCO",
+            "integer",
+            0,
+        ),  # category ID is an integer (1) ---> should be 0 in df
+        # COCO category IDs are always 1-based indices, and transformed to
+        # 0-based indices when read into df
+    ],
+)
+def test_category_id_extraction(
+    input_file: str,
+    format: Literal["VIA", "COCO"],
+    case_category_id: str,
+    expected_category_id: int | None,
+    annotations_test_data: dict,
+):
+    """Test that the category_id is extracted correctly from the input file."""
+    df = _from_single_file(
+        file_path=annotations_test_data[input_file],
+        format=format,
+    )
+
+    if case_category_id == "empty":
+        df["category_id"].apply(lambda x: x is expected_category_id).all()
+
+    elif case_category_id in ["string_integer", "integer"]:
+        assert df["category_id"].dtype == int
+        assert df["category_id"].unique() == [expected_category_id]
+
+    elif case_category_id == "string_category":
+        assert df["category_id"].dtype == int
+        assert df["category_id"].unique() == [expected_category_id]
+        assert all(df["category_id"] == df["category"].factorize()[0])
+
+
+@pytest.mark.parametrize(
+    "input_file_type, format",
+    [
+        ("multiple", "VIA"),
+        ("single", "COCO"),
+        ("multiple", "COCO"),
+    ],
+)
+def test_sorted_annotations_by_image_filename(
+    input_file_type: str,
+    format: Literal["VIA", "COCO"],
+    annotations_test_data: dict,
+    # multiple_files: dict,
+):
+    """Test that the annotations are sorted by image filename.
+
+    We use the `small_bboxes_image_id_COCO` data because the list of
+    image filenames is not sorted.
+
+    We don't test with a single VIA file because the VIA tool always
+    outputs the image dictionaries under `_via_img_metadata` sorted by
+    filename.
+    """
+    # Get input file(s)
+    if input_file_type == "single":
+        input_filepaths = annotations_test_data[
+            f"small_bboxes_image_id_{format}.json"
+        ]
+    elif input_file_type == "multiple":
+        input_files = (
+            ["VIA_JSON_sample_2.json", "VIA_JSON_sample_1.json"]
+            if format == "VIA"
+            else ["COCO_JSON_sample_1.json", "COCO_JSON_sample_2.json"]
+        )  # load in this order so that the image filenames are not sorted
+        input_filepaths = [annotations_test_data[file] for file in input_files]
+
+    # Check list of images as they are in the input data are unsorted
+    list_input_images = get_list_images(input_filepaths, format=format)
+    assert list_input_images != sorted(list_input_images)
+
+    # Compute bboxes dataframe
+    df = from_files(file_paths=input_filepaths, format=format)
+
+    # Check that the annotations in the dataframe are sorted by image filename
+    assert df["image_filename"].to_list() == sorted(
+        df["image_filename"].to_list()
     )
