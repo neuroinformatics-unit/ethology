@@ -76,14 +76,6 @@ pre-commit run  # applies to the staged files
 pre-commit run -a  # applies to all files in the repository
 ```
 
-To run the pre-commit hooks individually, you can run the following from the root of the repository:
-```sh
-ruff .
-mypy -p ethology
-check-manifest
-codespell
-```
-
 Some problems will be automatically fixed by the hooks. In this case, you should stage the auto-fixed changes and run the hooks again to ensure that there are no further issues:
 ```sh
 git add .  # stage all changes
