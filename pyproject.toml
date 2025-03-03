@@ -40,12 +40,13 @@ dev = [
   "pre-commit",
   "ruff",
   "codespell",
+  "check-manifest",
   "setuptools_scm",
   "pandas-stubs",
   "types-attrs",
-  "check-manifest",
   "types-PyYAML",
   "types-requests",
+  "pooch",
 ]
 
 # [project.scripts]
