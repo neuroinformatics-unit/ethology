@@ -46,6 +46,7 @@ dev = [
   "check-manifest",
   "types-PyYAML",
   "types-requests",
+  "torch",
 ]
 
 # [project.scripts]
