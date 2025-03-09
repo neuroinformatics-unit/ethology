@@ -1,0 +1,3 @@
+[submodule "ethology/trackers/cotracker"]
+	path = ethology/trackers/cotracker
+	url = https://github.com/facebookresearch/co-tracker.git
