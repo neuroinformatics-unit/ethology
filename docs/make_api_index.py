@@ -1,4 +1,4 @@
-"""Generate the API index page for all ``movement`` modules."""
+"""Generate the API index page for all ``ethology`` modules."""
 
 import os
 from pathlib import Path
@@ -12,7 +12,7 @@ os.chdir(script_dir)
 
 
 def make_api_index():
-    """Create a doctree of all ``movement`` modules."""
+    """Create a doctree of all ``ethology`` modules."""
     doctree = "\n"
     api_path = Path("../ethology")
     for path in sorted(api_path.rglob("*.py")):
