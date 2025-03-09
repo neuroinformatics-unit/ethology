@@ -41,7 +41,8 @@ class BaseTracker:
          query_points: list
          save_results: bool
         Returns:
-         path of each point cross the frames [Batch, Frames, X, Y].
+         path of each point cross the frames
+            [Batch, n_frames, n_keypoints, n_space=2].
 
         """
         # check if video source file exists in path
