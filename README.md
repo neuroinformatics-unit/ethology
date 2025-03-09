@@ -9,7 +9,7 @@
 # ethology
 
 
-## Installation
+## Quick Install
 
 First clone the repository at the desired location:
 ```bash
@@ -28,3 +28,4 @@ To install the package in editable mode with developer dependencies, replace the
 ```
 pip install -e .[dev]  # in mac: pip install -e ".[dev]"
 ```
+For More information [View Full Documentation here](/docs/source/index.md)
