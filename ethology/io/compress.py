@@ -35,7 +35,7 @@ def compress_video_h264(
             existing video on saveout_path.
 
     """
-    # check_ffmpeg_installed()
+    check_ffmpeg_installed()
     try:
         input = ffmpeg.input(video_path)
         output = input.output(
