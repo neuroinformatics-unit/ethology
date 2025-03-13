@@ -279,7 +279,7 @@ def test_df_bboxes_to_COCO_file(
     assert_list_of_dicts_match(
         input_dict["images"],
         output_dict["images"],
-        keys_to_exclude=None,
+        keys_to_exclude=["id"],  # "id" is expected to be different,
     )
 
     # Check lists of "annotations" dictionaries match
@@ -287,7 +287,7 @@ def test_df_bboxes_to_COCO_file(
     assert_list_of_dicts_match(
         input_dict["annotations"],
         output_dict["annotations"],
-        keys_to_exclude=["id", "category_id"],
+        keys_to_exclude=["id", "category_id", "image_id"],
     )
 
     # Check category_id is as expected for COCO files exported with VIA tool
