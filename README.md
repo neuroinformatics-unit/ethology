@@ -5,6 +5,7 @@
 [![Code style: Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/format.json)](https://github.com/astral-sh/ruff)
 [![codecov](https://codecov.io/gh/neuroinformatics-unit/ethology/branch/main/graph/badge.svg?token=P8CCH3TI8K)](https://codecov.io/gh/neuroinformatics-unit/ethology)
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit)
+[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/neuroinformatics-unit/ethology/main.svg)](https://results.pre-commit.ci/latest/github/neuroinformatics-unit/ethology/main)
 
 # ethology
 
