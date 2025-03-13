@@ -197,6 +197,11 @@ def _from_single_file(
     # Cast as an int if possible, otherwise factorize it
     if format == "VIA" and not df["category_id"].isna().all():
         df = _VIA_category_id_as_int(df)
+    elif format == "COCO":
+        # In COCO files exported with the VIA tool, the category_id
+        # is always a 1-based integer. Here we coerce it to a 0-based
+        # integer
+        df["category_id"] = df["category"].factorize(sort=True)[0]
 
     # Reorder columns to match standard columns
     # If columns dont exist they are filled with nan / na values
@@ -364,7 +369,7 @@ def _df_rows_from_valid_COCO_file(file_path: Path) -> list[dict]:
             "height": height,
             "supercategory": supercategory,
             "category": category,
-            "category_id": category_id - 1,
+            "category_id": category_id,
             # in COCO files, the category_id is always a 1-based integer
         }
 
