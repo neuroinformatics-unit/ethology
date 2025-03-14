@@ -18,15 +18,11 @@ git clone https://github.com/neuroinformatics-unit/ethology.git
 ```
 
 Then create a conda environment and install the package from source
-```
+```sh
 conda create -n ethology-env python=3.12 -y
 conda activate ethology-env
 cd ethology
 pip install .
 ```
 
-To install the package in editable mode with developer dependencies, replace the last command with:
-```
-pip install -e .[dev]  # in mac: pip install -e ".[dev]"
-```
-For more information view full documentation [here](/docs/source/index.md)
+For More information [View Full Documentation here](https://ethology.neuroinformatics.dev)

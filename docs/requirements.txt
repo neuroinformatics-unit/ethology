@@ -1,3 +1,4 @@
+-e .[ethology]
 linkify-it-py
 myst-parser
 nbsphinx

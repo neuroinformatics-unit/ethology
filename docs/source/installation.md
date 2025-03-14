@@ -36,7 +36,7 @@ pip install -e ".[dev]"
 ```
 
 ### Developers
-If you are a developer looking to contribute to ethology, please refer to our [contributing guide](community/contributing.md) for detailed setup instructions and guidelines.
+If you are a developer looking to contribute to ethology, please refer to our [contributing guide](community/contributing.rst) for detailed setup instructions and guidelines.
 
 To uninstall an existing environment named `ethology-env`:
 ```sh

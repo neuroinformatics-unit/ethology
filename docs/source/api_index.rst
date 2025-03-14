@@ -16,5 +16,6 @@ Information on specific functions, classes, and methods.
     :nosignatures:
 
     ethology.annotations.io.load_bboxes
+    ethology.annotations.io.save_bboxes
     ethology.annotations.json_schemas.utils
     ethology.annotations.validators

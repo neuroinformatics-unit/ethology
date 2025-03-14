@@ -48,6 +48,7 @@ extensions = [
 # Configure the myst parser to enable cool markdown features
 # See https://sphinx-design.readthedocs.io
 myst_enable_extensions = [
+    "amsmath",
     "colon_fence",
     "deflist",
     "dollarmath",
@@ -136,6 +137,7 @@ html_favicon = "_static/light-logo-niu.png"
 # these URLs
 linkcheck_anchors_ignore_for_url = [
     "https://neuroinformatics.zulipchat.com/",
+    "https://gin.g-node.org/G-Node/Info/wiki/",
 ]
 # A list of regular expressions that match URIs that should not be checked
 linkcheck_ignore = [
@@ -153,6 +155,11 @@ myst_url_schemes = {
     "setuptools-scm": "https://setuptools-scm.readthedocs.io/en/latest/{{path}}#{{fragment}}",
     "sphinx-doc": "https://www.sphinx-doc.org/en/master/usage/{{path}}#{{fragment}}",
     "conda": "https://docs.conda.io/en/latest/",
+    "gin": "https://gin.g-node.org/{{path}}#{{fragment}}",
+    "github-docs": "https://docs.github.com/en/{{path}}#{{fragment}}",
+    "mamba": "https://mamba.readthedocs.io/en/latest/",
+    "myst-parser": "https://myst-parser.readthedocs.io/en/latest/{{path}}#{{fragment}}",
+    "napari": "https://napari.org/dev/{{path}}",
 }
 
 
