@@ -1,5 +1,5 @@
 # Configuration file for the Sphinx documentation builder.
-"""Sphinx configuration for Ethology documentation."""
+"""Sphinx configuration for ethology documentation."""
 
 import os
 import sys
