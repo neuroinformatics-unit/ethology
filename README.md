@@ -10,7 +10,7 @@
 # ethology
 
 
-## Quick Install
+## Quick install
 
 First clone the repository at the desired location:
 ```bash
