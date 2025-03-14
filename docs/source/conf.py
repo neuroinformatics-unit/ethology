@@ -16,8 +16,8 @@ autodoc_mock_imports: list[str] = ["cv2", "torch"]
 sys.path.insert(0, os.path.abspath("../.."))
 
 project = "ethology"
-copyright = "2025, Neuroinformatics Unit"
-author = ""
+copyright = "2024, University College London"
+author = "Adam Tyson"
 try:
     release = setuptools_scm.get_version(root="../..", relative_to=__file__)
     release = release.split("+")[0]  # remove git hash
