@@ -8,6 +8,8 @@ recursive-exclude * __pycache__
 recursive-exclude * *.py[co]
 recursive-exclude docs *
 recursive-exclude tests *
+recursive-include examples *.rst *.py
+recursive-include docs *.md *.rst *.py
 
 # Include json schemas
 recursive-include ethology/annotations/json_schemas/schemas *.json
