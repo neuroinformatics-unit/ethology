@@ -20,7 +20,7 @@ Installation Instructions.
 Guidelines on How to Contribute.
 :::
 
-:::{grid-item-card} {fas}`handshake-angle;sd-text-primary` Join the Community
+:::{grid-item-card} {fas}`comments;sd-text-primary` Join the Community
 :link: community/index
 :link-type: doc
 

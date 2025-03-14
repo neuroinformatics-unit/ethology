@@ -37,7 +37,7 @@ Pre-commit hooks are a set of tools that run automatically before each commit an
 ## Pull requests
 
 Please submit code to the main repository with a pull request (PR).
-We follow our sister project [movement](https://github.com/neuroinformatics-unit/movement/blob/main/CONTRIBUTING.md) and adhere to the same conventions:
+We follow our sister project [ethology](https://github.com/neuroinformatics-unit/ethology/blob/main/CONTRIBUTING.md) and adhere to the same conventions:
 
 - Please submit _draft_ PRs as early as possible to allow for discussion.
 - The PR title should be descriptive e.g. "Add new function to do X" or "Fix bug in Y".
@@ -50,7 +50,7 @@ We follow our sister project [movement](https://github.com/neuroinformatics-unit
 ## Contribution workflow
 A typical contribution workflow would be as follows:
 * Locally, check out a new branch, make your changes, and stage them.
-* When you try to commit, the [pre-commit hooks](https://github.com/neuroinformatics-unit/ethology/blob/main/CONTRIBUTING.md#formatting-and-pre-commit-hooks) will be triggered.
+* When you try to commit, the [pre-commit hooks](#formatting-and-pre-commit-hooks) will be triggered.
 * Stage any fixes automatically made by the hooks, or fix any of them manually, and commit the changes.
 * Make sure to add tests for any new features or bug fixes. See the [testing](#testing) section below.
 * Don't forget to update the documentation, if necessary. This includes docstrings, README, and any other relevant documentation.
@@ -187,7 +187,7 @@ my_new_file
 ```
 
 #### Linking to external URLs
-If you are adding references to an external URL (e.g. `https://github.com/neuroinformatics-unit/ethology/issues/1`) in a `.md` file, you will need to check if a matching URL scheme (e.g. `https://github.com/neuroinformatics-unit/movement/`) is defined in `myst_url_schemes` in `docs/source/conf.py`. If it is, the following `[](scheme:loc)` syntax will be converted to the [full URL](ethology-github:issues/1) during the build process:
+If you are adding references to an external URL (e.g. `https://github.com/neuroinformatics-unit/ethology/issues/1`) in a `.md` file, you will need to check if a matching URL scheme (e.g. `https://github.com/neuroinformatics-unit/ethology/`) is defined in `myst_url_schemes` in `docs/source/conf.py`. If it is, the following `[](scheme:loc)` syntax will be converted to the [full URL](ethology-github:issues/1) during the build process:
 ```markdown
 [link text](ethology-github:issues/1)
 ```
@@ -224,7 +224,7 @@ For referencing ethology objects in `.rst` files, use the `` :role:`target` `` s
 
 For example, to reference the {mod}`ethology.io.load_bboxes` module, use:
 ```rst
-:mod:`movement.io.load_bboxes`
+:mod:`ethology.io.load_bboxes`
 ```
 :::
 ::::
@@ -316,8 +316,7 @@ make clean html linkcheck
 We maintain some sample datasets to be used for testing on an
 [external data repository](https://gin.g-node.org/neuroinformatics/ethology-test-data).
 Our hosting platform of choice is called [GIN](https://gin.g-node.org).
-GIN has a GitHub-like interface and git-like
-[CLI](https://gin.g-node.org/G-Node/Info/wiki#how-do-i-start) functionalities.
+GIN has a GitHub-like interface and git-like [CLI](https://gin.g-node.org/G-Node/Info/wiki/) functionalities.
 
 Please refer to the [README](https://gin.g-node.org/neuroinformatics/ethology-test-data/src/master/README.md) in the data repository for more information on the datasets and how to access them.
 

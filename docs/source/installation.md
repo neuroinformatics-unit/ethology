@@ -1,7 +1,6 @@
 (target-installation)=
 # Installation
 
-## Install ethology
 :::{admonition} Use a conda environment
 :class: note
 To avoid dependency conflicts with other packages, it is best practice to install Python packages within a virtual environment.
@@ -24,18 +23,18 @@ conda activate ethology-env
 cd ethology
 pip install .
 ```
-
-To install the package in editable mode with developer dependencies, replace the last command with:
-
+## Uninstalling `ethology`
+To Uninstall the package run the following command:
 ```sh
-pip install -e .[dev]
-
-# in mac:
-
-pip install -e ".[dev]"
+pip uninstall ethology
+```
+Deactivate/Delete the Environment
+```sh
+conda deactivate          # Exit the environment
+conda env remove -n ethology-env  # Delete the environment
 ```
 
-### Developers
+## Developers
 If you are a developer looking to contribute to ethology, please refer to our [contributing guide](community/contributing.rst) for detailed setup instructions and guidelines.
 
 To uninstall an existing environment named `ethology-env`:
@@ -48,4 +47,4 @@ If you are unsure about the environment name, you can get a list of the environm
 conda env list
 ```
 :::
-Once the environment has been removed, you can create a new one following the [installation instructions](#install-ethology) above.
+Once the environment has been removed, you can create a new one following the [installation instructions](#installation) above.

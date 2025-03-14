@@ -47,19 +47,3 @@ justify-content: space-between;
 .sd-card:hover {
   transform: translateY(-5px);
 }
-
-/* Ensuring content area uses full width when sidebar is hidden */
-.bd-page-width {
-  max-width: 90% !important;
-}
-
-/* Hide sidebar on pages with hide-sidebar metadata */
-body[data-hide-sidebar="true"] .bd-sidebar-primary {
-  display: none !important;
-}
-
-/* Expand content width when sidebar hidden */
-body[data-hide-sidebar="true"] .bd-main {
-  flex-grow: 1;
-  max-width: 75%;
-}
