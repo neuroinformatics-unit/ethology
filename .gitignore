@@ -81,6 +81,3 @@ venv/
 
 # written by setuptools_scm
 **/_version.py
-
-# processed videos
-/ethology/video/*.mp4

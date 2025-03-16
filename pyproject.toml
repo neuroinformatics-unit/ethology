@@ -47,6 +47,7 @@ dev = [
   "types-PyYAML",
   "types-requests",
   "torch",
+  "cotracker @ git+https://github.com/facebookresearch/co-tracker.git"
 ]
 
 # [project.scripts]
