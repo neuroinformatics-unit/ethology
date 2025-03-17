@@ -20,6 +20,8 @@ classifiers = [
 ]
 dependencies = [
   "movement",
+  "itk-elastix",
+  "itk",
 ]
 
 [project.urls]
@@ -46,6 +48,12 @@ dev = [
   "check-manifest",
   "types-PyYAML",
   "types-requests",
+]
+
+# optional group for visualization features
+registration = [
+  "matplotlib",
+  "jupyter",
 ]
 
 # [project.scripts]
