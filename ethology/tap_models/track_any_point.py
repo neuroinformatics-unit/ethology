@@ -9,6 +9,7 @@ from cotracker.utils.visualizer import (
     Visualizer,
     read_video_from_path,
 )
+from movement.io.load_poses import from_numpy
 
 LIST_OF_SUPPORTED_TAP_MODELS = ["cotracker"]
 
@@ -50,6 +51,32 @@ class BaseTrackAnyPoint:
                     "facebookresearch/co-tracker", "cotracker3_offline"
                 )
 
+    def convert_to_movement_dataset(self, pred_tracks):
+        """Convert the predicted tracks to movement dataset.
+
+        Parameters
+        ----------
+        pred_tracks: torch.Tensor
+            Tensor containing tracks of each query
+            point across the frames of size
+            [batch, frame, query_points, X, Y].
+
+        Returns
+        -------
+        momentum.ValidPosesDataset
+            Dataset containing the predicted tracks.
+
+        """
+        # pred_tracks.shape =  [batch, frames, querypoints, 2d points]
+        # goes into positional array with shape
+        # [frames, 2d points, 1 keypoint per query point, no. of query points]
+        pred_tracks = pred_tracks.cpu().numpy().squeeze(0)
+        ds = from_numpy(
+            position_array=pred_tracks.transpose(0, 2, 1)[:, :, None, :],
+            source_software="cotracker",
+        )
+        return ds
+
     def track(
         self,
         video_path: str,
@@ -66,7 +93,7 @@ class BaseTrackAnyPoint:
         query_points: list
             2D List of shape (Q,3) where Q is the
             number of query points and each Q containing
-            X, Y, Frame-Number to start tracking from
+            Frame-Number to start tracking from, X, Y
         save_dir: str
             Directory path to save the processed video
         save_results: bool
@@ -87,8 +114,6 @@ class BaseTrackAnyPoint:
             raise FileNotFoundError(
                 f"Video source file {video_path} not found"
             )
-        else:
-            print(f"Video source file {video_path} found")
 
         # load video
         video = read_video_from_path(video_path)
@@ -110,7 +135,7 @@ class BaseTrackAnyPoint:
         self.model = self.model.to(device)
         video = video.to(device)
         query_tensor = query_tensor.to(device)
-        print("video shape", video.shape)
+
         pred_tracks, pred_visibility = self.model(
             video, queries=query_tensor[None]
         )
@@ -134,5 +159,5 @@ class BaseTrackAnyPoint:
                 visibility=pred_visibility,
                 filename=file_name,
             )
-
-        return pred_tracks
+        ds = self.convert_to_movement_dataset(pred_tracks)
+        return ds

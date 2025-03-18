@@ -60,7 +60,12 @@ def test_track_with_valid_parameters():
         ),
         patch("torch.from_numpy", return_value=torch.from_numpy(mock_video)),
     ):
-        path = tracker.track(
+        ds = tracker.track(
             video_path="fake_video_path.mp4", query_points=query_points
         )
-        assert list(path.shape) == [1, 50, 4, 2]
+        assert ds.position.shape == (50, 2, 1, 4)
+        assert ds.source_software == "cotracker"
+        assert len(ds.individuals) == 4
+        assert len(ds.keypoints) == 1
+        assert len(ds.time) == 50
+        assert len(ds.space) == 2
