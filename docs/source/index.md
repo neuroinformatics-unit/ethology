@@ -17,7 +17,7 @@ Installation Instructions.
 :link: community/contributing
 :link-type: doc
 
-Guidelines on How to Contribute.
+We welcome external contributions to `ethology`.
 :::
 
 :::{grid-item-card} {fas}`comments;sd-text-primary` Join the Community
