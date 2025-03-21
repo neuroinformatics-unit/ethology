@@ -37,7 +37,7 @@ Pre-commit hooks are a set of tools that run automatically before each commit an
 ## Pull requests
 
 Please submit code to the main repository with a pull request (PR).
-We follow our sister project [ethology](https://github.com/neuroinformatics-unit/ethology/blob/main/CONTRIBUTING.md) and adhere to the same conventions:
+We follow our sister project [movement](https://github.com/neuroinformatics-unit/movement/blob/main/CONTRIBUTING.md) and adhere to the same conventions:
 
 - Please submit _draft_ PRs as early as possible to allow for discussion.
 - The PR title should be descriptive e.g. "Add new function to do X" or "Fix bug in Y".
