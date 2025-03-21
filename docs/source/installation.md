@@ -7,7 +7,7 @@ To avoid dependency conflicts with other packages, it is best practice to instal
 We recommend using [conda](conda:) to create and manage this environment, as they simplify the installation process.
 The following instructions assume that you have conda installed.
 :::
-
+## Install the package
 ## Users
 
 First clone the repository at the desired location:
