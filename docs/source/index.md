@@ -17,14 +17,14 @@ Installation instructions.
 :link: community/contributing
 :link-type: doc
 
-Guidelines on How to Contribute.
+We welcome external contributions to `ethology`.
 :::
 
 :::{grid-item-card} {fas}`comments;sd-text-primary` Join the Community
 :link: community/index
 :link-type: doc
 
-How to get in touch and contribute.
+Get in touch, request a feature or read our roadmap.
 :::
 ::::
 
@@ -33,7 +33,7 @@ How to get in touch and contribute.
 :::
 
 :::{tip}
-If you are looking to analyse your trajectory data with a user-friendly toolbox, check out our sister project
+If you are looking to analyse your pose estimation tracks with a user-friendly toolbox, check out our sister project
 [movement](https://movement.neuroinformatics.dev)!
 :::
 

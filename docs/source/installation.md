@@ -12,6 +12,8 @@ The following instructions assume that you have conda installed.
 🏗️ pip and conda installation available soon!
 :::
 
+## Install the package
+
 ## Users
 First clone the repository at the desired location:
 
@@ -30,10 +32,6 @@ pip install .
 ## Developers
 If you are a developer looking to contribute to ethology, please refer to our [contributing guide](community/contributing.rst) for detailed setup instructions and guidelines.
 
-To uninstall an existing environment named `ethology-env`:
-```sh
-conda env remove -n ethology-env
-```
 :::{tip}
 If you are unsure about the environment name, you can get a list of the environments on your system with:
 ```sh

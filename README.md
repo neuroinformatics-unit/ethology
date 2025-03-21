@@ -25,4 +25,4 @@ cd ethology
 pip install .
 ```
 
-For More information [View Full Documentation here](https://ethology.neuroinformatics.dev)
+For more information please check our [documentation](https://ethology.neuroinformatics.dev)
