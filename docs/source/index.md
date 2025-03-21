@@ -10,7 +10,7 @@
 :link: installation
 :link-type: doc
 
-Installation Instructions.
+Installation instructions.
 :::
 
 :::{grid-item-card} {fas}`handshake-angle;sd-text-primary` Contributing
@@ -27,8 +27,6 @@ Guidelines on How to Contribute.
 How to get in touch and contribute.
 :::
 ::::
-
-![](_static/behaviour_card.png)
 
 :::{warning}
 🏗️ The package is currently in early development stages and the interface is subject to change. Feel free to play around and provide feedback.

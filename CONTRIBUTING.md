@@ -336,11 +336,6 @@ To add a new file, you will need to:
 4. Clone the `ethology` data repository to your local machine, by running `gin get neuroinformatics/ethology-test-data` in a terminal.
 5. Add your new files as appropriate. Please follow the instructions in the [README](https://gin.g-node.org/neuroinformatics/ethology-test-data/src/master/README.md) and the existing file naming conventions as closely as possible.
 6. Determine the sha256 checksum hash of each new file. You can do this in a terminal by running:
-    <!-- ```bash
-    sha256sum <filename>  # in Ubuntu
-    shasum -a 256 <filename>  # in MacOS
-    certutil -hashfile <filename> SHA256  # in Windows
-    ``` -->
 
     ::::{tab-set}
     :::{tab-item} Ubuntu

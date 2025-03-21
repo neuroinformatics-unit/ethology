@@ -8,8 +8,11 @@ We recommend using [conda](conda:) to create and manage this environment, as the
 The following instructions assume that you have conda installed.
 :::
 
-## Users
+:::{warning}
+🏗️ pip and conda installation available soon!
+:::
 
+## Users
 First clone the repository at the desired location:
 
 ```bash
@@ -22,16 +25,6 @@ conda create -n ethology-env python=3.12 -y
 conda activate ethology-env
 cd ethology
 pip install .
-```
-## Uninstalling `ethology`
-To Uninstall the package run the following command:
-```sh
-pip uninstall ethology
-```
-Deactivate/Delete the Environment
-```sh
-conda deactivate          # Exit the environment
-conda env remove -n ethology-env  # Delete the environment
 ```
 
 ## Developers
@@ -48,3 +41,29 @@ conda env list
 ```
 :::
 Once the environment has been removed, you can create a new one following the [installation instructions](#installation) above.
+
+## Updating the Package
+
+To update to the latest version of `ethology`:
+```sh
+cd ethology
+git checkout main      # Ensure you're on the main branch
+git pull               # Fetch latest changes
+```
+
+Remove the `ethology-env` Conda environment:
+```sh
+conda env remove -n ethology-env
+```
+
+:::{tip}
+List all Conda environments to verify removal:
+```sh
+conda env list
+```
+:::
+
+Reinstall the package:
+```sh
+pip install .
+```
