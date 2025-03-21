@@ -24,7 +24,7 @@ We welcome external contributions to `ethology`.
 :link: community/index
 :link-type: doc
 
-How to get in touch and contribute.
+Get in touch, request a feature or read our roadmap.
 :::
 ::::
 
