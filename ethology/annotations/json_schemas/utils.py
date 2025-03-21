@@ -60,7 +60,7 @@ def _check_required_properties_keys(
     # Raise error if there are missing keys in the schema
     if missing_keys:
         raise ValueError(
-            f"Required key(s) {sorted(missing_keys)} not found " "in schema."
+            f"Required key(s) {sorted(missing_keys)} not found in schema."
         )
 
 
