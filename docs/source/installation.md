@@ -43,4 +43,3 @@ If you are unsure about the environment name, you can get a list of the environm
 conda env list
 ```
 :::
-Once the environment has been removed, you can create a new one following the [installation instructions](#installation) above.
