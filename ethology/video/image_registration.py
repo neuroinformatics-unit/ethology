@@ -7,7 +7,8 @@ def register_images(fixed_image_path, moving_image_path, output_path):
     """Register a moving image to a fixed image using Elastix.
     :param fixed_image_path: Path to the reference image.
     :param moving_image_path: Path to the image to be aligned.
-    :param output_path: Path to save the registered image."""
+    :param output_path: Path to save the registered image.
+    """
     # Read images using SimpleITK
     fixed_image = sitk.ReadImage(fixed_image_path, sitk.sitkFloat32)
     moving_image = sitk.ReadImage(moving_image_path, sitk.sitkFloat32)
