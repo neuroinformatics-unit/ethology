@@ -1,5 +1,4 @@
-"""
-Provides image registration functionality using Elastix (SimpleITK).
+"""Provides image registration functionality using Elastix (SimpleITK).
 
 This module helps align a moving image to a fixed image using a rigid transform.
 """
