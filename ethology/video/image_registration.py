@@ -2,6 +2,7 @@
 
 import SimpleITK as sitk
 
+
 def register_images(fixed_image_path, moving_image_path, output_path):
     """Register a moving image to a fixed image using Elastix.
 
