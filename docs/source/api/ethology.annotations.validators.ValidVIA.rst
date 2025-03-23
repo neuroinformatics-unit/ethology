@@ -1,9 +1,0 @@
-ValidVIA
-========
-
-.. currentmodule:: ethology.annotations.validators
-
-.. autoclass:: ValidVIA
-   :members:
-   :show-inheritance:
-   :inherited-members:

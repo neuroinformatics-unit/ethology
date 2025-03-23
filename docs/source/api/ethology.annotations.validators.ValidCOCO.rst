@@ -1,9 +1,0 @@
-ValidCOCO
-=========
-
-.. currentmodule:: ethology.annotations.validators
-
-.. autoclass:: ValidCOCO
-   :members:
-   :show-inheritance:
-   :inherited-members:

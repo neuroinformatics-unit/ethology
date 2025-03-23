@@ -32,24 +32,17 @@ pip install .
 ## Developers
 If you are a developer looking to contribute to ethology, please refer to our [contributing guide](community/contributing.rst) for detailed setup instructions and guidelines.
 
-:::{tip}
-If you are unsure about the environment name, you can get a list of the environments on your system with:
-```sh
-conda env list
-```
-:::
-Once the environment has been removed, you can create a new one following the [installation instructions](#installation) above.
-
 ## Updating the Package
 
 To update to the latest version of `ethology`:
 ```sh
 cd ethology
 git checkout main      # Ensure you're on the main branch
-git pull               # Fetch latest changes
+git fetch               # Fetch latest changes
+git pull
 ```
 
-Remove the `ethology-env` Conda environment:
+Remove the old `ethology-env` Conda environment:
 ```sh
 conda env remove -n ethology-env
 ```

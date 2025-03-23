@@ -21,8 +21,24 @@ def make_api_index():
         # Convert file path to module name
         rel_path = path.relative_to(api_path.parent)
         module_name = str(rel_path.with_suffix("")).replace(os.sep, ".")
-        if rel_path.stem not in exclude_modules:
-            doctree += f"    {module_name}\n"
+        # Split the module name into parts
+        # (e.g., ["ethology", "annotations", ...])
+        module_parts = module_name.split(".")
+        # Check against each excluded module's path
+        exclude = False
+        for excluded in exclude_modules:
+            excluded_parts = excluded.split(".")
+            # Only exclude if the module is a submodule of the excluded path
+            if (
+                len(module_parts) >= len(excluded_parts)
+                and module_parts[: len(excluded_parts)] == excluded_parts
+            ):
+                exclude = True
+                break
+        if exclude:
+            continue
+        doctree += f"    {module_name}\n"
+
     # Get the header
     api_head_path = Path("source") / "_templates" / "api_index_head.rst"
     api_head = api_head_path.read_text()

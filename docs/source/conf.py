@@ -73,13 +73,6 @@ autodoc_default_flags = ["members", "inherited-members"]
 # Prefix section labels with the document name
 autosectionlabel_prefix_document = True
 
-# Excluding the API index page from documenting json_schemas
-exclude_modules = ["ethology.annotations.json_schemas"]
-
-autodoc_default_options = {
-    "exclude-members": "json_schemas",
-}
-
 # -- Options for HTML output -------------------------------------------------
 html_theme = "pydata_sphinx_theme"
 html_title = "ethology"
