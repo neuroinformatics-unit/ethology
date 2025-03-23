@@ -1,8 +1,8 @@
 import SimpleITK as sitk
 
+
 def register_images(fixed_image_path, moving_image_path, output_path):
-    """
-    Register a moving image to a fixed image using Elastix.
+    """Register a moving image to a fixed image using Elastix.
 
     This function computes a rigid transformation to align the moving image with the fixed image.
 
