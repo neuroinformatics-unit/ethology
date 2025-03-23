@@ -1,18 +1,16 @@
-"""This module provides image registration functionality using Elastix (SimpleITK)."""
+"""
+Provides image registration functionality using Elastix (SimpleITK).
+"""
 
 import SimpleITK as sitk
 
 
 def register_images(fixed_image_path, moving_image_path, output_path):
-    """Register a moving image to a fixed image using Elastix.
+"""
+Provides image registration functionality using Elastix (SimpleITK).
 
-    This function computes a rigid transformation to align
-    the moving image with the fixed image.
-
-    :param fixed_image_path: Path to the reference image.
-    :param moving_image_path: Path to the image to be aligned.
-    :param output_path: Path to save the registered image.
-    """
+This module helps align a moving image to a fixed image using a rigid transform.
+"""
     # Read images using SimpleITK
     fixed_image = sitk.ReadImage(fixed_image_path, sitk.sitkFloat32)
     moving_image = sitk.ReadImage(moving_image_path, sitk.sitkFloat32)
