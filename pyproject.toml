@@ -46,7 +46,9 @@ dev = [
   "check-manifest",
   "types-PyYAML",
   "types-requests",
-]
+  "torch",
+  "torchvision"
+  ]
 
 # [project.scripts]
 # movement = "movement.cli_entrypoint:main"
