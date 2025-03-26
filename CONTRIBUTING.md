@@ -281,7 +281,7 @@ including the auto-generated files `source/api_index.rst`, as well as all files 
 ```sh
 make clean html
 ```
-Alternatively
+Or alternatively:
 ```sh
 make clean && make html
 ```
