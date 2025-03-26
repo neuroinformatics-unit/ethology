@@ -54,7 +54,3 @@ conda env list
 ```
 :::
 
-Reinstall the package:
-```sh
-pip install .
-```
