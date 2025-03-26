@@ -1,12 +1,9 @@
 (target-installation)=
 # Installation
 
-:::{admonition} Use a conda environment
-:class: note
 To avoid dependency conflicts with other packages, it is best practice to install Python packages within a virtual environment.
 We recommend using [conda](conda:) to create and manage this environment, as they simplify the installation process.
 The following instructions assume that you have conda installed.
-:::
 
 ## Install the package
 
