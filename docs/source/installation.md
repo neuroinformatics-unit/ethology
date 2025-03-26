@@ -40,6 +40,7 @@ cd ethology
 git checkout main      # Ensure you're on the main branch
 git fetch               # Fetch latest changes
 git pull
+pip install .
 ```
 
 To uninstall `ethology`, the simplest option is to delete the conda environment that contains it. To do so, run from a different conda environment (e.g., `base`):
