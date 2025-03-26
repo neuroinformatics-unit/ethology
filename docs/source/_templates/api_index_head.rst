@@ -1,5 +1,6 @@
-..
-    This file is auto-generated.
+.. API reference
+.. Information on specific functions, classes, and methods.
+.. This file is used to Auto generate the API reference index page.
 
 .. _target-api:
 
