@@ -14,7 +14,7 @@ The following instructions assume that you have conda installed.
 
 ## Install the package
 
-## Users
+### Users
 First clone the repository at the desired location:
 
 ```bash
