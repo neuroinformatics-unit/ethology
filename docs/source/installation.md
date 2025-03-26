@@ -42,7 +42,7 @@ git fetch               # Fetch latest changes
 git pull
 ```
 
-Remove the old `ethology-env` Conda environment:
+To uninstall `ethology`, the simplest option is to delete the conda environment that contains it. To do so, run from a different conda environment (e.g., `base`):
 ```sh
 conda env remove -n ethology-env
 ```
