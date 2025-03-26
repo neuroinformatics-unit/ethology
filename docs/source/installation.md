@@ -48,7 +48,7 @@ conda env remove -n ethology-env
 ```
 
 :::{tip}
-List all Conda environments to verify removal:
+You can list all conda environments afterwards to verify removal:
 ```sh
 conda env list
 ```
