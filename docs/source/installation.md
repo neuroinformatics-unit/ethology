@@ -53,4 +53,3 @@ You can list all conda environments afterwards to verify removal:
 conda env list
 ```
 :::
-
