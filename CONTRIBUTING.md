@@ -216,7 +216,7 @@ For referencing ethology objects in `.md` files, use the `` {role}`target` `` sy
 
 For example, to reference the {mod}`ethology.annotations.io.load_bboxes` module, use:
 ```markdown
-{mod}`ethology.io.load_bboxes`
+{mod}`ethology.annotations.io.load_bboxes`
 ```
 :::
 :::{tab-item} RestructuredText
