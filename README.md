@@ -25,4 +25,6 @@ cd ethology
 pip install .
 ```
 
-For more information please check our [documentation](https://ethology.neuroinformatics.dev)
+For more information please check our [documentation](https://ethology.neuroinformatics.dev).
+
+Contributions and feature requests are more than welcome! Have a look at our [Contributing guidelines](community/contributing.rst) and feel to [open an issue](https://github.com/neuroinformatics-unit/ethology/issues) to report a bug or request a new feature.
