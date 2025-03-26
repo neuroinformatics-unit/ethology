@@ -8,11 +8,12 @@ We recommend using [conda](conda:) to create and manage this environment, as the
 The following instructions assume that you have conda installed.
 :::
 
+## Install the package
+
 :::{warning}
 🏗️ pip and conda installation available soon!
 :::
 
-## Install the package
 
 ### Users
 First clone the repository at the desired location:
