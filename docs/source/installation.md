@@ -30,7 +30,7 @@ pip install .
 ### Developers
 If you are a developer looking to contribute to ethology, please refer to our [contributing guide](community/contributing.rst) for detailed setup instructions and guidelines.
 
-## Update the Package
+## Update the package
 
 To update to the latest version of `ethology`:
 ```sh
