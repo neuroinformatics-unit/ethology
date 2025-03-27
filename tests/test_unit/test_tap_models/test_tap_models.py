@@ -8,42 +8,44 @@ from ethology.tap_models import LIST_OF_SUPPORTED_TAP_MODELS, BaseTrackAnyPoint
 
 
 @pytest.mark.parametrize(
-    "tracker_type",
+    "model",
     [
         ("cotracker"),  # Supported tracker type
         ("unsupported_tracker"),
     ],
 )
-def test_init(tracker_type):
-    if tracker_type in LIST_OF_SUPPORTED_TAP_MODELS:
-        tracker = BaseTrackAnyPoint(tracker_type=tracker_type)
+def test_tap_model_type(model):
+    if model in LIST_OF_SUPPORTED_TAP_MODELS:
+        tracker = BaseTrackAnyPoint(model=model)
         assert tracker.tracker == "cotracker"
     else:
         with pytest.raises(
-            ValueError, match=f"Tracker type {tracker_type} not supported yet"
+            ValueError, match=f"Tracker type {model} not supported yet"
         ):
-            BaseTrackAnyPoint(tracker_type=tracker_type)
+            BaseTrackAnyPoint(model=model)
 
 
 @pytest.mark.parametrize(
     "video_path, exception, match",
     [
         (
-            "ethology/trackers/cotracker/assets/invalid_file.mp4",
+            "invalid_file.mp4",
             FileNotFoundError,
-            "Video source file ethology/trackers/cotracker/assets/invalid_file.mp4 not found",  # noqa: E501
+            "Video source file invalid_file.mp4 not found",
         ),
     ],
 )
 def test_track_with_invalid_video_path(video_path, exception, match):
-    tracker = BaseTrackAnyPoint(tracker_type="cotracker")
+    tracker = BaseTrackAnyPoint(model="cotracker")
     with pytest.raises(exception, match=match):
         tracker.track(video_path=video_path, query_points=[[0, 0, 0]])
 
 
 def test_track_with_valid_parameters():
-    tracker = BaseTrackAnyPoint(tracker_type="cotracker")
-    mock_video = np.random.rand(50, 224, 224, 3)
+    n_frames = 50
+    n_keypoints = 1
+    tracker = BaseTrackAnyPoint(model="cotracker")
+    mock_video = np.random.rand(n_frames, 224, 224, 3)
 
     query_points = [
         [0, 400, 350],  # frame_number, x, y
@@ -51,6 +53,7 @@ def test_track_with_valid_parameters():
         [0, 750, 600],
         [0, 900, 200],
     ]
+    n_individuals = len(query_points)
 
     with (
         patch("os.path.isfile", return_value=True),
@@ -65,7 +68,7 @@ def test_track_with_valid_parameters():
         )
         assert ds.position.shape == (50, 2, 1, 4)
         assert ds.source_software == "cotracker"
-        assert len(ds.individuals) == 4
-        assert len(ds.keypoints) == 1
+        assert len(ds.individuals) == n_individuals
+        assert len(ds.keypoints) == n_keypoints
         assert len(ds.time) == 50
         assert len(ds.space) == 2

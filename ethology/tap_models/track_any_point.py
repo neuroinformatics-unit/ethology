@@ -14,38 +14,53 @@ from movement.io.load_poses import from_numpy
 LIST_OF_SUPPORTED_TAP_MODELS = ["cotracker"]
 
 
+def get_device():
+    """Get the device to run the model on.
+
+    priority: cuda > mps > cpu
+
+    """
+    if torch.cuda.is_available():
+        device = torch.device("cuda")
+    elif torch.backends.mps.is_available():
+        device = torch.device("mps")
+    else:
+        device = torch.device("cpu")
+    return device
+
+
 class BaseTrackAnyPoint:
     """Base class for all Tracking Any Point trackers.
 
     Parameters
     ----------
-    tracker_type: str
+    model: str
         Type of Point tracker, current implementation supports ["cotracker"]
-    weight_file: str
+    checkpoint_path: str
         Path to the model weight of the tracker selected
 
     """
 
     def __init__(
         self,
-        tracker_type: Literal["cotracker"],
-        weight_file: str | None = None,
+        model: Literal["cotracker"],
+        checkpoint_path: str | None = None,
     ):
         """Initialize the tracker."""
-        self.tracker = tracker_type
+        self.tracker = model
 
-        if tracker_type not in LIST_OF_SUPPORTED_TAP_MODELS:
-            raise ValueError(f"Tracker type {tracker_type} not supported yet")
+        if model not in LIST_OF_SUPPORTED_TAP_MODELS:
+            raise ValueError(f"Tracker type {model} not supported yet")
 
         # load model
-        if tracker_type == "cotracker":
-            if weight_file and not os.path.isfile(weight_file):
+        if model == "cotracker":
+            if checkpoint_path and not os.path.isfile(checkpoint_path):
                 raise FileNotFoundError(
-                    f"Tracker model weights {weight_file} not found"
+                    f"Tracker model weights {checkpoint_path} not found"
                 )
 
-            if weight_file is not None:
-                self.model = CoTrackerPredictor(checkpoint=weight_file)
+            if checkpoint_path is not None:
+                self.model = CoTrackerPredictor(checkpoint=checkpoint_path)
             else:
                 self.model = torch.hub.load(
                     "facebookresearch/co-tracker", "cotracker3_offline"
@@ -76,6 +91,46 @@ class BaseTrackAnyPoint:
             source_software="cotracker",
         )
         return ds
+
+    def save_video(
+        self, video, video_path, save_dir, pred_tracks, pred_visibility
+    ):
+        """Save the processed video.
+
+        Parameters
+        ----------
+        video: torch.Tensor
+            Tensor containing video frames.
+        video_path: str
+            Path to the input video file.
+        save_dir: str
+            Directory path to save the processed video.
+        pred_tracks: torch.Tensor
+            Tensor containing tracks of each query
+            point across the frames of size
+            [batch, frame, query_points, X, Y].
+        pred_visibility: torch.Tensor
+            Tensor containing visibility of each query
+            point across the frames of size
+            [batch, frame, query_points].
+
+        """
+        if not os.path.exists(save_dir):
+            os.makedirs(save_dir)
+        file_name = f'{self.tracker}_{video_path.split("/")[-1].split(".")[0]}'
+
+        vis = Visualizer(
+            save_dir=save_dir,
+            linewidth=6,
+            mode="cool",
+            tracks_leave_trace=-1,
+        )
+        vis.visualize(
+            video=video,
+            tracks=pred_tracks,
+            visibility=pred_visibility,
+            filename=file_name,
+        )
 
     def track(
         self,
@@ -126,11 +181,7 @@ class BaseTrackAnyPoint:
         query_tensor = torch.tensor(query_points, dtype=torch.float32)
 
         # set device
-        device = (
-            torch.device("cuda")
-            if torch.cuda.is_available()
-            else torch.device("cpu")
-        )
+        device = get_device()
 
         self.model = self.model.to(device)
         video = video.to(device)
@@ -141,23 +192,9 @@ class BaseTrackAnyPoint:
         )
 
         if save_results:
-            if not os.path.exists(save_dir):
-                os.makedirs(save_dir)
-            file_name = (
-                f'{self.tracker}_{video_path.split("/")[-1].split(".")[0]}'
+            self.save_video(
+                video, video_path, save_dir, pred_tracks, pred_visibility
             )
 
-            vis = Visualizer(
-                save_dir=save_dir,
-                linewidth=6,
-                mode="cool",
-                tracks_leave_trace=-1,
-            )
-            vis.visualize(
-                video=video,
-                tracks=pred_tracks,
-                visibility=pred_visibility,
-                filename=file_name,
-            )
         ds = self.convert_to_movement_dataset(pred_tracks)
         return ds
