@@ -1,0 +1,21 @@
+﻿ethology.annotations.io.save\_bboxes
+====================================
+
+.. rubric:: Description
+
+.. automodule:: ethology.annotations.io.save_bboxes
+
+.. currentmodule:: ethology.annotations.io.save_bboxes
+
+
+
+
+.. rubric:: Functions
+
+.. autosummary::
+    :toctree: .
+    :nosignatures:
+    
+    to_COCO_file
+    
+

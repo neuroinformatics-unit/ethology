@@ -1,0 +1,21 @@
+﻿ethology.annotations.io.load\_bboxes
+====================================
+
+.. rubric:: Description
+
+.. automodule:: ethology.annotations.io.load_bboxes
+
+.. currentmodule:: ethology.annotations.io.load_bboxes
+
+
+
+
+.. rubric:: Functions
+
+.. autosummary::
+    :toctree: .
+    :nosignatures:
+    
+    from_files
+    
+

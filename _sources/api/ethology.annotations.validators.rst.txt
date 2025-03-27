@@ -1,0 +1,23 @@
+﻿ethology.annotations.validators
+===============================
+
+.. rubric:: Description
+
+.. automodule:: ethology.annotations.validators
+
+.. currentmodule:: ethology.annotations.validators
+
+
+.. rubric:: Classes
+
+.. autosummary::
+    :toctree: .
+    :nosignatures:
+    
+    ValidCOCO
+    
+    ValidVIA
+    
+
+
+

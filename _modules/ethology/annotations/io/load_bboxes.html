@@ -1,0 +1,855 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ethology.annotations.io.load_bboxes &#8212; ethology</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../../../_static/css/custom.css?v=9c66c473" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/sphinx-design.min.css?v=95c83b7e" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../../../../_static/documentation_options.js?v=6aee1ebc"></script>
+    <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/design-tabs.js?v=f930bc37"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/ethology/annotations/io/load_bboxes';</script>
+    <link rel="canonical" href="https://ethology.neuroinformatics.dev/_modules/ethology/annotations/io/load_bboxes.html" />
+    <link rel="icon" href="../../../../_static/light-logo-niu.png"/>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../../../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">ethology v0.1.dev1</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../../installation.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../../community/index.html">
+    Community
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../../api_index.html">
+    API reference
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/neuroinformatics-unit/ethology" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://neuroinformatics.zulipchat.com/#narrow/channel/483869-Ethology" title="Zulip (chat)" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-comments fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Zulip (chat)</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../../installation.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../../community/index.html">
+    Community
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../../api_index.html">
+    API reference
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/neuroinformatics-unit/ethology" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://neuroinformatics.zulipchat.com/#narrow/channel/483869-Ethology" title="Zulip (chat)" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-comments fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Zulip (chat)</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../../../index.html" class="nav-link">Module code</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">ethology.annotations.io.load_bboxes</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for ethology.annotations.io.load_bboxes</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Module for reading and writing manually labelled annotations.&quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">ethology.annotations.validators</span><span class="w"> </span><span class="kn">import</span> <span class="n">ValidCOCO</span><span class="p">,</span> <span class="n">ValidVIA</span>
+
+<span class="c1"># definition of standard bboxes dataframe</span>
+<span class="n">STANDARD_BBOXES_DF_INDEX</span> <span class="o">=</span> <span class="s2">&quot;annotation_id&quot;</span>
+<span class="n">STANDARD_BBOXES_DF_COLUMNS</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">&quot;image_filename&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;image_id&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;x_min&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;y_min&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;width&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;height&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;supercategory&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;category&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;category_id&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;image_width&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;image_height&quot;</span><span class="p">,</span>
+<span class="p">]</span>  <span class="c1"># superset of columns in the standard dataframe</span>
+
+
+<div class="viewcode-block" id="from_files">
+<a class="viewcode-back" href="../../../../api/ethology.annotations.io.load_bboxes.from_files.html#ethology.annotations.io.load_bboxes.from_files">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">from_files</span><span class="p">(</span>
+    <span class="n">file_paths</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">Path</span> <span class="o">|</span> <span class="nb">str</span><span class="p">],</span>
+    <span class="nb">format</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;VIA&quot;</span><span class="p">,</span> <span class="s2">&quot;COCO&quot;</span><span class="p">],</span>
+    <span class="n">images_dirs</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">Path</span> <span class="o">|</span> <span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Read input annotation files as a bboxes dataframe.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    file_paths : Path | str | list[Path | str]</span>
+<span class="sd">        Path or list of paths to the input annotation files.</span>
+<span class="sd">    format : Literal[&quot;VIA&quot;, &quot;COCO&quot;]</span>
+<span class="sd">        Format of the input annotation files.</span>
+<span class="sd">    images_dirs : Path | str | list[Path | str], optional</span>
+<span class="sd">        Path or list of paths to the directories containing the images the</span>
+<span class="sd">        annotations refer to.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    pd.DataFrame</span>
+<span class="sd">        Bounding boxes annotations dataframe. The dataframe is indexed</span>
+<span class="sd">        by &quot;annotation_id&quot; and has the following columns: &quot;image_filename&quot;,</span>
+<span class="sd">        &quot;image_id&quot;, &quot;image_width&quot;, &quot;image_height&quot;, &quot;x_min&quot;, &quot;y_min&quot;,</span>
+<span class="sd">        &quot;width&quot;, &quot;height&quot;, &quot;supercategory&quot;, &quot;category&quot;. It also has the</span>
+<span class="sd">        following attributes: &quot;annotation_files&quot;, &quot;annotation_format&quot;,</span>
+<span class="sd">        &quot;images_directories&quot;. The &quot;image_id&quot; is assigned based</span>
+<span class="sd">        on the alphabetically sorted list of unique image filenames across all</span>
+<span class="sd">        input files. The &quot;category_id&quot; column is always a 0-based integer,</span>
+<span class="sd">        except for VIA files where the values specified in the input file</span>
+<span class="sd">        are retained.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    We use image filenames&#39; to assign IDs to images, so if two images have the</span>
+<span class="sd">    same name but are in different input annotation files, they will be</span>
+<span class="sd">    assigned the same image ID and their annotations will be merged.</span>
+
+<span class="sd">    If this behaviour is not desired, and you would like to assign different</span>
+<span class="sd">    image IDs to images that have the same name but appear in different input</span>
+<span class="sd">    annotation files, you can either make the image filenames distinct before</span>
+<span class="sd">    loading the data, or you can load the data from each file</span>
+<span class="sd">    as a separate dataframe, and then concatenate them as desired.</span>
+
+<span class="sd">    See Also</span>
+<span class="sd">    --------</span>
+<span class="sd">    pandas.concat : Concatenate pandas objects along a particular axis.</span>
+
+<span class="sd">    pandas.DataFrame.drop_duplicates : Return DataFrame with duplicate rows</span>
+<span class="sd">    removed.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Delegate to reader of either a single file or multiple files</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">file_paths</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="n">df_all</span> <span class="o">=</span> <span class="n">_from_multiple_files</span><span class="p">(</span><span class="n">file_paths</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="nb">format</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">df_all</span> <span class="o">=</span> <span class="n">_from_single_file</span><span class="p">(</span><span class="n">file_paths</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="nb">format</span><span class="p">)</span>
+
+    <span class="c1"># Add metadata</span>
+    <span class="n">df_all</span><span class="o">.</span><span class="n">attrs</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;annotation_files&quot;</span><span class="p">:</span> <span class="n">file_paths</span><span class="p">,</span>
+        <span class="s2">&quot;annotation_format&quot;</span><span class="p">:</span> <span class="nb">format</span><span class="p">,</span>
+        <span class="s2">&quot;images_directories&quot;</span><span class="p">:</span> <span class="n">images_dirs</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="k">return</span> <span class="n">df_all</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_from_multiple_files</span><span class="p">(</span>
+    <span class="n">list_filepaths</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Path</span> <span class="o">|</span> <span class="nb">str</span><span class="p">],</span> <span class="nb">format</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;VIA&quot;</span><span class="p">,</span> <span class="s2">&quot;COCO&quot;</span><span class="p">]</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Read bounding boxes annotations from multiple files.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    list_filepaths : list[Path | str]</span>
+<span class="sd">        List of paths to the input annotation files</span>
+<span class="sd">    format : Literal[&quot;VIA&quot;, &quot;COCO&quot;]</span>
+<span class="sd">        Format of the input annotation files.</span>
+<span class="sd">        Currently supported formats are &quot;VIA&quot; and &quot;COCO&quot;.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    pd.DataFrame</span>
+<span class="sd">        Bounding boxes annotations dataframe. The dataframe is indexed</span>
+<span class="sd">        by &quot;annotation_id&quot; and has the following columns: &quot;image_filename&quot;,</span>
+<span class="sd">        &quot;image_id&quot;, &quot;image_width&quot;, &quot;image_height&quot;, &quot;x_min&quot;, &quot;y_min&quot;,</span>
+<span class="sd">        &quot;width&quot;, &quot;height&quot;, &quot;supercategory&quot;, &quot;category&quot;, &quot;category_id&quot;.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Get list of dataframes</span>
+    <span class="n">df_list</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">_from_single_file</span><span class="p">(</span><span class="n">file_path</span><span class="o">=</span><span class="n">file</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="nb">format</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">list_filepaths</span>
+    <span class="p">]</span>
+
+    <span class="c1"># Concatenate and reindex</span>
+    <span class="c1"># the resulting axis is labeled 0,1,…,n - 1.</span>
+    <span class="c1"># NOTE: after ignore_index=True the index name is no longer &quot;annotation_id&quot;</span>
+    <span class="n">df_all</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">df_list</span><span class="p">,</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># Update &quot;image_id&quot; based on the alphabetically sorted list of unique image</span>
+    <span class="c1"># filenames across all input files</span>
+    <span class="n">list_image_filenames</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">df_all</span><span class="p">[</span><span class="s2">&quot;image_filename&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()))</span>
+    <span class="n">df_all</span><span class="p">[</span><span class="s2">&quot;image_id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_all</span><span class="p">[</span><span class="s2">&quot;image_filename&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
+        <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">list_image_filenames</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Sort by image_filename</span>
+    <span class="n">df_all</span> <span class="o">=</span> <span class="n">df_all</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;image_filename&quot;</span><span class="p">])</span>
+
+    <span class="c1"># Remove duplicates that may exist across files and reindex</span>
+    <span class="n">df_all</span> <span class="o">=</span> <span class="n">df_all</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">(</span><span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="c1"># Set the index name back to &quot;annotation_id&quot;</span>
+    <span class="n">df_all</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">STANDARD_BBOXES_DF_INDEX</span>
+
+    <span class="k">return</span> <span class="n">df_all</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_from_single_file</span><span class="p">(</span>
+    <span class="n">file_path</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">format</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;VIA&quot;</span><span class="p">,</span> <span class="s2">&quot;COCO&quot;</span><span class="p">]</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Read bounding boxes annotations from a single file.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    file_path : Path | str</span>
+<span class="sd">        Path to the input annotation file.</span>
+<span class="sd">    format : Literal[&quot;VIA&quot;, &quot;COCO&quot;]</span>
+<span class="sd">        Format of the input annotation file.</span>
+<span class="sd">        Currently supported formats are &quot;VIA&quot; and &quot;COCO&quot;.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    pd.DataFrame</span>
+<span class="sd">        Bounding boxes annotations dataframe. The dataframe is indexed</span>
+<span class="sd">        by &quot;annotation_id&quot; and has the following columns: &quot;image_filename&quot;,</span>
+<span class="sd">        &quot;image_id&quot;, &quot;image_width&quot;, &quot;image_height&quot;, &quot;x_min&quot;, &quot;y_min&quot;,</span>
+<span class="sd">        &quot;width&quot;, &quot;height&quot;, &quot;supercategory&quot;, &quot;category&quot;, &quot;category_id&quot;.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Choose the appropriate validator and row-extraction function</span>
+    <span class="n">validator</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">ValidVIA</span> <span class="o">|</span> <span class="n">ValidCOCO</span><span class="p">]</span>
+    <span class="k">if</span> <span class="nb">format</span> <span class="o">==</span> <span class="s2">&quot;VIA&quot;</span><span class="p">:</span>
+        <span class="n">validator</span> <span class="o">=</span> <span class="n">ValidVIA</span>
+        <span class="n">get_rows_from_file</span> <span class="o">=</span> <span class="n">_df_rows_from_valid_VIA_file</span>
+    <span class="k">elif</span> <span class="nb">format</span> <span class="o">==</span> <span class="s2">&quot;COCO&quot;</span><span class="p">:</span>
+        <span class="n">validator</span> <span class="o">=</span> <span class="n">ValidCOCO</span>
+        <span class="n">get_rows_from_file</span> <span class="o">=</span> <span class="n">_df_rows_from_valid_COCO_file</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unsupported format: </span><span class="si">{</span><span class="nb">format</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Build dataframe from extracted rows</span>
+    <span class="n">valid_file</span> <span class="o">=</span> <span class="n">validator</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
+    <span class="n">list_rows</span> <span class="o">=</span> <span class="n">get_rows_from_file</span><span class="p">(</span><span class="n">valid_file</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">list_rows</span><span class="p">)</span>
+
+    <span class="c1"># Sort annotations by image_filename</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;image_filename&quot;</span><span class="p">])</span>
+
+    <span class="c1"># Drop duplicates and reindex</span>
+    <span class="c1"># The resulting axis is labeled 0,1,…,n-1.</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">(</span>
+        <span class="n">subset</span><span class="o">=</span><span class="p">[</span><span class="n">col</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="k">if</span> <span class="n">col</span> <span class="o">!=</span> <span class="s2">&quot;annotation_id&quot;</span><span class="p">],</span>
+        <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">inplace</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Fix category_id for VIA files if required</span>
+    <span class="c1"># Cast as an int if possible, otherwise factorize it</span>
+    <span class="k">if</span> <span class="nb">format</span> <span class="o">==</span> <span class="s2">&quot;VIA&quot;</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;category_id&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">_VIA_category_id_as_int</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">format</span> <span class="o">==</span> <span class="s2">&quot;COCO&quot;</span><span class="p">:</span>
+        <span class="c1"># In COCO files exported with the VIA tool, the category_id</span>
+        <span class="c1"># is always a 1-based integer. Here we coerce it to a 0-based</span>
+        <span class="c1"># integer</span>
+        <span class="n">df</span><span class="p">[</span><span class="s2">&quot;category_id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;category&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">factorize</span><span class="p">(</span><span class="n">sort</span><span class="o">=</span><span class="kc">True</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="c1"># Reorder columns to match standard columns</span>
+    <span class="c1"># If columns dont exist they are filled with nan / na values</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">reindex</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">STANDARD_BBOXES_DF_COLUMNS</span> <span class="o">+</span> <span class="p">[</span><span class="s2">&quot;annotation_id&quot;</span><span class="p">])</span>
+
+    <span class="c1"># Set the index name to &quot;annotation_id&quot;</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="n">STANDARD_BBOXES_DF_INDEX</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">df</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_df_rows_from_valid_VIA_file</span><span class="p">(</span><span class="n">file_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Extract list of dataframe rows from a validated VIA JSON file.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    file_path : Path</span>
+<span class="sd">        Path to the validated VIA JSON file.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    list[dict]</span>
+<span class="sd">        List of dataframe rows extracted from the validated VIA JSON file.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Read validated json as dict</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+        <span class="n">data_dict</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+
+    <span class="c1"># Prepare data</span>
+    <span class="n">image_metadata_dict</span> <span class="o">=</span> <span class="n">data_dict</span><span class="p">[</span><span class="s2">&quot;_via_img_metadata&quot;</span><span class="p">]</span>
+    <span class="n">list_sorted_filenames</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
+        <span class="p">[</span><span class="n">img_dict</span><span class="p">[</span><span class="s2">&quot;filename&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">img_dict</span> <span class="ow">in</span> <span class="n">image_metadata_dict</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
+    <span class="p">)</span>
+
+    <span class="n">via_attributes</span> <span class="o">=</span> <span class="n">data_dict</span><span class="p">[</span><span class="s2">&quot;_via_attributes&quot;</span><span class="p">]</span>
+
+    <span class="c1"># Get supercategories and categories</span>
+    <span class="n">supercategories_dict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">if</span> <span class="s2">&quot;region&quot;</span> <span class="ow">in</span> <span class="n">via_attributes</span><span class="p">:</span>
+        <span class="n">supercategories_dict</span> <span class="o">=</span> <span class="n">via_attributes</span><span class="p">[</span><span class="s2">&quot;region&quot;</span><span class="p">]</span>
+
+    <span class="c1"># Get list of rows in dataframe</span>
+    <span class="n">list_rows</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">annotation_id</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="c1"># loop through images</span>
+    <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">img_dict</span> <span class="ow">in</span> <span class="n">image_metadata_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="c1"># loop thru annotations in the image</span>
+        <span class="k">for</span> <span class="n">region</span> <span class="ow">in</span> <span class="n">img_dict</span><span class="p">[</span><span class="s2">&quot;regions&quot;</span><span class="p">]:</span>
+            <span class="c1"># Extract region data</span>
+            <span class="n">region_shape</span> <span class="o">=</span> <span class="n">region</span><span class="p">[</span><span class="s2">&quot;shape_attributes&quot;</span><span class="p">]</span>
+            <span class="n">region_attributes</span> <span class="o">=</span> <span class="n">region</span><span class="p">[</span><span class="s2">&quot;region_attributes&quot;</span><span class="p">]</span>
+
+            <span class="c1"># Define supercategory and category.</span>
+            <span class="c1"># A region (bbox) can have multiple supercategories.</span>
+            <span class="c1"># We only consider the first supercategory in alphabetical order.</span>
+            <span class="k">if</span> <span class="n">region_attributes</span> <span class="ow">and</span> <span class="n">supercategories_dict</span><span class="p">:</span>
+                <span class="c1"># bbox data</span>
+                <span class="n">supercategory</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">region_attributes</span><span class="o">.</span><span class="n">keys</span><span class="p">()))[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">category_id_str</span> <span class="o">=</span> <span class="n">region_attributes</span><span class="p">[</span><span class="n">supercategory</span><span class="p">]</span>
+
+                <span class="c1"># map to category name</span>
+                <span class="n">category</span> <span class="o">=</span> <span class="n">supercategories_dict</span><span class="p">[</span><span class="n">supercategory</span><span class="p">][</span><span class="s2">&quot;options&quot;</span><span class="p">][</span>
+                    <span class="n">category_id_str</span>
+                <span class="p">]</span>
+            <span class="c1"># If not defined, set to None</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">supercategory</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">category</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">category_id_str</span> <span class="o">=</span> <span class="kc">None</span>
+
+            <span class="n">row</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;annotation_id&quot;</span><span class="p">:</span> <span class="n">annotation_id</span><span class="p">,</span>
+                <span class="s2">&quot;image_filename&quot;</span><span class="p">:</span> <span class="n">img_dict</span><span class="p">[</span><span class="s2">&quot;filename&quot;</span><span class="p">],</span>
+                <span class="s2">&quot;image_id&quot;</span><span class="p">:</span> <span class="n">list_sorted_filenames</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">img_dict</span><span class="p">[</span><span class="s2">&quot;filename&quot;</span><span class="p">]),</span>
+                <span class="s2">&quot;x_min&quot;</span><span class="p">:</span> <span class="n">region_shape</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">],</span>
+                <span class="s2">&quot;y_min&quot;</span><span class="p">:</span> <span class="n">region_shape</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">],</span>
+                <span class="s2">&quot;width&quot;</span><span class="p">:</span> <span class="n">region_shape</span><span class="p">[</span><span class="s2">&quot;width&quot;</span><span class="p">],</span>
+                <span class="s2">&quot;height&quot;</span><span class="p">:</span> <span class="n">region_shape</span><span class="p">[</span><span class="s2">&quot;height&quot;</span><span class="p">],</span>
+                <span class="s2">&quot;supercategory&quot;</span><span class="p">:</span> <span class="n">supercategory</span><span class="p">,</span>
+                <span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="n">category</span><span class="p">,</span>
+                <span class="s2">&quot;category_id&quot;</span><span class="p">:</span> <span class="n">category_id_str</span><span class="p">,</span>
+                <span class="c1"># in VIA files, the category_id is a string</span>
+            <span class="p">}</span>
+
+            <span class="n">list_rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+
+            <span class="c1"># update &quot;annotation_id&quot;</span>
+            <span class="n">annotation_id</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="k">return</span> <span class="n">list_rows</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_df_rows_from_valid_COCO_file</span><span class="p">(</span><span class="n">file_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Extract list of dataframe rows from a validated COCO JSON file.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    file_path : Path</span>
+<span class="sd">        Path to the validated COCO JSON file.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    list[dict]</span>
+<span class="sd">        List of dataframe rows extracted from the validated COCO JSON file.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Read validated json as dict</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+        <span class="n">data_dict</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+
+    <span class="c1"># Prepare data</span>
+    <span class="c1"># We define image_id_ethology as the 0-based index of the image in the</span>
+    <span class="c1"># &quot;images&quot; list of the COCO JSON file. The following assumes the number of</span>
+    <span class="c1"># unique image_ids in the input COCO file matches the number of elements</span>
+    <span class="c1"># in the &quot;images&quot; list.</span>
+    <span class="n">map_img_id_coco_to_ethology</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">img_dict</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]:</span> <span class="n">idx</span>
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">img_dict</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span>
+            <span class="nb">sorted</span><span class="p">(</span><span class="n">data_dict</span><span class="p">[</span><span class="s2">&quot;images&quot;</span><span class="p">],</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="s2">&quot;file_name&quot;</span><span class="p">])</span>
+        <span class="p">)</span>
+    <span class="p">}</span>
+    <span class="n">map_img_id_coco_to_filename</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">img_dict</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]:</span> <span class="n">img_dict</span><span class="p">[</span><span class="s2">&quot;file_name&quot;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">img_dict</span> <span class="ow">in</span> <span class="n">data_dict</span><span class="p">[</span><span class="s2">&quot;images&quot;</span><span class="p">]</span>
+    <span class="p">}</span>
+    <span class="n">map_img_id_coco_to_width_height</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">img_dict</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]:</span> <span class="p">(</span><span class="n">img_dict</span><span class="p">[</span><span class="s2">&quot;width&quot;</span><span class="p">],</span> <span class="n">img_dict</span><span class="p">[</span><span class="s2">&quot;height&quot;</span><span class="p">])</span>
+        <span class="k">for</span> <span class="n">img_dict</span> <span class="ow">in</span> <span class="n">data_dict</span><span class="p">[</span><span class="s2">&quot;images&quot;</span><span class="p">]</span>
+    <span class="p">}</span>
+    <span class="n">map_category_id_to_category_data</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">cat_dict</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]:</span> <span class="p">(</span><span class="n">cat_dict</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">],</span> <span class="n">cat_dict</span><span class="p">[</span><span class="s2">&quot;supercategory&quot;</span><span class="p">])</span>
+        <span class="k">for</span> <span class="n">cat_dict</span> <span class="ow">in</span> <span class="n">data_dict</span><span class="p">[</span><span class="s2">&quot;categories&quot;</span><span class="p">]</span>
+    <span class="p">}</span>  <span class="c1"># category data: category name, supercategor name</span>
+
+    <span class="c1"># Build standard dataframe</span>
+    <span class="n">list_rows</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">annot_id</span><span class="p">,</span> <span class="n">annot_dict</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">data_dict</span><span class="p">[</span><span class="s2">&quot;annotations&quot;</span><span class="p">]):</span>
+        <span class="c1"># image data</span>
+        <span class="n">img_id_coco</span> <span class="o">=</span> <span class="n">annot_dict</span><span class="p">[</span><span class="s2">&quot;image_id&quot;</span><span class="p">]</span>
+        <span class="n">image_filename</span> <span class="o">=</span> <span class="n">map_img_id_coco_to_filename</span><span class="p">[</span><span class="n">img_id_coco</span><span class="p">]</span>
+        <span class="n">image_width</span><span class="p">,</span> <span class="n">image_height</span> <span class="o">=</span> <span class="n">map_img_id_coco_to_width_height</span><span class="p">[</span>
+            <span class="n">img_id_coco</span>
+        <span class="p">]</span>
+
+        <span class="c1"># compute image ID following ethology convention</span>
+        <span class="n">img_id_ethology</span> <span class="o">=</span> <span class="n">map_img_id_coco_to_ethology</span><span class="p">[</span><span class="n">img_id_coco</span><span class="p">]</span>
+
+        <span class="c1"># bbox data</span>
+        <span class="n">x_min</span><span class="p">,</span> <span class="n">y_min</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span> <span class="o">=</span> <span class="n">annot_dict</span><span class="p">[</span><span class="s2">&quot;bbox&quot;</span><span class="p">]</span>
+
+        <span class="c1"># category data</span>
+        <span class="n">category_id</span> <span class="o">=</span> <span class="n">annot_dict</span><span class="p">[</span><span class="s2">&quot;category_id&quot;</span><span class="p">]</span>
+        <span class="n">category</span><span class="p">,</span> <span class="n">supercategory</span> <span class="o">=</span> <span class="n">map_category_id_to_category_data</span><span class="p">[</span><span class="n">category_id</span><span class="p">]</span>
+
+        <span class="n">row</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;annotation_id&quot;</span><span class="p">:</span> <span class="n">annot_id</span><span class="p">,</span>
+            <span class="s2">&quot;image_filename&quot;</span><span class="p">:</span> <span class="n">image_filename</span><span class="p">,</span>
+            <span class="s2">&quot;image_id&quot;</span><span class="p">:</span> <span class="n">img_id_ethology</span><span class="p">,</span>
+            <span class="s2">&quot;image_width&quot;</span><span class="p">:</span> <span class="n">image_width</span><span class="p">,</span>
+            <span class="s2">&quot;image_height&quot;</span><span class="p">:</span> <span class="n">image_height</span><span class="p">,</span>
+            <span class="s2">&quot;x_min&quot;</span><span class="p">:</span> <span class="n">x_min</span><span class="p">,</span>
+            <span class="s2">&quot;y_min&quot;</span><span class="p">:</span> <span class="n">y_min</span><span class="p">,</span>
+            <span class="s2">&quot;width&quot;</span><span class="p">:</span> <span class="n">width</span><span class="p">,</span>
+            <span class="s2">&quot;height&quot;</span><span class="p">:</span> <span class="n">height</span><span class="p">,</span>
+            <span class="s2">&quot;supercategory&quot;</span><span class="p">:</span> <span class="n">supercategory</span><span class="p">,</span>
+            <span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="n">category</span><span class="p">,</span>
+            <span class="s2">&quot;category_id&quot;</span><span class="p">:</span> <span class="n">category_id</span><span class="p">,</span>
+            <span class="c1"># in COCO files, the category_id is always a 1-based integer</span>
+        <span class="p">}</span>
+
+        <span class="n">list_rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">list_rows</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_VIA_category_id_as_int</span><span class="p">(</span><span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert category_id to int if possible, otherwise factorize it.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    df : pd.DataFrame</span>
+<span class="sd">        Bounding boxes annotations dataframe.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    pd.DataFrame</span>
+<span class="sd">        Bounding boxes annotations dataframe with &quot;category_id&quot; as int.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">df</span><span class="p">[</span><span class="s2">&quot;category_id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;category_id&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="n">df</span><span class="p">[</span><span class="s2">&quot;category_id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;category&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">factorize</span><span class="p">(</span><span class="n">sort</span><span class="o">=</span><span class="kc">True</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">df</span>
+</pre></div>
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item"><p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    <br/>
+    </p>
+    <p class="theme-version">
+    Built with the
+    <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a>
+    0.16.1.
+    </p></div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item"><div class="things-in-a-row">
+    <a href="https://neuroinformatics.dev/">
+        <img src="../../../../_static/light-logo-niu.png" alt="Sponsors" class="only-light img-sponsor"/>
+        <img src="../../../../_static/dark-logo-niu.png" alt="Sponsors" class="only-dark img-sponsor"/>
+    </a>
+    <a href="https://www.sainsburywellcome.org/web/">
+        <img src="../../../../_static/light-logo-swc.png" alt="Sponsors" class="only-light img-sponsor"/>
+        <img src="../../../../_static/dark-logo-swc.png" alt="Sponsors" class="only-dark img-sponsor"/>
+    </a>
+    <a href="https://www.ucl.ac.uk/gatsby/gatsby-computational-neuroscience-unit">
+        <img src="../../../../_static/light-logo-gatsby.png" alt="Sponsors" class="only-light img-sponsor"/>
+        <img src="../../../../_static/dark-logo-gatsby.png" alt="Sponsors" class="only-dark img-sponsor"/>
+    </a>
+    <a href="https://www.ucl.ac.uk/">
+        <img src="../../../../_static/light-logo-ucl.png" alt="Sponsors" class="only-light img-sponsor"/>
+        <img src="../../../../_static/dark-logo-ucl.png" alt="Sponsors" class="only-dark img-sponsor"/>
+    </a>
+</div></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

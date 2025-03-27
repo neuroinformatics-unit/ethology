@@ -1,0 +1,908 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>How to Contribute &#8212; ethology</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=9c66c473" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../_static/documentation_options.js?v=6aee1ebc"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'community/contributing';</script>
+    <link rel="canonical" href="https://ethology.neuroinformatics.dev/community/contributing.html" />
+    <link rel="icon" href="../_static/light-logo-niu.png"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="License" href="license.html" />
+    <link rel="prev" title="Related projects" href="related-projects.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">ethology v0.1.dev1</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../installation.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="index.html">
+    Community
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../api_index.html">
+    API reference
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/neuroinformatics-unit/ethology" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://neuroinformatics.zulipchat.com/#narrow/channel/483869-Ethology" title="Zulip (chat)" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-comments fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Zulip (chat)</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../installation.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="index.html">
+    Community
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../api_index.html">
+    API reference
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/neuroinformatics-unit/ethology" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://neuroinformatics.zulipchat.com/#narrow/channel/483869-Ethology" title="Zulip (chat)" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-comments fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Zulip (chat)</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="mission-scope.html">Mission &amp; Scope</a></li>
+<li class="toctree-l1"><a class="reference internal" href="related-projects.html">Related projects</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">How to Contribute</a></li>
+<li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="index.html" class="nav-link">Community</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">How to Contribute</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="how-to-contribute">
+<span id="target-contributing"></span><h1>How to Contribute<a class="headerlink" href="#how-to-contribute" title="Link to this heading">#</a></h1>
+<section id="preparing-to-contribute">
+<h2>Preparing to contribute<a class="headerlink" href="#preparing-to-contribute" title="Link to this heading">#</a></h2>
+<section id="create-a-development-environment">
+<h3>Create a development environment<a class="headerlink" href="#create-a-development-environment" title="Link to this heading">#</a></h3>
+<p>We recommended using <a class="reference external" href="https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html">conda</a> to create a
+development environment. In the following, we assume you have
+<code class="docutils literal notranslate"><span class="pre">conda</span></code> installed.</p>
+<p>To install <code class="docutils literal notranslate"><span class="pre">ethology</span></code> for development, first create and activate a <code class="docutils literal notranslate"><span class="pre">conda</span></code> environment:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>conda<span class="w"> </span>create<span class="w"> </span>-n<span class="w"> </span>ethology-dev<span class="w"> </span><span class="nv">python</span><span class="o">=</span><span class="m">3</span>.12
+conda<span class="w"> </span>activate<span class="w"> </span>ethology-dev
+</pre></div>
+</div>
+<p>Then install the development version of <code class="docutils literal notranslate"><span class="pre">ethology</span></code> by cloning the GitHub repository,
+and pip-installing it in editable mode with the required dependencies:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="c1"># clone the repository</span>
+git<span class="w"> </span>clone<span class="w"> </span>https://github.com/neuroinformatics-unit/ethology.git
+
+<span class="c1"># then run from within the repository root folder:</span>
+pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.<span class="o">[</span>dev<span class="o">]</span><span class="w">  </span><span class="c1"># works on most shells</span>
+pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span><span class="s1">&#39;.[dev]&#39;</span><span class="w">  </span><span class="c1"># works on zsh (the default shell on macOS)</span>
+</pre></div>
+</div>
+<p>This should install all the dependencies needed for development, such as <code class="docutils literal notranslate"><span class="pre">pytest</span></code> and <code class="docutils literal notranslate"><span class="pre">pre-commit</span></code>.</p>
+<p>Finally, install the <a class="reference external" href="https://pre-commit.com/">pre-commit hooks</a>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pre-commit<span class="w"> </span>install
+</pre></div>
+</div>
+<p>Pre-commit hooks are a set of tools that run automatically before each commit and help maintain a consistent formatting style in the code (see the section <a class="reference internal" href="#formatting-and-pre-commit-hooks">pre-commit hooks</a> below for more details).</p>
+</section>
+<section id="pull-requests">
+<h3>Pull requests<a class="headerlink" href="#pull-requests" title="Link to this heading">#</a></h3>
+<p>Please submit code to the main repository with a pull request (PR).
+We follow our sister project <a class="reference external" href="https://github.com/neuroinformatics-unit/movement/blob/main/CONTRIBUTING.md">movement</a> and adhere to the same conventions:</p>
+<ul class="simple">
+<li><p>Please submit <em>draft</em> PRs as early as possible to allow for discussion.</p></li>
+<li><p>The PR title should be descriptive e.g. “Add new function to do X” or “Fix bug in Y”.</p></li>
+<li><p>The PR description should be used to provide context and motivation for the changes - we use a template to help you with this.</p></li>
+<li><p>One approval of a PR (by a repository owner) is enough for it to be merged.</p></li>
+<li><p>Unless someone approves the PR with optional comments, the PR is immediately squash and merged by the approving reviewer.</p></li>
+<li><p>Ask for a review from someone specific if you think they would be a particularly suited reviewer.</p></li>
+<li><p>PRs are preferably merged via the <a class="reference external" href="https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/incorporating-changes-from-a-pull-request/about-pull-request-merges#squash-and-merge-your-commits">“squash and merge”</a> option, to keep a clean commit history on the <em>main</em> branch.</p></li>
+</ul>
+</section>
+<section id="contribution-workflow">
+<h3>Contribution workflow<a class="headerlink" href="#contribution-workflow" title="Link to this heading">#</a></h3>
+<p>A typical contribution workflow would be as follows:</p>
+<ul class="simple">
+<li><p>Locally, check out a new branch, make your changes, and stage them.</p></li>
+<li><p>When you try to commit, the <a class="reference internal" href="#formatting-and-pre-commit-hooks">pre-commit hooks</a> will be triggered.</p></li>
+<li><p>Stage any fixes automatically made by the hooks, or fix any of them manually, and commit the changes.</p></li>
+<li><p>Make sure to add tests for any new features or bug fixes. See the <a class="reference internal" href="#testing">testing</a> section below.</p></li>
+<li><p>Don’t forget to update the documentation, if necessary. This includes docstrings, README, and any other relevant documentation.</p></li>
+<li><p>Make sure that all tests pass locally before pushing your changes.</p></li>
+<li><p>Push your changes to GitHub and open a draft pull request, with a meaningful title and a thorough description of the changes.</p></li>
+<li><p>If all continuous integration (CI) checks run successfully (e.g. linting, type checking, testing), you may mark the pull request as ready for review and tag a reviewer.</p></li>
+<li><p>Once the reviewer has provided feedback, you will need to respond to the review comments and implement any requested changes.</p></li>
+<li><p>After the review feedback has been addressed, one of the repository maintainers will approve the PR and add it to the <a class="reference external" href="https://github.blog/changelog/2023-02-08-pull-request-merge-queue-public-beta/">merge queue</a>.</p></li>
+<li><p>Success 🎉 !! Your PR will be (squash-)merged into the <em>main</em> branch.</p></li>
+</ul>
+</section>
+</section>
+<section id="contributing-code">
+<h2>Contributing code<a class="headerlink" href="#contributing-code" title="Link to this heading">#</a></h2>
+<section id="formatting-and-pre-commit-hooks">
+<h3>Formatting and pre-commit hooks<a class="headerlink" href="#formatting-and-pre-commit-hooks" title="Link to this heading">#</a></h3>
+<p>Running <code class="docutils literal notranslate"><span class="pre">pre-commit</span> <span class="pre">install</span></code> will set up our <a class="reference external" href="https://pre-commit.com/">pre-commit hooks</a> - these are useful to ensure a consistent formatting style. Currently, our hooks run:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://github.com/astral-sh/ruff">ruff</a>, which does a number of jobs, including code linting and auto-formatting.</p></li>
+<li><p><a class="reference external" href="https://mypy.readthedocs.io/en/stable/index.html">mypy</a>, which does static type checking.</p></li>
+<li><p><a class="reference external" href="https://github.com/mgedmin/check-manifest">check-manifest</a>, to ensure that the right files are included in the pip package.</p></li>
+<li><p><a class="reference external" href="https://github.com/codespell-project/codespell">codespell</a> to check for common misspellings.</p></li>
+</ul>
+<p>You may also run the pre-commit hooks manually at any time using one of the following commands before committing:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>pre-commit<span class="w"> </span>run<span class="w">  </span><span class="c1"># applies to the staged files</span>
+pre-commit<span class="w"> </span>run<span class="w"> </span>-a<span class="w">  </span><span class="c1"># applies to all files in the repository</span>
+</pre></div>
+</div>
+<p>Some problems will be automatically fixed by the hooks. In this case, you should stage the auto-fixed changes and run the hooks again to ensure that there are no further issues:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>add<span class="w"> </span>.<span class="w">  </span><span class="c1"># stage all changes</span>
+pre-commit<span class="w"> </span>run
+</pre></div>
+</div>
+<p>If a problem cannot be auto-fixed, the corresponding tool will provide
+information on what the issue is and how to fix it. For example, <code class="docutils literal notranslate"><span class="pre">ruff</span></code> might
+output something like:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>ethology/io/load_bboxes.py:551:80:<span class="w"> </span>E501<span class="w"> </span>Line<span class="w"> </span>too<span class="w"> </span>long<span class="w"> </span><span class="o">(</span><span class="m">90</span><span class="w"> </span>&gt;<span class="w"> </span><span class="m">79</span><span class="o">)</span>
+</pre></div>
+</div>
+<p>This pinpoints the problem to a single code line and a specific <a class="reference external" href="https://docs.astral.sh/ruff/rules/">ruff rule</a> violation.
+Sometimes you may have good reasons to ignore a particular rule for a specific line of code. You can do this by adding an inline comment, e.g. <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">noqa:</span> <span class="pre">E501</span></code>. Replace <code class="docutils literal notranslate"><span class="pre">E501</span></code> with the code of the rule you want to ignore.</p>
+<p>For docstrings, we adhere to the <a class="reference external" href="https://numpydoc.readthedocs.io/en/latest/format.html">numpydoc</a> style.
+Make sure to provide docstrings for all public functions, classes, and methods.
+This is important as it allows for automatic generation of the API reference.</p>
+</section>
+<section id="testing">
+<h3>Testing<a class="headerlink" href="#testing" title="Link to this heading">#</a></h3>
+<p>We use <a class="reference external" href="https://docs.pytest.org/en/latest/">pytest</a> for testing and aim for
+~100% test coverage (as far as is reasonable).
+All new features should be tested.
+Write your test methods and classes in the <em>tests</em> folder.</p>
+<p>For some tests, you will need to use real data.
+Please do not add sample data to the code repository, especially if they are large - we use an external data repository instead.
+See the <a class="reference internal" href="#test-data">sample data</a> section for more information.</p>
+</section>
+<section id="continuous-integration">
+<h3>Continuous integration<a class="headerlink" href="#continuous-integration" title="Link to this heading">#</a></h3>
+<p>All pushes and pull requests trigger a <a class="reference external" href="https://docs.github.com/en/actions">GitHub actions</a> workflow. This is defined in the file at <code class="docutils literal notranslate"><span class="pre">.github/workflows/test_and_deploy.yml</span></code> and runs:</p>
+<ul class="simple">
+<li><p>Linting checks (pre-commit).</p></li>
+<li><p>Testing in different operating systems and Python versions (only if linting checks pass)</p></li>
+<li><p>A release to PyPI (only if a git tag is present and if tests pass).</p></li>
+</ul>
+</section>
+</section>
+<section id="contributing-documentation">
+<h2>Contributing documentation<a class="headerlink" href="#contributing-documentation" title="Link to this heading">#</a></h2>
+<p>The documentation is hosted via <a class="reference external" href="https://pages.github.com/">GitHub pages</a> at
+<a class="reference internal" href="../index.html#target-ethology"><span class="std std-ref">ethology.neuroinformatics.dev</span></a>.
+Its source files are located in the <code class="docutils literal notranslate"><span class="pre">docs</span></code> folder of this repository.
+They are written in either <a class="reference external" href="https://myst-parser.readthedocs.io/en/latest/syntax/typography.html#">Markdown</a>
+or <a class="reference external" href="https://docutils.sourceforge.io/rst.html">reStructuredText</a>.
+The <code class="docutils literal notranslate"><span class="pre">index.md</span></code> file corresponds to the homepage of the documentation website.
+Other <code class="docutils literal notranslate"><span class="pre">.md</span></code>  or <code class="docutils literal notranslate"><span class="pre">.rst</span></code> files are linked to the homepage via the <code class="docutils literal notranslate"><span class="pre">toctree</span></code> directive.</p>
+<p>We use <a class="reference external" href="https://www.sphinx-doc.org/en/master/usage/#">Sphinx</a> and the <a class="reference external" href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a>
+to build the source files into HTML output.
+This is handled by a GitHub actions workflow (<code class="docutils literal notranslate"><span class="pre">.github/workflows/docs_build_and_deploy.yml</span></code>).
+The build job is triggered on each PR, ensuring that the documentation build is not broken by new changes.
+The deployment job is only triggered whenever a tag is pushed to the <em>main</em> branch,
+ensuring that the documentation is published in sync with each PyPI release.</p>
+<section id="editing-the-documentation">
+<h3>Editing the documentation<a class="headerlink" href="#editing-the-documentation" title="Link to this heading">#</a></h3>
+<p>To edit the documentation, first clone the repository, and install <code class="docutils literal notranslate"><span class="pre">ethology</span></code> in a
+<a class="reference internal" href="#create-a-development-environment">development environment</a>.</p>
+<p>Then, install a few additional dependencies in your development environment to be able to build the documentation locally. To do this, run the following command from the root of the repository:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>./docs/requirements.txt
+</pre></div>
+</div>
+<p>Now create a new branch, edit the documentation source files (<code class="docutils literal notranslate"><span class="pre">.md</span></code> or <code class="docutils literal notranslate"><span class="pre">.rst</span></code> in the <code class="docutils literal notranslate"><span class="pre">docs</span></code> folder),
+and commit your changes. Submit your documentation changes via a pull request,
+following the <a class="reference internal" href="#pull-requests">same guidelines as for code changes</a>.
+Make sure that the header levels in your <code class="docutils literal notranslate"><span class="pre">.md</span></code> or <code class="docutils literal notranslate"><span class="pre">.rst</span></code> files are incremented
+consistently (H1 &gt; H2 &gt; H3, etc.) without skipping any levels.</p>
+</section>
+<section id="adding-new-pages">
+<h3>Adding new pages<a class="headerlink" href="#adding-new-pages" title="Link to this heading">#</a></h3>
+<p>If you create a new documentation source file (e.g. <code class="docutils literal notranslate"><span class="pre">my_new_file.md</span></code> or <code class="docutils literal notranslate"><span class="pre">my_new_file.rst</span></code>),
+you will need to add it to the <code class="docutils literal notranslate"><span class="pre">toctree</span></code> directive in <code class="docutils literal notranslate"><span class="pre">index.md</span></code>
+for it to be included in the documentation website:</p>
+<div class="highlight-rst notranslate"><div class="highlight"><pre><span></span><span class="nc">:maxdepth:</span> 2
+<span class="nc">:hidden:</span>
+
+existing_file
+my_new_file
+</pre></div>
+</div>
+</section>
+<section id="linking-to-external-urls">
+<h3>Linking to external URLs<a class="headerlink" href="#linking-to-external-urls" title="Link to this heading">#</a></h3>
+<p>If you are adding references to an external URL (e.g. <code class="docutils literal notranslate"><span class="pre">https://github.com/neuroinformatics-unit/ethology/issues/1</span></code>) in a <code class="docutils literal notranslate"><span class="pre">.md</span></code> file, you will need to check if a matching URL scheme (e.g. <code class="docutils literal notranslate"><span class="pre">https://github.com/neuroinformatics-unit/ethology/</span></code>) is defined in <code class="docutils literal notranslate"><span class="pre">myst_url_schemes</span></code> in <code class="docutils literal notranslate"><span class="pre">docs/source/conf.py</span></code>. If it is, the following <code class="docutils literal notranslate"><span class="pre">[](scheme:loc)</span></code> syntax will be converted to the <a class="reference external" href="https://github.com/neuroinformatics-unit/ethology/issues/1">full URL</a> during the build process:</p>
+<div class="highlight-markdown notranslate"><div class="highlight"><pre><span></span>[<span class="nt">link text</span>](<span class="na">ethology-github:issues/1</span>)
+</pre></div>
+</div>
+<p>If it is not yet defined and you have multiple external URLs pointing to the same base URL, you will need to <a class="reference external" href="https://myst-parser.readthedocs.io/en/latest/syntax/cross-referencing.html#customising-external-url-resolution">add the URL scheme</a> to <code class="docutils literal notranslate"><span class="pre">myst_url_schemes</span></code> in <code class="docutils literal notranslate"><span class="pre">docs/source/conf.py</span></code>.</p>
+</section>
+<section id="updating-the-api-reference">
+<h3>Updating the API reference<a class="headerlink" href="#updating-the-api-reference" title="Link to this heading">#</a></h3>
+<p>The <a class="reference internal" href="../api_index.html#target-api"><span class="std std-ref">API reference</span></a> is auto-generated by the <code class="docutils literal notranslate"><span class="pre">docs/make_api_index.py</span></code> script, and the <a class="reference external" href="https://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html#">sphinx-autodoc</a> and <a class="reference external" href="https://www.sphinx-doc.org/en/master/usage/extensions/autosummary.html#">sphinx-autosummary</a> extensions.
+The script generates the <code class="docutils literal notranslate"><span class="pre">docs/source/api_index.rst</span></code> file containing the list of modules to be included in the <a class="reference internal" href="../api_index.html#target-api"><span class="std std-ref">API reference</span></a>.
+The plugins then generate the API reference pages for each module listed in <code class="docutils literal notranslate"><span class="pre">api_index.rst</span></code>, based on the docstrings in the source code.
+So make sure that all your public functions/classes/methods have valid docstrings following the <a class="reference external" href="https://numpydoc.readthedocs.io/en/latest/format.html">numpydoc</a> style.
+Our <code class="docutils literal notranslate"><span class="pre">pre-commit</span></code> hooks include some checks (<code class="docutils literal notranslate"><span class="pre">ruff</span></code> rules) that ensure the docstrings are formatted consistently.</p>
+<p>If your PR introduces new modules that should <em>not</em> be documented in the <a class="reference internal" href="../api_index.html#target-api"><span class="std std-ref">API reference</span></a>, or if there are changes to existing modules that necessitate their removal from the documentation, make sure to update the <code class="docutils literal notranslate"><span class="pre">exclude_modules</span></code> list within the <code class="docutils literal notranslate"><span class="pre">docs/make_api_index.py</span></code> script to reflect these exclusions.</p>
+</section>
+<section id="cross-referencing-python-objects">
+<h3>Cross-referencing Python objects<a class="headerlink" href="#cross-referencing-python-objects" title="Link to this heading">#</a></h3>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Docstrings in the <code class="docutils literal notranslate"><span class="pre">.py</span></code> files for the <a class="reference internal" href="../api_index.html#target-api"><span class="std std-ref">API reference</span></a>  are converted into <code class="docutils literal notranslate"><span class="pre">.rst</span></code> files, so these should use reStructuredText syntax.</p>
+</div>
+<section id="internal-references">
+<h4>Internal references<a class="headerlink" href="#internal-references" title="Link to this heading">#</a></h4>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-0" name="sd-tab-set-0" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-0">
+Markdown</label><div class="sd-tab-content docutils">
+<p>For referencing ethology objects in <code class="docutils literal notranslate"><span class="pre">.md</span></code> files, use the <code class="docutils literal notranslate"><span class="pre">{role}`target`</span></code> syntax with the appropriate <a class="reference external" href="https://www.sphinx-doc.org/en/master/usage/domains/python.html#cross-referencing-python-objects">Python object role</a>.</p>
+<p>For example, to reference the <a class="reference internal" href="../api/ethology.annotations.io.load_bboxes.html#module-ethology.annotations.io.load_bboxes" title="ethology.annotations.io.load_bboxes"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ethology.annotations.io.load_bboxes</span></code></a> module, use:</p>
+<div class="highlight-markdown notranslate"><div class="highlight"><pre><span></span>{mod}`ethology.annotations.io.load_bboxes`
+</pre></div>
+</div>
+</div>
+<input id="sd-tab-item-1" name="sd-tab-set-0" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-1">
+RestructuredText</label><div class="sd-tab-content docutils">
+<p>For referencing ethology objects in <code class="docutils literal notranslate"><span class="pre">.rst</span></code> files, use the <code class="docutils literal notranslate"><span class="pre">:role:`target`</span></code> syntax with the appropriate <a class="reference external" href="https://www.sphinx-doc.org/en/master/usage/domains/python.html#cross-referencing-python-objects">Python object role</a>.</p>
+<p>For example, to reference the <code class="xref py py-mod docutils literal notranslate"><span class="pre">ethology.io.load_bboxes</span></code> module, use:</p>
+<div class="highlight-rst notranslate"><div class="highlight"><pre><span></span><span class="na">:mod:</span><span class="nv">`ethology.io.load_bboxes`</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="external-references">
+<h4>External references<a class="headerlink" href="#external-references" title="Link to this heading">#</a></h4>
+<p>For referencing external Python objects using <a class="reference external" href="https://www.sphinx-doc.org/en/master/usage/extensions/intersphinx.html#">intersphinx</a>,
+ensure the mapping between module names and their documentation URLs is defined in <a class="reference external" href="https://www.sphinx-doc.org/en/master/usage/extensions/intersphinx.html#confval-intersphinx_mapping"><code class="docutils literal notranslate"><span class="pre">intersphinx_mapping</span></code></a> in <code class="docutils literal notranslate"><span class="pre">docs/source/conf.py</span></code>.
+Once the module is included in the mapping, use the same syntax as for <a class="reference internal" href="#internal-references">internal references</a>.</p>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-2" name="sd-tab-set-1" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-2">
+Markdown</label><div class="sd-tab-content docutils">
+<p>For example, to reference the <code class="xref py py-meth docutils literal notranslate"><span class="pre">xarray.Dataset.update()</span></code> method, use:</p>
+<div class="highlight-markdown notranslate"><div class="highlight"><pre><span></span>{meth}`xarray.Dataset.update`
+</pre></div>
+</div>
+</div>
+<input id="sd-tab-item-3" name="sd-tab-set-1" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-3">
+RestructuredText</label><div class="sd-tab-content docutils">
+<p>For example, to reference the <code class="xref py py-meth docutils literal notranslate"><span class="pre">xarray.Dataset.update()</span></code> method, use:</p>
+<div class="highlight-rst notranslate"><div class="highlight"><pre><span></span><span class="na">:meth:</span><span class="nv">`xarray.Dataset.update`</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="building-the-documentation-locally">
+<h3>Building the documentation locally<a class="headerlink" href="#building-the-documentation-locally" title="Link to this heading">#</a></h3>
+<p>We recommend that you build and view the documentation website locally, before you push your proposed changes.</p>
+<p>First, ensure your development environment with the required dependencies is active (see <a class="reference internal" href="#editing-the-documentation">Editing the documentation</a> for details on how to create it). Then, navigate to the <code class="docutils literal notranslate"><span class="pre">docs/</span></code> directory:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>docs
+</pre></div>
+</div>
+<p>All subsequent commands should be run from this directory.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Windows PowerShell users should prepend <code class="docutils literal notranslate"><span class="pre">make</span></code> commands with <code class="docutils literal notranslate"><span class="pre">.\</span></code> (e.g. <code class="docutils literal notranslate"><span class="pre">.\make</span> <span class="pre">html</span></code>).</p>
+</div>
+<p>To build the documentation, run:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>html
+</pre></div>
+</div>
+<p>The local build can be viewed by opening <code class="docutils literal notranslate"><span class="pre">docs/build/html/index.html</span></code> in a browser.</p>
+<p>To re-build the documentation after making changes,
+we recommend removing existing build files first.
+The following command will remove all generated files in <code class="docutils literal notranslate"><span class="pre">docs/</span></code>,
+including the auto-generated files <code class="docutils literal notranslate"><span class="pre">source/api_index.rst</span></code>, as well as all files in
+<code class="docutils literal notranslate"><span class="pre">build/</span></code>, <code class="docutils literal notranslate"><span class="pre">source/api/</span></code>.
+It will then re-build the documentation:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>clean<span class="w"> </span>html
+</pre></div>
+</div>
+<p>Or alternatively:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>clean<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>make<span class="w"> </span>html
+</pre></div>
+</div>
+<p>To check that external links are correctly resolved, run:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>linkcheck
+</pre></div>
+</div>
+<p>If the linkcheck step incorrectly marks links with valid anchors as broken, you can skip checking the anchors in specific links by adding the URLs to <code class="docutils literal notranslate"><span class="pre">linkcheck_anchors_ignore_for_url</span></code> in <code class="docutils literal notranslate"><span class="pre">docs/source/conf.py</span></code>, e.g.:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># The linkcheck builder will skip verifying that anchors exist when checking</span>
+<span class="c1"># these URLs</span>
+<span class="n">linkcheck_anchors_ignore_for_url</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">&quot;https://gin.g-node.org/G-Node/Info/wiki/&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;https://neuroinformatics.zulipchat.com/&quot;</span><span class="p">,</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">make</span></code> commands can be combined to run multiple tasks sequentially.
+For example, to re-build the documentation and check the links, run:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>make<span class="w"> </span>clean<span class="w"> </span>html<span class="w"> </span>linkcheck
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+<section id="test-data">
+<h2>Test data<a class="headerlink" href="#test-data" title="Link to this heading">#</a></h2>
+<p>We maintain some sample datasets to be used for testing on an
+<a class="reference external" href="https://gin.g-node.org/neuroinformatics/ethology-test-data">external data repository</a>.
+Our hosting platform of choice is called <a class="reference external" href="https://gin.g-node.org">GIN</a>.
+GIN has a GitHub-like interface and git-like <a class="reference external" href="https://gin.g-node.org/G-Node/Info/wiki/">CLI</a> functionalities.</p>
+<p>Please refer to the <a class="reference external" href="https://gin.g-node.org/neuroinformatics/ethology-test-data/src/master/README.md">README</a> in the data repository for more information on the datasets and how to access them.</p>
+<section id="fetching-data">
+<h3>Fetching data<a class="headerlink" href="#fetching-data" title="Link to this heading">#</a></h3>
+<p>To fetch the data from GIN, we use the <a class="reference external" href="https://www.fatiando.org/pooch/latest/index.html">pooch</a>
+Python package, which can download data from pre-specified URLs and store them
+locally for subsequent uses. It also provides some nice utilities,
+like verification of sha256 hashes and decompression of archives.</p>
+</section>
+<section id="adding-new-data">
+<h3>Adding new data<a class="headerlink" href="#adding-new-data" title="Link to this heading">#</a></h3>
+<p>Only core <code class="docutils literal notranslate"><span class="pre">ethology</span></code> developers may add new files to the external data repository.
+To add a new file, you will need to:</p>
+<ol class="arabic">
+<li><p>Create a <a class="reference external" href="https://gin.g-node.org/">GIN</a> account</p></li>
+<li><p>Ask to be added as a collaborator on the <a class="reference external" href="https://gin.g-node.org/neuroinformatics/ethology-test-data">ethology data repository</a> (if not already)</p></li>
+<li><p>Download the <a class="reference external" href="https://gin.g-node.org/G-Node/Info/wiki/GIN+CLI+Setup#quickstart">GIN CLI</a> and set it up with your GIN credentials, by running <code class="docutils literal notranslate"><span class="pre">gin</span> <span class="pre">login</span></code> in a terminal.</p></li>
+<li><p>Clone the <code class="docutils literal notranslate"><span class="pre">ethology</span></code> data repository to your local machine, by running <code class="docutils literal notranslate"><span class="pre">gin</span> <span class="pre">get</span> <span class="pre">neuroinformatics/ethology-test-data</span></code> in a terminal.</p></li>
+<li><p>Add your new files as appropriate. Please follow the instructions in the <a class="reference external" href="https://gin.g-node.org/neuroinformatics/ethology-test-data/src/master/README.md">README</a> and the existing file naming conventions as closely as possible.</p></li>
+<li><p>Determine the sha256 checksum hash of each new file. You can do this in a terminal by running:</p>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-4" name="sd-tab-set-2" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-4">
+Ubuntu</label><div class="sd-tab-content docutils">
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sha256sum<span class="w"> </span>&lt;filename&gt;
+</pre></div>
+</div>
+</div>
+<input id="sd-tab-item-5" name="sd-tab-set-2" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-5">
+MacOS</label><div class="sd-tab-content docutils">
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>shasum<span class="w"> </span>-a<span class="w"> </span><span class="m">256</span><span class="w"> </span>&lt;filename&gt;
+</pre></div>
+</div>
+</div>
+<input id="sd-tab-item-6" name="sd-tab-set-2" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-6">
+Windows</label><div class="sd-tab-content docutils">
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>certutil<span class="w"> </span>-hashfile<span class="w"> </span>&lt;filename&gt;<span class="w"> </span>SHA256
+</pre></div>
+</div>
+</div>
+</div>
+<p>For convenience, we’ve included a <code class="docutils literal notranslate"><span class="pre">get_sha256_hashes.py</span></code> script in the <a class="reference external" href="https://gin.g-node.org/neuroinformatics/ethology-test-data">ethology data repository</a>. If you run this from the root of the data repository, within a Python environment with <code class="docutils literal notranslate"><span class="pre">ethology</span></code> installed, it will calculate the sha256 hashes for all files in the <code class="docutils literal notranslate"><span class="pre">test_data</span></code> folder and write them to the file named <code class="docutils literal notranslate"><span class="pre">files-registry.txt</span></code>.</p>
+</li>
+<li><p>Commit a specific file with <code class="docutils literal notranslate"><span class="pre">gin</span> <span class="pre">commit</span> <span class="pre">-m</span> <span class="pre">&lt;message&gt;</span> <span class="pre">&lt;filename&gt;</span></code>, or <code class="docutils literal notranslate"><span class="pre">gin</span> <span class="pre">commit</span> <span class="pre">-m</span> <span class="pre">&lt;message&gt;</span> <span class="pre">.</span></code> to commit all changes.</p></li>
+<li><p>Upload the committed changes to the GIN repository by running <code class="docutils literal notranslate"><span class="pre">gin</span> <span class="pre">upload</span></code>. Latest changes to the repository can be pulled via <code class="docutils literal notranslate"><span class="pre">gin</span> <span class="pre">download</span></code>. <code class="docutils literal notranslate"><span class="pre">gin</span> <span class="pre">sync</span></code> will synchronise the latest changes bidirectionally.</p></li>
+</ol>
+</section>
+</section>
+<section id="versioning-and-releases">
+<h2>Versioning and releases<a class="headerlink" href="#versioning-and-releases" title="Link to this heading">#</a></h2>
+<p>We use <a class="reference external" href="https://semver.org/">semantic versioning</a>, which includes <code class="docutils literal notranslate"><span class="pre">MAJOR</span></code>.<code class="docutils literal notranslate"><span class="pre">MINOR</span></code>.<code class="docutils literal notranslate"><span class="pre">PATCH</span></code> version numbers:</p>
+<ul class="simple">
+<li><p>PATCH = small bugfix</p></li>
+<li><p>MINOR = new feature</p></li>
+<li><p>MAJOR = breaking change</p></li>
+</ul>
+<p>We use <a class="reference external" href="https://setuptools-scm.readthedocs.io/en/latest/">setuptools_scm</a> to automatically version <code class="docutils literal notranslate"><span class="pre">ethology</span></code>.
+It has been pre-configured in the <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code> file.
+<code class="docutils literal notranslate"><span class="pre">setuptools_scm</span></code> will automatically <a class="reference external" href="https://setuptools-scm.readthedocs.io/en/latest/usage#default-versioning-scheme">infer the version using git</a>.
+To manually set a new semantic version, create a tag and make sure the tag is pushed to GitHub.
+Make sure you commit any changes you wish to be included in this version. E.g. to bump the version to <code class="docutils literal notranslate"><span class="pre">1.0.0</span></code>:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>add<span class="w"> </span>.
+git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;Add new changes&quot;</span>
+git<span class="w"> </span>tag<span class="w"> </span>-a<span class="w"> </span>v1.0.0<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;Bump to version 1.0.0&quot;</span>
+git<span class="w"> </span>push<span class="w"> </span>--follow-tags
+</pre></div>
+</div>
+<p>Alternatively, you can also use the GitHub web interface to create a new release and tag.</p>
+<p>The addition of a GitHub tag triggers the package’s deployment to PyPI (see the <a class="reference internal" href="#continuous-integration">continuous integration</a> section).
+The version number is automatically determined from the latest tag on the <em>main</em> branch.</p>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="related-projects.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Related projects</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="license.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">License</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#preparing-to-contribute">Preparing to contribute</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#create-a-development-environment">Create a development environment</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pull-requests">Pull requests</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#contribution-workflow">Contribution workflow</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#contributing-code">Contributing code</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#formatting-and-pre-commit-hooks">Formatting and pre-commit hooks</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#testing">Testing</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#continuous-integration">Continuous integration</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#contributing-documentation">Contributing documentation</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#editing-the-documentation">Editing the documentation</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adding-new-pages">Adding new pages</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#linking-to-external-urls">Linking to external URLs</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#updating-the-api-reference">Updating the API reference</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cross-referencing-python-objects">Cross-referencing Python objects</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#internal-references">Internal references</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#external-references">External references</a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#building-the-documentation-locally">Building the documentation locally</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#test-data">Test data</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fetching-data">Fetching data</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adding-new-data">Adding new data</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#versioning-and-releases">Versioning and releases</a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/community/contributing.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item"><p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    <br/>
+    </p>
+    <p class="theme-version">
+    Built with the
+    <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a>
+    0.16.1.
+    </p></div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item"><div class="things-in-a-row">
+    <a href="https://neuroinformatics.dev/">
+        <img src="../_static/light-logo-niu.png" alt="Sponsors" class="only-light img-sponsor"/>
+        <img src="../_static/dark-logo-niu.png" alt="Sponsors" class="only-dark img-sponsor"/>
+    </a>
+    <a href="https://www.sainsburywellcome.org/web/">
+        <img src="../_static/light-logo-swc.png" alt="Sponsors" class="only-light img-sponsor"/>
+        <img src="../_static/dark-logo-swc.png" alt="Sponsors" class="only-dark img-sponsor"/>
+    </a>
+    <a href="https://www.ucl.ac.uk/gatsby/gatsby-computational-neuroscience-unit">
+        <img src="../_static/light-logo-gatsby.png" alt="Sponsors" class="only-light img-sponsor"/>
+        <img src="../_static/dark-logo-gatsby.png" alt="Sponsors" class="only-dark img-sponsor"/>
+    </a>
+    <a href="https://www.ucl.ac.uk/">
+        <img src="../_static/light-logo-ucl.png" alt="Sponsors" class="only-light img-sponsor"/>
+        <img src="../_static/dark-logo-ucl.png" alt="Sponsors" class="only-dark img-sponsor"/>
+    </a>
+</div></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

@@ -1,0 +1,6 @@
+to\_COCO\_file
+==============
+
+.. currentmodule:: ethology.annotations.io.save_bboxes
+
+.. autofunction:: to_COCO_file
