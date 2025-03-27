@@ -1,6 +1,8 @@
-# Preparing to contribute
+# How to Contribute
 
-## Create a development environment
+## Preparing to contribute
+
+### Create a development environment
 
 We recommended using [conda](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html) to create a
 development environment. In the following, we assume you have
@@ -34,7 +36,7 @@ pre-commit install
 
 Pre-commit hooks are a set of tools that run automatically before each commit and help maintain a consistent formatting style in the code (see the section [pre-commit hooks](#formatting-and-pre-commit-hooks) below for more details).
 
-## Pull requests
+### Pull requests
 
 Please submit code to the main repository with a pull request (PR).
 We follow our sister project [movement](https://github.com/neuroinformatics-unit/movement/blob/main/CONTRIBUTING.md) and adhere to the same conventions:
@@ -47,7 +49,7 @@ We follow our sister project [movement](https://github.com/neuroinformatics-unit
 - Ask for a review from someone specific if you think they would be a particularly suited reviewer.
 - PRs are preferably merged via the ["squash and merge"](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/incorporating-changes-from-a-pull-request/about-pull-request-merges#squash-and-merge-your-commits) option, to keep a clean commit history on the _main_ branch.
 
-## Contribution workflow
+### Contribution workflow
 A typical contribution workflow would be as follows:
 * Locally, check out a new branch, make your changes, and stage them.
 * When you try to commit, the [pre-commit hooks](#formatting-and-pre-commit-hooks) will be triggered.
@@ -61,8 +63,8 @@ A typical contribution workflow would be as follows:
 * After the review feedback has been addressed, one of the repository maintainers will approve the PR and add it to the [merge queue](https://github.blog/changelog/2023-02-08-pull-request-merge-queue-public-beta/).
 * Success 🎉 !! Your PR will be (squash-)merged into the _main_ branch.
 
-# Contributing code
-## Formatting and pre-commit hooks
+## Contributing code
+### Formatting and pre-commit hooks
 
 Running `pre-commit install` will set up our [pre-commit hooks](https://pre-commit.com/) - these are useful to ensure a consistent formatting style. Currently, our hooks run:
 * [ruff](https://github.com/astral-sh/ruff), which does a number of jobs, including code linting and auto-formatting.
@@ -97,7 +99,7 @@ For docstrings, we adhere to the [numpydoc](https://numpydoc.readthedocs.io/en/l
 Make sure to provide docstrings for all public functions, classes, and methods.
 This is important as it allows for automatic generation of the API reference.
 
-## Testing
+### Testing
 
 We use [pytest](https://docs.pytest.org/en/latest/) for testing and aim for
 ~100% test coverage (as far as is reasonable).
@@ -108,13 +110,13 @@ For some tests, you will need to use real data.
 Please do not add sample data to the code repository, especially if they are large - we use an external data repository instead.
 See the [sample data](#test-data) section for more information.
 
-## Continuous integration
+### Continuous integration
 All pushes and pull requests trigger a [GitHub actions](https://docs.github.com/en/actions) workflow. This is defined in the file at `.github/workflows/test_and_deploy.yml` and runs:
 * Linting checks (pre-commit).
 * Testing in different operating systems and Python versions (only if linting checks pass)
 * A release to PyPI (only if a git tag is present and if tests pass).
 
-# Contributing documentation
+## Contributing documentation
 
 The documentation is hosted via [GitHub pages](https://pages.github.com/) at
 [ethology.neuroinformatics.dev](target-ethology).
@@ -131,7 +133,7 @@ The build job is triggered on each PR, ensuring that the documentation build is 
 The deployment job is only triggered whenever a tag is pushed to the _main_ branch,
 ensuring that the documentation is published in sync with each PyPI release.
 
-## Editing the documentation
+### Editing the documentation
 
 To edit the documentation, first clone the repository, and install `ethology` in a
 [development environment](#create-a-development-environment).
@@ -147,7 +149,7 @@ following the [same guidelines as for code changes](#pull-requests).
 Make sure that the header levels in your `.md` or `.rst` files are incremented
 consistently (H1 > H2 > H3, etc.) without skipping any levels.
 
-## Adding new pages
+### Adding new pages
 If you create a new documentation source file (e.g. `my_new_file.md` or `my_new_file.rst`),
 you will need to add it to the `toctree` directive in `index.md`
 for it to be included in the documentation website:
@@ -160,7 +162,7 @@ existing_file
 my_new_file
 ```
 
-## Linking to external URLs
+### Linking to external URLs
 If you are adding references to an external URL (e.g. `https://github.com/neuroinformatics-unit/ethology/issues/1`) in a `.md` file, you will need to check if a matching URL scheme (e.g. `https://github.com/neuroinformatics-unit/ethology/`) is defined in `myst_url_schemes` in `docs/source/conf.py`. If it is, the following `[](scheme:loc)` syntax will be converted to the [full URL](ethology-github:issues/1) during the build process:
 ```markdown
 [link text](ethology-github:issues/1)
@@ -168,7 +170,7 @@ If you are adding references to an external URL (e.g. `https://github.com/neuroi
 
 If it is not yet defined and you have multiple external URLs pointing to the same base URL, you will need to [add the URL scheme](myst-parser:syntax/cross-referencing.html#customising-external-url-resolution) to `myst_url_schemes` in `docs/source/conf.py`.
 
-## Updating the API reference
+### Updating the API reference
 The [API reference](target-api) is auto-generated by the `docs/make_api_index.py` script, and the [sphinx-autodoc](sphinx-doc:extensions/autodoc.html) and [sphinx-autosummary](sphinx-doc:extensions/autosummary.html) extensions.
 The script generates the `docs/source/api_index.rst` file containing the list of modules to be included in the [API reference](target-api).
 The plugins then generate the API reference pages for each module listed in `api_index.rst`, based on the docstrings in the source code.
@@ -177,12 +179,12 @@ Our `pre-commit` hooks include some checks (`ruff` rules) that ensure the docstr
 
 If your PR introduces new modules that should *not* be documented in the [API reference](target-api), or if there are changes to existing modules that necessitate their removal from the documentation, make sure to update the `exclude_modules` list within the `docs/make_api_index.py` script to reflect these exclusions.
 
-## Cross-referencing Python objects
+### Cross-referencing Python objects
 :::{note}
 Docstrings in the `.py` files for the [API reference](target-api)  are converted into `.rst` files, so these should use reStructuredText syntax.
 :::
 
-## Internal references
+#### Internal references
 ::::{tab-set}
 :::{tab-item} Markdown
 For referencing ethology objects in `.md` files, use the `` {role}`target` `` syntax with the appropriate [Python object role](sphinx-doc:domains/python.html#cross-referencing-python-objects).
@@ -202,7 +204,7 @@ For example, to reference the {mod}`ethology.io.load_bboxes` module, use:
 :::
 ::::
 
-## External references
+#### External references
 For referencing external Python objects using [intersphinx](sphinx-doc:extensions/intersphinx.html),
 ensure the mapping between module names and their documentation URLs is defined in [`intersphinx_mapping`](sphinx-doc:extensions/intersphinx.html#confval-intersphinx_mapping) in `docs/source/conf.py`.
 Once the module is included in the mapping, use the same syntax as for [internal references](#internal-references).
@@ -223,7 +225,7 @@ For example, to reference the {meth}`xarray.Dataset.update` method, use:
 :::
 ::::
 
-## Building the documentation locally
+### Building the documentation locally
 We recommend that you build and view the documentation website locally, before you push your proposed changes.
 
 First, ensure your development environment with the required dependencies is active (see [Editing the documentation](#editing-the-documentation) for details on how to create it). Then, navigate to the `docs/` directory:
@@ -291,13 +293,13 @@ GIN has a GitHub-like interface and git-like [CLI](https://gin.g-node.org/G-Node
 
 Please refer to the [README](https://gin.g-node.org/neuroinformatics/ethology-test-data/src/master/README.md) in the data repository for more information on the datasets and how to access them.
 
-## Fetching data
+### Fetching data
 To fetch the data from GIN, we use the [pooch](https://www.fatiando.org/pooch/latest/index.html)
 Python package, which can download data from pre-specified URLs and store them
 locally for subsequent uses. It also provides some nice utilities,
 like verification of sha256 hashes and decompression of archives.
 
-## Adding new data
+### Adding new data
 Only core `ethology` developers may add new files to the external data repository.
 To add a new file, you will need to:
 
@@ -334,7 +336,7 @@ To add a new file, you will need to:
 
 9. Upload the committed changes to the GIN repository by running `gin upload`. Latest changes to the repository can be pulled via `gin download`. `gin sync` will synchronise the latest changes bidirectionally.
 
-# Versioning and releases
+## Versioning and releases
 
 We use [semantic versioning](https://semver.org/), which includes `MAJOR`.`MINOR`.`PATCH` version numbers:
 
