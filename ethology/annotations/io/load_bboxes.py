@@ -94,7 +94,7 @@ def from_files(
 
 def _from_multiple_files(
     list_filepaths: list[Path | str], format: Literal["VIA", "COCO"]
-):
+) -> pd.DataFrame:
     """Read bounding boxes annotations from multiple files.
 
     Parameters
@@ -114,11 +114,17 @@ def _from_multiple_files(
         "width", "height", "supercategory", "category", "category_id".
 
     """
-    # Get list of dataframes
-    df_list = [
-        _from_single_file(file_path=file, format=format)
-        for file in list_filepaths
-    ]
+    # Get list of dataframes and collect image dimensions
+    df_list = []
+    image_widths = set()
+    image_heights = set()
+
+    for file in list_filepaths:
+        df = _from_single_file(file_path=file, format=format)
+        df_list.append(df)
+
+        image_widths.add(df.attrs.get("image_width", "unknown"))
+        image_heights.add(df.attrs.get("image_height", "unknown"))
 
     # Concatenate and reindex
     # the resulting axis is labeled 0,1,…,n - 1.
@@ -140,6 +146,15 @@ def _from_multiple_files(
 
     # Set the index name back to "annotation_id"
     df_all.index.name = STANDARD_BBOXES_DF_INDEX
+
+    # Save image dimension metadata
+    df_all.attrs["annotation_format"] = format
+    df_all.attrs["image_width"] = (
+        str(image_widths.pop()) if len(image_widths) == 1 else "variable"
+    )
+    df_all.attrs["image_height"] = (
+        str(image_heights.pop()) if len(image_heights) == 1 else "variable"
+    )
 
     return df_all
 
@@ -206,6 +221,33 @@ def _from_single_file(
     # Reorder columns to match standard columns
     # If columns dont exist they are filled with nan / na values
     df = df.reindex(columns=STANDARD_BBOXES_DF_COLUMNS + ["annotation_id"])
+
+    # Infer and attach image dimension metadata
+    image_width: int | str = "unknown"
+    image_height: int | str = "unknown"
+
+    if format == "COCO":
+        if "image_width" in df.columns and "image_height" in df.columns:
+            unique_widths = df["image_width"].dropna().unique()
+            unique_heights = df["image_height"].dropna().unique()
+            if len(unique_widths) == 1 and len(unique_heights) == 1:
+                image_width = int(unique_widths[0])
+                image_height = int(unique_heights[0])
+                df = df.drop(columns=["image_width", "image_height"])
+            else:
+                image_width = "variable"
+                image_height = "variable"
+        else:
+            image_width = "variable"
+            image_height = "variable"
+    elif format == "VIA":
+        # VIA doesn't guarantee dimensions, but keep columns if they exist
+        image_width = "unknown"
+        image_height = "unknown"
+
+    # Attach to attrs
+    df.attrs["image_width"] = image_width
+    df.attrs["image_height"] = image_height
 
     # Set the index name to "annotation_id"
     df = df.set_index(STANDARD_BBOXES_DF_INDEX)
