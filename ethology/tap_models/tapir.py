@@ -7,21 +7,22 @@ interface for the TAPIR model.
 import mediapy as media
 import numpy as np
 import torch
+import torch.nn.functional as F
 from track_any_point import TapModel
 
 from tapnet.tapnet.torch import tapir_model
 from tapnet.tapnet.utils import transforms, viz_utils
-import torch.nn.functional as F
+
 
 class TAPIRModel(TapModel):
     """TAPIRModel provides the TAPIR-specific tracking implementation."""
-
 
     def __init__(self, weight_file: str | None = None):
         """Initialize TAPIRModel with an optional weight file.
 
         Args:
             weight_file (str or None): Optional path to the model weights.
+
         """
         # Initialize TAPIR-specific settings
         pass
@@ -53,6 +54,7 @@ class TAPIRModel(TapModel):
 
         Returns:
             torch.Tensor: Tensor containing tracked points.
+
         """
         # TAPIR-specific tracking logic.
         # @title Predict Sparse Point Tracks {form-width: "25%"}
@@ -86,6 +88,7 @@ class TAPIRModel(TapModel):
 
         Returns:
             str: The model name, "tapir".
+
         """
         return "tapir"
 
@@ -94,6 +97,7 @@ class TAPIRModel(TapModel):
 
         Returns:
             torch.device: 'cuda' if available, else 'cpu'.
+
         """
         if torch.cuda.is_available():
             self.device = torch.device("cuda")
@@ -136,6 +140,7 @@ def postprocess_occlusions(occlusions, expected_dist):
 
     Returns:
         Tensor: Boolean tensor indicating visible points.
+
     """
     visibles = (1 - F.sigmoid(occlusions)) * (
         1 - F.sigmoid(expected_dist)
@@ -155,6 +160,7 @@ def inference(frames, query_points, model):
 
     Returns:
         The inference result from the model.
+
     """
     # Preprocess video to match model inputs format
     frames = preprocess_frames(frames)

@@ -3,6 +3,7 @@
 This module defines the abstract base class and the concrete
 implementation for the CoTracker model.
 """
+
 import os
 from abc import ABC, abstractmethod
 
