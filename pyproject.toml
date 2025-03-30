@@ -48,6 +48,7 @@ dev = [
   "check-manifest",
   "types-PyYAML",
   "types-requests",
+  "loguru",
   "cotracker @ git+https://github.com/facebookresearch/co-tracker.git"
 ]
 

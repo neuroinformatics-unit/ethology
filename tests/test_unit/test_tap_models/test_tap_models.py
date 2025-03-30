@@ -66,9 +66,9 @@ def test_track_with_valid_parameters():
         ds = tracker.track(
             video_path="fake_video_path.mp4", query_points=query_points
         )
-        assert ds.position.shape == (50, 2, 1, 4)
+        assert ds.position.shape == (n_frames, 2, n_keypoints, n_individuals)
         assert ds.source_software == "cotracker"
         assert len(ds.individuals) == n_individuals
         assert len(ds.keypoints) == n_keypoints
-        assert len(ds.time) == 50
+        assert len(ds.time) == n_frames
         assert len(ds.space) == 2

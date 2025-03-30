@@ -9,7 +9,9 @@ from cotracker.utils.visualizer import (
     Visualizer,
     read_video_from_path,
 )
+from loguru import logger
 from movement.io.load_poses import from_numpy
+from movement.validators.datasets import ValidPosesDataset
 
 LIST_OF_SUPPORTED_TAP_MODELS = ["cotracker"]
 
@@ -27,6 +29,29 @@ def get_device():
     else:
         device = torch.device("cpu")
     return device
+
+
+def load_video(video_path):
+    """Load the video from the given path.
+
+    Parameters
+    ----------
+    video_path: str
+        Path to the video file.
+
+    Returns
+    -------
+    torch.Tensor
+        Tensor containing the video frames of shape
+        (Batch, Frames, Channels, Height, Width).
+
+    """
+    video = read_video_from_path(video_path)
+
+    # (Frames, Height, Width, Channels) ->
+    # (Batch, Frames, Channels, Height, Width)
+    video = torch.from_numpy(video).permute(0, 3, 1, 2)[None].float()
+    return video
 
 
 class BaseTrackAnyPoint:
@@ -66,7 +91,7 @@ class BaseTrackAnyPoint:
                     "facebookresearch/co-tracker", "cotracker3_offline"
                 )
 
-    def convert_to_movement_dataset(self, pred_tracks):
+    def convert_to_movement_dataset(self, pred_tracks) -> ValidPosesDataset:
         """Convert the predicted tracks to movement dataset.
 
         Parameters
@@ -78,7 +103,7 @@ class BaseTrackAnyPoint:
 
         Returns
         -------
-        momentum.ValidPosesDataset
+        movement.ValidPosesDataset
             Dataset containing the predicted tracks.
 
         """
@@ -102,7 +127,8 @@ class BaseTrackAnyPoint:
         video: torch.Tensor
             Tensor containing video frames.
         video_path: str
-            Path to the input video file.
+            Path to the input video file to extract
+            name from.
         save_dir: str
             Directory path to save the processed video.
         pred_tracks: torch.Tensor
@@ -136,9 +162,8 @@ class BaseTrackAnyPoint:
         self,
         video_path: str,
         query_points: list[list],
-        save_dir: str = "processed_videos",
-        save_results: bool = False,
-    ) -> torch.Tensor:
+        save_dir: str | None = None,
+    ) -> ValidPosesDataset:
         """Track the query points in the video source.
 
         Parameters
@@ -150,18 +175,14 @@ class BaseTrackAnyPoint:
             number of query points and each Q containing
             Frame-Number to start tracking from, X, Y
         save_dir: str
-            Directory path to save the processed video
-        save_results: bool
-            Flag to save the results as a video file
+            If given, will save the processed video
+            in the given directory.
 
         Returns
         -------
-        torch.Tensor
-            Tensor containing tracks of each query
-            point across the frames of size
-            [batch, frame, query_points, X, Y].
-            Example: 50 frames video with 4 query_points
-            will give a tensor of shape [1, 50, 4, 2]
+        movement.validators.datasets.ValidPosesDataset
+            Dataset containing the predicted tracks. Current implementation
+            supports 1 keypoint per individual.
 
         """
         # check if video source file exists in path
@@ -171,30 +192,45 @@ class BaseTrackAnyPoint:
             )
 
         # load video
-        video = read_video_from_path(video_path)
-
-        # (Frames, Height, Width, Channels) ->
-        # (Batch, Frames, Channels, Height, Width)
-        video = torch.from_numpy(video).permute(0, 3, 1, 2)[None].float()
+        video_data = load_video(video_path)
 
         # List to tensor
         query_tensor = torch.tensor(query_points, dtype=torch.float32)
 
         # set device
         device = get_device()
+        logger.info(f"Running inference on {device}...")
 
         self.model = self.model.to(device)
-        video = video.to(device)
+        video_data = video_data.to(device)
         query_tensor = query_tensor.to(device)
 
+        # Run tap model
+        logger.info(f"Starting Tracking Any Point using {self.tracker}...")
         pred_tracks, pred_visibility = self.model(
-            video, queries=query_tensor[None]
+            video_data, queries=query_tensor[None]
         )
+        logger.info("tracking complete")
 
-        if save_results:
+        if save_dir:
             self.save_video(
-                video, video_path, save_dir, pred_tracks, pred_visibility
+                video_data, video_path, save_dir, pred_tracks, pred_visibility
             )
+            logger.success("Video saved successfully!")
 
         ds = self.convert_to_movement_dataset(pred_tracks)
+        logger.success("Tracking Any Point completed successfully!")
+
         return ds
+
+
+if __name__ == "__main__":
+    obj = BaseTrackAnyPoint(model="cotracker")
+    query_points = [[0, 400, 350], [0, 600, 500], [0, 750, 600], [0, 900, 200]]
+
+    rt = obj.track(
+        "/home/parikshit/Desktop/curr_work/extra_files/apple.mp4",
+        query_points,
+        save_dir="/home/parikshit/Desktop/curr_work/extra_files/",
+    )
+    print(rt)
