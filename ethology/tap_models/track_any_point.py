@@ -222,15 +222,3 @@ class BaseTrackAnyPoint:
         logger.success("Tracking Any Point completed successfully!")
 
         return ds
-
-
-if __name__ == "__main__":
-    obj = BaseTrackAnyPoint(model="cotracker")
-    query_points = [[0, 400, 350], [0, 600, 500], [0, 750, 600], [0, 900, 200]]
-
-    rt = obj.track(
-        "/home/parikshit/Desktop/curr_work/extra_files/apple.mp4",
-        query_points,
-        save_dir="/home/parikshit/Desktop/curr_work/extra_files/",
-    )
-    print(rt)
