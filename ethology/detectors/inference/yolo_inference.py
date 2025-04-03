@@ -3,10 +3,23 @@ from ultralytics import YOLO
 
 
 class YOLODetector:
+    """YOLOv8 detector for running inference on videos."""
+
     def __init__(self, model_path):
+        """Initialize YOLO model from weights."""
         self.model = YOLO(model_path)
 
     def run(self, video_path, visualize=False):
+        """Run detection on a video.
+
+        Args:
+            video_path (str): Path to input video.
+            visualize (bool): Whether to show detections with OpenCV.
+
+        Returns:
+            list: List of detection dictionaries.
+
+        """
         cap = cv2.VideoCapture(video_path)
         detections = []
 
@@ -19,7 +32,7 @@ class YOLODetector:
             results = self.model.predict(frame, verbose=False)[0]
 
             for det in results.boxes:
-                bbox = det.xyxy[0].tolist()  # [x1, y1, x2, y2]
+                bbox = det.xyxy[0].tolist()
                 conf = float(det.conf[0])
                 cls_id = int(det.cls[0])
                 class_name = self.model.names[cls_id]
@@ -56,4 +69,5 @@ class YOLODetector:
         cap.release()
         if visualize:
             cv2.destroyAllWindows()
+
         return detections

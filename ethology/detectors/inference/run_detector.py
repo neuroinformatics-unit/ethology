@@ -1,3 +1,5 @@
+"""Run object detector on video and output JSON detections."""
+
 import argparse
 import json
 import sys
@@ -6,6 +8,7 @@ from detectors.inference.yolo_inference import YOLODetector
 
 
 def parse_args():
+    """Parse command-line arguments."""
     parser = argparse.ArgumentParser(
         description="Run object detector on video and output JSON detections."
     )
@@ -40,6 +43,7 @@ def parse_args():
 
 
 def main():
+    """Run detection and save results to JSON."""
     args = parse_args()
 
     try:
