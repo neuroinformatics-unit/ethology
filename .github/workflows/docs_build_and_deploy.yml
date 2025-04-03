@@ -30,6 +30,12 @@ jobs:
     name: Build Sphinx Docs
     runs-on: ubuntu-latest
     steps:
+      # Fetch all tags
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+      # Using custom action after fetching tags
       - uses: neuroinformatics-unit/actions/build_sphinx_docs@main
         with:
           python-version: 3.12
