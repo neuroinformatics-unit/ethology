@@ -1,5 +1,6 @@
-from ultralytics import YOLO
 import cv2
+from ultralytics import YOLO
+
 
 class YOLODetector:
     def __init__(self, model_path):
@@ -23,22 +24,31 @@ class YOLODetector:
                 cls_id = int(det.cls[0])
                 class_name = self.model.names[cls_id]
 
-                detections.append({
-                    "frame": frame_id,
-                    "bbox": bbox,
-                    "confidence": conf,
-                    "class_id": cls_id,
-                    "class_name": class_name,
-                })
+                detections.append(
+                    {
+                        "frame": frame_id,
+                        "bbox": bbox,
+                        "confidence": conf,
+                        "class_id": cls_id,
+                        "class_name": class_name,
+                    }
+                )
                 if visualize:
                     x1, y1, x2, y2 = map(int, bbox)
                     cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
                     label = f"{class_name} {conf:.2f}"
-                    cv2.putText(frame, label, (x1, y1 - 10),
-                                cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+                    cv2.putText(
+                        frame,
+                        label,
+                        (x1, y1 - 10),
+                        cv2.FONT_HERSHEY_SIMPLEX,
+                        0.5,
+                        (0, 255, 0),
+                        2,
+                    )
             if visualize:
                 cv2.imshow("Detections", frame)
-                if cv2.waitKey(1) & 0xFF == ord('q'):
+                if cv2.waitKey(1) & 0xFF == ord("q"):
                     break
 
             frame_id += 1
