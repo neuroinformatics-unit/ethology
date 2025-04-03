@@ -30,16 +30,43 @@ jobs:
     name: Build Sphinx Docs
     runs-on: ubuntu-latest
     steps:
-      # Fetch all tags
+      # Full checkout with tags and history
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
           fetch-tags: true
-      # Using custom action after fetching tags
-      - uses: neuroinformatics-unit/actions/build_sphinx_docs@main
+
+      # Verify tags are available (debugging step)
+      - name: List Git tags
+        run: git tag --list
+
+      # Set up Python environment
+      - uses: actions/setup-python@v5
         with:
           python-version: 3.12
-          use-make: true
+
+      # Install documentation dependencies
+      - name: Install requirements
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r docs/requirements.txt
+
+      # Verify installed version (debugging step)
+      - name: Check ethology version
+        run: pip list | grep ethology
+
+      # Build documentation
+      - name: Build docs
+        run: |
+          cd docs
+          make clean
+          make html
+
+      # Upload build artifacts
+      - uses: actions/upload-artifact@v3
+        with:
+          name: sphinx-docs
+          path: docs/_build/html/
 
   deploy_sphinx_docs:
     name: Deploy Sphinx Docs
