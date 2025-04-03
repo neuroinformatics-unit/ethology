@@ -885,3 +885,21 @@ def test_from_files_empty_list_input():
     with pytest.raises(ValueError) as excinfo:
         from_files([])
     assert "Input 'file_paths' list cannot be empty" in str(excinfo.value)
+
+
+def test_from_files_invalid_filepaths_type():
+    """Test from_files raises TypeError for invalid file_paths type."""
+    with pytest.raises(TypeError) as excinfo:
+        # Pass an integer or other unsupported type
+        from_files(file_paths=123)  # type: ignore
+    assert "Unsupported type for 'file_paths'" in str(excinfo.value)
+
+
+def test_from_files_invalid_format_string(unknown_format_json_file: Path):
+    """Test `from_files` raises error for invalid explicit format string."""
+    valid_file = unknown_format_json_file
+    with pytest.raises(ValueError) as excinfo:
+        from_files(valid_file, format="invalid_format_string")  # type: ignore
+    assert "Invalid format specified: 'invalid_format_string'" in str(
+        excinfo.value
+    )
