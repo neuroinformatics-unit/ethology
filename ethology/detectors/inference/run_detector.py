@@ -4,7 +4,7 @@ import argparse
 import json
 import sys
 
-from detectors.inference.yolo_inference import YOLODetector
+from ethology.detectors.inference.yolo_inference import YOLODetector
 
 
 def parse_args():
