@@ -1,0 +1,65 @@
+import subprocess
+import numpy as np
+import os
+
+FFPROBE_PATH = r"C:\ffmpeg\bin\ffprobe.exe"
+FFMPEG_PATH = r"C:\ffmpeg\bin\ffmpeg.exe"
+
+def extract_frames_over_interval(video_path, num_frames, output_folder, start_time, end_time):
+    try:
+        if not os.path.exists(video_path):
+            raise FileNotFoundError(f"Video file not found: {video_path}")
+
+        os.makedirs(output_folder, exist_ok=True)
+
+        # Get video duration using FFprobe
+        result = subprocess.run(
+            [FFPROBE_PATH, "-v", "error", "-show_entries", "format=duration",
+             "-of", "default=noprint_wrappers=1:nokey=1", video_path],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            check=True,
+        )
+        video_duration = float(result.stdout.strip())
+
+        # Validate the interval
+        if start_time < 0 or end_time > video_duration:
+            raise ValueError(f"Invalid interval: start_time={start_time}, end_time={end_time}, video_duration={video_duration}")
+        if start_time >= end_time:
+            raise ValueError("Start time must be less than end time.")
+
+        # Calculate timestamps for evenly spaced frames within the interval
+        timestamps = np.linspace(start_time, end_time, num=num_frames)
+
+        # Extract frames using FFmpeg
+        for i, timestamp in enumerate(timestamps):
+            output_file = os.path.join(output_folder, f"frame_{i:04d}.jpg")
+            subprocess.run(
+                [
+                    FFMPEG_PATH,
+                    "-ss", str(timestamp),  # Seek to the specific timestamp
+                    "-i", video_path,       # Input video file
+                    "-vf", "format=yuvj420p",  # Force full-range YUV for MJPEG
+                    "-frames:v", "1",       # Extract one frame
+                    "-y",                   # Overwrite output files without prompting
+                    output_file             # Output file path
+                ],
+                check=True,
+                stderr=subprocess.PIPE,
+            )
+            print(f"Saved frame {i+1}/{num_frames} at {timestamp:.2f}s to {output_file}")
+
+    except subprocess.CalledProcessError as e:
+        print(f"FFmpeg error: {e.stderr}")
+    except Exception as e:
+        print(f"Error: {str(e)}")
+
+# Example usage: Extract 10 frames between 5 seconds and 10 seconds of the video
+extract_frames_over_interval(
+    "baboon.mp4",
+    10,
+    "extracted_frames",
+    5,  # Start time in seconds
+    10    # End time in seconds
+)
