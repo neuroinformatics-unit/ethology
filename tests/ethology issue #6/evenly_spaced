@@ -9,9 +9,9 @@ def extract_frames_over_interval(video_path, num_frames, output_folder, start_ti
     try:
         if not os.path.exists(video_path):
             raise FileNotFoundError(f"Video file not found: {video_path}")
-        
+
         os.makedirs(output_folder, exist_ok=True)
-        
+
         # Get video duration using FFprobe
         result = subprocess.run(
             [FFPROBE_PATH, "-v", "error", "-show_entries", "format=duration",
@@ -22,16 +22,16 @@ def extract_frames_over_interval(video_path, num_frames, output_folder, start_ti
             check=True,
         )
         video_duration = float(result.stdout.strip())
-        
+
         # Validate the interval
         if start_time < 0 or end_time > video_duration:
             raise ValueError(f"Invalid interval: start_time={start_time}, end_time={end_time}, video_duration={video_duration}")
         if start_time >= end_time:
             raise ValueError("Start time must be less than end time.")
-        
+
         # Calculate timestamps for evenly spaced frames within the interval
         timestamps = np.linspace(start_time, end_time, num=num_frames)
-        
+
         # Extract frames using FFmpeg
         for i, timestamp in enumerate(timestamps):
             output_file = os.path.join(output_folder, f"frame_{i:04d}.jpg")
@@ -49,7 +49,7 @@ def extract_frames_over_interval(video_path, num_frames, output_folder, start_ti
                 stderr=subprocess.PIPE,
             )
             print(f"Saved frame {i+1}/{num_frames} at {timestamp:.2f}s to {output_file}")
-            
+
     except subprocess.CalledProcessError as e:
         print(f"FFmpeg error: {e.stderr}")
     except Exception as e:
