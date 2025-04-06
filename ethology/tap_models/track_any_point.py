@@ -206,9 +206,22 @@ class BaseTrackAnyPoint:
         device = get_device()
         logger.info(f"Running inference on {device}...")
 
-        self.model = self.model.to(device)
-        video_data = video_data.to(device)
-        query_tensor = query_tensor.to(device)
+        # handle out of memory errors
+        try:
+            self.model = self.model.to(device)
+            video_data = video_data.to(device)
+            query_tensor = query_tensor.to(device)
+        except RuntimeError as e:
+            if "out of memory" in str(e):
+                logger.error("Out of memory error.")
+                logger.debug("Switching to CPU...")
+                torch.cuda.empty_cache()
+
+                self.model = self.model.to("cpu")
+                video_data = video_data.to("cpu")
+                query_tensor = query_tensor.to("cpu")
+            else:
+                raise e
 
         # Run tap model
         logger.info(f"Starting Tracking Any Point using {self.tracker}...")
