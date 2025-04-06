@@ -1,10 +1,15 @@
+import os
 from unittest.mock import patch
 
 import numpy as np
 import pytest
 import torch
 
-from ethology.tap_models import LIST_OF_SUPPORTED_TAP_MODELS, BaseTrackAnyPoint
+from ethology.tap_models import (
+    LIST_OF_SUPPORTED_TAP_MODELS,
+    BaseTrackAnyPoint,
+    load_video,
+)
 
 
 @pytest.mark.parametrize(
@@ -47,7 +52,6 @@ def test_convert_to_movement_dataset():
     n_individuals = 4
 
     pred_tracks = torch.randint(0, 500, (1, n_frames, n_individuals, 2))
-    # pred_visibility = torch.randint(0, 2, (1, 50, 4, 2), dtype=torch.bool)
 
     tracker = BaseTrackAnyPoint(model="cotracker")
     ds = tracker.convert_to_movement_dataset(pred_tracks)
@@ -68,6 +72,43 @@ def test_convert_to_movement_dataset():
         # comparing individual elements
         assert x_coords == pred_tracks[0, :, ind, 0].tolist()
         assert y_coords == pred_tracks[0, :, ind, 1].tolist()
+
+
+@pytest.mark.parametrize(
+    "n_frames, n_individuals, video_shape, tap_model",
+    [
+        (50, 4, (3, 224, 224), "cotracker"),
+    ],
+)
+def test_save_video(n_frames, n_individuals, video_shape, tap_model, tmpdir):
+    tracker = BaseTrackAnyPoint(model=tap_model)
+    video = torch.rand(
+        (1, n_frames, *video_shape)
+    )  # Mock video tensor shape: Batch, Frames, Channels, Height, Width
+
+    video_path = "fake_video_path.mp4"
+
+    pred_tracks = torch.randint(
+        0, video_shape[1], (1, n_frames, n_individuals, 2)
+    )
+    # Mock predicted tracks tensor shape:
+    # (batch, frames, individuals, 2D points)
+
+    pred_visibility = torch.randint(
+        0, 2, (1, n_frames, n_individuals), dtype=torch.bool
+    )  # Mock predicted visibility tensor shape: (batch, frames, individuals)
+
+    tracker.save_video(video, video_path, tmpdir, pred_tracks, pred_visibility)
+
+    loaded_video = load_video(
+        os.path.join(tmpdir, f"{tap_model}_{video_path}")
+    )
+    # Patch: for some reason, the video while saving it should be saved
+    # with 3 less frames according to
+    # https://github.com/facebookresearch/co-tracker/blob/main/cotracker/utils/visualizer.py#L156
+    # however, while loading the video, it is loaded with 6 more frames,
+    # probably something in imageio
+    assert loaded_video.shape == (1, n_frames + 6, *video_shape)
 
 
 def test_track_with_valid_parameters():

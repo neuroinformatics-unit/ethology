@@ -118,7 +118,12 @@ class BaseTrackAnyPoint:
         return ds
 
     def save_video(
-        self, video, video_path, save_dir, pred_tracks, pred_visibility
+        self,
+        video: torch.Tensor,
+        video_path: str,
+        save_dir: str,
+        pred_tracks: torch.Tensor,
+        pred_visibility: torch.Tensor,
     ):
         """Save the processed video.
 

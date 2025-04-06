@@ -1,1 +1,1 @@
-from ethology.tap_models.track_any_point import BaseTrackAnyPoint, LIST_OF_SUPPORTED_TAP_MODELS
+from ethology.tap_models.track_any_point import BaseTrackAnyPoint, LIST_OF_SUPPORTED_TAP_MODELS, load_video
