@@ -124,6 +124,7 @@ class BaseTrackAnyPoint:
         save_dir: str,
         pred_tracks: torch.Tensor,
         pred_visibility: torch.Tensor,
+        fps: int,
     ):
         """Save the processed video.
 
@@ -144,6 +145,8 @@ class BaseTrackAnyPoint:
             Tensor containing visibility of each query
             point across the frames of size
             [batch, frame, query_points].
+        fps: int
+            Frames per second to save the video at.
 
         """
         if not os.path.exists(save_dir):
@@ -155,6 +158,7 @@ class BaseTrackAnyPoint:
             linewidth=6,
             mode="cool",
             tracks_leave_trace=-1,
+            fps=fps,
         )
         vis.visualize(
             video=video,
@@ -168,6 +172,7 @@ class BaseTrackAnyPoint:
         video_path: str,
         query_points: list[list],
         save_dir: str | None = None,
+        fps: int = 10,
     ) -> ValidPosesDataset:
         """Track the query points in the video source.
 
@@ -182,6 +187,9 @@ class BaseTrackAnyPoint:
         save_dir: str
             If given, will save the processed video
             in the given directory.
+        fps: int
+            Frames per second to save the video at.
+            Default is 10.
 
         Returns
         -------
@@ -232,7 +240,12 @@ class BaseTrackAnyPoint:
 
         if save_dir:
             self.save_video(
-                video_data, video_path, save_dir, pred_tracks, pred_visibility
+                video_data,
+                video_path,
+                save_dir,
+                pred_tracks,
+                pred_visibility,
+                fps,
             )
             logger.success("Video saved successfully!")
 

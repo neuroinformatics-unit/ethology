@@ -98,7 +98,9 @@ def test_save_video(n_frames, n_individuals, video_shape, tap_model, tmpdir):
         0, 2, (1, n_frames, n_individuals), dtype=torch.bool
     )  # Mock predicted visibility tensor shape: (batch, frames, individuals)
 
-    tracker.save_video(video, video_path, tmpdir, pred_tracks, pred_visibility)
+    tracker.save_video(
+        video, video_path, tmpdir, pred_tracks, pred_visibility, 30
+    )
 
     loaded_video = load_video(
         os.path.join(tmpdir, f"{tap_model}_{video_path}")
