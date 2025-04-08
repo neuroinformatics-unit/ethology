@@ -1,6 +1,10 @@
+Glossary
+========
+
+This glossary defines key terms used within the ``ethology`` package and relevant concepts from computer vision and animal behaviour analysis.
+
 .. glossary::
    :sorted:
-This glossary defines key terms used within the ``ethology`` package and relevant concepts from computer vision and animal behaviour analysis.
 
 Annotation
     A manual label or piece of information added to data (e.g., an image or video frame) to mark features of interest. In ```ethology```, this often refers to bounding boxes marking the location of animals. See also: *Ground Truth*, *Label*.

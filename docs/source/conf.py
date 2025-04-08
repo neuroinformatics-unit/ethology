@@ -50,7 +50,6 @@ extensions = [
     "sphinx.ext.imgmath",
     "sphinx.ext.coverage",
     "sphinx.ext.doctest",
-    "sphinx.ext.term",
 ]
 
 # Configure the myst parser to enable cool markdown features
