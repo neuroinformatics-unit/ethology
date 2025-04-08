@@ -903,3 +903,38 @@ def test_from_files_invalid_format_string(unknown_format_json_file: Path):
     assert "Invalid format specified: 'invalid_format_string'" in str(
         excinfo.value
     )
+
+
+def test_from_files_auto_detect_generic_read_error(tmp_path: Path):
+    """Test `from_files` with format='auto' handles generic Exception
+    during file read.
+    """
+    # Create a dummy file so that file_path.is_file() passes
+    dummy_filepath = tmp_path / "dummy_generic_error.json"
+    dummy_filepath.touch()  # Creates an empty file
+
+    # Define the generic exception we want the mocked 'open' to raise
+    simulated_error = Exception("Simulated generic I/O error")
+
+    # We expect from_files to catch the Exception from _detect_format
+    # and wrap it in a ValueError
+    with (
+        pytest.raises(ValueError) as excinfo,
+        patch(
+            "ethology.annotations.io.load_bboxes.open",
+            side_effect=simulated_error,
+        ),
+    ):
+        # Call the public function that uses _detect_format
+        from_files(dummy_filepath, format="auto")
+
+    # Check that the final error is the expected ValueError from from_files
+    assert "Automatic format detection failed" in str(excinfo.value)
+
+    # Check the cause of the ValueError is the ValueError from _detect_format
+    assert isinstance(excinfo.value.__cause__, ValueError)
+    assert "Could not read file" in str(excinfo.value.__cause__)
+
+    # Check that the original simulated Exception is the ultimate cause
+    assert isinstance(excinfo.value.__cause__.__cause__, Exception)
+    assert excinfo.value.__cause__.__cause__ is simulated_error
