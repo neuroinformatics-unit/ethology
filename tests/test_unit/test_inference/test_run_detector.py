@@ -1,4 +1,5 @@
 import json
+import os
 import tempfile
 from unittest.mock import patch
 
@@ -12,7 +13,12 @@ def test_run_detector_main(mock_yolo_cls):
     dummy_detector = mock_yolo_cls.return_value
     dummy_detector.run.return_value = [{"frame": 0, "class_name": "test"}]
 
-    with tempfile.NamedTemporaryFile(suffix=".json") as tmp_output:
+    with tempfile.NamedTemporaryFile(
+        suffix=".json", delete=False
+    ) as tmp_output:
+        tmp_output_path = tmp_output.name
+
+    try:
         test_args = [
             "--video_path",
             "sample.mp4",
@@ -29,6 +35,8 @@ def test_run_detector_main(mock_yolo_cls):
         with open(tmp_output.name) as f:
             data = json.load(f)
         assert data[0]["class_name"] == "test"
+    finally:
+        os.remove(tmp_output_path)
 
 
 @patch(
