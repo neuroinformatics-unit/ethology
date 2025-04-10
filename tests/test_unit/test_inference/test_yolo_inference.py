@@ -67,14 +67,14 @@ def test_yolo_detector_visualize(
 
     mock_model = mock_yolo.return_value
     mock_model.names = {1: "test_class"}
+
+    mock_box = MagicMock()
+    mock_box.xyxy = [np.array([0, 0, 100, 100])]
+    mock_box.conf = [np.array([0.9])]
+    mock_box.cls = [np.array([1])]
+
     mock_result = MagicMock()
-    mock_result.boxes = [
-        MagicMock(
-            xyxy=[np.array([0, 0, 100, 100])],
-            conf=[np.array([0.9])],
-            cls=[np.array([1])],
-        )
-    ]
+    mock_result.boxes = [mock_box]
     mock_model.predict.return_value = [mock_result]
 
     detector = YOLODetector("mock.pt")
