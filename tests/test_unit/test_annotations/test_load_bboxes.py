@@ -687,3 +687,33 @@ def test_sorted_annotations_by_image_filename(
     assert df["image_filename"].to_list() == sorted(
         df["image_filename"].to_list()
     )
+
+
+@pytest.mark.parametrize(
+    "input_file, format, expected_width, expected_height",
+    [
+        # COCO with consistent size
+        ("small_bboxes_COCO_same_size.json", "COCO", 640, 480),
+        # COCO with variable size
+        ("small_bboxes_COCO_varied_size.json", "COCO", "variable", "variable"),
+        # VIA should return None or unknown for both
+        ("small_bboxes_VIA.json", "VIA", None, None),
+    ],
+)
+def test_image_size_metadata_in_dataframe(
+    input_file: str,
+    format: Literal["VIA", "COCO"],
+    expected_width: int | str | None,
+    expected_height: int | str | None,
+    annotations_test_data: dict,
+):
+    """Test that image width/height metadata is correctly inferred and stored
+    in the dataframe attributes when loading bboxes from files.
+    """
+    # Load file
+    filepath = annotations_test_data[input_file]
+    df = from_files(filepath, format=format)
+
+    # Check metadata in dataframe attributes
+    assert df.attrs.get("image_width") == expected_width
+    assert df.attrs.get("image_height") == expected_height
