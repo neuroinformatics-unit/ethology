@@ -30,7 +30,7 @@ jobs:
     name: Build Sphinx Docs
     runs-on: ubuntu-latest
     steps:
-      - uses: neuroinformatics-unit/actions/build_sphinx_docs@main
+      - uses: neuroinformatics-unit/actions/build_sphinx_docs@fe6e2b549ec67a5077c319f5a51d57b258b043af
         with:
           python-version: 3.12
           use-make: true
