@@ -20,6 +20,7 @@ classifiers = [
 ]
 dependencies = [
   "movement",
+  "ultralytics"
 ]
 
 [project.urls]
@@ -46,7 +47,6 @@ dev = [
   "check-manifest",
   "types-PyYAML",
   "types-requests",
-  "ultralytics"
 ]
 
 # [project.scripts]
