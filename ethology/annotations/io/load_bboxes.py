@@ -4,7 +4,9 @@ import json
 from pathlib import Path
 from typing import Literal
 
+import numpy as np
 import pandas as pd
+import xarray as xr
 
 from ethology.annotations.validators import ValidCOCO, ValidVIA
 
@@ -88,6 +90,8 @@ def from_files(
         "annotation_format": format,
         "images_directories": images_dirs,
     }
+
+    # TODO: run dataframe validator?
 
     return df_all
 
@@ -397,3 +401,87 @@ def _VIA_category_id_as_int(df: pd.DataFrame) -> pd.DataFrame:
     except ValueError:
         df["category_id"] = df["category"].factorize(sort=True)[0]
     return df
+
+
+def _df_to_xarray_ds(df: pd.DataFrame) -> xr.Dataset:
+    # xarray dataset with
+    # - 3 dimensions: image ID, space, annotation ID, (category)
+    # - and the following arrays: position, shape
+    # TODO: how to best map image_id to?:
+    #   image_shape,
+    #   image_filename,
+
+    # Compute max number of annotations per image
+    max_annotations_per_image = df["image_id"].value_counts().max()
+    space_coords = ["x", "y"]
+
+    # Sort the dataframe by image_id
+    # Note: the input annotation ID is unique across the dataframe
+    df = df.sort_values(by=["image_id"])
+
+    # Compute indices of the rows where the image ID switches
+    bool_id_diff_from_prev = df["image_id"].ne(df["image_id"].shift())
+    indices_id_switch = np.argwhere(bool_id_diff_from_prev).squeeze()[1:]
+
+    # Stack position, shape and confidence arrays along ID axis
+    map_key_to_columns = {
+        "position_array": ["x_min", "y_min"],
+        "shape_array": ["width", "height"],
+        # "category_array": ["category"],
+        # "category_id_array": ["category_id"],
+    }
+    map_key_to_padding = {
+        "position_array": (np.float64, np.nan),
+        "shape_array": (np.float64, np.nan),
+        # "category_array": (np.str_, ""),
+        # "category_id_array": (np.int_, -1),
+    }
+    array_dict = {}
+    for key in map_key_to_columns:
+        # extract annotations per image
+        list_arrays = np.split(
+            df[map_key_to_columns[key]].to_numpy(
+                dtype=map_key_to_padding[key][0]
+            ),
+            indices_id_switch,  # indices along axis=0
+        )
+
+        # pad arrays with NaN values along the annotation ID axis
+        list_arrays_padded = [
+            np.pad(
+                arr,
+                ((0, max_annotations_per_image - arr.shape[0]), (0, 0)),
+                constant_values=map_key_to_padding[key][1],
+            )
+            for arr in list_arrays
+        ]
+
+        # stack along the first axis (image_id)
+        array_dict[key] = np.stack(list_arrays_padded, axis=0).squeeze()
+
+        if "category" not in key:
+            array_dict[key] = np.moveaxis(array_dict[key], -1, 1)
+
+    # ----
+    # Modify x_min and y_min to represent the bbox centre
+    array_dict["position_array"] += array_dict["shape_array"] / 2
+
+    # Create xarray dataset
+    return xr.Dataset(
+        data_vars=dict(
+            position=(
+                ["image_id", "space", "id"],
+                array_dict["position_array"],
+            ),
+            shape=(["image_id", "space", "id"], array_dict["shape_array"]),
+            category=(["image_id", "id"], array_dict["category_array"]),
+            category_id=(["image_id", "id"], array_dict["category_id_array"]),
+        ),
+        coords=dict(
+            image_id=df["image_id"].unique(),
+            space=space_coords,
+            id=range(max_annotations_per_image),
+            # annotation ID per frame; could be consistent across frames
+            # or not
+        ),
+    )
