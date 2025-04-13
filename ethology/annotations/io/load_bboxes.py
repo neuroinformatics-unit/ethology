@@ -405,11 +405,16 @@ def _VIA_category_id_as_int(df: pd.DataFrame) -> pd.DataFrame:
 
 def _df_to_xarray_ds(df: pd.DataFrame) -> xr.Dataset:
     # xarray dataset with
-    # - 3 dimensions: image ID, space, annotation ID, (category)
-    # - and the following arrays: position, shape
+    # - 3 dimensions: image ID, space, ID, (category ID)
+    #   - they correspond to time, space, individual and kpt in movement
+    # - and the following arrays: position, shape,
+    # TODO: change category ID to a dimension? or use a diff name?
     # TODO: how to best map image_id to?:
     #   image_shape,
     #   image_filename,
+    # TODO: fix mypy for padded strings better
+    # TODO: can I use a movement function with the obtained ds?
+    # (e.g. plot occupancy or plot trajectory)
 
     # def pad_with(vector, pad_width, iaxis, kwargs):
     #     pad_value = kwargs.get('padder', 10)
@@ -418,7 +423,7 @@ def _df_to_xarray_ds(df: pd.DataFrame) -> xr.Dataset:
 
     # Compute max number of annotations per image
     max_annotations_per_image = df["image_id"].value_counts().max()
-    space_coords = ["x", "y"]
+    # space_coords = ["x", "y"]
 
     # Sort the dataframe by image_id
     # Note: the input annotation ID is unique across the dataframe
@@ -485,7 +490,7 @@ def _df_to_xarray_ds(df: pd.DataFrame) -> xr.Dataset:
         ),
         coords=dict(
             image_id=df["image_id"].unique(),
-            space=space_coords,
+            space=["x", "y"],
             id=range(max_annotations_per_image),
             # annotation ID per frame; could be consistent across frames
             # or not
