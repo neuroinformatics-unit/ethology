@@ -411,10 +411,10 @@ def _df_to_xarray_ds(df: pd.DataFrame) -> xr.Dataset:
     #   image_shape,
     #   image_filename,
 
-    def pad_with(vector, pad_width, iaxis, kwargs):
-        pad_value = kwargs.get("padder", -1)
-        vector[: pad_width[0]] = pad_value
-        vector[-pad_width[1] :] = pad_value
+    # def pad_with(vector, pad_width, iaxis, kwargs):
+    #     pad_value = kwargs.get('padder', 10)
+    #     vector[:pad_width[0], :] = pad_value
+    #     vector[-pad_width[1]:] = pad_value
 
     # Compute max number of annotations per image
     max_annotations_per_image = df["image_id"].value_counts().max()
@@ -438,7 +438,7 @@ def _df_to_xarray_ds(df: pd.DataFrame) -> xr.Dataset:
     map_key_to_padding = {
         "position_array": (np.float64, np.nan),
         "shape_array": (np.float64, np.nan),
-        "category_array": (str, ""),
+        # "category_array": (np.dtypes.StringDType(), "__missing__"),
         "category_id_array": (int, -1),
     }
     array_dict = {}
@@ -456,8 +456,7 @@ def _df_to_xarray_ds(df: pd.DataFrame) -> xr.Dataset:
             np.pad(
                 arr,
                 ((0, max_annotations_per_image - arr.shape[0]), (0, 0)),
-                pad_with,
-                padder=map_key_to_padding[key][1],
+                constant_values=(map_key_to_padding[key][1],),
             )
             for arr in list_arrays
         ]
