@@ -438,7 +438,7 @@ def _df_to_xarray_ds(df: pd.DataFrame) -> xr.Dataset:
     map_key_to_padding = {
         "position_array": (np.float64, np.nan),
         "shape_array": (np.float64, np.nan),
-        # "category_array": (np.dtypes.StringDType(), "__missing__"),
+        "category_array": (np.dtypes.StringDType(), "__missing__"),
         "category_id_array": (int, -1),
     }
     array_dict = {}
@@ -446,7 +446,7 @@ def _df_to_xarray_ds(df: pd.DataFrame) -> xr.Dataset:
         # extract annotations per image
         list_arrays = np.split(
             df[map_key_to_columns[key]].to_numpy(
-                dtype=map_key_to_padding[key][0]
+                dtype=map_key_to_padding[key][0]  # type: ignore
             ),
             indices_id_switch,  # indices along axis=0
         )
@@ -456,7 +456,7 @@ def _df_to_xarray_ds(df: pd.DataFrame) -> xr.Dataset:
             np.pad(
                 arr,
                 ((0, max_annotations_per_image - arr.shape[0]), (0, 0)),
-                constant_values=(map_key_to_padding[key][1],),
+                constant_values=map_key_to_padding[key][1],  # type: ignore
             )
             for arr in list_arrays
         ]
@@ -464,6 +464,7 @@ def _df_to_xarray_ds(df: pd.DataFrame) -> xr.Dataset:
         # stack along the first axis (image_id)
         array_dict[key] = np.stack(list_arrays_padded, axis=0).squeeze()
 
+        # reorder axes if required
         if "category" not in key:
             array_dict[key] = np.moveaxis(array_dict[key], -1, 1)
 
