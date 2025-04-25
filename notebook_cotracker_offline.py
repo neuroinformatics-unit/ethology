@@ -1,6 +1,5 @@
 # %%
 # Imports
-# import sleap_io as sio
 import os
 from datetime import datetime
 from pathlib import Path
@@ -23,7 +22,7 @@ DEFAULT_DEVICE = (
     else "cpu"
 )
 
-# %matplotlib widget
+%matplotlib widget
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Data paths
@@ -33,9 +32,23 @@ ground_truth_data = Path(
     "/home/sminano/swc/project_ethology/tap_models_crabs/input/04.09.2023-04-Right_RE_test_corrected_ST_SM_20241029_113207.csv"
 )
 
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# Parmeters
+
+# query points
+step_between_query_frames = 5
+individuals_gt_ids = [57]
+
+# downsample video
+scale_factor = 0.25
+
+# clip video
+chunk_start = 0
+chunk_width = 75
+
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-# Query points from gt
+# Select query points
 
 ds_gt = load_bboxes.from_file(
     file_path=ground_truth_data,
@@ -43,62 +56,94 @@ ds_gt = load_bboxes.from_file(
     use_frame_numbers_from_file=False,
 )
 
+
+# ------------------
+# Select individuals to use as query points
+if len(individuals_gt_ids) == 0:
+    ds_gt_one = ds_gt
+else:
+    ds_gt_one = ds_gt.isel(individuals=[i - 1 for i in individuals_gt_ids])
+
+print(ds_gt_one)
+
+# Select frames
+list_frames = list(range(ds_gt_one.sizes["time"]))
+frames_to_select = np.array(list_frames)[
+    chunk_start:chunk_start + chunk_width:step_between_query_frames
+]  # every N frame
+print(frames_to_select)
+# --------------------
+
 # Prepare query points array
 # it has frame as first column
 queries_array = np.vstack(
     [
         np.hstack(
             [
-                f * np.ones((ds_gt.sizes["individuals"], 1)),  # frame column
-                ds_gt.position.sel(time=f).values.T,  # x, y columns
+                f
+                * np.ones((ds_gt_one.sizes["individuals"], 1)),  # frame column
+                ds_gt_one.position.sel(time=f).values.T,  # x, y columns
             ]
         )
-        for f in range(ds_gt.sizes["time"])
+        for f in range(ds_gt_one.sizes["time"])
     ]
 )
 
 # Remove rows with nans in position
 queries_array = queries_array[~np.any(np.isnan(queries_array), axis=1), :]
 
-# # Select frames
-# list_frames = list(range(ds_gt.sizes["time"]))
-# frames_to_select = np.array(list_frames)[
-#     ::step_between_query_frames
-# ]  # every second frame
-# queries_sel = queries_array[[col in frames_to_select for col in queries_array[:, 0]], :]
+# Filter selected query points
+queries_sel = queries_array[
+    [col in frames_to_select for col in queries_array[:, 0]], :
+]
 
-# print(np.unique(queries_sel[:, 0]))
+print(queries_sel.shape)
+
+
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# Downsample queries by the same scale factor as the video
+queries_downsampled = queries_sel * scale_factor
+queries_downsampled[:, 0] = queries_sel[:, 0]
+print(queries_downsampled.shape)  # torch.Size([1, 614, 2])
+print(queries_downsampled)
+
+# convert to torch tensor and place on device
+queries_downsampled = torch.tensor(queries_downsampled).to(torch.float).to(
+    DEFAULT_DEVICE
+)  # .half().to(device) torch.float16
 
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Read video
-# TODO: is it faster with sleap_io?
+# TODO: is it faster with sleap_io? yes! but then converting to torch is very slow
+# %time video_full = read_video_from_path(video_path)  # Wall time: 13.4 s
+# %time video_full = sio.load_video(video_path)  # Wall time: 27.4 ms
+# %time video_full = np.array(sio.load_video(video_path))
+
 video_full = read_video_from_path(video_path)
 print(type(video_full))
 print(video_full.shape)  # (614, 2160, 4096, 3)
 
-
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-# Make it a torch tensor with dimensions in expected order
+# as torch tensor
 video_full = torch.from_numpy(video_full).permute(0, 3, 1, 2)[None]
 
-print(video_full.shape)  # (1, 614, 3, 2160, 4096)
-print(video_full.device)
-
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-# Downsample frames
-# out_frame_size = [216, 410] # 108, 205
-# video = F.interpolate(video[0], out_frame_size, mode="bilinear")[None]
+# Downsample video
+video_downsampled = F.interpolate(
+    video_full[0], scale_factor=scale_factor, mode="bilinear"
+)[None]
 
-print(video_full.shape)  # (1, 614, 3, 2160, 4096)
-print(video_full.device)
+print(video_downsampled.shape)  # torch.Size([1, 614, 3, 540, 1024])
+print(video_downsampled.device)
+
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Select first part of the video only  (to fit in GPU)
 # video = video[:, : video.shape[1] // 8]
-chunk_start = 0
-video = video_full[:, chunk_start : chunk_start + 75, :, :, :]  # 75 frames
-print(video.shape)  # (1, 307, 3, 2160, 4096)
+video_downsampled_chunk = video_downsampled[
+    :, chunk_start : chunk_start + chunk_width, :, :, :
+]  # 75 frames
+print(video_downsampled_chunk.shape)  # torch.Size([1, 75, 3, 540, 1024])
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Convert to float and place video on device
@@ -110,61 +155,49 @@ device = "cuda"
 # video = video.float().to(device)
 # video = video.half().to(device) # Use half precision for memory efficiency
 # TODO: Make sure your video is normalized properly (video / 255.0) before converting to half()
-video = video.to(torch.float).to(device)  # torch.float16
+video_downsampled_chunk = video_downsampled_chunk.to(torch.float).to(
+    device
+)  # torch.float16
 
-# %%
-# Check gpu memory usage
-# print(torch.cuda.memory_summary())
-# %%
-# Define query points
-queries = torch.tensor(
-    [
-        [0.0, 1070.1, 1697.1],
-        # if downsampled: [0.0, 97.09, 177.34],  # point tracked from the first frame
-        [0.0, 980.7, 1762.2],
-        # if downsampled: [0.0, 106.20, 170.33],
-        # [113.0, 1961.00, 1665.00]
-        # [10.0, 600.0, 500.0],  # frame number 10
-        # [20.0, 750.0, 600.0],  # ...
-        # [30.0, 900.0, 200.0],
-    ]
-)
 
-# # Select all points at the first frame of the chunk
-# queries = queries_array[queries_array[:, 0] == chunk_start, :]  
-# queries = queries[:1, :]
-# queries = torch.tensor(queries)
-
-# Place query tensor on GPU
-queries = queries.to(torch.float).to(device)  # .half().to(device) torch.float16
-
-# %%
-# Visualize query points over frame
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# Visualize query points over frames
 
 # Create a list of frame numbers corresponding to each point
-frame_numbers = queries[:, 0].int().unique().tolist()
+frame_numbers = queries_downsampled[:, 0].int().unique().tolist()
 
 for frame_number in frame_numbers:
-    # get the query points for the current frame
-    queries_one_frame = queries[queries[:, 0] == frame_number]
+    if frame_number in list(range(video_downsampled_chunk.shape[1])):
+        # get the query points for the current frame
+        queries_one_frame = queries_downsampled[
+            queries_downsampled[:, 0] == frame_number
+        ]
 
-    fig, ax = plt.subplots(1, 1)
-    # plot frame
-    ax.imshow(
-        video_full[frame_number, :, :]
-    )  # B T C H W -> H W C
-    # plot query points
-    ax.scatter(
-        x=queries_one_frame[:, 1].cpu(), y=queries_one_frame[:, 2].cpu(), s=5, c="red"
-    )
+        fig, ax = plt.subplots(1, 1)
+        # plot frame
+        ax.imshow(
+            video_downsampled_chunk.permute(0, 1, -2, -1, -3)[
+                0, frame_number, :, :, :
+            ]
+            .cpu()
+            .numpy()
+            .astype(np.int32)
+        )  # B T C H W -> H W C
+        # plot query points
+        ax.scatter(
+            x=queries_one_frame[:, 1].cpu(),
+            y=queries_one_frame[:, 2].cpu(),
+            s=5,
+            c="red",
+        )
 
-    ax.set_title("Frame {}".format(frame_number))
-    ax.set_xlim(0, video.shape[4])
-    ax.set_ylim(0, video.shape[3])
-    ax.invert_yaxis()
+        ax.set_title("Frame {}".format(frame_number))
+        ax.set_xlim(0, video_downsampled_chunk.shape[4])
+        ax.set_ylim(0, video_downsampled_chunk.shape[3])
+        ax.invert_yaxis()
 
 
-# %%
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Get Offline CoTracker model
 model = torch.hub.load("facebookresearch/co-tracker", "cotracker3_offline")
 
@@ -172,8 +205,9 @@ model = torch.hub.load("facebookresearch/co-tracker", "cotracker3_offline")
 # Note: this is for memory usage
 model = model.to(device)  # .half().to(device) # .to(torch.float16).to(device)
 
+print(model.model.window_len)
 
-# %%
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # all_half = all(p.dtype == torch.float16 for p in model.parameters())
 # print("All parameters are float16:", all_half)
 
@@ -187,10 +221,12 @@ model = model.to(device)  # .half().to(device) # .to(torch.float16).to(device)
 #     print(f"{name}: {buffer.dtype}")
 
 
-# %%
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Run CoTracker
 pred_tracks, pred_visibility = model(
-    video, queries=queries[None], backward_tracking=True
+    video_downsampled_chunk, 
+    queries=queries_downsampled[None], 
+    backward_tracking=True,
 )  # B T N 2,  B T N 1
 
 
@@ -206,26 +242,43 @@ pred_tracks, pred_visibility = model(
 print(pred_tracks.shape)  # (1, 307, 2, 2) --> Batch, Time, N of points, 2 (x,y)
 print(pred_visibility.shape)
 
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# Upsample results to the original video resolution
+
+pred_tracks_upsampled = pred_tracks*1 / scale_factor
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Save as a movement dataset
-
-# Assuming 1 query per individual
-
-# Prepare position array
 # (n_frames, n_space, n_keypoints, n_individuals)
-position_array = np.empty(
-    ds_gt.position.shape[:2] + (1,) + (ds_gt.position.shape[-1],)
-    # add keypoint dimension
-)
-position_array.fill(np.nan)
-position_array[150 : 150 + 75, :, :, :] = (
-    pred_tracks.permute(1, -1, 0, -2).cpu().numpy()
-)  
+
+# assuming 1 query is 1 individual
+position_array = (
+    pred_tracks_upsampled.permute(1, -1, 0, -2).cpu().numpy()
+)  # (T, 2, 1, Nqueries)
+visibility_array = pred_visibility.cpu().numpy()[0]  # (T, Nqueries)
+
+# set position to nan if non visible
+# (improve this)
+for i in range(visibility_array.shape[1]):
+    position_array[~visibility_array[:, i], :, :, i] = np.nan
+
+# -----------------------------
+# # get each track from its query point
+# position_array_fix = np.vstack(
+#     [
+#         position_array[
+#             frames_to_select[i]:(frames_to_select[i+1]
+#               if i<queries.shape[0]-1 else None), :, i
+#         ]
+#         for i in range(queries.shape[0])
+#     ]
+# )
+# position_array_fix = position_array_fix.T[None,None].T
+# --------------------------------------------
 
 ds = load_poses.from_numpy(
-    position_array=position_array,
-    individual_names=[f"ind_{i}" for i in range(pred_tracks.shape[2])],
+    position_array=position_array,  # position_array_fix,
+    individual_names=[f"ind_{i}" for i in range(position_array.shape[-1])],
     keypoint_names=["centroid"],
     source_software="CoTracker3",
 )
@@ -239,7 +292,7 @@ timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
 save_poses.to_sleap_analysis_file(
     ds,
-    f"output/cotracker_offline_output_{timestamp}.h5",
+    f"../tap_models_crabs/output/cotracker_offline_output_{timestamp}.h5",
 )
 
 
