@@ -1,3 +1,5 @@
+"""Offline tracking with CoTracker3."""
+
 # %%
 # Imports
 import os
@@ -22,29 +24,32 @@ DEFAULT_DEVICE = (
     else "cpu"
 )
 
-%matplotlib widget
+# %matplotlib widget
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Data paths
-video_path = "/home/sminano/swc/project_ethology/tap_models_crabs/input/04.09.2023-04-Right_RE_test.mp4"
+video_path = (
+    "/home/sminano/swc/project_ethology/tap_models_crabs/"
+    "input/04.09.2023-04-Right_RE_test.mp4"
+)
 
 ground_truth_data = Path(
     "/home/sminano/swc/project_ethology/tap_models_crabs/input/04.09.2023-04-Right_RE_test_corrected_ST_SM_20241029_113207.csv"
 )
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-# Parmeters
+# Parameters
 
 # query points
-step_between_query_frames = 5
-individuals_gt_ids = [57]
+step_between_query_frames: int = 1000
+individuals_gt_ids: list[int] = []
 
 # downsample video
-scale_factor = 0.25
+scale_factor: float = 0.25
 
 # clip video
-chunk_start = 0
-chunk_width = 75
+chunk_start: int = 0
+chunk_width = 100
 
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -69,7 +74,7 @@ print(ds_gt_one)
 # Select frames
 list_frames = list(range(ds_gt_one.sizes["time"]))
 frames_to_select = np.array(list_frames)[
-    chunk_start:chunk_start + chunk_width:step_between_query_frames
+    chunk_start : chunk_start + chunk_width : step_between_query_frames
 ]  # every N frame
 print(frames_to_select)
 # --------------------
@@ -108,14 +113,15 @@ print(queries_downsampled.shape)  # torch.Size([1, 614, 2])
 print(queries_downsampled)
 
 # convert to torch tensor and place on device
-queries_downsampled = torch.tensor(queries_downsampled).to(torch.float).to(
-    DEFAULT_DEVICE
-)  # .half().to(device) torch.float16
+queries_downsampled_tensor: torch.Tensor = (
+    torch.from_numpy(queries_downsampled).to(torch.float).to(DEFAULT_DEVICE)
+)
 
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Read video
-# TODO: is it faster with sleap_io? yes! but then converting to torch is very slow
+# TODO: is it faster with sleap_io? yes! but then converting
+# to torch is very slow
 # %time video_full = read_video_from_path(video_path)  # Wall time: 13.4 s
 # %time video_full = sio.load_video(video_path)  # Wall time: 27.4 ms
 # %time video_full = np.array(sio.load_video(video_path))
@@ -148,13 +154,13 @@ print(video_downsampled_chunk.shape)  # torch.Size([1, 75, 3, 540, 1024])
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Convert to float and place video on device
 # Why do we need .float conversion?
-# chatgpt: Mathematical operations like convolutions, normalizations, or matrix mults expect float32 or float16
+# chatgpt: Mathematical operations like convolutions, normalizations,
+# or matrix mults expect float32 or float16
 
 
 device = "cuda"
 # video = video.float().to(device)
 # video = video.half().to(device) # Use half precision for memory efficiency
-# TODO: Make sure your video is normalized properly (video / 255.0) before converting to half()
 video_downsampled_chunk = video_downsampled_chunk.to(torch.float).to(
     device
 )  # torch.float16
@@ -164,13 +170,13 @@ video_downsampled_chunk = video_downsampled_chunk.to(torch.float).to(
 # Visualize query points over frames
 
 # Create a list of frame numbers corresponding to each point
-frame_numbers = queries_downsampled[:, 0].int().unique().tolist()
+frame_numbers = queries_downsampled_tensor[:, 0].unique().tolist()
 
 for frame_number in frame_numbers:
     if frame_number in list(range(video_downsampled_chunk.shape[1])):
         # get the query points for the current frame
-        queries_one_frame = queries_downsampled[
-            queries_downsampled[:, 0] == frame_number
+        queries_one_frame = queries_downsampled_tensor[
+            queries_downsampled_tensor[:, 0] == frame_number
         ]
 
         fig, ax = plt.subplots(1, 1)
@@ -191,7 +197,7 @@ for frame_number in frame_numbers:
             c="red",
         )
 
-        ax.set_title("Frame {}".format(frame_number))
+        ax.set_title(f"Frame {frame_number}")
         ax.set_xlim(0, video_downsampled_chunk.shape[4])
         ax.set_ylim(0, video_downsampled_chunk.shape[3])
         ax.invert_yaxis()
@@ -224,8 +230,8 @@ print(model.model.window_len)
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Run CoTracker
 pred_tracks, pred_visibility = model(
-    video_downsampled_chunk, 
-    queries=queries_downsampled[None], 
+    video_downsampled_chunk,
+    queries=queries_downsampled_tensor[None],
     backward_tracking=True,
 )  # B T N 2,  B T N 1
 
@@ -239,13 +245,15 @@ pred_tracks, pred_visibility = model(
 
 # %%
 # TODO: Can I upsample the results to the original video res?
-print(pred_tracks.shape)  # (1, 307, 2, 2) --> Batch, Time, N of points, 2 (x,y)
+print(
+    pred_tracks.shape
+)  # (1, 307, 2, 2) --> Batch, Time, N of points, 2 (x,y)
 print(pred_visibility.shape)
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Upsample results to the original video resolution
 
-pred_tracks_upsampled = pred_tracks*1 / scale_factor
+pred_tracks_upsampled = pred_tracks * 1 / scale_factor
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Save as a movement dataset
@@ -294,23 +302,3 @@ save_poses.to_sleap_analysis_file(
     ds,
     f"../tap_models_crabs/output/cotracker_offline_output_{timestamp}.h5",
 )
-
-
-# %%
-# # Visualize results
-
-# vis = Visualizer(
-#     save_dir="./output",
-#     linewidth=1,
-#     mode="cool",
-#     tracks_leave_trace=-1,
-#     fps=10,
-# )
-
-# # Generate timestamp of today in format YYYYMMDD_HHMMSS
-# timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-
-# # Save video with predictions
-# vis.visualize(video, pred_tracks, pred_visibility, filename=f"queries_{timestamp}")
-
-# %%

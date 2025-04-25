@@ -16,3 +16,4 @@ recursive-include ethology/annotations/json_schemas/schemas *.md
 
 # Temporarily include notebooks
 include notebook_cotracker_online.py
+include notebook_cotracker_offline.py

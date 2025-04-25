@@ -1,4 +1,4 @@
-"""Multi-window approach for online tracking with CoTracker3.
+"""Sliding-window approach for online tracking with CoTracker3.
 
 Todo:
 - more query points?
