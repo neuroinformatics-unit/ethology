@@ -112,17 +112,19 @@ def test_save_video(n_frames, n_individuals, video_shape, tap_model, tmpdir):
 
 def test_track_with_valid_parameters():
     n_frames = 50
-    n_keypoints = 1
     tracker = BaseTrackAnyPoint(model="cotracker")
     mock_video = np.random.rand(n_frames, 224, 224, 3)
 
-    query_points = [
-        [0, 400, 350],  # frame_number, x, y
-        [0, 600, 500],
-        [0, 750, 600],
-        [0, 900, 200],
-    ]
-    n_individuals = len(query_points)
+    query_points = {
+        "individual_0": [
+            [0, 400, 350],  # frame_number, x, y
+            [0, 600, 500],
+            [0, 750, 600],
+            [0, 900, 200],
+        ]
+    }
+    n_individuals = len(query_points.keys())
+    n_keypoints = len(query_points["individual_0"])
 
     with (
         patch("os.path.isfile", return_value=True),
