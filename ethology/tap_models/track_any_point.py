@@ -91,7 +91,9 @@ class BaseTrackAnyPoint:
                     "facebookresearch/co-tracker", "cotracker3_offline"
                 )
 
-    def convert_to_movement_dataset(self, pred_tracks) -> ValidPosesDataset:
+    def convert_to_movement_dataset(
+        self, pred_tracks, individuals
+    ) -> ValidPosesDataset:
         """Convert the predicted tracks to movement dataset.
 
         Parameters
@@ -100,6 +102,8 @@ class BaseTrackAnyPoint:
             Tensor containing tracks of each query
             point across the frames of size
             [batch, frame, query_points, X, Y].
+        individuals: list
+            List of names of individuals tracked.
 
         Returns
         -------
@@ -107,12 +111,24 @@ class BaseTrackAnyPoint:
             Dataset containing the predicted tracks.
 
         """
-        # pred_tracks.shape =  [batch, frames, querypoints, 2d points]
+        # pred_tracks.shape =
+        # [batch, frames,
+        # keypoints per individual * number of individuals, 2d points]
         # goes into positional array with shape
-        # [frames, 2d points, 1 keypoint per query point, no. of query points]
+        # [frames, 2d points, keypoints, individuals]
+        num_individuals = len(individuals)
         pred_tracks = pred_tracks.cpu().numpy().squeeze(0)
+        # [frames, keypoints per individual * number of individuals, 2d points]
+        num_keypoints = pred_tracks.shape[1] // num_individuals
+        pred_tracks = pred_tracks.reshape(
+            pred_tracks.shape[0], num_individuals, num_keypoints, 2
+        )  # [frames, individuals, keypoints, 2d points]
+
         ds = from_numpy(
-            position_array=pred_tracks.transpose(0, 2, 1)[:, :, None, :],
+            position_array=pred_tracks.transpose(
+                0, 3, 2, 1
+            ),  # [frames, 2d points, keypoints, individuals]
+            individual_names=individuals,
             source_software="cotracker",
         )
         return ds
@@ -170,7 +186,7 @@ class BaseTrackAnyPoint:
     def track(
         self,
         video_path: str,
-        query_points: list[list],
+        query_points: dict[str, list],
         save_dir: str | None = None,
         fps: int = 10,
     ) -> ValidPosesDataset:
@@ -180,8 +196,10 @@ class BaseTrackAnyPoint:
         ----------
         video_path: str
             Path to the input video file.
-        query_points: list
-            2D List of shape (Q,3) where Q is the
+        query_points: dict
+            Dictionary of query points for each individual,
+            key is the individual id and value is a
+            2D list of shape (Q,3) where Q is the
             number of query points and each Q containing
             Frame-Number to start tracking from, X, Y
         save_dir: str
@@ -207,8 +225,10 @@ class BaseTrackAnyPoint:
         # load video
         video_data = load_video(video_path)
 
-        # List to tensor
-        query_tensor = torch.tensor(query_points, dtype=torch.float32)
+        # dict to tensor
+        query_tensor = torch.tensor(
+            list(query_points.values()), dtype=torch.float32
+        )
 
         # set device
         device = get_device()
@@ -233,9 +253,22 @@ class BaseTrackAnyPoint:
 
         # Run tap model
         logger.info(f"Starting Tracking Any Point using {self.tracker}...")
-        pred_tracks, pred_visibility = self.model(
-            video_data, queries=query_tensor[None]
+
+        all_keypoint_tracks, all_keypoint_visibility = (
+            torch.tensor([]),
+            torch.tensor([]),
         )
+        for query in query_tensor:
+            pred_tracks, pred_visibility = self.model(
+                video_data, queries=query[None]
+            )
+            all_keypoint_tracks = torch.cat(
+                (all_keypoint_tracks, pred_tracks.to("cpu")), dim=2
+            )
+            all_keypoint_visibility = torch.cat(
+                (all_keypoint_visibility, pred_visibility.to("cpu")), dim=2
+            )
+
         logger.info("tracking complete")
 
         if save_dir:
@@ -243,13 +276,15 @@ class BaseTrackAnyPoint:
                 video_data,
                 video_path,
                 save_dir,
-                pred_tracks,
-                pred_visibility,
+                all_keypoint_tracks,
+                all_keypoint_visibility,
                 fps,
             )
             logger.success("Video saved successfully!")
 
-        ds = self.convert_to_movement_dataset(pred_tracks)
+        ds = self.convert_to_movement_dataset(
+            all_keypoint_tracks, query_points.keys()
+        )
         logger.success("Tracking Any Point completed successfully!")
 
         return ds

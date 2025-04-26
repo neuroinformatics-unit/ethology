@@ -50,28 +50,25 @@ def test_convert_to_movement_dataset():
     # check before conversion to movement and after the data is same.
     n_frames = 50
     n_individuals = 4
+    individuals = [f"individual_{i}" for i in range(n_individuals)]
+    n_keypoints = 3
 
-    pred_tracks = torch.randint(0, 500, (1, n_frames, n_individuals, 2))
+    pred_tracks = torch.randint(
+        0, 500, (1, n_frames, n_individuals * n_keypoints, 2)
+    )
 
     tracker = BaseTrackAnyPoint(model="cotracker")
-    ds = tracker.convert_to_movement_dataset(pred_tracks)
-    x_positions = ds.position.sel(
-        space="x"
-    ).values  # Shape: (time, keypoints, individuals)
-    y_positions = ds.position.sel(space="y").values
+    ds = tracker.convert_to_movement_dataset(pred_tracks, individuals)
 
-    for ind in range(n_individuals):
-        print(f"Individual: {ind}")
-        x_coords = np.array(x_positions[:, :, ind]).flatten().tolist()
-        y_coords = np.array(y_positions[:, :, ind]).flatten().tolist()
-
-        # comparing size of x and y coordinates
-        assert len(x_coords) == len(pred_tracks[0, :, ind, 0])
-        assert len(y_coords) == len(pred_tracks[0, :, ind, 1])
-
-        # comparing individual elements
-        assert x_coords == pred_tracks[0, :, ind, 0].tolist()
-        assert y_coords == pred_tracks[0, :, ind, 1].tolist()
+    for i, individual in enumerate(individuals):
+        for k in range(n_keypoints):
+            index = i * n_keypoints + k
+            assert (
+                ds.sel(
+                    individuals=individual, keypoints=f"keypoint_{k}"
+                ).position.values
+                == pred_tracks[0, :, index, :].tolist()
+            ).all()
 
 
 @pytest.mark.parametrize(
