@@ -167,7 +167,7 @@ class BaseTrackAnyPoint:
         """
         if not os.path.exists(save_dir):
             os.makedirs(save_dir)
-        file_name = f'{self.tracker}_{video_path.split("/")[-1].split(".")[0]}'
+        file_name = f"{self.tracker}_{video_path.split('/')[-1].split('.')[0]}"
 
         vis = Visualizer(
             save_dir=save_dir,
