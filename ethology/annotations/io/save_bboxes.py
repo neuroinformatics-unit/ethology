@@ -64,6 +64,12 @@ def _fill_in_COCO_required_data(df: pd.DataFrame) -> pd.DataFrame:
     # Add annotation_id as column
     df["annotation_id"] = df.index
 
+    # For the image_width and image_height columns,
+    # if they have NaNs, set them to 0
+    for col in ["image_width", "image_height"]:
+        if col in df.columns:
+            df[col] = df[col].fillna(0)
+
     # Add COCO required data
     if "category" not in df.columns:
         df["category"] = ""  # if not defined: set as empty string
