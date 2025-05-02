@@ -6,9 +6,8 @@ from pathlib import Path
 import cv2
 import numpy as np
 import xarray as xr
-from movement.io import load_bboxes, load_poses
-
 from boxmot import BotSort
+from movement.io import load_bboxes, load_poses
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Helper functions
@@ -55,6 +54,7 @@ def write_tracked_detections_to_csv(
             tracked_bboxes_dict[frame_idx]["tracked_boxes"],
             tracked_bboxes_dict[frame_idx]["ids"],
             tracked_bboxes_dict[frame_idx]["scores"],
+            strict=False,
         ):
             # extract shape
             xmin, ymin, xmax, ymax = bbox
@@ -235,7 +235,9 @@ while input_video_object.isOpened():
 
     tracked_detections_all_frames[t] = {
         "tracked_boxes": tracked_boxes_array[:, :4],  # :-1],  # (x, y, x, y)
-        "ids": tracked_boxes_array[:, 4],  # -1],  # IDs are the last(5th) column
+        "ids": tracked_boxes_array[
+            :, 4
+        ],  # -1],  # IDs are the last(5th) column
         "scores": tracked_boxes_array[:, 5],
     }
 
