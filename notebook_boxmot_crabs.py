@@ -8,10 +8,9 @@ import numpy as np
 import torch
 import torchvision.transforms.v2 as transforms
 import yaml
-from movement.io import load_bboxes, load_poses
-from torchvision.models.detection import fasterrcnn_resnet50_fpn_v2
-
 from boxmot import BotSort
+from movement.io import load_bboxes
+from torchvision.models.detection import fasterrcnn_resnet50_fpn_v2
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Set default device: CUDA if available, otherwise mps, otherwise CPU
@@ -26,14 +25,15 @@ device = torch.device(
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Input data
 video_path = Path(
-    "/home/sminano/swc/project_ethology/tap_models_crabs/input/04.09.2023-04-Right_RE_test.mp4"
+    # "/home/sminano/swc/project_ethology/tap_models_crabs/input/04.09.2023-04-Right_RE_test.mp4"
+    "/home/sminano/swc/project_ethology/boxmot/2_escape-birds-eye_many-crabs.mp4"
 )
 
 trained_model_path = Path(
-    "/home/sminano/swc/project_ethology/run_slurm_5313275_0/ml-runs_317777717624044570_40b1688a76d94bd08175cb380d0a6e0e_checkpoints_last.ckpt"
+    "/home/sminano/swc/project_ethology/detector-slurm_5313275_0/ml-runs_317777717624044570_40b1688a76d94bd08175cb380d0a6e0e_checkpoints_last.ckpt"
 )
 trained_model_config_path = Path(
-    "/home/sminano/swc/project_ethology/run_slurm_5313275_0/01_config_all_data_augmentation.yaml"
+    "/home/sminano/swc/project_ethology/detector-slurm_5313275_0/01_config_all_data_augmentation.yaml"
 )
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -85,6 +85,7 @@ def write_tracked_detections_to_csv(
             tracked_bboxes_dict[frame_idx]["tracked_boxes"],
             tracked_bboxes_dict[frame_idx]["ids"],
             tracked_bboxes_dict[frame_idx]["scores"],
+            strict=False,
         ):
             # extract shape
             xmin, ymin, xmax, ymax = bbox
@@ -233,7 +234,9 @@ while input_video_object.isOpened():
     # Add data to dict; key is frame index (0-based) for input clip
     tracked_detections_all_frames[frame_idx] = {
         "tracked_boxes": tracked_boxes_array[:, :4],  # :-1],  # (x, y, x, y)
-        "ids": tracked_boxes_array[:, 4],  # -1],  # IDs are the last(5th) column
+        "ids": tracked_boxes_array[
+            :, 4
+        ],  # -1],  # IDs are the last(5th) column
         "scores": detections_dict["scores"],
     }
 
@@ -250,7 +253,7 @@ input_video_object.release()
 
 # timestamp
 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-filename = f"tracked_detections_{timestamp}.csv"
+filename = f"{video_path.stem}_tracked_detections_{timestamp}.csv"
 
 write_tracked_detections_to_csv(
     csv_file_path=filename,
