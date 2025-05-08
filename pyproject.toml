@@ -20,6 +20,10 @@ classifiers = [
 ]
 dependencies = [
   "movement",
+  "torch",
+  "torchvision",
+  "cotracker @ git+https://github.com/facebookresearch/co-tracker.git",
+  "imageio[ffmpeg]",
 ]
 
 [project.urls]
