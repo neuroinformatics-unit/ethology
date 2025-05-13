@@ -3,8 +3,7 @@
 
 import os
 import sys
-
-import setuptools_scm
+from importlib.metadata import version as get_version
 
 # Used when building API docs, put the dependencies
 # of any class you are documenting here
@@ -19,7 +18,7 @@ project = "ethology"
 copyright = "2024, University College London"
 author = "Adam Tyson"
 try:
-    release = setuptools_scm.get_version(root="../..", relative_to=__file__)
+    release = get_version("ethology")
     release = release.split("+")[0]  # remove git hash
 except LookupError:
     # if git is not initialised, still allow local build
