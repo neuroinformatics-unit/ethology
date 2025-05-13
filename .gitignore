@@ -59,6 +59,7 @@ instance/
 # Sphinx documentation
 docs/_build/
 docs/source/build/
+docs/source/_build/
 docs/source/api/
 docs/source/api_index.rst
 # PyBuilder
