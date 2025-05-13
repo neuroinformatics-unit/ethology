@@ -58,10 +58,9 @@ instance/
 
 # Sphinx documentation
 docs/_build/
-
-# MkDocs documentation
-/site/
-
+docs/source/build/
+docs/source/api/
+docs/source/api_index.rst
 # PyBuilder
 target/
 
