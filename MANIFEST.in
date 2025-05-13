@@ -13,3 +13,7 @@ recursive-include docs *.md *.rst *.py
 # Include json schemas
 recursive-include ethology/annotations/json_schemas/schemas *.json
 recursive-include ethology/annotations/json_schemas/schemas *.md
+
+
+# Temporarily include notebooks
+include *.py

@@ -18,9 +18,7 @@ classifiers = [
   "Operating System :: OS Independent",
   "License :: OSI Approved :: BSD License",
 ]
-dependencies = [
-  "movement",
-]
+dependencies = ["movement", "boxmot"]
 
 [project.urls]
 "Homepage" = "https://github.com/neuroinformatics-unit/ethology"
