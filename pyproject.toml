@@ -22,6 +22,8 @@ dependencies = [
   "movement",
   "torch",
   "torchvision",
+  "loguru",
+  "cotracker @ git+https://github.com/facebookresearch/co-tracker.git"
 ]
 
 [project.urls]
@@ -47,9 +49,7 @@ dev = [
   "types-attrs",
   "check-manifest",
   "types-PyYAML",
-  "types-requests",
-  "loguru",
-  "cotracker @ git+https://github.com/facebookresearch/co-tracker.git"
+  "types-requests"
 ]
 
 # [project.scripts]
