@@ -20,6 +20,7 @@ from ethology.tap_models import (
     ],
 )
 def test_tap_model_type(model):
+    """Test the currently supported tracker types."""
     if model in LIST_OF_SUPPORTED_TAP_MODELS:
         tracker = BaseTrackAnyPoint(model=model)
         assert tracker.tracker == "cotracker"
@@ -41,12 +42,16 @@ def test_tap_model_type(model):
     ],
 )
 def test_track_with_invalid_video_path(video_path, exception, match):
+    """Test the behavior of the tracker when an
+    invalid video path is provided.
+    """
     tracker = BaseTrackAnyPoint(model="cotracker")
     with pytest.raises(exception, match=match):
         tracker.track(video_path=video_path, query_points=[[0, 0, 0]])
 
 
 def test_convert_to_movement_dataset():
+    """Test the conversion of predicted tracks to a movement dataset."""
     # check before conversion to movement and after the data is same.
     n_frames = 50
     n_individuals = 4
@@ -78,6 +83,7 @@ def test_convert_to_movement_dataset():
     ],
 )
 def test_save_video(n_frames, n_individuals, video_shape, tap_model, tmpdir):
+    """Test the save_video method of the tracker."""
     tracker = BaseTrackAnyPoint(model=tap_model)
     video = torch.rand(
         (1, n_frames, *video_shape)
@@ -111,6 +117,9 @@ def test_save_video(n_frames, n_individuals, video_shape, tap_model, tmpdir):
 
 
 def test_track_with_valid_parameters():
+    """Test the behavior of the tracker when a valid video
+    path and query points are provided.
+    """
     n_frames = 50
     tracker = BaseTrackAnyPoint(model="cotracker")
     mock_video = np.random.rand(n_frames, 224, 224, 3)
