@@ -1,7 +1,6 @@
 """Module for reading and writing manually labelled annotations."""
 
 import json
-import warnings
 from pathlib import Path
 from typing import Literal
 
@@ -44,51 +43,39 @@ def _detect_format(file_path: Path) -> Literal["VIA", "COCO"]:
 
     Raises
     ------
-    FileNotFoundError
-        If the file_path does not exist.
     ValueError
-        If the file cannot be decoded as JSON, or if the format cannot
+        If the file cannot be read or parsed, or if the format cannot
         be reliably determined from the top-level keys.
 
     """
-    if not file_path.is_file():
-        raise FileNotFoundError(f"Annotation file not found: {file_path}")
-
     try:
         with open(file_path) as f:
-            # Load only enough to check keys, avoid loading huge files
-            # if possible
-            # For simplicity here, load the whole thing.
-            # Optimization is possible if needed.
             data = json.load(f)
-    except json.JSONDecodeError as e:
+    except Exception as e:
+        # Keep this as a fallback for truly weird read issues
         raise ValueError(
-            f"Error decoding JSON data from file {file_path}: {e}"
+            f"Could not read or parse JSON from file {file_path} "
+            f"for format detection: {e}"
         ) from e
-    except Exception as e:  # Catch other potential file reading errors
-        raise ValueError(f"Could not read file {file_path}: {e}") from e
 
     if not isinstance(data, dict):
         raise ValueError(
-            f"Expected JSON root to be a dictionary, but got {type(data)} "
-            f"in file {file_path}"
+            f"Expected JSON root to be a dictionary for format detection, "
+            f"but got {type(data)} in file {file_path}"
         )
 
+    # The validators will check if data is a dict,
+    # so we don't need to check here
     top_level_keys = set(data.keys())
 
     # Define characteristic keys
-    # Based on validators and common usage
     via_keys = {"_via_img_metadata", "_via_attributes", "_via_settings"}
-    # 'info' and 'licenses' are optional
     coco_keys = {"images", "annotations", "categories"}
 
     has_via_keys = bool(via_keys.intersection(top_level_keys))
-    # Require all core COCO keys
     has_coco_keys = coco_keys.issubset(top_level_keys)
 
     if has_coco_keys and has_via_keys:
-        # Ambiguous case - perhaps warn and default to COCO, or error?
-        # Let's raise an error for now, as it indicates a weird file.
         raise ValueError(
             f"File {file_path} contains keys characteristic of *both* VIA "
             "and COCO formats. "
@@ -106,12 +93,52 @@ def _detect_format(file_path: Path) -> Literal["VIA", "COCO"]:
         )
 
 
-# --- UPDATED FUNCTION (for issue #43) ---
+def _determine_format_from_paths(
+    input_file_list: list[Path],
+) -> Literal["VIA", "COCO"]:
+    """Determine the annotation format by inspecting files.
+
+    If multiple files are provided, ensure they are all of the same detected
+    format.
+    """
+    try:
+        # Should be caught by from_files, but good check
+        if not input_file_list:
+            raise ValueError(
+                "Cannot determine format from an empty list of files."
+            )
+
+        if len(input_file_list) == 1:
+            # Detect format based on the single file
+            return _detect_format(input_file_list[0])
+        else:
+            # For multiple files, check all files and ensure consistency
+            detected_formats = []
+            for file_path in input_file_list:
+                detected_format = _detect_format(file_path)
+                detected_formats.append(detected_format)
+
+            # Check if all formats are the same
+            unique_formats = set(detected_formats)
+            if len(unique_formats) > 1:
+                raise ValueError(
+                    f"Inconsistent formats detected across files: "
+                    f"{unique_formats}. All files must have the same format."
+                )
+            return detected_formats[0]
+    except (
+        FileNotFoundError,
+        ValueError,
+    ) as e:  # Catch errors from _detect_format
+        # Re-raise errors related to detection more informatively
+        raise ValueError(f"Automatic format detection failed: {e}") from e
+
+
+# --- REFACTORED from_files FUNCTION ---
 def from_files(
     file_paths: Path | str | list[Path | str],
-    format: Literal["VIA", "COCO", "auto"] = "auto",  # Changed default and
-    # added "auto"
-    images_dirs: Path | str | list[Path | str] | None = None,  # Use Union
+    format: Literal["VIA", "COCO", "auto"] = "auto",
+    images_dirs: Path | str | list[Path | str] | None = None,
 ) -> pd.DataFrame:
     """Read input annotation files as a bboxes dataframe.
 
@@ -121,9 +148,10 @@ def from_files(
         Path or list of paths to the input annotation files.
     format : Literal["VIA", "COCO", "auto"], optional
         Format of the input annotation files. If set to "auto" (default),
-        the format will be detected based on the content of the first file
+        the format will be detected based on the content of the files
         provided. Detection relies on characteristic top-level keys in the
-        JSON structure.
+        JSON structure. For multiple files, all files must have the same
+        format.
     images_dirs : Path | str | list[Path | str], optional
         Path or list of paths to the directories containing the images the
         annotations refer to.
@@ -139,13 +167,17 @@ def from_files(
     Raises
     ------
     ValueError
-        If format="auto" and the format cannot be detected, or if an
-        invalid format string is provided.
+        If format="auto" and the format cannot be detected, if multiple
+        files have inconsistent formats, or if an invalid format string
+        is provided.
     FileNotFoundError
-        If format="auto" and the first file path does not exist.
+        If format="auto" and any file path does not exist (this will be
+        the underlying cause of the ValueError from auto-detection).
     json.JSONDecodeError
-        If format="auto" and the first file cannot be parsed as JSON.
-        (Wrapped in ValueError by _detect_format).
+        If format="auto" and any file cannot be parsed as JSON (this
+        will be the underlying cause of the ValueError from auto-detection).
+    TypeError
+        If `file_paths` is of an unsupported type.
 
     Notes
     -----
@@ -158,18 +190,19 @@ def from_files(
     is always a 0-based integer derived from the category names.
 
     When loading multiple files:
-    - If format="auto", the format is detected from the *first* file in the
-      list and assumed to be the same for all subsequent files.
+
+    - If `format="auto"`, the format is detected from all files and they must
+      all have the same format.
     - Image filenames are used to assign unique image IDs. If the same
       filename appears in multiple annotation files, annotations will be
-      merged under the same image_id.
+      merged under the same `image_id`.
     - Duplicate annotations across files are dropped.
 
     See Also
     --------
     pandas.concat : Concatenate pandas objects along a particular axis.
     pandas.DataFrame.drop_duplicates : Return DataFrame with duplicate rows
-    removed.
+        removed.
 
     """
     # Ensure file_paths is a list internally, even if single path is given
@@ -186,24 +219,10 @@ def from_files(
             f"Unsupported type for 'file_paths': {type(file_paths)}"
         )
 
-    # --- Format Detection Logic ---
+    # --- Determine Format ---
     determined_format: Literal["VIA", "COCO"]
     if format == "auto":
-        try:
-            # Detect format based on the first file
-            determined_format = _detect_format(input_file_list[0])
-            # Optionally warn if multiple files were provided
-            if not is_single_file:
-                warnings.warn(
-                    f"Format automatically detected as '{determined_format}' "
-                    f"based on the first file '{input_file_list[0].name}'. "
-                    "Assuming all files in the list have the same format.",
-                    UserWarning,
-                    stacklevel=2,
-                )
-        except (FileNotFoundError, ValueError) as e:
-            # Re-raise errors related to detection more informatively
-            raise ValueError(f"Automatic format detection failed: {e}") from e
+        determined_format = _determine_format_from_paths(input_file_list)
     elif format in ["VIA", "COCO"]:
         determined_format = format
     else:
@@ -211,10 +230,10 @@ def from_files(
             f"Invalid format specified: '{format}'. Must be 'VIA', "
             f"'COCO', or 'auto'."
         )
-    # --- End Format Detection ---
+    # --- End Determine Format ---
 
     # Delegate to reader of either a single file or multiple files
-    if is_single_file:
+    if is_single_file:  # or len(input_file_list) == 1
         df_all = _from_single_file(
             input_file_list[0], format=determined_format
         )
@@ -228,7 +247,6 @@ def from_files(
     df_all.attrs = {
         "annotation_files": file_paths,  # Store original input representation
         "annotation_format": determined_format,
-        # Store detected/validated format
         "images_directories": images_dirs,
     }
 
@@ -242,7 +260,7 @@ def _from_multiple_files(
 
     Parameters
     ----------
-    list_filepaths : list[Path | str]
+    list_filepaths : list[Path]
         List of paths to the input annotation files
     format : Literal["VIA", "COCO"]
         Format of the input annotation files.
