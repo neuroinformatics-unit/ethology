@@ -102,7 +102,7 @@ def _determine_format_from_paths(
     format.
     """
     try:
-        # Should be caught by from_files, but good check
+        # Should be caught by from_files
         if not input_file_list:
             raise ValueError(
                 "Cannot determine format from an empty list of files."
@@ -134,7 +134,6 @@ def _determine_format_from_paths(
         raise ValueError(f"Automatic format detection failed: {e}") from e
 
 
-# --- REFACTORED from_files FUNCTION ---
 def from_files(
     file_paths: Path | str | list[Path | str],
     format: Literal["VIA", "COCO", "auto"] = "auto",
@@ -219,7 +218,6 @@ def from_files(
             f"Unsupported type for 'file_paths': {type(file_paths)}"
         )
 
-    # --- Determine Format ---
     determined_format: Literal["VIA", "COCO"]
     if format == "auto":
         determined_format = _determine_format_from_paths(input_file_list)
@@ -230,7 +228,6 @@ def from_files(
             f"Invalid format specified: '{format}'. Must be 'VIA', "
             f"'COCO', or 'auto'."
         )
-    # --- End Determine Format ---
 
     # Delegate to reader of either a single file or multiple files
     if is_single_file:  # or len(input_file_list) == 1
@@ -245,7 +242,7 @@ def from_files(
 
     # Add metadata
     df_all.attrs = {
-        "annotation_files": file_paths,  # Store original input representation
+        "annotation_files": file_paths,
         "annotation_format": determined_format,
         "images_directories": images_dirs,
     }
