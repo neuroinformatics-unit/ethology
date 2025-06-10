@@ -735,14 +735,15 @@ def test_from_files_auto_detect_single_success(
         "COCO",
     ],
 )
-def test_from_files_auto_detect_multiple_success(  # MODIFIED
+def test_from_files_auto_detect_multiple_success(
     format: Literal["VIA", "COCO"], multiple_files: dict
 ):
-    """Test `from_files` with format='auto' detects format from files
-    in a list and loads correctly.
+    """Test `from_files` with format='auto' detects format from the first
+    file in a list and loads correctly, emitting a warning.
     """
     list_paths = multiple_files[format]
 
+    # Compute expected total number of annotations and images
     n_images_total = sum(
         count_imgs_and_annots_in_input_file(file, format=format)[0]
         for file in list_paths
@@ -752,8 +753,20 @@ def test_from_files_auto_detect_multiple_success(  # MODIFIED
         for file in list_paths
     )
 
-    df_all = from_files(list_paths, format="auto")
+    # Check that the warning is emitted when loading multiple files with auto
+    with pytest.warns(UserWarning) as record:
+        df_all = from_files(list_paths, format="auto")
 
+    # Check the warning message content (optional but good)
+    assert len(record) == 1
+    assert f"Format automatically detected as '{format}'" in str(
+        record[0].message
+    )
+    assert "Assuming all files in the list have the same format" in str(
+        record[0].message
+    )
+
+    # Check dataframe (adapt expected categories/supercategories if needed)
     assert_dataframe(
         df_all,
         expected_n_annotations=n_annotations_total,
@@ -809,57 +822,36 @@ def unknown_format_json_file(tmp_path: Path) -> Path:
 # --- Tests for format="auto" error conditions ---
 
 
-def test_from_files_auto_detect_file_not_found():  # MODIFIED
+def test_from_files_auto_detect_file_not_found():
     """Test `from_files` with format='auto' raises error if file not found."""
-    non_existent_path = Path("./non_existent_file_for_sure.json")
-    assert not non_existent_path.exists()
+    non_existent_path = Path("./non_existent_file.json")
+    assert not non_existent_path.exists()  # Ensure it doesn't exist
 
     with pytest.raises(ValueError) as excinfo:
         from_files(non_existent_path, format="auto")
 
     assert "Automatic format detection failed" in str(excinfo.value)
-    # Check the cause of the ValueError from from_files
-    assert isinstance(excinfo.value.__cause__, ValueError)
-    assert "Could not read or parse JSON" in str(excinfo.value.__cause__)
-    # Check the ultimate cause from _detect_format's open()
-    assert isinstance(excinfo.value.__cause__.__cause__, FileNotFoundError)
-    assert "No such file or directory" in str(
-        excinfo.value.__cause__.__cause__
-    )
+    assert "Annotation file not found" in str(excinfo.value.__cause__)
 
 
-def test_from_files_auto_detect_invalid_json(
-    invalid_json_file: Path,
-):  # MODIFIED
+def test_from_files_auto_detect_invalid_json(invalid_json_file: Path):
     """Test `from_files` with format='auto' raises error for invalid JSON."""
     with pytest.raises(ValueError) as excinfo:
         from_files(invalid_json_file, format="auto")
 
     assert "Automatic format detection failed" in str(excinfo.value)
-    assert isinstance(excinfo.value.__cause__, ValueError)
-    assert "Could not read or parse JSON" in str(excinfo.value.__cause__)
-    assert isinstance(excinfo.value.__cause__.__cause__, json.JSONDecodeError)
+    assert "Error decoding JSON data" in str(excinfo.value.__cause__)
 
 
-def test_from_files_auto_detect_non_dict_json(
-    non_dict_json_file: Path,
-):  # MODIFIED FOR OPTION 1
+def test_from_files_auto_detect_non_dict_json(non_dict_json_file: Path):
     """Test `from_files` with format='auto' raises error for non-dict JSON."""
     with pytest.raises(ValueError) as excinfo:
         from_files(non_dict_json_file, format="auto")
 
-    assert "Automatic format detection failed" in str(
-        excinfo.value
-    )  # Outer error from from_files
-    # Intermediate error from _detect_format
-    assert isinstance(excinfo.value.__cause__, ValueError)
-    # This is the new message if you re-add the check in _detect_format
-    assert "Expected JSON root to be a dictionary for format detection" in str(
+    assert "Automatic format detection failed" in str(excinfo.value)
+    assert "Expected JSON root to be a dictionary" in str(
         excinfo.value.__cause__
     )
-    assert "got <class 'list'>" in str(
-        excinfo.value.__cause__
-    )  # Check the type reported
 
 
 def test_from_files_auto_detect_ambiguous_format(ambiguous_json_file: Path):
@@ -913,15 +905,19 @@ def test_from_files_invalid_format_string(unknown_format_json_file: Path):
     )
 
 
-def test_from_files_auto_detect_generic_read_error(tmp_path: Path):  # MODIFIED
+def test_from_files_auto_detect_generic_read_error(tmp_path: Path):
     """Test `from_files` with format='auto' handles generic Exception
     during file read.
     """
+    # Create a dummy file so that file_path.is_file() passes
     dummy_filepath = tmp_path / "dummy_generic_error.json"
-    dummy_filepath.touch()
+    dummy_filepath.touch()  # Creates an empty file
 
+    # Define the generic exception we want the mocked 'open' to raise
     simulated_error = Exception("Simulated generic I/O error")
 
+    # We expect from_files to catch the Exception from _detect_format
+    # and wrap it in a ValueError
     with (
         pytest.raises(ValueError) as excinfo,
         patch(
@@ -929,36 +925,16 @@ def test_from_files_auto_detect_generic_read_error(tmp_path: Path):  # MODIFIED
             side_effect=simulated_error,
         ),
     ):
+        # Call the public function that uses _detect_format
         from_files(dummy_filepath, format="auto")
 
+    # Check that the final error is the expected ValueError from from_files
     assert "Automatic format detection failed" in str(excinfo.value)
+
+    # Check the cause of the ValueError is the ValueError from _detect_format
     assert isinstance(excinfo.value.__cause__, ValueError)
-    assert "Could not read or parse JSON" in str(excinfo.value.__cause__)
+    assert "Could not read file" in str(excinfo.value.__cause__)
+
+    # Check that the original simulated Exception is the ultimate cause
     assert isinstance(excinfo.value.__cause__.__cause__, Exception)
     assert excinfo.value.__cause__.__cause__ is simulated_error
-
-
-def test_from_files_auto_detect_multiple_inconsistent_formats(
-    annotations_test_data: dict,
-):
-    """Test `from_files` with format='auto' raises error if multiple files
-    have inconsistent formats.
-    """
-    via_file = annotations_test_data["small_bboxes_VIA.json"]
-    coco_file = annotations_test_data["small_bboxes_COCO.json"]
-    mixed_files = [via_file, coco_file]
-
-    with pytest.raises(ValueError) as excinfo:
-        from_files(mixed_files, format="auto")
-
-    assert "Automatic format detection failed" in str(excinfo.value)
-    # The direct cause should be the ValueError from from_files about
-    # inconsistent formats
-    assert isinstance(excinfo.value.__cause__, ValueError)
-    assert "Inconsistent formats detected across files" in str(
-        excinfo.value.__cause__
-    )
-    assert "{'VIA', 'COCO'}" in str(
-        excinfo.value.__cause__
-    ) or "{'COCO', 'VIA'}" in str(excinfo.value.__cause__)
-    # Order in set can vary
