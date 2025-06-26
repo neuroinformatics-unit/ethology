@@ -215,7 +215,9 @@ annotations_per_validation_sample = {}
 metric_per_frame = MeanAveragePrecision(
     box_format="xyxy",
     iou_type="bbox",
-    iou_thresholds=[0.1], # 0.5  # If set to None [0.5,...,0.95] with step 0.05
+    iou_thresholds=[
+        0.1
+    ],  # 0.5  # If set to None [0.5,...,0.95] with step 0.05
     rec_thresholds=None,  # If set to None [0,...,1] with step 0.01 -- these are the interpolation points
     max_detection_thresholds=[10, 100, 1000],
     extended_summary=True,
@@ -259,7 +261,9 @@ for val_idx, (image, annotations) in enumerate(val_dataset):
         # map is area under P-C curve, averaged over all IOU thresholds?
         recall_one_frame = metrics_one_frame["recall"][0, 0, 0, -1].item()
 
-        precision_values = metrics_one_frame["precision"][
+        precision_values = metrics_one_frame[
+            "precision"
+        ][
             0, :, 0, 0, -1
         ].numpy()  # first IOU threshold, first class, first area (?), max detections = 1000
         idcs_precision_non_zero = np.nonzero(precision_values)[0]
@@ -271,7 +275,6 @@ for val_idx, (image, annotations) in enumerate(val_dataset):
         recall_per_sample.append(recall_one_frame)
         precision_per_sample.append(precision_one_frame)
         map_per_sample.append(map_one_frame)
-        
 
         print(
             f"Validation sample {val_idx}, "
@@ -309,10 +312,10 @@ for val_idx, (image, annotations) in enumerate(val_dataset):
 # metrics = metric.compute()
 # print(metrics["map"])
 
-print(f"Mean recall: {np.mean(recall_per_sample)}") 
+print(f"Mean recall: {np.mean(recall_per_sample)}")
 # 0.8494677009613534 @ IOU=0.1
 # 0.8033303880293905 @ IOU=0.5
-print(f"Mean precision: {np.mean(precision_per_sample)}")  
+print(f"Mean precision: {np.mean(precision_per_sample)}")
 # 0.9767496450305635 @ IOU=0.1
 # 0.929829445017168 @ IOU=0.5
 
