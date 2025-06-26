@@ -1,7 +1,7 @@
-"""Run detection only.
+"""Run detection on video and export results as a movement dataset.
 
-A script to run detection only and export them in a format that
-can be loaded in movement napari widget
+A script to run detection only on an input video and export the results
+in a format that can be loaded in movement napari widget.
 """
 
 # %%
