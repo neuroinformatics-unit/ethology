@@ -18,7 +18,13 @@ classifiers = [
   "Operating System :: OS Independent",
   "License :: OSI Approved :: BSD License",
 ]
-dependencies = ["movement", "boxmot"]
+dependencies = [
+  "movement",
+  "boxmot",
+  "mlflow-skinny",
+  "pycocotools",
+  "torchmetrics"
+]
 
 [project.urls]
 "Homepage" = "https://github.com/neuroinformatics-unit/ethology"
