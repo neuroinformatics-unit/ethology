@@ -8,8 +8,11 @@ from typing import Any
 import numpy as np
 import pandas as pd
 import pytz
+import xarray as xr
 
-from ethology.annotations.io.load_bboxes import STANDARD_BBOXES_DF_INDEX
+from ethology.annotations.io.load_bboxes import (
+    STANDARD_BBOXES_DF_INDEX,
+)
 from ethology.annotations.validators import ValidCOCO
 
 # Mapping of dataframe columns to COCO keys
@@ -37,6 +40,79 @@ STANDARD_BBOXES_DF_COLUMNS_TO_COCO = {
 }
 
 
+def _xarray_ds_to_df(ds: xr.Dataset) -> pd.DataFrame:
+    """Convert xarray dataset to a dataframe.
+
+    Parameters
+    ----------
+    ds : xr.Dataset
+        Bounding boxes annotations xarray dataset.
+
+    Returns
+    -------
+    df : pd.DataFrame
+        Bounding boxes annotations dataframe.
+    """
+    # Create dataframe from xarray dataset
+    df_raw = ds.to_dataframe(dim_order=["image_id", "id", "space"])
+    df_raw = df_raw.reset_index()
+
+    # Remove rows where position or shape data is nan
+    # (where at least one of the specified columns contains a NaN value.)
+    df_raw = df_raw.dropna(subset=["position", "shape"])
+
+    # Pivot the dataframe to get position_x, position_y, shape_x, shape_y
+    df_raw = df_raw.pivot_table(
+        index=["image_id", "id", "category"],
+        columns="space",
+        values=["position", "shape"],
+    ).reset_index()
+
+    # Flatten the columns
+    df_raw.columns = [
+        "_".join(col).strip() if col[1] != "" else col[0]
+        for col in df_raw.columns.values
+    ]
+
+    # Rename id to id_per_frame and category to category_id
+    # (category in ds is an integer)
+    df_raw.rename(columns={"id": "id_per_frame"}, inplace=True)
+    df_raw.rename(columns={"category": "category_id"}, inplace=True)
+
+    # Compute x_min, y_min, width, height for each annotation
+    df_raw["x_min"] = df_raw["position_x"] - df_raw["shape_x"] / 2
+    df_raw["y_min"] = df_raw["position_y"] - df_raw["shape_y"] / 2
+    df_raw["width"] = df_raw["shape_x"]
+    df_raw["height"] = df_raw["shape_y"]
+
+    # Compute image_filename from image_id
+    map_image_id_to_filename = ds.attrs["map_image_id_to_filename"]
+    df_raw["image_filename"] = df_raw["image_id"].map(map_image_id_to_filename)
+
+    # Compute category from category_id
+    map_category_id_to_category = ds.attrs["map_category_id_to_category"]
+    df_raw["category"] = df_raw["category_id"].map(map_category_id_to_category)
+
+    # Set index name to STANDARD_BBOXES_DF_INDEX
+    df_raw.index.name = STANDARD_BBOXES_DF_INDEX
+
+    # select only the columns that are in STANDARD_BBOXES_DF_COLUMNS
+    df_output = df_raw[
+        [
+            "image_id",
+            "image_filename",
+            "x_min",
+            "y_min",
+            "width",
+            "height",
+            "category",  # str
+            "category_id",  # int
+        ]
+    ]
+
+    return df_output
+
+
 def _validate_df_bboxes(df: pd.DataFrame):
     """Check if the input dataframe is a valid bounding boxes dataframe."""
     # Check type
@@ -48,6 +124,16 @@ def _validate_df_bboxes(df: pd.DataFrame):
         raise ValueError(
             f"Expected index name to be '{STANDARD_BBOXES_DF_INDEX}', "
             f"but got '{df.index.name}'."
+        )
+
+    # Check image_filename is present
+    missing_img_columns = [
+        x for x in ["image_id", "image_filename"] if x not in df.columns
+    ]
+    if missing_img_columns:
+        raise ValueError(
+            f"Required columns {missing_img_columns} are not present "
+            "in the dataframe."
         )
 
     # Check bboxes coordinates exist as df columns
@@ -67,6 +153,9 @@ def _fill_in_COCO_required_data(df: pd.DataFrame) -> pd.DataFrame:
     # Add COCO required data
     if "category" not in df.columns:
         df["category"] = ""  # if not defined: set as empty string
+
+    if "supercategory" not in df.columns:
+        df["supercategory"] = ""  # if not defined: set as empty string
 
     if "category_id" not in df.columns or df["category_id"].dtype != int:
         df["category_id"] = df["category"].factorize(sort=True)[0]
@@ -104,6 +193,23 @@ def _fill_in_COCO_required_data(df: pd.DataFrame) -> pd.DataFrame:
         df["bbox"] = (
             df[["x_min", "y_min", "width", "height"]].to_numpy().tolist()
         )
+
+    if "image_width" not in df.columns:
+        df["image_width"] = 0  # needs to be integer
+
+    if "image_height" not in df.columns:
+        df["image_height"] = 0  # needs to be integer
+
+    # Check all required data per section exists
+    for section in ["images", "categories", "annotations"]:
+        required_columns = list(
+            STANDARD_BBOXES_DF_COLUMNS_TO_COCO[section].keys()
+        )
+        missing_columns = [x for x in required_columns if x not in df.columns]
+        if missing_columns:
+            raise ValueError(
+                f"Required columns {missing_columns} are not defined."
+            )
 
     return df
 
@@ -143,13 +249,13 @@ def _create_COCO_dict(df: pd.DataFrame) -> dict:
     return COCO_dict
 
 
-def to_COCO_file(df: pd.DataFrame, output_filepath: str | Path):
+def to_COCO_file(ds: xr.Dataset, output_filepath: str | Path):
     """Write bounding boxes annotations to a COCO JSON file.
 
     Parameters
     ----------
-    df : pd.DataFrame
-        Bounding boxes annotations dataframe.
+    ds : xr.Dataset
+        Bounding boxes annotations xarray dataset.
     output_filepath : str or Path
         Output file path.
 
@@ -159,6 +265,9 @@ def to_COCO_file(df: pd.DataFrame, output_filepath: str | Path):
         Output file path.
 
     """
+    # Compute dataframe from xarray dataset
+    df = _xarray_ds_to_df(ds)
+
     # Validate input dataframe
     _validate_df_bboxes(df)
 
