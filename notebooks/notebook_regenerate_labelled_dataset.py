@@ -25,8 +25,7 @@ via_path = Path(
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Load data
 
-df = load_bboxes.from_files(via_path, format="VIA")
-ds = load_bboxes._df_to_xarray_ds(df)
+ds = load_bboxes.from_files(via_path, format="VIA")
 
 ds_as_movement = ds.rename_dims({"image_id": "time", "id": "individuals"})
 
@@ -187,14 +186,17 @@ ax.axis("equal")
 ax.invert_yaxis()
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Export only small annotations and visualize in VIA tool
-df["diagonal"] = np.sqrt(df["width"] ** 2 + df["height"] ** 2)
+# TODO: adapt to xarray dataset
+ds["diagonal"] = np.sqrt(
+    ds.shape.sel(space="x") ** 2 + ds.shape.sel(space="y") ** 2
+)
 
 for p in [1, 5, 10, 25, 50]:
-    df_small = df.loc[df["diagonal"] <= bbox_diagonal_percentiles[p]]
+    ds_small = ds.loc[ds.diagonal <= bbox_diagonal_percentiles[p]]
 
     # Export as VIA tracks file
     out = save_bboxes.to_COCO_file(
-        df_small,
+        ds_small,
         Path(f"annotations_below_percentile_{p}.json"),
     )
 
@@ -202,14 +204,14 @@ for p in [1, 5, 10, 25, 50]:
 
 # Export all but small annotations
 for p in [1, 5, 10, 25, 50]:
-    df_large = df.loc[df["diagonal"] > bbox_diagonal_percentiles[p]]
+    ds_large = ds.loc[ds.diagonal > bbox_diagonal_percentiles[p]]
 
     # Set category_id to 1 -- 0 is reserved for background
-    df_large.loc[:, "category_id"] = 1
+    ds_large.loc[:, "category_id"] = 1
 
-    # Export as VIA tracks file
+    # Export as COCO annotations file
     out = save_bboxes.to_COCO_file(
-        df_large,
+        ds_large,
         Path(f"annotations_above_percentile_{p}.json"),
     )
 
