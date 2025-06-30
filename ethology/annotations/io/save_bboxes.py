@@ -52,6 +52,7 @@ def _xarray_ds_to_df(ds: xr.Dataset) -> pd.DataFrame:
     -------
     df : pd.DataFrame
         Bounding boxes annotations dataframe.
+
     """
     # Create dataframe from xarray dataset
     df_raw = ds.to_dataframe(dim_order=["image_id", "id", "space"])
