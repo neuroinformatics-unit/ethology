@@ -20,6 +20,10 @@ classifiers = [
 ]
 dependencies = [
   "movement",
+  "torch",
+  "torchvision",
+  "loguru",
+  "cotracker @ git+https://github.com/facebookresearch/co-tracker.git"
 ]
 
 [project.urls]
@@ -45,7 +49,7 @@ dev = [
   "types-attrs",
   "check-manifest",
   "types-PyYAML",
-  "types-requests",
+  "types-requests"
 ]
 
 # [project.scripts]
