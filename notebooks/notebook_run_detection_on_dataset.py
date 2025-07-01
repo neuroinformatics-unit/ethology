@@ -16,6 +16,7 @@ import torchvision.transforms.v2 as transforms
 import xarray as xr
 from mlflow.tracking import MlflowClient
 from pycocotools.coco import COCO
+from pycocotools.cocoeval import COCOeval
 from torch.utils.data import random_split
 from torchvision.datasets import CocoDetection, wrap_dataset_for_transforms_v2
 from torchvision.models.detection import fasterrcnn_resnet50_fpn_v2
@@ -367,3 +368,49 @@ out_path = save_bboxes.to_COCO_file(
 # Note: this is not an official COCO format for results
 # The format for annotations and detections is different
 # https://cocodataset.org/#format-results
+
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# Evaluate with pycocotools
+# from faster_coco_eval import COCO, COCOeval_faster
+
+annType = "bbox"
+prefix = "instances"
+
+
+cocoGt = COCO(
+    "/home/sminano/swc/project_ethology/sept2023_annotations.bk/VIA_JSON_combined_coco_gen.json"
+)
+
+# results file is just a list of dicts!
+cocoDet = cocoGt.loadRes(
+    "/home/sminano/swc/project_ethology/run_slurm_977884_0_detections_val_set_20250701_145412.json"
+)
+
+
+# %%
+# initialise evaluation object
+Eval = COCOeval(cocoGt, cocoDet, annType)
+
+
+# set parameters
+# https://github.com/ppwwyyxx/cocoapi/blob/8cbc887b3da6cb76c7cc5b10f8e082dd29d565cb/PythonAPI/pycocotools/cocoeval.py#L502
+# val_samples_dataset_ids = [sample[1]["image_id"] for sample in val_dataset]
+val_samples_dataset_ids = ds.image_id.values.tolist()
+
+Eval.params.imgIds = val_samples_dataset_ids
+Eval.params.iouThrs = [0.1]
+Eval.params.maxDets = [1000]
+Eval.params.areaRng = [[0**2, 1e5**2]]
+Eval.params.areaRngLbl = ["all"]
+Eval.params.useCats = 0
+Eval.params.recThrs = [0, 1]
+
+# run per image evaluation
+Eval.evaluate()
+
+print(len(Eval.evalImgs))
+
+
+# %%
+print(Eval.evalImgs[0]["image_id"])
+print(Eval.evalImgs[0]["dtMatches"])
