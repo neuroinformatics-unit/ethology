@@ -6,22 +6,20 @@ export the results in a format that can be loaded in movement napari widget.
 
 # %%
 import ast
-from datetime import datetime
 from pathlib import Path
 
+import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
 import torch
 import torchvision.transforms.v2 as transforms
 import xarray as xr
+from mean_average_precision import MetricBuilder
 from mlflow.tracking import MlflowClient
-from pycocotools.coco import COCO
-from pycocotools.cocoeval import COCOeval
 from torch.utils.data import random_split
 from torchvision.datasets import CocoDetection, wrap_dataset_for_transforms_v2
 from torchvision.models.detection import fasterrcnn_resnet50_fpn_v2
 
-from ethology.annotations.io import save_bboxes
+# %matplotlib widget
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Set xarray options
@@ -239,178 +237,112 @@ for val_idx, (image, annotations) in enumerate(val_dataset):
     }
 
 
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%
-# Format detections as an ethology detections dataset
-# (validate as ethology annotations dataset? or add from_numpy?)
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# Compute precision and recall per validation sample
 
-# Get params for array dimensions
-max_detections_per_frame = max(
-    [
-        dets["bbox_centroids"].shape[0]
-        for dets in detections_per_validation_sample.values()
+pr_per_validation_sample = {}
+
+iou_threshold = 0.1
+recall_threshold = 0.0
+
+
+# the mean average precision package assumes class_id starts at 0!
+# so if there is only one class, it assumes its id is 0
+metric_fn = MetricBuilder.build_evaluation_metric("map_2d", num_classes=1)
+
+for idx_validation_sample in range(len(val_dataset)):
+    # Get ground truth bboxes
+    # [xmin, ymin, xmax, ymax, class_id, difficult, crowd]
+    gt_bboxes_xyxy = np.c_[
+        val_dataset[idx_validation_sample][1]["boxes"].cpu().numpy(),
+        np.zeros(
+            val_dataset[idx_validation_sample][1]["boxes"].shape[0]
+        ),  # class_id = 0
+        np.zeros(
+            val_dataset[idx_validation_sample][1]["boxes"].shape[0]
+        ),  # difficult
+        np.zeros(
+            val_dataset[idx_validation_sample][1]["boxes"].shape[0]
+        ),  # crowd
     ]
-)
-n_keypoints = 1
-total_n_frames = len(val_dataset)
 
-# Initialise position, shape and label arrays
-array_dict = {}
-array_dict["position_array"] = np.full(
-    (total_n_frames, 2, max_detections_per_frame),
-    np.nan,
-)  # (n_frames, n_space, n_individuals)
-array_dict["shape_array"] = np.full(
-    (total_n_frames, 2, max_detections_per_frame),
-    np.nan,
-)  # (n_frames, n_space, n_individuals)
-array_dict["category_array"] = np.full(
-    (total_n_frames, max_detections_per_frame),
-    -1,  # -1 is the default value for missing data
-)  # (n_frames, n_individuals)
-array_dict["score_array"] = np.full(
-    (total_n_frames, max_detections_per_frame),
-    np.nan,
-)  # (n_frames, n_individuals)
-
-# Fill in values
-for frame_idx, dets in detections_per_validation_sample.items():
-    array_dict["position_array"][
-        frame_idx, :, : dets["bbox_centroids"].shape[0]
-    ] = np.transpose(dets["bbox_centroids"])
-    array_dict["shape_array"][frame_idx, :, : dets["bbox_shapes"].shape[0]] = (
-        np.transpose(dets["bbox_shapes"])
-    )
-    array_dict["category_array"][frame_idx, : dets["bbox_labels"].shape[0]] = (
-        dets["bbox_labels"]
-    )
-    array_dict["score_array"][
-        frame_idx, : dets["bbox_confidences"].shape[0]
-    ] = dets["bbox_confidences"]
-
-# Format detections on validation set as ethology detections dataset
-# (detections dataset is a like ethology annotations dataset but with
-# confidence scores)
-ds = xr.Dataset(
-    data_vars=dict(
-        position=(
-            ["image_id", "space", "id"],
-            array_dict["position_array"],
-        ),
-        shape=(["image_id", "space", "id"], array_dict["shape_array"]),
-        category=(["image_id", "id"], array_dict["category_array"]),
-        confidence=(["image_id", "id"], array_dict["score_array"]),
-    ),
-    coords=dict(
-        # use image_id from ground truth annotations!
-        image_id=[
-            val_dataset[i][1]["image_id"] for i in range(total_n_frames)
+    # Get predicted bboxes
+    # make class_id 0-indexed!
+    # [xmin, ymin, xmax, ymax, class_id, confidence]
+    pred_bboxes_xyxy_conf = np.c_[
+        detections_per_validation_sample[idx_validation_sample]["bbox_xyxy"],
+        detections_per_validation_sample[idx_validation_sample]["bbox_labels"]
+        - 1,  # class_id is 0-indexed!
+        detections_per_validation_sample[idx_validation_sample][
+            "bbox_confidences"
         ],
-        space=["x", "y"],
-        id=range(max_detections_per_frame),
-        # annotation ID per frame; could be consistent across frames
-        # or not
-    ),
-)
+    ]
 
-print(ds)
-
-
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-# Get map from image_id to filename from ground truth annotations
-
-cocoGt = COCO(str(dataset_dir / "annotations/VIA_JSON_combined_coco_gen.json"))
-
-# compute map from image_id to filename
-# assuming val_dataset[0][1]['image_id'] is the image_id of the first frame
-# in the validation set, for the image IDs as specified in the ground truth annotation
-# file
-df_images = pd.DataFrame(cocoGt.dataset["images"])
-map_image_id_to_filename_gt = {
-    image_id: filename
-    for image_id, filename in zip(
-        df_images["id"], df_images["file_name"], strict=False
+    # Add gt and pred bboxes to metric
+    metric_fn.reset()
+    metric_fn.add(pred_bboxes_xyxy_conf, gt_bboxes_xyxy)
+    metric = metric_fn.value(
+        iou_thresholds=[iou_threshold],
+        recall_thresholds=np.array([recall_threshold]),
+        mpolicy="soft",
     )
-}
 
-# # map image_id in xarray to filename
-# map_val_image_id_to_filename = {
-#     idx: map_image_id_to_filename_gt[val_dataset[idx][1]["image_id"]]
-#     for idx in range(total_n_frames)
-# }
+    # compute precision and recall for one frame
+    pr_per_validation_sample[idx_validation_sample] = {
+        "precision": metric[iou_threshold][0]["precision"][-1],
+        "recall": metric[iou_threshold][0]["recall"][-1],
+    }
 
-# compute map from category_id to category_name
-df_categories = pd.DataFrame(cocoGt.dataset["categories"])
-map_category_id_to_category_name = {
-    category_id: category_name
-    for category_id, category_name in zip(
-        df_categories["id"],
-        df_categories["name"],
-        strict=True,
+# average across validation samples
+print(
+    f"Average precision: {
+        np.mean([pr['precision'] for pr in pr_per_validation_sample.values()])
+    }"
+)
+print(
+    f"Average recall: {
+        np.mean([pr['recall'] for pr in pr_per_validation_sample.values()])
+    }"
+)
+
+# %%
+# plot gt and pred bboxes for one frame (idx_validation_sample)
+
+fig, ax = plt.subplots()
+ax.imshow(val_dataset[idx_validation_sample][0].permute(1, 2, 0))
+for i in range(gt_bboxes_xyxy.shape[0]):
+    ax.add_patch(
+        plt.Rectangle(
+            (gt_bboxes_xyxy[i, 0], gt_bboxes_xyxy[i, 1]),
+            gt_bboxes_xyxy[i, 2] - gt_bboxes_xyxy[i, 0],  # width
+            gt_bboxes_xyxy[i, 3] - gt_bboxes_xyxy[i, 1],  # height
+            fill=False,
+            edgecolor=(0, 1, 0),
+            linewidth=2.5,
+        )
     )
-}
-
-# add map to ds
-ds.attrs["map_image_id_to_filename"] = map_image_id_to_filename_gt
-ds.attrs["map_category_id_to_category"] = map_category_id_to_category_name
-
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-# Export detections on validation set as COCO JSON file
-
-timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-filename = Path(
-    f"{mlflow_params['run_name']}_detections_val_set_{timestamp}.json"
-)
-out_path = save_bboxes.to_COCO_file(
-    ds,
-    output_parent_dir / filename,
-)
-
-# Note: this is not an official COCO format for results
-# The format for annotations and detections is different
-# https://cocodataset.org/#format-results
-
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-# Evaluate with pycocotools
-# from faster_coco_eval import COCO, COCOeval_faster
-
-annType = "bbox"
-prefix = "instances"
-
-
-cocoGt = COCO(
-    "/home/sminano/swc/project_ethology/sept2023_annotations.bk/VIA_JSON_combined_coco_gen.json"
-)
-
-# results file is just a list of dicts!
-cocoDet = cocoGt.loadRes(
-    "/home/sminano/swc/project_ethology/run_slurm_977884_0_detections_val_set_20250701_145412.json"
-)
+for i in range(pred_bboxes_xyxy_conf.shape[0]):
+    ax.add_patch(
+        plt.Rectangle(
+            (pred_bboxes_xyxy_conf[i, 0], pred_bboxes_xyxy_conf[i, 1]),
+            pred_bboxes_xyxy_conf[i, 2] - pred_bboxes_xyxy_conf[i, 0],
+            pred_bboxes_xyxy_conf[i, 3] - pred_bboxes_xyxy_conf[i, 1],
+            fill=False,
+            edgecolor="red",
+            linewidth=2,
+        )
+    )
+plt.show()
 
 
 # %%
-# initialise evaluation object
-Eval = COCOeval(cocoGt, cocoDet, annType)
-
-
-# set parameters
-# https://github.com/ppwwyyxx/cocoapi/blob/8cbc887b3da6cb76c7cc5b10f8e082dd29d565cb/PythonAPI/pycocotools/cocoeval.py#L502
-# val_samples_dataset_ids = [sample[1]["image_id"] for sample in val_dataset]
-val_samples_dataset_ids = ds.image_id.values.tolist()
-
-Eval.params.imgIds = val_samples_dataset_ids
-Eval.params.iouThrs = [0.1]
-Eval.params.maxDets = [1000]
-Eval.params.areaRng = [[0**2, 1e5**2]]
-Eval.params.areaRngLbl = ["all"]
-Eval.params.useCats = 0
-Eval.params.recThrs = [0, 1]
-
-# run per image evaluation
-Eval.evaluate()
-
-print(len(Eval.evalImgs))
-
-
-# %%
-print(Eval.evalImgs[0]["image_id"])
-print(Eval.evalImgs[0]["dtMatches"])
+# plot precision and recall for one iou threshold and last frame
+plt.plot(
+    metric[iou_threshold][0]["recall"],
+    metric[iou_threshold][0]["precision"],
+    ".-",
+)
+plt.xlabel("Recall")
+plt.ylabel("Precision")
+plt.title("Precision-Recall Curve")
+plt.show()
