@@ -36,6 +36,7 @@ STANDARD_BBOXES_DF_COLUMNS_TO_COCO = {
         "category_id": "category_id",
         "iscrowd": "iscrowd",
         "segmentation": "segmentation",
+        "confidence": "score",  # only for predictions
     },
 }
 
@@ -63,8 +64,11 @@ def _xarray_ds_to_df(ds: xr.Dataset) -> pd.DataFrame:
     df_raw = df_raw.dropna(subset=["position", "shape"])
 
     # Pivot the dataframe to get position_x, position_y, shape_x, shape_y
+    index_cols = ["image_id", "id", "category"]
+    if "confidence" in df_raw.columns:
+        index_cols.append("confidence")
     df_raw = df_raw.pivot_table(
-        index=["image_id", "id", "category"],
+        index=index_cols,
         columns="space",
         values=["position", "shape"],
     ).reset_index()
@@ -98,18 +102,22 @@ def _xarray_ds_to_df(ds: xr.Dataset) -> pd.DataFrame:
     df_raw.index.name = STANDARD_BBOXES_DF_INDEX
 
     # select only the columns that are in STANDARD_BBOXES_DF_COLUMNS
-    df_output = df_raw[
-        [
-            "image_id",
-            "image_filename",
-            "x_min",
-            "y_min",
-            "width",
-            "height",
-            "category",  # str
-            "category_id",  # int
-        ]
+    cols_to_select = [
+        "image_id",
+        "image_filename",
+        "x_min",
+        "y_min",
+        "width",
+        "height",
     ]
+    if "confidence" in df_raw.columns:
+        cols_to_select.append("confidence")
+    df_output = df_raw[cols_to_select]
+
+    if "confidence" in df_raw.columns:
+        df_output.attrs["type"] = "predictions"
+    else:
+        df_output.attrs["type"] = "manual_annotations"
 
     return df_output
 
@@ -143,6 +151,13 @@ def _validate_df_bboxes(df: pd.DataFrame):
             "Required bounding box coordinates "
             "'x_min', 'y_min', 'width', 'height', are not present in "
             "the dataframe."
+        )
+
+    # Check confidence is present if type is predictions
+    if df.attrs["type"] == "predictions" and "confidence" not in df.columns:
+        raise ValueError(
+            "Confidence is required for predictions, "
+            "but not present in the dataframe."
         )
 
 
@@ -201,16 +216,19 @@ def _fill_in_COCO_required_data(df: pd.DataFrame) -> pd.DataFrame:
     if "image_height" not in df.columns:
         df["image_height"] = 0  # needs to be integer
 
-    # Check all required data per section exists
-    for section in ["images", "categories", "annotations"]:
-        required_columns = list(
-            STANDARD_BBOXES_DF_COLUMNS_TO_COCO[section].keys()
-        )
-        missing_columns = [x for x in required_columns if x not in df.columns]
-        if missing_columns:
-            raise ValueError(
-                f"Required columns {missing_columns} are not defined."
-            )
+    # # Check all required data per section exists
+    # # in validation?
+    # for section in ["images", "categories", "annotations"]:
+    #     required_columns = list(
+    #         STANDARD_BBOXES_DF_COLUMNS_TO_COCO[section].keys()
+    #     )
+    #     missing_columns = [
+    #         x for x in required_columns if x not in df.columns
+    #     ]
+    #     if missing_columns:
+    #         raise ValueError(
+    #             f"Required columns {missing_columns} are not defined."
+    #         )
 
     return df
 
@@ -219,10 +237,17 @@ def _create_COCO_dict(df: pd.DataFrame) -> dict:
     """Extract COCO dictionary from a bounding boxes dataframe."""
     COCO_dict: dict[str, Any] = {}
     for sections in ["images", "categories", "annotations"]:
+        list_required_columns = list(
+            STANDARD_BBOXES_DF_COLUMNS_TO_COCO[sections].keys()
+        )
+        if (
+            sections == "annotations"
+            and df.attrs["type"] == "manual_annotations"
+        ):
+            list_required_columns.remove("confidence")
+
         # Extract required columns
-        df_section = df[
-            list(STANDARD_BBOXES_DF_COLUMNS_TO_COCO[sections].keys())
-        ].copy()
+        df_section = df[list_required_columns].copy()
 
         # Rename columns to COCO standard
         df_section = df_section.rename(
