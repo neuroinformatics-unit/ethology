@@ -16,4 +16,4 @@ recursive-include ethology/annotations/json_schemas/schemas *.md
 
 
 # Temporarily include notebooks
-include *.py
+recursive-include notebooks *.py
