@@ -10,11 +10,13 @@ from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 import torch
+import torchvision.ops as ops
 import torchvision.transforms.v2 as transforms
 import xarray as xr
-from mean_average_precision import MetricBuilder
 from mlflow.tracking import MlflowClient
+from scipy.optimize import linear_sum_assignment
 from torch.utils.data import random_split
 from torchvision.datasets import CocoDetection, wrap_dataset_for_transforms_v2
 from torchvision.models.detection import fasterrcnn_resnet50_fpn_v2
@@ -24,6 +26,161 @@ from torchvision.models.detection import fasterrcnn_resnet50_fpn_v2
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Set xarray options
 xr.set_options(display_expand_attrs=False)
+
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# Detection evaluation function
+
+
+def evaluate_detections(pred_bboxes, gt_bboxes, iou_threshold=0.5):
+    """Evaluate detection performance using IoU-based matching.
+
+    Parameters
+    ----------
+    pred_bboxes : np.ndarray
+        Array of predicted bounding boxes with columns [x1, y1, x2, y2, confidence]
+    gt_bboxes : np.ndarray
+        Array of ground truth bounding boxes with columns [x1, y1, x2, y2]
+    iou_threshold : float, optional
+        IoU threshold for considering a detection as true positive, default 0.5
+
+    Returns
+    -------
+    tuple
+        (true_positives, false_positives, missed_detections) where each is a boolean array
+        - true_positives: column vector with True for each predicted bbox that is a true positive
+        - false_positives: column vector with True for each predicted bbox that is a false positive
+        - missed_detections: column vector with True for each ground truth bbox that is missed
+
+    """
+    # Initialize output arrays
+    true_positives = np.zeros(len(pred_bboxes), dtype=bool)
+    false_positives = np.zeros(len(pred_bboxes), dtype=bool)
+    missed_detections = np.zeros(len(gt_bboxes), dtype=bool)
+
+    if len(pred_bboxes) > 0 and len(gt_bboxes) > 0:
+        # Sort predictions by confidence (descending)
+        sorted_indices = np.argsort(pred_bboxes[:, 4])[::-1]
+        pred_bboxes_sorted = pred_bboxes[sorted_indices]
+
+        # Track which ground truth boxes have been matched
+        gt_matched = np.zeros(len(gt_bboxes), dtype=bool)
+
+        # For each prediction, find the best matching ground truth
+        for i, pred_bbox in enumerate(pred_bboxes_sorted):
+            best_iou = 0
+            best_gt_idx = -1
+
+            # Calculate IoU with all unmatched ground truth boxes
+            for j, gt_bbox in enumerate(gt_bboxes):
+                if gt_matched[j]:
+                    continue
+
+                # Calculate IoU using torchvision.ops.box_iou
+                pred_tensor = torch.tensor(
+                    pred_bbox[:4], dtype=torch.float32
+                ).unsqueeze(0)
+                gt_tensor = torch.tensor(
+                    gt_bbox, dtype=torch.float32
+                ).unsqueeze(0)
+                iou = ops.box_iou(pred_tensor, gt_tensor).item()
+
+                if iou > best_iou:
+                    best_iou = iou
+                    best_gt_idx = j
+
+            # Determine if this prediction is a true positive or false positive
+            pred_idx_in_original = sorted_indices[i]
+
+            if best_iou >= iou_threshold and best_gt_idx >= 0:
+                # True positive
+                true_positives[pred_idx_in_original] = True
+                gt_matched[best_gt_idx] = True
+            else:
+                # False positive
+                false_positives[pred_idx_in_original] = True
+
+        # Mark unmatched ground truth as missed detections
+        missed_detections = ~gt_matched
+
+    elif len(pred_bboxes) == 0 and len(gt_bboxes) > 0:
+        # No predictions, all ground truth are missed
+        missed_detections[:] = True
+    elif len(pred_bboxes) > 0 and len(gt_bboxes) == 0:
+        # No ground truth, all predictions are false positives
+        false_positives[:] = True
+
+    return true_positives, false_positives, missed_detections
+
+
+def evaluate_detections_hungarian(
+    pred_bboxes: np.ndarray, gt_bboxes: np.ndarray, iou_threshold: float
+) -> dict:
+    """Evaluate detection performance using Hungarian algorithm for matching.
+
+    Parameters
+    ----------
+    pred_bboxes : list
+        A list of prediction bounding boxes with columns [x1, y1, x2, y2, confidence]
+    gt_bboxes : list
+        A list of ground truth bounding boxes with columns [x1, y1, x2, y2]
+    iou_threshold : float
+        IoU threshold for considering a detection as true positive
+
+    Returns
+    -------
+    tuple
+        (true_positives, false_positives, missed_detections) where each is a boolean array
+        - true_positives: column vector with True for each predicted bbox that is a true positive
+        - false_positives: column vector with True for each predicted bbox that is a false positive
+        - missed_detections: column vector with True for each ground truth bbox that is missed
+
+    """
+    # Initialize output arrays
+    true_positives = np.zeros(len(pred_bboxes), dtype=bool)
+    false_positives = np.zeros(len(pred_bboxes), dtype=bool)
+    matched_gts = np.zeros(len(gt_bboxes), dtype=bool)
+    missed_detections = np.zeros(len(gt_bboxes), dtype=bool)  # unmatched gts
+
+    if len(pred_bboxes) > 0 and len(gt_bboxes) > 0:
+        # Compute IoU matrix (pred_bboxes x gt_bboxes)
+        iou_matrix = (
+            ops.box_iou(
+                torch.tensor(pred_bboxes[:, :4], dtype=torch.float32),
+                torch.tensor(gt_bboxes, dtype=torch.float32),
+            )
+            .cpu()
+            .numpy()
+        )
+
+        # Use Hungarian algorithm to find optimal assignment
+        pred_indices, gt_indices = linear_sum_assignment(
+            iou_matrix, maximize=True
+        )
+
+        # Mark true positives and false positives based on optimal assignment
+        for pred_idx, gt_idx in zip(pred_indices, gt_indices, strict=True):
+            if iou_matrix[pred_idx, gt_idx] > iou_threshold:
+                true_positives[pred_idx] = True
+                matched_gts[gt_idx] = True
+            else:
+                false_positives[pred_idx] = True
+
+        # Mark unmatched predictions as false positives
+        false_positives[~true_positives] = True
+
+        # Mark unmatched ground truth as missed detections
+        missed_detections[~matched_gts] = True
+
+    elif len(pred_bboxes) == 0 and len(gt_bboxes) > 0:
+        # No predictions, all ground truth are missed
+        missed_detections[:] = True
+    elif len(pred_bboxes) > 0 and len(gt_bboxes) == 0:
+        # No ground truth, all predictions are false positives
+        false_positives[:] = True
+
+    # Return sum as a dict
+    return true_positives, false_positives, missed_detections
+
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Input data
@@ -238,111 +395,210 @@ for val_idx, (image, annotations) in enumerate(val_dataset):
 
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-# Compute precision and recall per validation sample
-
-pr_per_validation_sample = {}
+# Evaluate detections using Hungarian algorithm and create dataframes
 
 iou_threshold = 0.1
-recall_threshold = 0.0
+
+# Collect all data efficiently
+list_pred_subtables = []
+list_gt_subtables = []
 
 
-# the mean average precision package assumes class_id starts at 0!
-# so if there is only one class, it assumes its id is 0
-metric_fn = MetricBuilder.build_evaluation_metric("map_2d", num_classes=1)
-
-for idx_validation_sample in range(len(val_dataset)):
-    # Get ground truth bboxes
-    # [xmin, ymin, xmax, ymax, class_id, difficult, crowd]
-    gt_bboxes_xyxy = np.c_[
-        val_dataset[idx_validation_sample][1]["boxes"].cpu().numpy(),
-        np.zeros(
-            val_dataset[idx_validation_sample][1]["boxes"].shape[0]
-        ),  # class_id = 0
-        np.zeros(
-            val_dataset[idx_validation_sample][1]["boxes"].shape[0]
-        ),  # difficult
-        np.zeros(
-            val_dataset[idx_validation_sample][1]["boxes"].shape[0]
-        ),  # crowd
-    ]
-
-    # Get predicted bboxes
-    # make class_id 0-indexed!
-    # [xmin, ymin, xmax, ymax, class_id, confidence]
-    pred_bboxes_xyxy_conf = np.c_[
-        detections_per_validation_sample[idx_validation_sample]["bbox_xyxy"],
-        detections_per_validation_sample[idx_validation_sample]["bbox_labels"]
-        - 1,  # class_id is 0-indexed!
-        detections_per_validation_sample[idx_validation_sample][
-            "bbox_confidences"
-        ],
-    ]
-
-    # Add gt and pred bboxes to metric
-    metric_fn.reset()
-    metric_fn.add(pred_bboxes_xyxy_conf, gt_bboxes_xyxy)
-    metric = metric_fn.value(
-        iou_thresholds=[iou_threshold],
-        recall_thresholds=np.array([recall_threshold]),
-        mpolicy="soft",
+# Loop over validation set
+for val_idx, (image, annotations) in enumerate(val_dataset):
+    # Get predictions for this image
+    pred_dict = detections_per_validation_sample[val_idx]
+    pred_bboxes = np.column_stack(
+        [pred_dict["bbox_xyxy"], pred_dict["bbox_confidences"]]
     )
 
-    # compute precision and recall for one frame
-    pr_per_validation_sample[idx_validation_sample] = {
-        "precision": metric[iou_threshold][0]["precision"][-1],
-        "recall": metric[iou_threshold][0]["recall"][-1],
-    }
+    # Get ground truth
+    gt_bboxes = annotations["boxes"].cpu().numpy()
 
-# average across validation samples
-print(
-    f"Average precision: {
-        np.mean([pr['precision'] for pr in pr_per_validation_sample.values()])
-    }"
-)
-print(
-    f"Average recall: {
-        np.mean([pr['recall'] for pr in pr_per_validation_sample.values()])
-    }"
-)
+    # Evaluate detections
+    tp, fp, md = evaluate_detections_hungarian(
+        pred_bboxes, gt_bboxes, iou_threshold
+    )
+
+    # Calculate bboxes areas
+    pred_bboxes_width = pred_bboxes[:, 2] - pred_bboxes[:, 0]
+    pred_bboxes_height = pred_bboxes[:, 3] - pred_bboxes[:, 1]
+    pred_areas = pred_bboxes_width * pred_bboxes_height
+
+    gt_bboxes_width = gt_bboxes[:, 2] - gt_bboxes[:, 0]
+    gt_bboxes_height = gt_bboxes[:, 3] - gt_bboxes[:, 1]
+    gt_areas = gt_bboxes_width * gt_bboxes_height
+
+    # Create prediction subtable
+    pred_data = {
+        "prediction_ID": [
+            f"pred_{val_idx}_{i}" for i in range(len(pred_bboxes))
+        ],
+        "image_ID": annotations["image_id"],
+        "confidence": pred_dict["bbox_confidences"],
+        "TP": tp,
+        "FP": fp,
+        "bbox_area": pred_areas,
+    }
+    list_pred_subtables.append(pd.DataFrame(pred_data))
+
+    # Create ground truth subtable
+    gt_data = {
+        "gt_annotation_ID": [
+            f"gt_{val_idx}_{i}" for i in range(len(gt_bboxes))
+        ],
+        "image_ID": annotations["image_id"],
+        "missed_detection": md,
+        "bbox_area": gt_areas,
+    }
+    list_gt_subtables.append(pd.DataFrame(gt_data))
+
+# Concatenate all dataframes
+predictions_df = pd.concat(list_pred_subtables, ignore_index=True)
+gt_annotations_df = pd.concat(list_gt_subtables, ignore_index=True)
+
 
 # %%
-# plot gt and pred bboxes for one frame (idx_validation_sample)
+gt_area_percentiles = np.percentile(
+    gt_annotations_df["bbox_area"], np.arange(0, 105, 5)
+)
 
-fig, ax = plt.subplots()
-ax.imshow(val_dataset[idx_validation_sample][0].permute(1, 2, 0))
-for i in range(gt_bboxes_xyxy.shape[0]):
-    ax.add_patch(
-        plt.Rectangle(
-            (gt_bboxes_xyxy[i, 0], gt_bboxes_xyxy[i, 1]),
-            gt_bboxes_xyxy[i, 2] - gt_bboxes_xyxy[i, 0],  # width
-            gt_bboxes_xyxy[i, 3] - gt_bboxes_xyxy[i, 1],  # height
-            fill=False,
-            edgecolor=(0, 1, 0),
-            linewidth=2.5,
-        )
-    )
-for i in range(pred_bboxes_xyxy_conf.shape[0]):
-    ax.add_patch(
-        plt.Rectangle(
-            (pred_bboxes_xyxy_conf[i, 0], pred_bboxes_xyxy_conf[i, 1]),
-            pred_bboxes_xyxy_conf[i, 2] - pred_bboxes_xyxy_conf[i, 0],
-            pred_bboxes_xyxy_conf[i, 3] - pred_bboxes_xyxy_conf[i, 1],
-            fill=False,
-            edgecolor="red",
-            linewidth=2,
-        )
-    )
+bin_labels = [
+    f"{gt_area_percentiles[i]:.0f}-{gt_area_percentiles[i + 1]:.0f}"
+    for i in range(gt_area_percentiles.shape[0] - 1)
+]
+
+
+predictions_df["area_bins"] = pd.cut(
+    predictions_df["bbox_area"],
+    bins=gt_area_percentiles,  # same bins for predictions and gt
+    labels=bin_labels,
+    include_lowest=True,
+    right=False,
+)
+
+gt_annotations_df["area_bins"] = pd.cut(
+    gt_annotations_df["bbox_area"],
+    bins=gt_area_percentiles,  # same bins for predictions and gt
+    labels=bin_labels,
+    include_lowest=True,
+    right=False,
+)
+
+
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# Count detections in each bin
+# Is GT really that balanced??
+predictions_per_area_bin = (
+    predictions_df["area_bins"].value_counts().sort_index()
+)
+gt_per_area_bin = gt_annotations_df["area_bins"].value_counts().sort_index()
+
+comparison_df = pd.DataFrame(
+    {"Predictions": predictions_per_area_bin, "Ground Truth": gt_per_area_bin}
+)
+
+# Plot as bar chart
+plt.figure(figsize=(10, 6))
+comparison_df.plot(
+    kind="bar",
+    figsize=(12, 6),
+    color=["skyblue", "lightcoral"],
+    stacked=False,
+)
+plt.title("Detection Counts by Area Bins Validation Set")
+plt.xlabel("Area Range (pixels^2)")
+plt.ylabel("Number of Detections")
+plt.xticks(rotation=45)
+plt.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# Count true positives per bin
+
+true_positives_counts = pd.DataFrame(
+    {
+        "Predictions": predictions_per_area_bin,
+        # "Ground Truth": gt_per_area_bin,
+        "True Positives": predictions_df.loc[predictions_df["TP"], "area_bins"]
+        .value_counts()
+        .sort_index(),
+    }
+)
+
+# Plot as bar chart
+true_positives_counts.plot(
+    kind="bar",
+    figsize=(12, 6),
+    color=["skyblue", "blue"],
+    stacked=False,
+)
+plt.title("Counts per Area Bin Validation Set")
+plt.xlabel("Bbox area (pixels^2)")
+plt.ylabel("Number of Detections")
+plt.xticks(rotation=45)
+plt.grid(True, alpha=0.3)
+plt.tight_layout()
 plt.show()
 
 
-# %%
-# plot precision and recall for one iou threshold and last frame
-plt.plot(
-    metric[iou_threshold][0]["recall"],
-    metric[iou_threshold][0]["precision"],
-    ".-",
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# Count missed detections per bin
+
+missed_detections_counts = pd.DataFrame(
+    {
+        "Ground Truth": gt_per_area_bin,
+        "Matched Ground Truth": gt_annotations_df.loc[
+            ~gt_annotations_df["missed_detection"], "area_bins"
+        ]
+        .value_counts()
+        .sort_index(),
+    }
 )
-plt.xlabel("Recall")
-plt.ylabel("Precision")
-plt.title("Precision-Recall Curve")
+
+# Plot as bar chart
+missed_detections_counts.plot(
+    kind="bar",
+    figsize=(12, 6),
+    color=["lightcoral", "green"],
+    stacked=False,
+)
+plt.title("Counts per Area Bin Validation Set")
+plt.xlabel("Area Range (pixels^2)")
+plt.ylabel("Number of Detections")
+plt.xticks(rotation=45)
+plt.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
+
+
+# %%%%%%%%%%%
+# Image id histogram
+
+detections_per_image_id = pd.DataFrame(
+    {
+        "Predictions": predictions_df.groupby("image_ID").count()[
+            "prediction_ID"
+        ],
+        "Ground Truth": gt_annotations_df.groupby("image_ID").count()[
+            "gt_annotation_ID"
+        ],
+        "True Positives": predictions_df.groupby("image_ID")["TP"].sum(),
+    }
+)
+
+# Plot as bar chart
+plt.figure(figsize=(10, 6))
+detections_per_image_id.plot(
+    kind="bar",
+    figsize=(12, 6),
+    color=["skyblue", "lightcoral", "green"],
+    stacked=False,
+)
+plt.title("Detections per Image ID")
+plt.xlabel("Image ID")
+plt.ylabel("Number of Detections")
+plt.xticks(rotation=45)
+plt.grid(True, alpha=0.3)
+plt.tight_layout()
 plt.show()
