@@ -84,6 +84,40 @@ bin_labels = [
 
 print(bin_labels)
 
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+def split_dataset_crab_repo(dataset_coco, seed_n):
+    """Split dataset like in crabs repo."""
+    # Split data into train and test-val sets
+    rng_train_split = torch.Generator().manual_seed(seed_n)
+    rng_val_split = torch.Generator().manual_seed(seed_n)
+
+    # Split train and test-val sets
+    train_dataset, test_val_dataset = random_split(
+        dataset_coco,
+        [config["train_fraction"], 1 - config["train_fraction"]],
+        generator=rng_train_split,
+    )
+
+    # Split test/val sets from the remainder
+    test_dataset, val_dataset = random_split(
+        test_val_dataset,
+        [
+            1 - config["val_over_test_fraction"],
+            config["val_over_test_fraction"],
+        ],
+        generator=rng_val_split,
+    )
+
+    print(f"Seed: {seed_n}")
+    print(f"Number of training samples: {len(train_dataset)}")  # images
+    print(f"Number of validation samples: {len(val_dataset)}")  # images
+    print(f"Number of test samples: {len(test_dataset)}")  # images
+
+    return train_dataset, val_dataset, test_dataset
+
+
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Set default device: CUDA if available, otherwise mps, otherwise CPU
 device = torch.device(
@@ -99,7 +133,7 @@ print(f"Using device: {device}")
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Retrieve model config and CLI args from mlflow
 
-trained_model_path = str(models_dict["above_5th_percentile_seed_42"])
+trained_model_path = str(models_dict["above_0th_percentile_seed_42"])
 
 mlflow_params = read_mlflow_params(trained_model_path)
 config = read_config_from_mlflow_params(mlflow_params)
@@ -138,35 +172,12 @@ dataset_coco = create_coco_dataset(
 )
 
 
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Split dataset like in crabs repo
-
-# Split data into train and test-val sets
-seed_n = cli_args["seed_n"]
-rng_train_split = torch.Generator().manual_seed(seed_n)
-rng_val_split = torch.Generator().manual_seed(seed_n)
-
-# Split train and test-val sets
-train_dataset, test_val_dataset = random_split(
+train_dataset, val_dataset, test_dataset = split_dataset_crab_repo(
     dataset_coco,
-    [config["train_fraction"], 1 - config["train_fraction"]],
-    generator=rng_train_split,
+    seed_n=cli_args["seed_n"],
 )
 
-# Split test/val sets from the remainder
-test_dataset, val_dataset = random_split(
-    test_val_dataset,
-    [
-        1 - config["val_over_test_fraction"],
-        config["val_over_test_fraction"],
-    ],
-    generator=rng_val_split,
-)
-
-print(f"Seed: {seed_n}")
-print(f"Number of training samples: {len(train_dataset)}")  # images
-print(f"Number of validation samples: {len(val_dataset)}")  # images
-print(f"Number of test samples: {len(test_dataset)}")  # images
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Create dataloader
@@ -184,6 +195,8 @@ detections_dict_per_sample = run_detector_on_dataset(
     dataset=val_dataset,
     device=device,
 )
+
+# save as movement bbox dataset / netcdf?
 
 # reshape
 detections_per_validation_sample = {}
@@ -211,12 +224,10 @@ list_gt_subtables = []
 
 
 # Loop over validation set
-for val_idx, (image, annotations) in enumerate(val_dataset):
+for val_idx, (_img, annotations) in enumerate(val_dataset):
     # Get predictions for this image
     pred_dict = detections_per_validation_sample[val_idx]
-    pred_bboxes = np.column_stack(
-        [pred_dict["bbox_xyxy"], pred_dict["bbox_confidences"]]
-    )
+    pred_bboxes = pred_dict["bbox_xyxy"]
 
     # Get ground truth
     gt_bboxes = annotations["boxes"].cpu().numpy()
@@ -268,7 +279,6 @@ gt_annotations_df = pd.concat(list_gt_subtables, ignore_index=True)
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Check average precision and recall on validation set
 
-
 precision_recall_df = pd.DataFrame(
     {
         "TP": predictions_df.groupby("image_ID")["TP"].sum(),
@@ -303,6 +313,57 @@ print(f"Average recall: {precision_recall_df['recall'].mean()}")
 # Average precision: 0.9456786718983294
 # Average recall: 0.8494677009613534
 
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# Discretize predictions based on confidence
+bin_edges = np.arange(0, 1.01, 0.05)
+predictions_df["confidence_bins"] = pd.cut(
+    predictions_df["confidence"],
+    bins=bin_edges,
+)
+
+precision_per_confidence_bin = predictions_df.groupby(
+    "confidence_bins", observed=False
+)["TP"].sum()
+total_detections_per_confidence_bin = (
+    predictions_df["confidence_bins"].value_counts().sort_index()
+)
+
+calibration_df = pd.DataFrame(
+    {
+        "precision": precision_per_confidence_bin
+        / total_detections_per_confidence_bin,
+        "total_detections": total_detections_per_confidence_bin,
+        "TP": precision_per_confidence_bin,
+    }
+)
+
+# Plot as bar chart
+fig, ax = plt.subplots(1, 1, figsize=(10, 6))
+calibration_df["precision"].plot(
+    kind="bar",
+    figsize=(12, 6),
+    color=["skyblue"],
+    ax=ax,
+)
+
+ax.plot(
+    np.arange(len(calibration_df)),  # bin indices
+    (bin_edges[:-1] + bin_edges[1:]) / 2,  # perfect calibration
+    color="red",
+    linewidth=2,
+    marker="o",
+    label="Perfect calibration",
+)
+
+ax.set_title(f"Calibration curve (n={precision_per_confidence_bin.sum()})")
+ax.set_xlabel("confidence")
+ax.set_ylabel("Precision")
+ax.tick_params(axis="x", rotation=45)
+ax.grid(True, alpha=0.3)
+
+plt.tight_layout()
+plt.show()
+
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Discretize annotations based on diagonal
 
@@ -311,7 +372,7 @@ predictions_df["diagonal_bins"] = pd.cut(
     predictions_df["bbox_diagonal"],
     bins=gt_diagonal_percentiles,  # same bins for predictions and gt
     labels=bin_labels,
-    include_lowest=True,
+    include_lowest=True,  # --- change
     right=False,
 )
 
