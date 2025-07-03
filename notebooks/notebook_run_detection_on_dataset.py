@@ -5,200 +5,41 @@ export the results in a format that can be loaded in movement napari widget.
 """
 
 # %%
-import ast
 from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import torch
-import torchvision.ops as ops
 import torchvision.transforms.v2 as transforms
 import xarray as xr
-from mlflow.tracking import MlflowClient
-from scipy.optimize import linear_sum_assignment
 from torch.utils.data import random_split
-from torchvision.datasets import CocoDetection, wrap_dataset_for_transforms_v2
-from torchvision.models.detection import fasterrcnn_resnet50_fpn_v2
+
+from ethology.datasets.create import create_coco_dataset
+from ethology.detectors.evaluate import evaluate_detections_hungarian
+from ethology.detectors.inference import run_detector_on_dataset
+from ethology.detectors.load import load_fasterrcnn_resnet50_fpn_v2
+from ethology.mlflow import (
+    read_cli_args_from_mlflow_params,
+    read_config_from_mlflow_params,
+    read_mlflow_params,
+)
+
+# Set xarray options
+xr.set_options(display_expand_attrs=False)
 
 # %matplotlib widget
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%
-# Set xarray options
-xr.set_options(display_expand_attrs=False)
-
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%
-# Detection evaluation function
-
-
-def evaluate_detections(pred_bboxes, gt_bboxes, iou_threshold=0.5):
-    """Evaluate detection performance using IoU-based matching.
-
-    Parameters
-    ----------
-    pred_bboxes : np.ndarray
-        Array of predicted bounding boxes with columns [x1, y1, x2, y2, confidence]
-    gt_bboxes : np.ndarray
-        Array of ground truth bounding boxes with columns [x1, y1, x2, y2]
-    iou_threshold : float, optional
-        IoU threshold for considering a detection as true positive, default 0.5
-
-    Returns
-    -------
-    tuple
-        (true_positives, false_positives, missed_detections) where each is a boolean array
-        - true_positives: column vector with True for each predicted bbox that is a true positive
-        - false_positives: column vector with True for each predicted bbox that is a false positive
-        - missed_detections: column vector with True for each ground truth bbox that is missed
-
-    """
-    # Initialize output arrays
-    true_positives = np.zeros(len(pred_bboxes), dtype=bool)
-    false_positives = np.zeros(len(pred_bboxes), dtype=bool)
-    missed_detections = np.zeros(len(gt_bboxes), dtype=bool)
-
-    if len(pred_bboxes) > 0 and len(gt_bboxes) > 0:
-        # Sort predictions by confidence (descending)
-        sorted_indices = np.argsort(pred_bboxes[:, 4])[::-1]
-        pred_bboxes_sorted = pred_bboxes[sorted_indices]
-
-        # Track which ground truth boxes have been matched
-        gt_matched = np.zeros(len(gt_bboxes), dtype=bool)
-
-        # For each prediction, find the best matching ground truth
-        for i, pred_bbox in enumerate(pred_bboxes_sorted):
-            best_iou = 0
-            best_gt_idx = -1
-
-            # Calculate IoU with all unmatched ground truth boxes
-            for j, gt_bbox in enumerate(gt_bboxes):
-                if gt_matched[j]:
-                    continue
-
-                # Calculate IoU using torchvision.ops.box_iou
-                pred_tensor = torch.tensor(
-                    pred_bbox[:4], dtype=torch.float32
-                ).unsqueeze(0)
-                gt_tensor = torch.tensor(
-                    gt_bbox, dtype=torch.float32
-                ).unsqueeze(0)
-                iou = ops.box_iou(pred_tensor, gt_tensor).item()
-
-                if iou > best_iou:
-                    best_iou = iou
-                    best_gt_idx = j
-
-            # Determine if this prediction is a true positive or false positive
-            pred_idx_in_original = sorted_indices[i]
-
-            if best_iou >= iou_threshold and best_gt_idx >= 0:
-                # True positive
-                true_positives[pred_idx_in_original] = True
-                gt_matched[best_gt_idx] = True
-            else:
-                # False positive
-                false_positives[pred_idx_in_original] = True
-
-        # Mark unmatched ground truth as missed detections
-        missed_detections = ~gt_matched
-
-    elif len(pred_bboxes) == 0 and len(gt_bboxes) > 0:
-        # No predictions, all ground truth are missed
-        missed_detections[:] = True
-    elif len(pred_bboxes) > 0 and len(gt_bboxes) == 0:
-        # No ground truth, all predictions are false positives
-        false_positives[:] = True
-
-    return true_positives, false_positives, missed_detections
-
-
-def evaluate_detections_hungarian(
-    pred_bboxes: np.ndarray, gt_bboxes: np.ndarray, iou_threshold: float
-) -> dict:
-    """Evaluate detection performance using Hungarian algorithm for matching.
-
-    Parameters
-    ----------
-    pred_bboxes : list
-        A list of prediction bounding boxes with columns [x1, y1, x2, y2, confidence]
-    gt_bboxes : list
-        A list of ground truth bounding boxes with columns [x1, y1, x2, y2]
-    iou_threshold : float
-        IoU threshold for considering a detection as true positive
-
-    Returns
-    -------
-    tuple
-        (true_positives, false_positives, missed_detections) where each is a boolean array
-        - true_positives: column vector with True for each predicted bbox that is a true positive
-        - false_positives: column vector with True for each predicted bbox that is a false positive
-        - missed_detections: column vector with True for each ground truth bbox that is missed
-
-    """
-    # Initialize output arrays
-    true_positives = np.zeros(len(pred_bboxes), dtype=bool)
-    false_positives = np.zeros(len(pred_bboxes), dtype=bool)
-    matched_gts = np.zeros(len(gt_bboxes), dtype=bool)
-    missed_detections = np.zeros(len(gt_bboxes), dtype=bool)  # unmatched gts
-
-    if len(pred_bboxes) > 0 and len(gt_bboxes) > 0:
-        # Compute IoU matrix (pred_bboxes x gt_bboxes)
-        iou_matrix = (
-            ops.box_iou(
-                torch.tensor(pred_bboxes[:, :4], dtype=torch.float32),
-                torch.tensor(gt_bboxes, dtype=torch.float32),
-            )
-            .cpu()
-            .numpy()
-        )
-
-        # Use Hungarian algorithm to find optimal assignment
-        pred_indices, gt_indices = linear_sum_assignment(
-            iou_matrix, maximize=True
-        )
-
-        # Mark true positives and false positives based on optimal assignment
-        for pred_idx, gt_idx in zip(pred_indices, gt_indices, strict=True):
-            if iou_matrix[pred_idx, gt_idx] > iou_threshold:
-                true_positives[pred_idx] = True
-                matched_gts[gt_idx] = True
-            else:
-                false_positives[pred_idx] = True
-
-        # Mark unmatched predictions as false positives
-        false_positives[~true_positives] = True
-
-        # Mark unmatched ground truth as missed detections
-        missed_detections[~matched_gts] = True
-
-    elif len(pred_bboxes) == 0 and len(gt_bboxes) > 0:
-        # No predictions, all ground truth are missed
-        missed_detections[:] = True
-    elif len(pred_bboxes) > 0 and len(gt_bboxes) == 0:
-        # No ground truth, all predictions are false positives
-        false_positives[:] = True
-
-    # Return sum as a dict
-    return true_positives, false_positives, missed_detections
-
-
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%
-# Input data
+# Input data - in domain
 dataset_dir = Path("/home/sminano/swc/project_crabs/data/sep2023-full")
 
-trained_model_path = Path(
-    "/home/sminano/swc/project_crabs/ml-runs/617393114420881798/f348d9d196934073bece1b877cbc4d38/checkpoints/last.ckpt"
-)
 
-trained_model_mlflow_params_path = Path(
-    "/home/sminano/swc/project_crabs/ml-runs/617393114420881798/f348d9d196934073bece1b877cbc4d38/params"
-)  # for config
-
-
-# to save output frames and detections
-output_parent_dir = Path("/home/sminano/swc/project_ethology")
-
-flag_save_frames = False
+trained_model_dict = {
+    "all_data_augm_seed_42": Path(
+        "/home/sminano/swc/project_crabs/ml-runs/617393114420881798/f348d9d196934073bece1b877cbc4d38/checkpoints/last.ckpt"
+    )
+}
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Set default device: CUDA if available, otherwise mps, otherwise CPU
@@ -215,74 +56,26 @@ print(f"Using device: {device}")
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Retrieve model config and CLI args from mlflow
 
-
-def read_mlflow_params(
-    trained_model_path: str, tracking_uri: str = None
-) -> dict:
-    """Read parameters for a specific MLflow run."""
-    # Create MLflow client
-    mlruns_path = str(Path(trained_model_path).parents[3])
-    client = MlflowClient(tracking_uri=mlruns_path)
-
-    # Get the run
-    runID = Path(trained_model_path).parents[1].stem
-    run = client.get_run(runID)
-
-    # Access parameters
-    params = run.data.params
-    params["run_name"] = run.info.run_name
-
-    return params
-
-
 mlflow_params = read_mlflow_params(trained_model_path)
-config = {
-    k.removeprefix("config/"): ast.literal_eval(v)
-    for k, v in mlflow_params.items()
-    if k.startswith("config/")
-}
-
-
-def safe_eval_string(s):
-    """Try to evaluate a string as a literal, otherwise return as-is."""
-    try:
-        return ast.literal_eval(s)
-    except (ValueError, SyntaxError):
-        # return as-is if not a valid literal
-        return s
-
-
-cli_args = {
-    k.removeprefix("cli_args/"): safe_eval_string(v)
-    for k, v in mlflow_params.items()
-    if k.startswith("cli_args/")
-}
+config = read_config_from_mlflow_params(mlflow_params)
+cli_args = read_cli_args_from_mlflow_params(mlflow_params)
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Load model
 
-# Load structure
-model = fasterrcnn_resnet50_fpn_v2(
-    weights=None,
-    weights_backbone=None,
+model = load_fasterrcnn_resnet50_fpn_v2(
+    trained_model_path,
     num_classes=config["num_classes"],
+    device=device,
 )
 
-# Read state dict
-state_dict = torch.load(trained_model_path)
-state_dict_model = {
-    k.lstrip("model."): v
-    for k, v in state_dict["state_dict"].items()
-    if k.startswith("model.")
-}
-
-# Load weights into model and set to evaluation mode
-model.load_state_dict(state_dict_model)
+# Set to evaluation mode
 model.eval()
-model.to(device)
 
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%
-# Define transforms to apply to input frames
+
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# Create COCO dataset
+annotations_filename = Path(cli_args["annotation_files"][0]).name
 inference_transforms = transforms.Compose(
     [
         transforms.ToImage(),
@@ -290,56 +83,25 @@ inference_transforms = transforms.Compose(
     ]
 )
 
-# Sanitize bounding boxes?
 
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-# Build Pytorch dataset
-seed_n = cli_args["seed_n"]
-annotations_filename = Path(cli_args["annotation_files"][0]).name
-
-# create "default" COCO dataset
-dataset_coco = CocoDetection(
-    Path(dataset_dir) / "frames",
-    Path(dataset_dir) / "annotations" / annotations_filename,
-    transforms=inference_transforms,
+dataset_coco = create_coco_dataset(
+    images_dir=Path(dataset_dir) / "frames",
+    annotations_file=Path(dataset_dir) / "annotations" / annotations_filename,
+    composed_transform=inference_transforms,
 )
-
-# wrap dataset for transforms v2
-dataset_transformed = wrap_dataset_for_transforms_v2(dataset_coco)
 
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-# Split dataset
-# def _collate_fn(self, batch: tuple) -> tuple:
-#     """Collate function used for dataloaders.
-
-#     A custom function is needed for detection
-#     because the number of bounding boxes varies
-#     between images of the same batch.
-#     See https://pytorch.org/vision/main/auto_examples/transforms/plot_transforms_e2e.html#data-loading-and-training-loop
-
-#     Parameters
-#     ----------
-#     batch : tuple
-#         a tuple of 2 tuples, the first one holding all images in the batch,
-#         and the second one holding the corresponding annotations.
-
-#     Returns
-#     -------
-#     tuple
-#         a tuple of length = batch size, made up of (image, annotations)
-#         tuples.
-
-#     """
-#     return tuple(zip(*batch))
-
+# Split dataset like in crabs repo
 
 # Split data into train and test-val sets
+seed_n = cli_args["seed_n"]
 rng_train_split = torch.Generator().manual_seed(seed_n)
 rng_val_split = torch.Generator().manual_seed(seed_n)
 
+# Split train and test-val sets
 train_dataset, test_val_dataset = random_split(
-    dataset_transformed,
+    dataset_coco,
     [config["train_fraction"], 1 - config["train_fraction"]],
     generator=rng_train_split,
 )
@@ -359,30 +121,27 @@ print(f"Number of training samples: {len(train_dataset)}")
 print(f"Number of validation samples: {len(val_dataset)}")
 print(f"Number of test samples: {len(test_dataset)}")
 
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# Create dataloader
+
+# dataloader = torch.utils.data.DataLoader(
+#     val_dataset,
+#     batch_size=1,
+#     shuffle=True,
+# )
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Run detection on validation set
+detections_dict_per_sample = run_detector_on_dataset(
+    model=model,
+    dataset=val_dataset,
+    device=device,
+)
 
-# TODO: use dataloader for efficiency?
+# reshape
 detections_per_validation_sample = {}
-
-for val_idx, (image, annotations) in enumerate(val_dataset):
-    # Apply transforms to frame and place tensor on device
-    image_tensor = inference_transforms(image).to(device)[None]
-
-    # Put annotations in same device as image
-    annotations["boxes"] = annotations["boxes"].to(device)
-    annotations["labels"] = annotations["labels"].to(device)
-
-    # Run detection
-    with torch.no_grad():
-        # use [0] to select the one image in the batch
-        # Returns: dictionary with data of the predicted bounding boxes.
-        # The keys are: "boxes", "scores", and "labels". The labels
-        # refer to the class of the object detected, and not its ID.
-        detections_dict = model(image_tensor)[0]
-
-    # Add to dict
+for val_idx in range(len(val_dataset)):
+    detections_dict = detections_dict_per_sample[val_idx]
     bboxes_xyxy = detections_dict["boxes"].cpu().numpy()
 
     detections_per_validation_sample[val_idx] = {
@@ -435,6 +194,7 @@ for val_idx, (image, annotations) in enumerate(val_dataset):
             f"pred_{val_idx}_{i}" for i in range(len(pred_bboxes))
         ],
         "image_ID": annotations["image_id"],
+        "val_batch_idx": val_idx,
         "confidence": pred_dict["bbox_confidences"],
         "TP": tp,
         "FP": fp,
@@ -448,6 +208,7 @@ for val_idx, (image, annotations) in enumerate(val_dataset):
             f"gt_{val_idx}_{i}" for i in range(len(gt_bboxes))
         ],
         "image_ID": annotations["image_id"],
+        "val_batch_idx": val_idx,
         "missed_detection": md,
         "bbox_area": gt_areas,
     }
@@ -457,8 +218,45 @@ for val_idx, (image, annotations) in enumerate(val_dataset):
 predictions_df = pd.concat(list_pred_subtables, ignore_index=True)
 gt_annotations_df = pd.concat(list_gt_subtables, ignore_index=True)
 
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# Check average precision and recall on validation set
 
-# %%
+
+precision_recall_df = pd.DataFrame(
+    {
+        "TP": predictions_df.groupby("image_ID")["TP"].sum(),
+        "FP": predictions_df.groupby("image_ID")["FP"].sum(),
+        "MD": gt_annotations_df.groupby("image_ID")["missed_detection"].sum(),
+        "GT": gt_annotations_df.groupby("image_ID").count()[
+            "gt_annotation_ID"
+        ],
+        "val_batch_idx": predictions_df.groupby("image_ID")[
+            "val_batch_idx"
+        ].first(),
+    }
+)
+
+# sort by val_batch_idx
+precision_recall_df = precision_recall_df.sort_values(by="val_batch_idx")
+precision_recall_df = precision_recall_df.reset_index()
+
+precision_recall_df["precision"] = precision_recall_df["TP"] / (
+    precision_recall_df["TP"] + precision_recall_df["FP"]
+)
+precision_recall_df["recall"] = (
+    precision_recall_df["TP"] / precision_recall_df["GT"]
+)
+
+print(precision_recall_df)
+print(f"Average precision: {precision_recall_df['precision'].mean()}")
+print(f"Average recall: {precision_recall_df['recall'].mean()}")
+
+# Average precision: 0.9456786718983294
+# Average recall: 0.8494677009613534
+
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# Discretize annotations based on area
+
 gt_area_percentiles = np.percentile(
     gt_annotations_df["bbox_area"], np.arange(0, 105, 5)
 )
@@ -487,7 +285,7 @@ gt_annotations_df["area_bins"] = pd.cut(
 
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-# Count detections in each bin
+# Count detections in each area bin
 # Is GT really that balanced??
 predictions_per_area_bin = (
     predictions_df["area_bins"].value_counts().sort_index()
@@ -495,7 +293,10 @@ predictions_per_area_bin = (
 gt_per_area_bin = gt_annotations_df["area_bins"].value_counts().sort_index()
 
 comparison_df = pd.DataFrame(
-    {"Predictions": predictions_per_area_bin, "Ground Truth": gt_per_area_bin}
+    {
+        "Predictions": predictions_per_area_bin,
+        "Ground Truth": gt_per_area_bin,
+    }
 )
 
 # Plot as bar chart
@@ -519,28 +320,49 @@ plt.show()
 true_positives_counts = pd.DataFrame(
     {
         "Predictions": predictions_per_area_bin,
-        # "Ground Truth": gt_per_area_bin,
         "True Positives": predictions_df.loc[predictions_df["TP"], "area_bins"]
         .value_counts()
         .sort_index(),
     }
 )
 
+true_positives_counts["precision"] = (
+    true_positives_counts["True Positives"]
+    / true_positives_counts["Predictions"]
+)
+
 # Plot as bar chart
-true_positives_counts.plot(
+fig, ax = plt.subplots(1, 1, figsize=(10, 6))
+true_positives_counts.loc[:, ["Predictions", "True Positives"]].plot(
     kind="bar",
+    ax=ax,
     figsize=(12, 6),
     color=["skyblue", "blue"],
     stacked=False,
 )
-plt.title("Counts per Area Bin Validation Set")
-plt.xlabel("Bbox area (pixels^2)")
-plt.ylabel("Number of Detections")
-plt.xticks(rotation=45)
-plt.grid(True, alpha=0.3)
+ax.set_title("Counts per Area Bin Validation Set")
+ax.set_xlabel("Bbox area (pixels^2)")
+ax.set_ylabel("Number of Detections")
+ax.tick_params(axis="x", rotation=45)
+ax.grid(True, alpha=0.3)
+
+
+# add line plot for precision on right y-axis
+ax2 = ax.twinx()
+ax2.plot(
+    range(len(true_positives_counts)),
+    true_positives_counts["precision"],
+    color="red",
+    marker="o",
+    label="Precision",
+    linewidth=2,
+)
+ax2.set_ylabel("Precision", color="red")
+ax2.tick_params(axis="y", labelcolor="red")
+ax2.set_ylim(0.4, 1.01)  # Precision is between 0 and 1
+
 plt.tight_layout()
 plt.show()
-
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Count missed detections per bin
@@ -556,23 +378,44 @@ missed_detections_counts = pd.DataFrame(
     }
 )
 
+missed_detections_counts["recall"] = (
+    missed_detections_counts["Matched Ground Truth"]
+    / missed_detections_counts["Ground Truth"]
+)
+
 # Plot as bar chart
-missed_detections_counts.plot(
+fig, ax = plt.subplots(1, 1, figsize=(10, 6))
+missed_detections_counts.loc[:, ["Ground Truth", "Matched Ground Truth"]].plot(
     kind="bar",
+    ax=ax,
     figsize=(12, 6),
     color=["lightcoral", "green"],
     stacked=False,
 )
-plt.title("Counts per Area Bin Validation Set")
-plt.xlabel("Area Range (pixels^2)")
-plt.ylabel("Number of Detections")
-plt.xticks(rotation=45)
-plt.grid(True, alpha=0.3)
+ax.set_title("Counts per Area Bin Validation Set")
+ax.set_xlabel("Area Range (pixels^2)")
+ax.set_ylabel("Number of Detections")
+ax.tick_params(axis="x", rotation=45)
+ax.grid(True, alpha=0.3)
+
+
+# add line plot for recall on right y-axis
+ax2 = ax.twinx()
+ax2.plot(
+    range(len(missed_detections_counts)),
+    missed_detections_counts["recall"],
+    color="blue",
+    marker="o",
+    linewidth=2,
+)
+ax2.tick_params(axis="y", labelcolor="blue")
+ax2.set_ylabel("Recall", color="blue")
+ax2.set_ylim(0.4, 1.01)  # Recall is between 0 and 1
+
 plt.tight_layout()
 plt.show()
 
-
-# %%%%%%%%%%%
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Image id histogram
 
 detections_per_image_id = pd.DataFrame(
