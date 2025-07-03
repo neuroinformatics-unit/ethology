@@ -13,6 +13,7 @@ import pandas as pd
 import torch
 import torchvision.transforms.v2 as transforms
 import xarray as xr
+from pycocotools.coco import COCO
 from torch.utils.data import random_split
 
 from ethology.datasets.create import create_coco_dataset
@@ -35,11 +36,53 @@ xr.set_options(display_expand_attrs=False)
 dataset_dir = Path("/home/sminano/swc/project_crabs/data/sep2023-full")
 
 
-trained_model_dict = {
-    "all_data_augm_seed_42": Path(
-        "/home/sminano/swc/project_crabs/ml-runs/617393114420881798/f348d9d196934073bece1b877cbc4d38/checkpoints/last.ckpt"
-    )
+experiment_ID = "617393114420881798"
+ml_runs_experiment_dir = (
+    Path("/home/sminano/swc/project_crabs/ml-runs") / experiment_ID
+)
+annotations_dir = Path("/home/sminano/swc/project_ethology/large_annotations")
+
+
+# percentile is of bbox diagonal!
+models_dict = {
+    "above_0th_percentile_seed_42": (
+        ml_runs_experiment_dir
+        / "f348d9d196934073bece1b877cbc4d38"
+        / "checkpoints"
+        / "last.ckpt"
+    ),
+    "above_5th_percentile_seed_42": (
+        ml_runs_experiment_dir
+        / "e72e53b23df142ae859dd590798b4162"
+        / "checkpoints"
+        / "last.ckpt"
+    ),
 }
+
+
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+full_gt_annotations_file = annotations_dir / "VIA_JSON_combined_coco_gen.json"
+coco_full_gt = COCO(str(full_gt_annotations_file))
+
+# compute diagonal percentiles for full gt
+gt_bboxes_diagonals = [
+    np.sqrt(
+        annot["bbox"][2] ** 2 + annot["bbox"][3] ** 2
+    )  # bbox is xywh in COCO
+    for annot in coco_full_gt.dataset["annotations"]
+]
+gt_diagonal_percentiles = np.percentile(
+    gt_bboxes_diagonals, np.arange(0, 105, 5)
+)
+
+
+bin_labels = [
+    f"{gt_diagonal_percentiles[i]:.0f}-{gt_diagonal_percentiles[i + 1]:.0f}"
+    for i in range(gt_diagonal_percentiles.shape[0] - 1)
+]
+
+print(bin_labels)
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Set default device: CUDA if available, otherwise mps, otherwise CPU
@@ -55,6 +98,8 @@ print(f"Using device: {device}")
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Retrieve model config and CLI args from mlflow
+
+trained_model_path = str(models_dict["above_5th_percentile_seed_42"])
 
 mlflow_params = read_mlflow_params(trained_model_path)
 config = read_config_from_mlflow_params(mlflow_params)
@@ -76,6 +121,8 @@ model.eval()
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Create COCO dataset
 annotations_filename = Path(cli_args["annotation_files"][0]).name
+print(annotations_filename)
+
 inference_transforms = transforms.Compose(
     [
         transforms.ToImage(),
@@ -86,7 +133,7 @@ inference_transforms = transforms.Compose(
 
 dataset_coco = create_coco_dataset(
     images_dir=Path(dataset_dir) / "frames",
-    annotations_file=Path(dataset_dir) / "annotations" / annotations_filename,
+    annotations_file=annotations_dir / annotations_filename,
     composed_transform=inference_transforms,
 )
 
@@ -117,9 +164,9 @@ test_dataset, val_dataset = random_split(
 )
 
 print(f"Seed: {seed_n}")
-print(f"Number of training samples: {len(train_dataset)}")
-print(f"Number of validation samples: {len(val_dataset)}")
-print(f"Number of test samples: {len(test_dataset)}")
+print(f"Number of training samples: {len(train_dataset)}")  # images
+print(f"Number of validation samples: {len(val_dataset)}")  # images
+print(f"Number of test samples: {len(test_dataset)}")  # images
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Create dataloader
@@ -179,14 +226,14 @@ for val_idx, (image, annotations) in enumerate(val_dataset):
         pred_bboxes, gt_bboxes, iou_threshold
     )
 
-    # Calculate bboxes areas
+    # Calculate bboxes diagonals
     pred_bboxes_width = pred_bboxes[:, 2] - pred_bboxes[:, 0]
     pred_bboxes_height = pred_bboxes[:, 3] - pred_bboxes[:, 1]
-    pred_areas = pred_bboxes_width * pred_bboxes_height
+    pred_diagonals = np.sqrt(pred_bboxes_width**2 + pred_bboxes_height**2)
 
     gt_bboxes_width = gt_bboxes[:, 2] - gt_bboxes[:, 0]
     gt_bboxes_height = gt_bboxes[:, 3] - gt_bboxes[:, 1]
-    gt_areas = gt_bboxes_width * gt_bboxes_height
+    gt_diagonals = np.sqrt(gt_bboxes_width**2 + gt_bboxes_height**2)
 
     # Create prediction subtable
     pred_data = {
@@ -198,7 +245,7 @@ for val_idx, (image, annotations) in enumerate(val_dataset):
         "confidence": pred_dict["bbox_confidences"],
         "TP": tp,
         "FP": fp,
-        "bbox_area": pred_areas,
+        "bbox_diagonal": pred_diagonals,
     }
     list_pred_subtables.append(pd.DataFrame(pred_data))
 
@@ -210,7 +257,7 @@ for val_idx, (image, annotations) in enumerate(val_dataset):
         "image_ID": annotations["image_id"],
         "val_batch_idx": val_idx,
         "missed_detection": md,
-        "bbox_area": gt_areas,
+        "bbox_diagonal": gt_diagonals,
     }
     list_gt_subtables.append(pd.DataFrame(gt_data))
 
@@ -251,33 +298,26 @@ print(precision_recall_df)
 print(f"Average precision: {precision_recall_df['precision'].mean()}")
 print(f"Average recall: {precision_recall_df['recall'].mean()}")
 
+
+# all annotations:
 # Average precision: 0.9456786718983294
 # Average recall: 0.8494677009613534
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-# Discretize annotations based on area
-
-gt_area_percentiles = np.percentile(
-    gt_annotations_df["bbox_area"], np.arange(0, 105, 5)
-)
-
-bin_labels = [
-    f"{gt_area_percentiles[i]:.0f}-{gt_area_percentiles[i + 1]:.0f}"
-    for i in range(gt_area_percentiles.shape[0] - 1)
-]
+# Discretize annotations based on diagonal
 
 
-predictions_df["area_bins"] = pd.cut(
-    predictions_df["bbox_area"],
-    bins=gt_area_percentiles,  # same bins for predictions and gt
+predictions_df["diagonal_bins"] = pd.cut(
+    predictions_df["bbox_diagonal"],
+    bins=gt_diagonal_percentiles,  # same bins for predictions and gt
     labels=bin_labels,
     include_lowest=True,
     right=False,
 )
 
-gt_annotations_df["area_bins"] = pd.cut(
-    gt_annotations_df["bbox_area"],
-    bins=gt_area_percentiles,  # same bins for predictions and gt
+gt_annotations_df["diagonal_bins"] = pd.cut(
+    gt_annotations_df["bbox_diagonal"],
+    bins=gt_diagonal_percentiles,  # same bins for predictions and gt
     labels=bin_labels,
     include_lowest=True,
     right=False,
@@ -285,17 +325,19 @@ gt_annotations_df["area_bins"] = pd.cut(
 
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-# Count detections in each area bin
+# Count detections in each diagonal bin
 # Is GT really that balanced??
-predictions_per_area_bin = (
-    predictions_df["area_bins"].value_counts().sort_index()
+predictions_per_diagonal_bin = (
+    predictions_df["diagonal_bins"].value_counts().sort_index()
 )
-gt_per_area_bin = gt_annotations_df["area_bins"].value_counts().sort_index()
+gt_per_diagonal_bin = (
+    gt_annotations_df["diagonal_bins"].value_counts().sort_index()
+)
 
 comparison_df = pd.DataFrame(
     {
-        "Predictions": predictions_per_area_bin,
-        "Ground Truth": gt_per_area_bin,
+        "Predictions": predictions_per_diagonal_bin,
+        "Ground Truth": gt_per_diagonal_bin,
     }
 )
 
@@ -307,8 +349,8 @@ comparison_df.plot(
     color=["skyblue", "lightcoral"],
     stacked=False,
 )
-plt.title("Detection Counts by Area Bins Validation Set")
-plt.xlabel("Area Range (pixels^2)")
+plt.title("Detection Counts by Diagonal Bins Validation Set")
+plt.xlabel("Diagonal (pixels)")
 plt.ylabel("Number of Detections")
 plt.xticks(rotation=45)
 plt.grid(True, alpha=0.3)
@@ -319,8 +361,10 @@ plt.show()
 
 true_positives_counts = pd.DataFrame(
     {
-        "Predictions": predictions_per_area_bin,
-        "True Positives": predictions_df.loc[predictions_df["TP"], "area_bins"]
+        "Predictions": predictions_per_diagonal_bin,
+        "True Positives": predictions_df.loc[
+            predictions_df["TP"], "diagonal_bins"
+        ]
         .value_counts()
         .sort_index(),
     }
@@ -340,10 +384,11 @@ true_positives_counts.loc[:, ["Predictions", "True Positives"]].plot(
     color=["skyblue", "blue"],
     stacked=False,
 )
-ax.set_title("Counts per Area Bin Validation Set")
-ax.set_xlabel("Bbox area (pixels^2)")
+ax.set_title("Counts per Diagonal Bin Validation Set")
+ax.set_xlabel("Diagonal (pixels)")
 ax.set_ylabel("Number of Detections")
 ax.tick_params(axis="x", rotation=45)
+ax.set_ylim(0.0, 325)
 ax.grid(True, alpha=0.3)
 
 
@@ -359,7 +404,7 @@ ax2.plot(
 )
 ax2.set_ylabel("Precision", color="red")
 ax2.tick_params(axis="y", labelcolor="red")
-ax2.set_ylim(0.4, 1.01)  # Precision is between 0 and 1
+ax2.set_ylim(0.0, 1.00)  # Precision is between 0 and 1
 
 plt.tight_layout()
 plt.show()
@@ -369,9 +414,9 @@ plt.show()
 
 missed_detections_counts = pd.DataFrame(
     {
-        "Ground Truth": gt_per_area_bin,
+        "Ground Truth": gt_per_diagonal_bin,
         "Matched Ground Truth": gt_annotations_df.loc[
-            ~gt_annotations_df["missed_detection"], "area_bins"
+            ~gt_annotations_df["missed_detection"], "diagonal_bins"
         ]
         .value_counts()
         .sort_index(),
@@ -392,10 +437,11 @@ missed_detections_counts.loc[:, ["Ground Truth", "Matched Ground Truth"]].plot(
     color=["lightcoral", "green"],
     stacked=False,
 )
-ax.set_title("Counts per Area Bin Validation Set")
-ax.set_xlabel("Area Range (pixels^2)")
+ax.set_title("Counts per Diagonal Bin Validation Set")
+ax.set_xlabel("Diagonal (pixels)")
 ax.set_ylabel("Number of Detections")
 ax.tick_params(axis="x", rotation=45)
+ax.set_ylim(0.0, 325)
 ax.grid(True, alpha=0.3)
 
 
@@ -410,7 +456,7 @@ ax2.plot(
 )
 ax2.tick_params(axis="y", labelcolor="blue")
 ax2.set_ylabel("Recall", color="blue")
-ax2.set_ylim(0.4, 1.01)  # Recall is between 0 and 1
+ax2.set_ylim(0.0, 1.00)  # Recall is between 0 and 1
 
 plt.tight_layout()
 plt.show()
@@ -445,3 +491,5 @@ plt.xticks(rotation=45)
 plt.grid(True, alpha=0.3)
 plt.tight_layout()
 plt.show()
+
+# %%
