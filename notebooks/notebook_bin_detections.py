@@ -34,13 +34,12 @@ xr.set_options(display_expand_attrs=False)
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Input data - in domain
 dataset_dir = Path("/home/sminano/swc/project_crabs/data/sep2023-full")
-
+annotations_dir = Path("/home/sminano/swc/project_ethology/large_annotations")
 
 experiment_ID = "617393114420881798"
 ml_runs_experiment_dir = (
     Path("/home/sminano/swc/project_crabs/ml-runs") / experiment_ID
 )
-annotations_dir = Path("/home/sminano/swc/project_ethology/large_annotations")
 
 
 # percentile is of bbox diagonal!
@@ -61,22 +60,26 @@ models_dict = {
 
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# Compute bins using full GT annotations
+# We bin the size of the bbox diagonal
 
 full_gt_annotations_file = annotations_dir / "VIA_JSON_combined_coco_gen.json"
 coco_full_gt = COCO(str(full_gt_annotations_file))
 
-# compute diagonal percentiles for full gt
+# compute diagonals for each gt annotation
 gt_bboxes_diagonals = [
     np.sqrt(
         annot["bbox"][2] ** 2 + annot["bbox"][3] ** 2
     )  # bbox is xywh in COCO
     for annot in coco_full_gt.dataset["annotations"]
 ]
+
+# compute percentiles of diagonals
 gt_diagonal_percentiles = np.percentile(
     gt_bboxes_diagonals, np.arange(0, 105, 5)
 )
 
-
+# define labels for bins
 bin_labels = [
     f"{gt_diagonal_percentiles[i]:.0f}-{gt_diagonal_percentiles[i + 1]:.0f}"
     for i in range(gt_diagonal_percentiles.shape[0] - 1)
