@@ -4,7 +4,9 @@ import json
 from pathlib import Path
 from typing import Literal
 
+import numpy as np
 import pandas as pd
+import xarray as xr
 
 from ethology.annotations.validators import ValidCOCO, ValidVIA
 
@@ -30,7 +32,7 @@ def from_files(
     format: Literal["VIA", "COCO"],
     images_dirs: Path | str | list[Path | str] | None = None,
 ) -> pd.DataFrame:
-    """Read input annotation files as a bboxes dataframe.
+    """Read input annotation files as a bboxes xarray dataset.
 
     Parameters
     ----------
@@ -44,17 +46,29 @@ def from_files(
 
     Returns
     -------
-    pd.DataFrame
-        Bounding boxes annotations dataframe. The dataframe is indexed
-        by "annotation_id" and has the following columns: "image_filename",
-        "image_id", "image_width", "image_height", "x_min", "y_min",
-        "width", "height", "supercategory", "category". It also has the
-        following attributes: "annotation_files", "annotation_format",
-        "images_directories". The "image_id" is assigned based
-        on the alphabetically sorted list of unique image filenames across all
-        input files. The "category_id" column is always a 0-based integer,
-        except for VIA files where the values specified in the input file
-        are retained.
+    xr.Dataset
+        Bounding boxes annotations xarray dataset. The dataset has the
+        following dimensions: "image_id", "space", "id".
+        The "image_id" is assigned based on the alphabetically sorted list
+        of unique image filenames across all input files. The "space"
+        dimension holds the "x" or "y" coordinates. The "id" dimension
+        corresponds to the annotation ID per image and it is assigned from
+        0 to the max number of annotations per image in the full dataset.
+
+        The dataset consists of three arrays:
+        - "position": (image_id, space, id)
+        - "shape": (image_id, space, id)
+        - "category": (image_id, id)
+        The "category" array holds 0-based integers, except for VIA
+        files where the values specified in the input file are retained.
+
+        The dataset attributes include:
+        - "map_category_id_to_category": map from category_id to category name
+        - "map_image_id_to_filename": map from image_id to image filename
+        - "images_directories": list of paths to the directories containing
+        the images the annotations refer to (optional)
+        - "annotation_files": list of paths to the input annotation files
+        - "annotation_format": format of the input annotation files
 
     Notes
     -----
@@ -66,7 +80,18 @@ def from_files(
     image IDs to images that have the same name but appear in different input
     annotation files, you can either make the image filenames distinct before
     loading the data, or you can load the data from each file
-    as a separate dataframe, and then concatenate them as desired.
+    as a separate xarray dataset, and then concatenate them as desired.
+
+    Examples
+    --------
+    >>> ds = from_files(
+    ...     file_paths=[
+    ...         "path/to/annotation_file_1.json",
+    ...         "path/to/annotation_file_2.json",
+    ...     ],
+    ...     format="VIA",
+    ...     images_dirs=["path/to/images_dir_1", "path/to/images_dir_2"],
+    ... )
 
     See Also
     --------
@@ -82,14 +107,33 @@ def from_files(
     else:
         df_all = _from_single_file(file_paths, format=format)
 
-    # Add metadata
-    df_all.attrs = {
+    # Get map from image_id to image_filename
+    mapping_df = df_all[["image_filename", "image_id"]].drop_duplicates()
+    map_image_id_to_filename = mapping_df.set_index("image_id").to_dict()[
+        "image_filename"
+    ]
+
+    # Get map from category_id to category
+    map_category_id_to_category = (
+        df_all[["category_id", "category"]]
+        .drop_duplicates()
+        .set_index("category_id")
+        .to_dict()["category"]
+    )
+
+    # Convert to xarray dataset
+    ds = _df_to_xarray_ds(df_all)
+
+    # Add metadata to the dataset
+    ds.attrs = {
         "annotation_files": file_paths,
         "annotation_format": format,
+        "map_category_id_to_category": map_category_id_to_category,
+        "map_image_id_to_filename": map_image_id_to_filename,
         "images_directories": images_dirs,
     }
 
-    return df_all
+    return ds
 
 
 def _from_multiple_files(
@@ -397,3 +441,100 @@ def _VIA_category_id_as_int(df: pd.DataFrame) -> pd.DataFrame:
     except ValueError:
         df["category_id"] = df["category"].factorize(sort=True)[0]
     return df
+
+
+def _df_to_xarray_ds(df: pd.DataFrame) -> xr.Dataset:
+    """Convert bounding boxes annotations dataframe to an xarray dataset.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Bounding boxes annotations dataframe.
+
+    Returns
+    -------
+    xr.Dataset
+        an xarray dataset with the following dimensions:
+        - "image_id": holds the 0-based index of the image in the "images"
+        list of the COCO JSON file;
+        - "space": "x" or "y";
+        - "id": annotation ID per image, assigned from 0 to the max number of
+        annotations per image in the full dataset.
+
+        The dataset is made up of the following arrays:
+        - position: (image_id, space, id)
+        - shape: (image_id, space, id)
+        - category: (image_id, id)
+
+    """
+    # Compute max number of annotations per image
+    max_annotations_per_image = df["image_id"].value_counts().max()
+
+    # Sort the dataframe by image_id
+    # Note: the input annotation ID is unique across the dataframe
+    df = df.sort_values(by=["image_id"])
+
+    # Compute indices of the rows where the image ID switches
+    bool_id_diff_from_prev = df["image_id"].ne(df["image_id"].shift())
+    indices_id_switch = np.argwhere(bool_id_diff_from_prev).squeeze()[1:]
+
+    # Stack position, shape and confidence arrays along ID axis
+    map_key_to_columns = {
+        "position_array": ["x_min", "y_min"],
+        "shape_array": ["width", "height"],
+        "category_array": ["category_id"],
+    }
+    map_key_to_padding = {
+        "position_array": (np.float64, np.nan),
+        "shape_array": (np.float64, np.nan),
+        "category_array": (int, -1),
+    }
+    array_dict = {}
+    for key in map_key_to_columns:
+        # extract annotations per image
+        list_arrays = np.split(
+            df[map_key_to_columns[key]].to_numpy(
+                dtype=map_key_to_padding[key][0]  # type: ignore
+            ),
+            indices_id_switch,  # indices along axis=0
+        )
+
+        # pad arrays with NaN values along the annotation ID axis
+        list_arrays_padded = [
+            np.pad(
+                arr,
+                ((0, max_annotations_per_image - arr.shape[0]), (0, 0)),
+                constant_values=map_key_to_padding[key][1],  # type: ignore
+            )
+            for arr in list_arrays
+        ]
+
+        # stack along the first axis (image_id)
+        array_dict[key] = np.stack(list_arrays_padded, axis=0).squeeze()
+
+        # reorder axes if required
+        if "category" not in key:
+            array_dict[key] = np.moveaxis(array_dict[key], -1, 1)
+
+    # ----
+    # Modify x_min and y_min to represent the bbox centre
+    array_dict["position_array"] += array_dict["shape_array"] / 2
+
+    # Create xarray dataset
+    return xr.Dataset(
+        data_vars=dict(
+            position=(
+                ["image_id", "space", "id"],
+                array_dict["position_array"],
+            ),
+            shape=(["image_id", "space", "id"], array_dict["shape_array"]),
+            category=(["image_id", "id"], array_dict["category_array"]),
+        ),
+        coords=dict(
+            image_id=df["image_id"].unique(),
+            space=["x", "y"],
+            id=range(max_annotations_per_image),
+            # annotation ID per frame; could be consistent across frames
+            # or not
+        ),
+    )
