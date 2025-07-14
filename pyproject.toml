@@ -21,6 +21,7 @@ classifiers = [
 dependencies = [
   "movement",
   "mlflow-skinny",
+  "netCDF4",
 ]
 
 [project.urls]
