@@ -49,7 +49,9 @@ map_run_slurm_977884_jobID_to_percentile = {
 # Compute bins using full GT annotations
 # We bin the size of the bbox diagonal
 
-full_gt_annotations_file = annotations_dir / "VIA_JSON_combined_coco_gen_sorted_imageIDs.json"
+full_gt_annotations_file = (
+    annotations_dir / "VIA_JSON_combined_coco_gen_sorted_imageIDs.json"
+)
 coco_full_gt = COCO(str(full_gt_annotations_file))
 
 # compute diagonals for each gt annotation
@@ -157,7 +159,7 @@ eval_set = "test" if df["cli_args/use_test_set"].all() else "val"
 print(f"Evaluating on {eval_set} set")
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%
-# plot precision and recall 
+# plot precision and recall
 fig, ax = plt.subplots(figsize=(10, 6))
 
 # Precision plot

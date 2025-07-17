@@ -5,7 +5,6 @@ export the results in a format that can be loaded in movement napari widget.
 """
 
 # %%
-import pickle
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -16,7 +15,6 @@ import torchvision.transforms.v2 as transforms
 import xarray as xr
 from pycocotools.coco import COCO
 from torch.utils.data import random_split
-from torchvision.utils import draw_bounding_boxes
 
 from ethology.datasets.create import create_coco_dataset
 from ethology.detectors.evaluate import evaluate_detections_hungarian
@@ -227,8 +225,10 @@ def discretize_based_on_bbox_diagonal(
     return predictions_df, gt_annotations_df
 
 
-def plot_true_positives_per_bin(predictions_df, predictions_per_diagonal_bin, model_key):
-    "Plot true positives per diagonal bin"
+def plot_true_positives_per_bin(
+    predictions_df, predictions_per_diagonal_bin, model_key
+):
+    """Plot true positives per diagonal bin"""
     true_positives_counts = pd.DataFrame(
         {
             "Predictions": predictions_per_diagonal_bin,
@@ -261,7 +261,6 @@ def plot_true_positives_per_bin(predictions_df, predictions_per_diagonal_bin, mo
     ax.set_ylim(0.0, 425)
     ax.grid(True, alpha=0.3)
 
-
     # add line plot for precision on right y-axis
     ax2 = ax.twinx()
     ax2.plot(
@@ -285,8 +284,9 @@ def plot_true_positives_per_bin(predictions_df, predictions_per_diagonal_bin, mo
     plt.show()
 
 
-def plot_missed_detections_per_bin(gt_annotations_df, gt_per_diagonal_bin, model_key):
-
+def plot_missed_detections_per_bin(
+    gt_annotations_df, gt_per_diagonal_bin, model_key
+):
     missed_detections_counts = pd.DataFrame(
         {
             "Ground Truth": gt_per_diagonal_bin,
@@ -305,7 +305,9 @@ def plot_missed_detections_per_bin(gt_annotations_df, gt_per_diagonal_bin, model
 
     # Plot as bar chart
     fig, ax = plt.subplots(1, 1, figsize=(10, 6))
-    missed_detections_counts.loc[:, ["Ground Truth", "Matched Ground Truth"]].plot(
+    missed_detections_counts.loc[
+        :, ["Ground Truth", "Matched Ground Truth"]
+    ].plot(
         kind="bar",
         ax=ax,
         figsize=(12, 6),
@@ -319,7 +321,6 @@ def plot_missed_detections_per_bin(gt_annotations_df, gt_per_diagonal_bin, model
     ax.set_ylim(0.0, 400)
     ax.grid(True, alpha=0.3)
 
-
     # add line plot for recall on right y-axis
     ax2 = ax.twinx()
     ax2.plot(
@@ -332,7 +333,6 @@ def plot_missed_detections_per_bin(gt_annotations_df, gt_per_diagonal_bin, model
     ax2.tick_params(axis="y", labelcolor="blue")
     ax2.set_ylabel("Recall", color="blue")
     ax2.set_ylim(0.0, 1.00)  # Recall is between 0 and 1
-
 
     # add reference line at 0.85
     ax2.axhline(y=0.85, color="blue", linestyle="--", linewidth=1)
@@ -435,7 +435,6 @@ for model_key in list_models:
     config = read_config_from_mlflow_params(mlflow_params)
     cli_args = read_cli_args_from_mlflow_params(mlflow_params)
 
-
     # Create COCO dataset
     # Fix for model trained on all annotations
     # (VIA_JSON_combined_coco_gen has different image IDs than the rest)
@@ -445,12 +444,12 @@ for model_key in list_models:
     ):
         dataset_coco = create_coco_dataset(
             images_dir=Path(dataset_dir) / "frames",
-            annotations_file=annotations_dir / "VIA_JSON_combined_coco_gen.json",
+            annotations_file=annotations_dir
+            / "VIA_JSON_combined_coco_gen.json",
             composed_transform=inference_transforms,
         )
     else:
         dataset_coco = default_dataset_coco
-
 
     # Split dataset like in crabs repo
     train_dataset, val_dataset, test_dataset = split_dataset_crab_repo(
@@ -485,8 +484,7 @@ for model_key in list_models:
         bin_labels,
     )
 
-
-    #---------------------------------------
+    # ---------------------------------------
     # Plot boxes in each diagonal bin in validation set
     predictions_per_diagonal_bin = (
         predictions_df["diagonal_bins"].value_counts().sort_index()
@@ -519,16 +517,17 @@ for model_key in list_models:
     plt.tight_layout()
     plt.show()
 
-    #---------------------------------------
+    # ---------------------------------------
     # Plot true positives per bin
-    plot_true_positives_per_bin(predictions_df, predictions_per_diagonal_bin, model_key)
-    
+    plot_true_positives_per_bin(
+        predictions_df, predictions_per_diagonal_bin, model_key
+    )
 
-    #---------------------------------------
+    # ---------------------------------------
     # Plot missed detections per bin
-    plot_missed_detections_per_bin(gt_annotations_df, gt_per_diagonal_bin, model_key)
-
-
+    plot_missed_detections_per_bin(
+        gt_annotations_df, gt_per_diagonal_bin, model_key
+    )
 
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
