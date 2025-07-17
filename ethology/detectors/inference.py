@@ -20,6 +20,25 @@ def _detections_per_image_id_as_ds(
     detections_per_image_id: dict,
 ) -> xr.Dataset:
     """Reshape detections per sample as xarray dataset."""
+    # Place tensors on cpu if required
+    if any(
+        [
+            any(
+                isinstance(detections[key], torch.Tensor) for key in detections
+            )
+            for detections in detections_per_image_id.values()
+        ]
+    ):
+        detections_per_image_id = {
+            image_id: {
+                key: value.cpu().numpy()
+                if isinstance(value, torch.Tensor)
+                else value
+                for key, value in detections.items()
+            }
+            for image_id, detections in detections_per_image_id.items()
+        }
+
     # Get coordinates
     list_image_id_coords = list(detections_per_image_id.keys())
     list_space_coords = ["x", "y"]
@@ -41,33 +60,28 @@ def _detections_per_image_id_as_ds(
 
     # Get lists of data arrays
     list_centroid_arrays = [
-        (
-            detections["boxes"].cpu().numpy()[:, 0:2]
-            + detections["boxes"].cpu().numpy()[:, 2:4]
-        )
-        * 0.5
+        (detections["boxes"][:, 0:2] + detections["boxes"][:, 2:4]) * 0.5
         for detections in detections_per_image_id.values()
     ]
 
     list_shape_arrays = [
-        detections["boxes"].cpu().numpy()[:, 2:4]
-        - detections["boxes"].cpu().numpy()[:, 0:2]
+        detections["boxes"][:, 2:4] - detections["boxes"][:, 0:2]
         for detections in detections_per_image_id.values()
     ]
 
     list_confidence_arrays = [
-        detections["scores"].cpu().numpy()  # .reshape(-1, 1)
+        detections["scores"]  # .reshape(-1, 1)
         for detections in detections_per_image_id.values()
     ]
 
     list_label_arrays = [
-        detections["labels"].cpu().numpy()  # .reshape(-1, 1)
+        detections["labels"]  # .reshape(-1, 1)
         for detections in detections_per_image_id.values()
     ]
 
     # Define arrays to create
     arrays_dict = {
-        "centroids": {  # --> change to position
+        "position": {  # --> before: centroids
             "data": list_centroid_arrays,
             "coords": coords_dict,
             "pad_value": np.nan,
@@ -152,13 +166,6 @@ def run_detector_on_dataset(
     return detections_dataset
 
 
-def _detections_per_batch_as_ds(
-    detections_per_batch: dict,
-) -> xr.Dataset:
-    """Reshape detections per batch as xarray dataset."""
-    pass
-
-
 def run_detector_on_dataloader(
     model: torch.nn.Module,
     dataloader: torch.utils.data.DataLoader,
@@ -189,6 +196,11 @@ def run_detector_on_dataloader(
 
         # Add to dict
         detections_per_batch[batch_idx] = detections_batch
+
+    # # Format as xarray dataset
+    # detections_dataset = _detections_per_image_id_as_ds(
+    #     detections_per_image_id
+    # )
 
     return detections_per_batch
 
