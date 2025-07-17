@@ -16,6 +16,7 @@ import torchvision.transforms.v2 as transforms
 import xarray as xr
 from pycocotools.coco import COCO
 from torch.utils.data import random_split
+from torchvision.utils import draw_bounding_boxes
 
 from ethology.datasets.create import create_coco_dataset
 from ethology.detectors.evaluate import evaluate_detections_hungarian
@@ -24,7 +25,6 @@ from ethology.mlflow import (
     read_config_from_mlflow_params,
     read_mlflow_params,
 )
-from torchvision.utils import draw_bounding_boxes
 
 # Set xarray options
 xr.set_options(display_expand_attrs=False)

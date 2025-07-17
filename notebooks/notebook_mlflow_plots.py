@@ -127,10 +127,10 @@ ax1.set_ylabel("count")
 
 
 # %%
-# Plot P/R on validation set per "last" model
+# Prepare data
 
 csv_file = Path(
-    "/home/sminano/swc/project_ethology/figs_subset_annotations/run_slurm_1098734_0_17_val_set.csv"
+    "/home/sminano/swc/project_ethology/figs_subset_annotations/run_slurm_1103832_0_17_val_set_full.csv"
 )
 
 # read csv
@@ -157,7 +157,7 @@ eval_set = "test" if df["cli_args/use_test_set"].all() else "val"
 print(f"Evaluating on {eval_set} set")
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%
-# plot precision and recall on validation set
+# plot precision and recall 
 fig, ax = plt.subplots(figsize=(10, 6))
 
 # Precision plot

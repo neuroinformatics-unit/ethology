@@ -175,7 +175,6 @@ for model_key in models_dict:
     detections_ds.attrs["coco_crabs_dataset_split"] = "val"
 
     # ------------------------------------
-    # Save detections dataset and evaluation dataset
     # Save detections dataset
     detections_ds.to_netcdf(
         output_dir
