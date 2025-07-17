@@ -16,17 +16,17 @@ def _pad_sequence_along_detections_dim(
     )
 
 
-def _detections_per_sample_as_ds(
-    detections_per_sample: dict,
+def _detections_per_image_id_as_ds(
+    detections_per_image_id: dict,
 ) -> xr.Dataset:
     """Reshape detections per sample as xarray dataset."""
     # Get coordinates
-    list_image_id_coords = list(detections_per_sample.keys())
+    list_image_id_coords = list(detections_per_image_id.keys())
     list_space_coords = ["x", "y"]
     max_n_detections_per_image = max(
         [
             detections["boxes"].shape[0]
-            for detections in detections_per_sample.values()
+            for detections in detections_per_image_id.values()
         ]
     )
 
@@ -46,28 +46,28 @@ def _detections_per_sample_as_ds(
             + detections["boxes"].cpu().numpy()[:, 2:4]
         )
         * 0.5
-        for detections in detections_per_sample.values()
+        for detections in detections_per_image_id.values()
     ]
 
     list_shape_arrays = [
         detections["boxes"].cpu().numpy()[:, 2:4]
         - detections["boxes"].cpu().numpy()[:, 0:2]
-        for detections in detections_per_sample.values()
+        for detections in detections_per_image_id.values()
     ]
 
     list_confidence_arrays = [
         detections["scores"].cpu().numpy()  # .reshape(-1, 1)
-        for detections in detections_per_sample.values()
+        for detections in detections_per_image_id.values()
     ]
 
     list_label_arrays = [
         detections["labels"].cpu().numpy()  # .reshape(-1, 1)
-        for detections in detections_per_sample.values()
+        for detections in detections_per_image_id.values()
     ]
 
     # Define arrays to create
     arrays_dict = {
-        "centroids": {
+        "centroids": {  # --> change to position
             "data": list_centroid_arrays,
             "coords": coords_dict,
             "pad_value": np.nan,
@@ -122,7 +122,7 @@ def run_detector_on_dataset(
     """Run detection on each sample of a dataset.
 
     Note that the dataset transforms are applied to the sampled images.
-    The output is a dictionary with the detections per sample as a dictionary.
+    The output is a dictionary with the detections per image_id as a dictionary.
     The detections dictionary has the following keys:
     - "boxes": tensor of shape [N, 4]
     - "scores": tensor of shape [N]
@@ -132,8 +132,8 @@ def run_detector_on_dataset(
     model.eval()
 
     # Run detection
-    detections_per_sample = {}
-    for idx, (image, _annotations) in enumerate(dataset):
+    detections_per_image_id = {}
+    for image, annotations in dataset:
         # Place image tensor on device and add batch dimension
         image = image.to(device)[None]  # [1, C, H, W]
 
@@ -141,11 +141,13 @@ def run_detector_on_dataset(
         with torch.no_grad():
             detections = model(image)[0]  # select single batch dimension
 
-        # Add to dict
-        detections_per_sample[idx] = detections
+        # Add to dict with key = image_id
+        detections_per_image_id[annotations["image_id"]] = detections
 
     # Format as xarray dataset
-    detections_dataset = _detections_per_sample_as_ds(detections_per_sample)
+    detections_dataset = _detections_per_image_id_as_ds(
+        detections_per_image_id
+    )
 
     return detections_dataset
 

@@ -37,25 +37,21 @@ ml_runs_experiment_dir = (
     Path("/home/sminano/swc/project_crabs/ml-runs") / experiment_ID
 )
 
-# percentile is of bbox diagonal!
+# I pick seed 42 for each set of models
 models_dict = {
-    "above_0th": (
-        ml_runs_experiment_dir
-        / "f348d9d196934073bece1b877cbc4d38"
-        / "checkpoints"
-        / "last.ckpt"
-    ),
-    "above_5th": (
-        ml_runs_experiment_dir
-        / "e72e53b23df142ae859dd590798b4162"
-        / "checkpoints"
-        / "last.ckpt"
-    ),
+    "above_0th": ml_runs_experiment_dir / "f348d9d196934073bece1b877cbc4d38",
+    "above_1st": ml_runs_experiment_dir / "879d2f77e2b24adcb06b87d2fede6a04",
+    "above_5th": ml_runs_experiment_dir / "75583ec227e3444ab692b99c64795325",
+    "above_10th": ml_runs_experiment_dir / "4acc37206b1e4f679d535c837bee2c2f",
+    "above_25th": ml_runs_experiment_dir / "fdcf88fcbcc84fbeb94b45ca6b6f8914",
+    "above_50th": ml_runs_experiment_dir / "daa05ded0ea047388c9134bf044061c5",
 }
 
 output_dir = Path(
     "/home/sminano/swc/project_ethology/remove_small_bboxes_inD_output"
 )
+# create output dir if it doesn't exist
+output_dir.mkdir(parents=True, exist_ok=True)
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Set default device: CUDA if available, otherwise mps, otherwise CPU
@@ -108,9 +104,13 @@ def split_dataset_crab_repo(dataset_coco, seed_n, config):
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Compute detections for each model
 
+timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+
 for model_key in models_dict:
     # Retrieve model config and CLI args from mlflow
-    trained_model_path = str(models_dict["above_0th"])
+    trained_model_path = str(
+        models_dict[model_key] / "checkpoints" / "last.ckpt"
+    )
 
     mlflow_params = read_mlflow_params(trained_model_path)
     config = read_config_from_mlflow_params(mlflow_params)
@@ -126,10 +126,6 @@ for model_key in models_dict:
     model.eval()
 
     # ------------------------------------
-    # Create COCO dataset
-    annotations_filename = Path(cli_args["annotation_files"][0]).name
-    print(annotations_filename)
-
     # Define transforms for inference
     inference_transforms = transforms.Compose(
         [
@@ -138,7 +134,11 @@ for model_key in models_dict:
         ]
     )
 
-    # Create COCO dataset and split
+    # Create COCO dataset
+    annotations_filename = Path(cli_args["annotation_files"][0]).name
+    print(annotations_filename)
+    print(f"Seed: {cli_args['seed_n']}")
+
     dataset_coco = create_coco_dataset(
         images_dir=Path(dataset_dir) / "frames",
         annotations_file=annotations_dir / annotations_filename,
@@ -162,7 +162,7 @@ for model_key in models_dict:
     )
 
     # ------------------------------------
-    # Add attributes
+    # Add attributes to detections dataset
     detections_ds.attrs["model_name"] = "fasterrcnn_resnet50_fpn_v2"
     detections_ds.attrs["model_path"] = trained_model_path
     detections_ds.attrs["config"] = json.dumps(config, indent=2)
@@ -175,13 +175,20 @@ for model_key in models_dict:
     detections_ds.attrs["coco_crabs_dataset_split"] = "val"
 
     # ------------------------------------
-    # Save dataset
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    # Save detections dataset and evaluation dataset
+    # Save detections dataset
     detections_ds.to_netcdf(
         output_dir
         / f"{model_key}_detections_val_set_seed_{cli_args['seed_n']}_{timestamp}.nc"
     )
 
+    # # Save evaluation dataset with pickle
+    # with open(
+    #     output_dir
+    #     / f"{model_key}_evaluation_val_set_seed_{cli_args['seed_n']}_{timestamp}.pkl",
+    #     "wb",
+    # ) as f:
+    #     pickle.dump(val_dataset, f)
 
 # %%
 # # reshape
