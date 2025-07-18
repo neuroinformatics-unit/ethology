@@ -9,7 +9,6 @@ from datetime import datetime
 from pathlib import Path
 
 import cv2
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import torch
@@ -283,7 +282,6 @@ iou_threshold_precision = 0.1  # threshold for a TP
 
 # Loop thru samples in val set
 for k, (image, annots) in enumerate(val_dataset):
-
     # Get predictions per model for this image_id
     image_id = annots["image_id"]
     list_bboxes, list_labels, list_scores = [], [], []
