@@ -8,7 +8,7 @@ from scipy.optimize import linear_sum_assignment
 
 def evaluate_detections_hungarian(
     pred_bboxes: np.ndarray, gt_bboxes: np.ndarray, iou_threshold: float
-) -> dict:
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Compute true positives, false positives, and missed detections.
 
     Uses Hungarian algorithm for matching.
@@ -29,7 +29,8 @@ def evaluate_detections_hungarian(
     tuple
         A tuple of three boolean arrays:
         - true_positives: True for each predicted bbox that is a true positive
-        - false_positives: True for each predicted bbox that is a false positive
+        - false_positives: True for each predicted bbox that is a false
+        positive
         - missed_detections: True for each ground truth bbox that is missed
 
     """
@@ -39,16 +40,15 @@ def evaluate_detections_hungarian(
     matched_gts = np.zeros(len(gt_bboxes), dtype=bool)
     missed_detections = np.zeros(len(gt_bboxes), dtype=bool)  # unmatched gts
 
+    # cast as a tensor if not already
+    if not isinstance(pred_bboxes, torch.Tensor):
+        pred_bboxes = torch.tensor(pred_bboxes, dtype=torch.float32)
+    if not isinstance(gt_bboxes, torch.Tensor):
+        gt_bboxes = torch.tensor(gt_bboxes, dtype=torch.float32)
+
     if len(pred_bboxes) > 0 and len(gt_bboxes) > 0:
         # Compute IoU matrix (pred_bboxes x gt_bboxes)
-        iou_matrix = (
-            ops.box_iou(
-                torch.tensor(pred_bboxes[:, :4], dtype=torch.float32),
-                torch.tensor(gt_bboxes, dtype=torch.float32),
-            )
-            .cpu()
-            .numpy()
-        )
+        iou_matrix = ops.box_iou(pred_bboxes[:, :4], gt_bboxes).cpu().numpy()
 
         # Use Hungarian algorithm to find optimal assignment
         pred_indices, gt_indices = linear_sum_assignment(
