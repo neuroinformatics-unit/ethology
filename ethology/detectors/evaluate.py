@@ -79,4 +79,9 @@ def evaluate_detections_hungarian(
         # No ground truth, all predictions are false positives
         false_positives[:] = True
 
-    return true_positives, false_positives, missed_detections, true_positives_iou
+    return (
+        true_positives,
+        false_positives,
+        missed_detections,
+        true_positives_iou,
+    )
