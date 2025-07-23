@@ -130,7 +130,8 @@ ax1.set_ylabel("count")
 
 # %%
 # Prepare data
-
+# run_slurm_1103832_0_17_val_set_full -- evaluated using corrected full GT annotations
+# (with 0-based image ID)
 csv_file = Path(
     "/home/sminano/swc/project_ethology/figs_subset_annotations/run_slurm_1103832_0_17_val_set_full.csv"
 )

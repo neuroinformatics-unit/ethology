@@ -26,7 +26,7 @@ xr.set_options(display_expand_attrs=False)
 # %matplotlib widget
 
 # %%
-# Helper function for plotting and saving ensemble detections
+# Helper function
 
 
 def plot_and_save_ensemble_detections(
@@ -135,10 +135,10 @@ model_to_path = {
 
 # dataset
 dataset_dir = Path("/home/sminano/swc/project_crabs/data/sep2023-full")
-annotations_dir = Path("/home/sminano/swc/project_ethology/large_annotations")
-full_gt_annotations_file = (
-    annotations_dir / "VIA_JSON_combined_coco_gen_sorted_imageIDs.json"
+full_gt_annotations_file = Path(
+    "/home/sminano/swc/project_ethology/large_annotations/VIA_JSON_combined_coco_gen_sorted_imageIDs.json"
 )
+
 image_width = 4096  # pixels
 image_height = 2160  # pixels
 
