@@ -349,7 +349,7 @@ for k, (image, annots) in enumerate(val_dataset):
     }
 
     # compute precision per frame
-    tp, fp, md = evaluate_detections_hungarian(
+    tp, fp, md, _ = evaluate_detections_hungarian(
         ensemble_x1_y1_x2_y2, annots["boxes"], iou_threshold_precision
     )
 

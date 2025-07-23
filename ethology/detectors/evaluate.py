@@ -40,6 +40,8 @@ def evaluate_detections_hungarian(
     matched_gts = np.zeros(len(gt_bboxes), dtype=bool)
     missed_detections = np.zeros(len(gt_bboxes), dtype=bool)  # unmatched gts
 
+    true_positives_iou = np.zeros(len(pred_bboxes), dtype=bool)
+
     # cast as a tensor if not already
     if not isinstance(pred_bboxes, torch.Tensor):
         pred_bboxes = torch.tensor(pred_bboxes, dtype=torch.float32)
@@ -60,6 +62,7 @@ def evaluate_detections_hungarian(
             if iou_matrix[pred_idx, gt_idx] > iou_threshold:
                 true_positives[pred_idx] = True
                 matched_gts[gt_idx] = True
+                true_positives_iou[pred_idx] = iou_matrix[pred_idx, gt_idx]
             else:
                 false_positives[pred_idx] = True
 
@@ -76,4 +79,4 @@ def evaluate_detections_hungarian(
         # No ground truth, all predictions are false positives
         false_positives[:] = True
 
-    return true_positives, false_positives, missed_detections
+    return true_positives, false_positives, missed_detections, true_positives_iou

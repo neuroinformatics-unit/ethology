@@ -117,7 +117,7 @@ def compute_pred_gt_tables(iou_threshold, ds_predictions, val_dataset):
         gt_bboxes = annotations["boxes"].cpu().numpy()
 
         # Evaluate detections
-        tp, fp, md = evaluate_detections_hungarian(
+        tp, fp, md, _ = evaluate_detections_hungarian(
             pred_bboxes, gt_bboxes, iou_threshold
         )
 
