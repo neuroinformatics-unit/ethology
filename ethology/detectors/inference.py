@@ -20,7 +20,7 @@ def _detections_per_image_id_as_ds(
     detections_per_image_id: dict,
 ) -> xr.Dataset:
     """Reshape detections per sample as xarray dataset."""
-    # Place tensors on cpu if required
+    # Place any tensors on cpu if required
     if any(
         [
             any(
@@ -145,23 +145,29 @@ def run_detector_on_dataset(
     # Ensure model is in evaluation mode
     model.eval()
 
-    # Run detection
+    # Run detection for each sample in the dataset
     detections_per_image_id = {}
     for image, annotations in dataset:
         # Place image tensor on device and add batch dimension
         image = image.to(device)[None]  # [1, C, H, W]
 
-        # Run detection
         with torch.no_grad():
-            detections = model(image)[0]  # select single batch dimension
+            detections = model(image)
 
         # Add to dict with key = image_id
-        detections_per_image_id[annotations["image_id"]] = detections
+        # [0] to select single batch dimension
+        detections_per_image_id[annotations["image_id"]] = detections[0]
 
     # Format as xarray dataset
     detections_dataset = _detections_per_image_id_as_ds(
         detections_per_image_id
     )
+
+    # Add image_width and image_height as attributes
+    # (we assume all images in the dataset have the same width and height
+    # as the last image)
+    detections_dataset.attrs["image_width"] = image.shape[-2]
+    detections_dataset.attrs["image_height"] = image.shape[-1]
 
     return detections_dataset
 
