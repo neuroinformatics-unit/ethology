@@ -18,8 +18,11 @@ def load_fasterrcnn_resnet50_fpn_v2(
     )
 
     # load state dict
-    checkpoint = torch.load(trained_model_path)
+    # When you call torch.load() on a file which contains GPU tensors,
+    # those tensors will be loaded to GPU by default.
+    checkpoint = torch.load(trained_model_path, map_location="cpu")
 
+    # Load weights into model
     # if model is saved with model. prefix, remove it
     if any([ky.startswith("model.") for ky in checkpoint["state_dict"]]):
         model_weights = {
@@ -29,8 +32,6 @@ def load_fasterrcnn_resnet50_fpn_v2(
         }
     else:
         model_weights = checkpoint["state_dict"]  # ok?
-
-    # Load weights into model
     model.load_state_dict(model_weights)
 
     # Put model on device if provided
