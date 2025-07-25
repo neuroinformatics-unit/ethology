@@ -1,6 +1,4 @@
 # %%
-import json
-from datetime import datetime
 from pathlib import Path
 
 import cv2
@@ -11,13 +9,13 @@ import xarray as xr
 from ensemble_boxes import weighted_boxes_fusion
 from torch.utils.data import random_split
 
-from ethology.ethology.detectors.utils import add_bboxes_min_max_corners
 from ethology.datasets.create import create_coco_dataset
 from ethology.detectors.inference import (
     _detections_per_image_id_as_ds,
     run_detector_on_dataset,
 )
 from ethology.detectors.load import load_fasterrcnn_resnet50_fpn_v2
+from ethology.detectors.utils import add_bboxes_min_max_corners
 from ethology.mlflow import (
     read_cli_args_from_mlflow_params,
     read_config_from_mlflow_params,
