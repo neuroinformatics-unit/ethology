@@ -3,15 +3,17 @@ from pathlib import Path
 
 import cv2
 import numpy as np
+import pandas as pd
 import torch
 import torchvision.transforms.v2 as transforms
 import xarray as xr
 from ensemble_boxes import weighted_boxes_fusion
 from torch.utils.data import random_split
+from tqdm import tqdm
 
 from ethology.datasets.create import create_coco_dataset
 from ethology.detectors.inference import (
-    _detections_per_image_id_as_ds,
+    concat_detections_ds,
     run_detector_on_dataset,
 )
 from ethology.detectors.load import load_fasterrcnn_resnet50_fpn_v2
@@ -251,69 +253,251 @@ train_dataset, val_dataset, test_dataset = split_dataset_crab_repo(
 
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-# Compute detections per model
-
+# Compute detections per model -- make it faster
+# can I vectorize this?
+# use dataloader instead?
 list_detections_ds = []
-for model in list_models:
+for model in tqdm(list_models):
     model.to(device)
     detections_ds = run_detector_on_dataset(
         model=model,
         dataset=val_dataset,
         device=device,
     )
-    detections_ds = add_bboxes_min_max_corners(detections_ds)  
+    detections_ds = add_bboxes_min_max_corners(detections_ds)
     list_detections_ds.append(detections_ds)
+
+
+# Concatenate detections across models
+all_models_detections_ds = concat_detections_ds(
+    list_detections_ds,
+    pd.Index(range(len(list_detections_ds)), name="model"),
+)
+
+
+# %%
+
+
+def wbf_arrays_one_img(
+    x1y1_x2y2_norm_one_img: xr.DataArray,  # ("model", "id", "space")
+    scores_one_img: xr.DataArray,
+    labels_one_img: xr.DataArray,
+    iou_thr_ensemble,
+    skip_box_thr,
+):
+    print(x1y1_x2y2_norm_one_img.data.shape)  # n_models, annot_id, space
+    print(scores_one_img.data.shape)  # n_models, annot_id
+    print(labels_one_img.data.shape)  # n_models, annot_id
+
+    # Run WBF
+    ensemble_x1y1_x2y2_norm, ensemble_scores, ensemble_labels = (
+        weighted_boxes_fusion(
+            x1y1_x2y2_norm_one_img,
+            scores_one_img,
+            labels_one_img,
+            iou_thr=iou_thr_ensemble,
+            skip_box_thr=skip_box_thr,
+        )
+    )
+
+    #
+
+    return xr.DataArray(
+        data=(ensemble_x1y1_x2y2_norm * np.tile(image_width_height, (1, 2))).T,
+        dims=["space", "id"],
+        coords={
+            "space": ["x", "y", "x", "y"],
+            "id": list(range(ensemble_x1y1_x2y2_norm.shape[0])),
+        },
+    )
+
+    # # Format as xarray dataset
+    # # Undo x1y1 x2y2 normalization!
+    # ensemble_detections_ds = detections_x1y1_x2y2_as_ds(
+    #     ensemble_x1y1_x2y2_norm * np.tile(image_width_height, (1, 2)),
+    #     ensemble_scores,
+    #     ensemble_labels,
+    # )
+
+    # return ensemble_detections_ds
+
+
+# %%
+iou_thr_ensemble = 0.5
+skip_box_thr = 0.0001  # skip boxes with confidence below this threshold
+
+sel_id = 193
+
+# compute x1y1_x2y2_norm
+image_width_height = np.array(
+    [
+        all_models_detections_ds.attrs["image_width"],
+        all_models_detections_ds.attrs["image_height"],
+    ]
+)
+x1y1x2y2_norm = (
+    xr.concat(
+        [
+            all_models_detections_ds["xy_min"],
+            all_models_detections_ds["xy_max"],
+        ],
+        dim="space",
+    )
+    / np.tile(image_width_height, (1, 2))[None, :, :, None]
+)  # model, image_id, 4, (annot) ID
+
+x1y1x2y2_ensemble = wbf_arrays_one_img(
+    x1y1x2y2_norm.sel(image_id=sel_id).transpose("model", "id", "space").data,
+    all_models_detections_ds.confidence.sel(image_id=sel_id).data,
+    all_models_detections_ds.label.sel(image_id=sel_id).data,
+    iou_thr_ensemble=iou_thr_ensemble,
+    skip_box_thr=skip_box_thr,
+)
+
+print(x1y1x2y2_ensemble.shape)
+
+
+# %%
+def test(
+    image_id,
+    x1y1x2y2_normalised,
+    confidence,
+    label,
+):
+    print(image_id)
+    print(image_id.shape)
+    print("---")
+    iou_thr_ensemble = 0.5
+    skip_box_thr = 0.0001  # skip boxes with confidence below this threshold
+
+    x1y1x2y2_ensemble = wbf_arrays_one_img(
+        x1y1x2y2_normalised,  # .sel(image_id=image_id).transpose("model", "id", "space"),
+        confidence,
+        label,
+        iou_thr_ensemble=iou_thr_ensemble,
+        skip_box_thr=skip_box_thr,
+    )
+
+    print(x1y1x2y2_ensemble.shape)
+    # n_detections_in = x1y1x2y2_normalised.shape[1]
+    # print(n_detections_in)
+    print("<----->")
+
+    # return x1y1x2y2_ensemble 
+    # ---> could not broadcast input array from shape (4,115) into shape (4,112)
+
+
+    # To have constant output dimension
+    return np.pad(
+        x1y1x2y2_ensemble,
+        ((0, 0), (0, 300 - x1y1x2y2_ensemble.shape[1])),
+        "constant",
+        constant_values=np.nan,
+    )
+
+    # To have same dimensions as the input
+    # n_detections_in = x1y1x2y2_normalised.shape[1]
+    # n_detections_diff = (
+    #     x1y1x2y2_normalised.shape[1] - x1y1x2y2_ensemble.shape[1]
+    # )
+    # if n_detections_diff > 0:
+    #     return np.pad(
+    #         x1y1x2y2_ensemble,
+    #         ((0, 0), (0, n_detections_diff)),
+    #         "constant",
+    #         constant_values=np.nan,
+    #     )
+    # else:   
+    #     return x1y1x2y2_ensemble[:, :n_detections_in]
+    
+
+    
+# %%
+
+x1y1_x2y2_fused = xr.apply_ufunc(
+    test,
+    all_models_detections_ds.image_id,
+    x1y1x2y2_norm.transpose("model", "id", "space", "image_id"),
+    all_models_detections_ds.confidence.transpose("model", "id", "image_id"),
+    all_models_detections_ds.label.transpose("model", "id", "image_id"),
+    input_core_dims=[
+        [],
+        ["model", "id", "space"],
+        ["model", "id"],
+        ["model", "id"],
+    ],
+    output_core_dims=[["space", "id_out"]],
+    vectorize=True,
+    exclude_dims={"id"},  # to allow dimensions that change size btw input and output
+)
+
+
+print(x1y1_x2y2_fused.shape)  # image_id, 4, padded_id
+
+
+
+
+
+
+
+
+# # %%
+# ensemble_x1y1_x2y2_norm, ensemble_scores, ensemble_labels = (
+#     weighted_boxes_fusion(
+#         x1y1x2y2_norm.isel(image_id=0).transpose("model", "id", "space"),
+#         all_models_detections_ds.confidence.isel(image_id=0),  # "model", "id"
+#         all_models_detections_ds.label.isel(image_id=0),  # "model", "id"
+#         iou_thr=iou_thr_ensemble,
+#         skip_box_thr=skip_box_thr,
+#     )
+# )
+
+# # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# # Run WBF for all image IDs
+# for image_id in all_models_detections_ds.image_id:
+#     ensemble_x1y1_x2y2_norm, ensemble_scores, ensemble_labels = (
+#         weighted_boxes_fusion(
+#             x1y1x2y2_norm.isel(image_id=image_id).transpose(
+#                 "model", "id", "space"
+#             ),
+#         )
+#     )
 
 
 # %%
 # Combine detections
 # can I avoid double loop?
-# should i use dataloader here?
+# should i use dataloader here too?
 
 # Define parameters for WBF
 iou_thr_ensemble = 0.5
 skip_box_thr = 0.0001  # skip boxes with confidence below this threshold
-image_height, image_width,  = val_dataset[0][0].shape[-2:]
+
+(image_height, image_width) = val_dataset[0][0].shape[-2:]
+image_height_width = np.array([image_width, image_height])
 
 list_image_ids = [annot["image_id"] for img, annot in val_dataset]
 
-
 detections_per_image_id = {}
 for image_id in list_image_ids:
-
     # Get detections for current image across all models
-    list_ds_per_model = [ds.sel(image_id=image_id) for ds in list_detections_ds]
-
-    # Prepare inputs for WBF
-    list_nan_confidence = [ds.confidence.isnull() for ds in list_ds_per_model]
+    detections_ds_per_model = [
+        ds.sel(image_id=image_id) for ds in list_detections_ds
+    ]
 
     list_bboxes_x1y1_x2y2_norm = [
-        np.hstack(
-            [
-                ds["xy_min"].T / np.array([image_width, image_height]),
-                ds["xy_max"].T / np.array([image_width, image_height]),
-            ]
-        )[~slc_nan, :]  # remove nan annotations
-        for ds, slc_nan in zip(
-            list_ds_per_model, list_nan_confidence, strict=True
+        xr.concat(
+            [ds["xy_min"].T, ds["xy_max"].T],
+            dim="space",
         )
+        / np.tile(image_height_width, (1, 2))
+        for ds in detections_ds_per_model
     ]
-
-    list_scores = [
-        ds.confidence.to_numpy().T[~slc_nan]
-        for ds, slc_nan in zip(
-            list_ds_per_model, list_nan_confidence, strict=True
-        )
-    ]
-
-    list_labels = [
-        ds.label.to_numpy().T[~slc_nan]
-        for ds, slc_nan in zip(
-            list_ds_per_model, list_nan_confidence, strict=True
-        )
-    ]
+    list_scores = [ds.confidence.T for ds in detections_ds_per_model]
+    list_labels = [ds.label.T for ds in detections_ds_per_model]
 
     # Run WBF
+    # can I vectorize this across image_id?
     ensemble_x1y1_x2y2_norm, ensemble_scores, ensemble_labels = (
         weighted_boxes_fusion(
             list_bboxes_x1y1_x2y2_norm,  # n_models, n_predictions, 4
@@ -330,9 +514,9 @@ for image_id in list_image_ids:
     ensemble_scores = ensemble_scores[~slc_nan_rows]
     ensemble_labels = ensemble_labels[~slc_nan_rows]
 
-    # Undo normalization
+    # Undo x1y1 x2y2 normalization
     ensemble_x1y1_x2y2 = ensemble_x1y1_x2y2_norm * np.tile(
-        np.array([image_width, image_height]), (1, 2)
+        image_height_width, (1, 2)
     )
 
     # Add to dict with key = image_id
@@ -373,7 +557,9 @@ plot_and_save_ensemble_detections(
     gt_boxes_x1_y1_x2_y2=gt_annotations["boxes"],
     pred_boxes_x1_y1_x2_y2=np.hstack(
         [
-            ensemble_detections_ds[xy_corner_str].isel(image_id=image_index).values.T
+            ensemble_detections_ds[xy_corner_str]
+            .isel(image_id=image_index)
+            .values.T
             for xy_corner_str in ["xy_min", "xy_max"]
         ]
     ),
@@ -404,5 +590,3 @@ plot_and_save_ensemble_detections(
 #     ensemble_boxes_method="wbf",
 #     **ensemble_boxes_kwargs,
 # )
-
-
