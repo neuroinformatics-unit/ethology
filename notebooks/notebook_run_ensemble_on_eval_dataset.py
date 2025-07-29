@@ -10,6 +10,7 @@ import xarray as xr
 from torch.utils.data import DataLoader, random_split
 from tqdm import tqdm
 
+from ethology.annotations.io import load_bboxes
 from ethology.datasets.create import create_coco_dataset
 from ethology.detectors.ensembles import combine_detections_across_models_wbf
 from ethology.detectors.evaluate import compute_precision_recall_ds
@@ -308,7 +309,6 @@ fused_detections_ds = combine_detections_across_models_wbf(
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Define ground truth dataset
 
-from ethology.annotations.io import load_bboxes
 
 print(annotations_file_path.name)
 # VIA_JSON_combined_coco_gen_sorted_imageIDs.json -->
@@ -336,202 +336,37 @@ gt_bboxes_val_ds = gt_bboxes_ds.sel(image_id=list_image_ids_val)
 fused_detections_ds, gt_bboxes_val_ds = compute_precision_recall_ds(
     pred_bboxes_ds=fused_detections_ds,
     gt_bboxes_ds=gt_bboxes_val_ds,
-    iou_threshold=0.5,
+    iou_threshold=0.1, # change to 0.5?
 )
 
 
-
-
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-# Evaluate
-
-# fused_detections_ds, val_annotations_ds = evaluate_detections_hungarian_ds(
-#     pred_bboxes=fused_detections_ds,
-#     gt_bboxes=gt_bboxes_val_ds,
-#     iou_threshold=0.5,
-# )
-
-# # Add xy_min and xy_max if not present
-# if all(
-#     [
-#         var_str not in fused_detections_ds.variables
-#         for var_str in ["xy_min", "xy_max"]
-#     ]
-# ):
-#     fused_detections_ds = add_bboxes_min_max_corners(fused_detections_ds)
-
-# if all(
-#     [
-#         var_str not in gt_bboxes_val_ds.variables
-#         for var_str in ["xy_min", "xy_max"]
-#     ]
-# ):
-#     gt_bboxes_val_ds = add_bboxes_min_max_corners(gt_bboxes_val_ds)
-
-
-# %%
-# Prepare input for hungarian
-# pred_bboxes_x1y1_x2y2 = xr.concat(
-#     [fused_detections_ds.xy_min, fused_detections_ds.xy_max], dim="space"
-# ).transpose("image_id", "id", "space")
-
-# # Prepare input for hungarian
-# gt_bboxes_x1y1_x2y2 = xr.concat(
-#     [gt_bboxes_val_ds.xy_min, gt_bboxes_val_ds.xy_max], dim="space"
-# ).transpose("image_id", "id", "space")
-
-
-# # rename id dimension in gt_bboxes_x1y1_x2y2
-# gt_bboxes_x1y1_x2y2 = gt_bboxes_x1y1_x2y2.rename({"id": "id_gt"})
-
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-# Run hungarian one image
-# OJO False values in arrays are "unreliable"; always use True values
-# print(pred_bboxes_x1y1_x2y2.data[0].shape)
-# print(gt_bboxes_x1y1_x2y2.data[0].shape)
-# tp, fp, md, iou_tp = evaluate_detections_hungarian_arrays(
-#     pred_bboxes_x1y1_x2y2.data[0],
-#     gt_bboxes_x1y1_x2y2.data[0],
-#     iou_threshold=0.5,
-# )
-
-# print("---")
-# print(tp.shape)
-# print(fp.shape)
-# print(iou_tp.shape)
-# print(md.shape)
-
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-# # Run hungarian vectorized
-
-
-# # def test(pred_bboxes_x1y1_x2y2, gt_bboxes_x1y1_x2y2, iou_threshold):
-# #     print(pred_bboxes_x1y1_x2y2.shape)
-# #     print(gt_bboxes_x1y1_x2y2.shape)
-# #     print(iou_threshold)
-# #     print('----')
-# #     return evaluate_detections_hungarian_arrays(
-# #         pred_bboxes_x1y1_x2y2,
-# #         gt_bboxes_x1y1_x2y2,
-# #         iou_threshold,
-# #     )
-
-
-# tp_array, fp_array, md_array, iou_tp_array = xr.apply_ufunc(
-#     evaluate_detections_hungarian_arrays,
-#     pred_bboxes_x1y1_x2y2,
-#     gt_bboxes_x1y1_x2y2,
-#     kwargs={"iou_threshold": 0.5},
-#     input_core_dims=[
-#         ["id", "space"],
-#         ["id_gt", "space"],
-#     ],
-#     output_core_dims=[
-#         ["id"],
-#         ["id"],
-#         ["id_gt"],
-#         ["id"],
-#     ],
-#     vectorize=True,
-#     exclude_dims={"id", "id_gt"},
-# )
-
-
-# # %%
-# # Add to dataset
-# fused_detections_ds["tp"] = xr.DataArray(tp_array, dims=["image_id", "id"])
-# fused_detections_ds["fp"] = xr.DataArray(fp_array, dims=["image_id", "id"])
-# fused_detections_ds["iou_tp"] = xr.DataArray(
-#     iou_tp_array, dims=["image_id", "id"]
-# )
-
-
-# # rename id dimension in md_array
-# md_array = md_array.rename({"id_gt": "id"})
-# gt_bboxes_val_ds["md"] = xr.DataArray(md_array, dims=["image_id", "id"])
-
-
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-# plot ensemble detections on first image
+# plot ensemble detections on a selected image
 
 # Get first image
-image_index = 25
+image_index = 0
 image = val_dataset[image_index][0]
 gt_annotations = val_dataset[image_index][1]
 
-fused_detections_ds_plot = add_bboxes_min_max_corners(fused_detections_ds)
+# fused_detections_ds_plot = add_bboxes_min_max_corners(fused_detections_ds)
 
 plot_and_save_ensemble_detections(
     image=image,
     gt_boxes_x1_y1_x2_y2=gt_annotations["boxes"],
     pred_boxes_x1_y1_x2_y2=np.hstack(
         [
-            fused_detections_ds_plot[xy_corner_str]
+            fused_detections_ds[xy_corner_str]
             .isel(image_id=image_index)
             .values.T
             for xy_corner_str in ["xy_min", "xy_max"]
         ]
     ),
-    pred_boxes_scores=fused_detections_ds_plot.isel(
+    pred_boxes_scores=fused_detections_ds.isel(
         image_id=image_index
     ).confidence.values,
     image_id=gt_annotations["image_id"],
     output_dir=Path.cwd(),
-    precision=0.0,
-    recall=0.0,
+    precision=fused_detections_ds.isel(image_id=image_index).precision.values,
+    recall=fused_detections_ds.isel(image_id=image_index).recall.values,
 )
 
-# %%
-
-
-# %%
-# # Combine detections with WBF
-# detections_ds = run_ensemble_of_detectors_on_dataset(
-#     list_models,
-#     dataset,  # could be list too
-#     device,   # ensure models and dataset are placed on this device?
-#     ensemble_boxes_method="wbf",
-#     **ensemble_boxes_kwargs,
-# )
-
-
-# detections_ds = run_ensemble_of_detectors_on_dataloader(
-#     list_models,
-#     dataset,  # could be list too
-#     device,   # ensure models and dataset are placed on this device?
-#     ensemble_boxes_method="wbf",
-#     **ensemble_boxes_kwargs,
-# )
-
-
-# %%
-
-x1y1_x2y2_fused = xr.apply_ufunc(
-    test,
-    all_models_detections_ds.image_id,
-    x1y1x2y2_norm.transpose(
-        "model", "id", "space", "image_id"
-    ),  # place broadcast dims at the end
-    all_models_detections_ds.confidence.transpose("model", "id", "image_id"),
-    all_models_detections_ds.label.transpose("model", "id", "image_id"),
-    input_core_dims=[
-        [],  # do not exclude any dimensions
-        ["model", "id", "space"],  # do not broadcast across these
-        ["model", "id"],
-        ["model", "id"],
-    ],
-    output_core_dims=[["space", "id"]],
-    vectorize=True,  # loop over non-core dims
-    exclude_dims={
-        "id"
-    },  # to allow dimensions that change size btw input and output
-)
-
-
-print(x1y1_x2y2_fused.shape)  # image_id, 4, padded_id
-
-# Can I remove the excessive pad?
