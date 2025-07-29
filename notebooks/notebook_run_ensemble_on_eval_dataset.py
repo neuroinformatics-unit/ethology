@@ -12,6 +12,7 @@ from torch.utils.data import DataLoader, random_split
 from tqdm import tqdm
 
 from ethology.datasets.create import create_coco_dataset
+from ethology.detectors.ensembles import combine_detections_across_models_wbf
 from ethology.detectors.inference import (
     collate_fn_varying_n_bboxes,
     concat_detections_ds,
@@ -274,7 +275,7 @@ val_dataloader = DataLoader(
 
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-# Compute detections per model -- make it faster
+# Compute detections per model -- can I make it faster?
 # can I vectorize this? (pytorch forum question)
 list_detections_ds = []
 for model in tqdm(list_models):
@@ -295,285 +296,196 @@ all_models_detections_ds = concat_detections_ds(
     pd.Index(range(len(list_detections_ds)), name="model"),
 )
 
-# Fuse detections across models
-# fused_detections_ds = combine_detections_across_models(all_models_detections_ds)
-
-# Evaluate
-
-
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-# Fuse detections across models -- Approach 1: naive
-# v clear but slow
-
-def wbf_wrapper(
-    ds: xr.Dataset,  
-) -> xr.Dataset:
-    """Wrapper for weighted boxes fusion."""
-
-    # Define parameters for WBF
-    iou_thr_ensemble = 0.5
-    skip_box_thr = 0.0001  # skip boxes with confidence below this threshold
-    image_width_height = np.array([4096, 2160])
-
-    # Check ds has required dimensions
-    if "image_id" in ds.dims:
-        raise ValueError("Input dataset must not have image_id dimension")
-    if not all(s in ds.dims for s in ("model", "space", "id")):
-        raise ValueError(
-            "Input dataset must have model, space and id dimensions"
-        )
-
-    # Compute x1y1x2y2_normalised
-    x1y1x2y2_normalised = xr.concat(
-        [ds.xy_min, ds.xy_max], dim="space"
-    ) / np.tile(image_width_height, (1, 2))[:,:,None]
-
-    # Run WBF
-    ensemble_x1y1_x2y2_norm, ensemble_scores, ensemble_labels = (
-        weighted_boxes_fusion(
-            x1y1x2y2_normalised.transpose("model", "id", "space"),
-            ds.confidence,
-            ds.label,
-            iou_thr=iou_thr_ensemble,
-            skip_box_thr=skip_box_thr,
-        )
-    )
-
-    # Undo x1y1, x2y2 normalization
-    ensemble_x1y1_x2y2 = ensemble_x1y1_x2y2_norm * np.tile(
-        image_width_height, (1, 2)
-    )
-
-    # Format output as xarray dataarrays
-    fused_detections_ds = detections_x1y1_x2y2_as_ds(
-        ensemble_x1y1_x2y2, ensemble_scores, ensemble_labels
-    )
-
-    return fused_detections_ds
+# Fuse detections across models
+fused_detections_ds = combine_detections_across_models_wbf(
+    all_models_detections_ds,
+    kwargs_wbf={
+        "iou_thr_ensemble": 0.5,
+        "skip_box_thr": 0.0001,
+        "max_n_detections": 300,
+    },
+)
 
 
 # %%
-#%timeit --> 9.09 s ± 55.9 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)
-# for every image_id slice
-list_fused_detections_ds = []
-for img_id in all_models_detections_ds.image_id:
-    
-    fused_detections_ds = wbf_wrapper(
-        all_models_detections_ds.sel(image_id=img_id)
+import torchvision
+
+
+def padded_batched_nms(
+    bboxes: torch.Tensor,
+    scores: torch.Tensor,
+    labels: torch.Tensor,
+    iou_threshold: float,
+) -> torch.Tensor:
+    print(bboxes.shape)
+    print(scores.shape)
+    print(labels.shape)
+
+    n_input_detections = bboxes.shape[0]
+    idcs_to_keep = torchvision.ops.batched_nms(
+        bboxes, scores, labels, iou_threshold
     )
 
-    list_fused_detections_ds.append(fused_detections_ds)
+    print(idcs_to_keep.shape)
 
-# Concatenate fused detections across image_ids
-fused_detections_ds = concat_detections_ds(
-    list_fused_detections_ds,
-    pd.Index(range(len(list_fused_detections_ds)), name="image_id"),
+    # # pad with -1
+    # idcs_to_keep = torch.nn.functional.pad(
+    #     idcs_to_keep,
+    #     (0, n_input_detections - idcs_to_keep.shape[0]),
+    #     value=-1,
+    # )
+    # print(idcs_to_keep)
+    return idcs_to_keep
+
+
+# %%
+
+# Prepare input for nms
+fused_detections_ds = add_bboxes_min_max_corners(fused_detections_ds)
+ensemble_x1y1_x2y2 = xr.concat(
+    [
+        fused_detections_ds.xy_min,
+        fused_detections_ds.xy_max,
+    ],
+    dim="space",
+).transpose("image_id", "id", "space")
+
+
+list_x1y1_x2y2_to_keep = []
+for image_id in range(ensemble_x1y1_x2y2.shape[0]):
+    idcs_to_keep = torchvision.ops.nms(
+        torch.from_numpy(ensemble_x1y1_x2y2.data[image_id]),
+        torch.from_numpy(fused_detections_ds.confidence.data[image_id]),
+        0.1,
+    )
+
+    list_x1y1_x2y2_to_keep.append(ensemble_x1y1_x2y2.data[image_id][idcs_to_keep,:])
+    print(idcs_to_keep.shape)
+
+
+# %%
+for idx in range(ensemble_x1y1_x2y2.shape[0]):
+    print(torch.from_numpy(ensemble_x1y1_x2y2.data[idx]).shape)
+    print(torch.from_numpy(fused_detections_ds.confidence.data[idx]).shape)
+    print(sum(fused_detections_ds.label.data[idx] != -1))
+
+    out = torchvision.ops.batched_nms(
+        torch.from_numpy(ensemble_x1y1_x2y2.data[idx]),
+        torch.from_numpy(fused_detections_ds.confidence.data[idx]),
+        torch.from_numpy(fused_detections_ds.label.data[idx]),
+        0.1,
+    )
+    print(out.shape)
+    # out = torch.nn.functional.pad(
+    #     out,
+    #     (0, ensemble_x1y1_x2y2.data[idx].shape[0] - out.shape[0]),
+    #     value=-1,
+    # ) --- not neede with batched_nms?
+    # print(out.shape)
+    print("---")
+
+
+# %%
+# def padded_nms(
+#     bboxes: torch.Tensor,
+#     scores: torch.Tensor,
+#     iou_threshold: float,
+# ) -> torch.Tensor:
+#     print(bboxes.shape)
+#     print(scores.shape)
+
+#     out = torchvision.ops.nms(bboxes, scores, iou_threshold)
+#     out_padded = torch.nn.functional.pad(
+#         out,
+#         (0, bboxes.shape[0] - out.shape[0]),
+#         value=-1,
+#     )
+#     print(out_padded.shape)
+#     return out_padded
+
+vectorised_batched_nms = torch.vmap(
+    torchvision.ops.batched_nms,
+    in_dims=(0, 0, 0, None),
 )
+idcs_to_keep = vectorised_batched_nms(
+    torch.from_numpy(ensemble_x1y1_x2y2.data),
+    torch.from_numpy(fused_detections_ds.confidence.data),
+    torch.from_numpy(fused_detections_ds.label.data),
+    0.1,
+)
+
+
+# %%
+
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# Evaluate
+
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Fuse detections across models -- Approach 2: vectorized
 # faster but less clear
 
-def wbf_wrapper_arrays(
-    x1y1: np.ndarray,  # model, annot, 4
-    x2y2: np.ndarray,  # model, annot, 4
-    confidence: np.ndarray,  # model, annot
-    label: np.ndarray,  # model, annot
-) -> tuple[xr.DataArray, xr.DataArray, xr.DataArray, xr.DataArray]:
-
-    iou_thr_ensemble = 0.5
-    skip_box_thr = 0.0001  # skip boxes with confidence below this threshold
-    max_n_detections = 300  # set a priori, max after fusing
-    image_width_height = np.array([4096, 2160])
-
-    x1y1x2y2_normalised = (
-        np.concat([x1y1, x2y2], axis=-1) / np.tile(image_width_height, (1, 2))
-    )[:, :, :, None]
-
-    # ------------------------------------
-    # Run WBF
-    ensemble_x1y1_x2y2_norm, ensemble_scores, ensemble_labels = (
-        weighted_boxes_fusion(
-            x1y1x2y2_normalised,
-            confidence,
-            label,
-            iou_thr=iou_thr_ensemble,
-            skip_box_thr=skip_box_thr,
-        )
-    )
-
-    # ------------------------------------
-    # Undo x1y1 x2y2 normalization
-    ensemble_x1y1_x2y2 = ensemble_x1y1_x2y2_norm * np.tile(
-        image_width_height, (1, 2)
-    )
-
-    # Combine x1y1, x2y2, scores and labels in one array
-    ensemble_x1y2_x2y2_scores_labels = np.c_[
-        ensemble_x1y1_x2y2, ensemble_scores, ensemble_labels
-    ]
-
-    # Remove rows with nan coordinates
-    slc_nan_rows = np.any(np.isnan(ensemble_x1y1_x2y2), axis=1)
-    ensemble_x1y2_x2y2_scores_labels = ensemble_x1y2_x2y2_scores_labels[
-        ~slc_nan_rows
-    ]
-
-    # Pad combinedarray to max_n_detections
-    # This is to have a constant output dimension in the `id` dimension
-    ensemble_x1y2_x2y2_scores_labels = np.pad(
-        ensemble_x1y2_x2y2_scores_labels,
-        (
-            (0, max_n_detections - ensemble_x1y2_x2y2_scores_labels.shape[0]),
-            (0, 0),
-        ),
-        "constant",
-        constant_values=np.nan,
-    )
-
-    # Format output as xarray dataarrays
-    centroid, shape, confidence, label = detections_x1y1_x2y2_as_da_tuple(
-        ensemble_x1y2_x2y2_scores_labels[:, 0:4],
-        ensemble_x1y2_x2y2_scores_labels[:, 4],
-        ensemble_x1y2_x2y2_scores_labels[:, 5],
-    )
-
-    # print(centroid.shape)  # space, id
-    # print(shape.shape)  # space, id
-    # print("<----->")
-
-    return centroid, shape, confidence, label
-
 
 # %%
 # timeit --- 1.37 s ± 11.1 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)
 # this will become a fn
-centroid_fused, shape_fused, confidence_fused, label_fused = xr.apply_ufunc(
-    wbf_wrapper_arrays,
-    all_models_detections_ds.xy_min, # the underlaying .data array is passed
-    all_models_detections_ds.xy_max,
-    all_models_detections_ds.confidence,
-    all_models_detections_ds.label,
-    input_core_dims=[ # do not broadcast across these
-        ["model", "id", "space"],  
-        ["model", "id", "space"],  
-        ["model", "id"],
-        ["model", "id"],
-    ],
-    output_core_dims=[["space", "id"], ["space", "id"], ["id"], ["id"]],
-    vectorize=True,
-    # loop over non-core dims (i.e. image_id);
-    # assumes function only takes arrays over core dims as input
-    exclude_dims={"id"},
-    # to allow dimensions that change size btw input and output
-)
+# centroid_fused, shape_fused, confidence_fused, label_fused = xr.apply_ufunc(
+#     wbf_wrapper_arrays,
+#     all_models_detections_ds.xy_min,  # the underlaying .data array is passed
+#     all_models_detections_ds.xy_max,
+#     all_models_detections_ds.confidence,
+#     all_models_detections_ds.label,
+#     kwargs={
+#         "image_width_height": np.array(
+#             [
+#                 all_models_detections_ds.attrs[img_size]
+#                 for img_size in ["image_width", "image_height"]
+#             ]
+#         ),
+#         "iou_thr_ensemble": 0.5,
+#         "skip_box_thr": 0.0001,
+#         "max_n_detections": 300,
+#     },
+#     input_core_dims=[  # do not broadcast across these
+#         ["model", "id", "space"],
+#         ["model", "id", "space"],
+#         ["model", "id"],
+#         ["model", "id"],
+#     ],
+#     output_core_dims=[["space", "id"], ["space", "id"], ["id"], ["id"]],
+#     vectorize=True,
+#     # loop over non-core dims (i.e. image_id);
+#     # assumes function only takes arrays over core dims as input
+#     exclude_dims={"id"},
+#     # to allow dimensions that change size btw input and output
+# )
 
 
-# Remove pad across annotations
-centroid_fused = centroid_fused.dropna(dim="id", how="all")
-shape_fused = shape_fused.dropna(dim="id", how="all")
-confidence_fused = confidence_fused.dropna(dim="id", how="all")
-label_fused = label_fused.dropna(dim="id", how="all")
+# # Remove pad across annotations
+# centroid_fused = centroid_fused.dropna(dim="id", how="all")
+# shape_fused = shape_fused.dropna(dim="id", how="all")
+# confidence_fused = confidence_fused.dropna(dim="id", how="all")
+# label_fused = label_fused.dropna(dim="id", how="all")
 
 
-# Pad labels with -1 rather than nan
-label_fused = label_fused.fillna(-1)
+# # Pad labels with -1 rather than nan
+# label_fused = label_fused.fillna(-1)
 
 
-# Return a dataset
-fused_detections_ds = xr.Dataset(
-    data_vars={
-        "position": centroid_fused,
-        "shape": shape_fused,
-        "confidence": confidence_fused,
-        "label": label_fused,
-    }
-)
+# # Return a dataset
+# fused_detections_ds = xr.Dataset(
+#     data_vars={
+#         "position": centroid_fused,
+#         "shape": shape_fused,
+#         "confidence": confidence_fused,
+#         "label": label_fused,
+#     }
+# )
 
 # print(fused_detections_ds)
 
 # %%
-
-
-# %%
-# Combine detections
-# can I avoid double loop?
-# should i use dataloader here too?
-
-# Define parameters for WBF
-iou_thr_ensemble = 0.5
-skip_box_thr = 0.0001  # skip boxes with confidence below this threshold
-
-(image_height, image_width) = val_dataset[0][0].shape[-2:]
-image_height_width = np.array([image_width, image_height])
-
-list_image_ids = [annot["image_id"] for img, annot in val_dataset]
-
-detections_per_image_id = {}
-for image_id in list_image_ids:
-    # Get detections for current image across all models
-    detections_ds_per_model = [
-        ds.sel(image_id=image_id) for ds in list_detections_ds
-    ]
-
-    list_bboxes_x1y1_x2y2_norm = [
-        xr.concat(
-            [ds["xy_min"].T, ds["xy_max"].T],
-            dim="space",
-        )
-        / np.tile(image_height_width, (1, 2))
-        for ds in detections_ds_per_model
-    ]
-    list_scores = [ds.confidence.T for ds in detections_ds_per_model]
-    list_labels = [ds.label.T for ds in detections_ds_per_model]
-
-    # Run WBF
-    # can I vectorize this across image_id?
-    ensemble_x1y1_x2y2_norm, ensemble_scores, ensemble_labels = (
-        weighted_boxes_fusion(
-            list_bboxes_x1y1_x2y2_norm,  # n_models, n_predictions, 4
-            list_scores,  # n_models, n_predictions
-            list_labels,
-            iou_thr=iou_thr_ensemble,
-            skip_box_thr=skip_box_thr,
-        )
-    )
-
-    # Remove rows with nan coordinates
-    slc_nan_rows = np.any(np.isnan(ensemble_x1y1_x2y2_norm), axis=1)
-    ensemble_x1y1_x2y2_norm = ensemble_x1y1_x2y2_norm[~slc_nan_rows]
-    ensemble_scores = ensemble_scores[~slc_nan_rows]
-    ensemble_labels = ensemble_labels[~slc_nan_rows]
-
-    # Undo x1y1 x2y2 normalization
-    ensemble_x1y1_x2y2 = ensemble_x1y1_x2y2_norm * np.tile(
-        image_height_width, (1, 2)
-    )
-
-    # apply nms?
-    # idcs_to_keep = torchvision.ops.nms(
-    #     ensemble_x1y1_x2y2,
-    #     ensemble_scores,
-    #     iou_threshold=0.9,
-    # )
-
-    # ensemble_x1y1_x2y2 = ensemble_x1y1_x2y2[idcs_to_keep]
-    # ensemble_scores = ensemble_scores[idcs_to_keep]
-    # ensemble_labels = ensemble_labels[idcs_to_keep]
-
-    # Add to dict with key = image_id
-    detections_per_image_id[image_id] = {
-        "boxes": ensemble_x1y1_x2y2,
-        "scores": ensemble_scores,
-        "labels": ensemble_labels,
-    }
-
-# %%
-# Format as xarray dataset
-ensemble_detections_ds = _detections_per_image_id_as_ds(
-    detections_per_image_id
-)
-
 # %%
 # Evaluate detections with hungarian
 
@@ -593,19 +505,20 @@ image_index = 25
 image = val_dataset[image_index][0]
 gt_annotations = val_dataset[image_index][1]
 
+fused_detections_ds_plot = add_bboxes_min_max_corners(fused_detections_ds)
 
 plot_and_save_ensemble_detections(
     image=image,
     gt_boxes_x1_y1_x2_y2=gt_annotations["boxes"],
     pred_boxes_x1_y1_x2_y2=np.hstack(
         [
-            ensemble_detections_ds[xy_corner_str]
+            fused_detections_ds_plot[xy_corner_str]
             .isel(image_id=image_index)
             .values.T
             for xy_corner_str in ["xy_min", "xy_max"]
         ]
     ),
-    pred_boxes_scores=ensemble_detections_ds.isel(
+    pred_boxes_scores=fused_detections_ds_plot.isel(
         image_id=image_index
     ).confidence.values,
     image_id=gt_annotations["image_id"],
@@ -613,6 +526,9 @@ plot_and_save_ensemble_detections(
     precision=0.0,
     recall=0.0,
 )
+
+# %%
+
 
 # %%
 # # Combine detections with WBF
