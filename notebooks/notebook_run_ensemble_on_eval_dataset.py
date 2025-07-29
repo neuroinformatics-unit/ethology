@@ -259,7 +259,7 @@ train_dataset, val_dataset, test_dataset = split_dataset_crab_repo(
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Define val dataloader
-# shuffle=False so that we dont shuffle the data 
+# shuffle=False so that we dont shuffle the data
 # after one pass over all batches
 val_dataloader = DataLoader(
     val_dataset,
