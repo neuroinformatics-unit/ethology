@@ -22,6 +22,7 @@ from ethology.detectors.load import load_fasterrcnn_resnet50_fpn_v2
 from ethology.detectors.utils import (
     add_bboxes_min_max_corners,
     detections_x1y1_x2y2_as_da_tuple,
+    detections_x1y1_x2y2_as_ds,
 )
 from ethology.mlflow import (
     read_cli_args_from_mlflow_params,
@@ -295,22 +296,90 @@ all_models_detections_ds = concat_detections_ds(
 )
 
 # Fuse detections across models
-# ....
+# fused_detections_ds = combine_detections_across_models(all_models_detections_ds)
+
+# Evaluate
+
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# Fuse detections across models -- Approach 1: naive
+# v clear but slow
+
+def wbf_wrapper(
+    ds: xr.Dataset,  
+) -> xr.Dataset:
+    """Wrapper for weighted boxes fusion."""
+
+    # Define parameters for WBF
+    iou_thr_ensemble = 0.5
+    skip_box_thr = 0.0001  # skip boxes with confidence below this threshold
+    image_width_height = np.array([4096, 2160])
+
+    # Check ds has required dimensions
+    if "image_id" in ds.dims:
+        raise ValueError("Input dataset must not have image_id dimension")
+    if not all(s in ds.dims for s in ("model", "space", "id")):
+        raise ValueError(
+            "Input dataset must have model, space and id dimensions"
+        )
+
+    # Compute x1y1x2y2_normalised
+    x1y1x2y2_normalised = xr.concat(
+        [ds.xy_min, ds.xy_max], dim="space"
+    ) / np.tile(image_width_height, (1, 2))[:,:,None]
+
+    # Run WBF
+    ensemble_x1y1_x2y2_norm, ensemble_scores, ensemble_labels = (
+        weighted_boxes_fusion(
+            x1y1x2y2_normalised.transpose("model", "id", "space"),
+            ds.confidence,
+            ds.label,
+            iou_thr=iou_thr_ensemble,
+            skip_box_thr=skip_box_thr,
+        )
+    )
+
+    # Undo x1y1, x2y2 normalization
+    ensemble_x1y1_x2y2 = ensemble_x1y1_x2y2_norm * np.tile(
+        image_width_height, (1, 2)
+    )
+
+    # Format output as xarray dataarrays
+    fused_detections_ds = detections_x1y1_x2y2_as_ds(
+        ensemble_x1y1_x2y2, ensemble_scores, ensemble_labels
+    )
+
+    return fused_detections_ds
 
 
-def test(
+# %%
+#%timeit --> 9.09 s ± 55.9 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)
+# for every image_id slice
+list_fused_detections_ds = []
+for img_id in all_models_detections_ds.image_id:
+    
+    fused_detections_ds = wbf_wrapper(
+        all_models_detections_ds.sel(image_id=img_id)
+    )
+
+    list_fused_detections_ds.append(fused_detections_ds)
+
+# Concatenate fused detections across image_ids
+fused_detections_ds = concat_detections_ds(
+    list_fused_detections_ds,
+    pd.Index(range(len(list_fused_detections_ds)), name="image_id"),
+)
+
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# Fuse detections across models -- Approach 2: vectorized
+# faster but less clear
+
+def wbf_wrapper_arrays(
     x1y1: np.ndarray,  # model, annot, 4
     x2y2: np.ndarray,  # model, annot, 4
     confidence: np.ndarray,  # model, annot
     label: np.ndarray,  # model, annot
 ) -> tuple[xr.DataArray, xr.DataArray, xr.DataArray, xr.DataArray]:
-    # print(x1y1.shape)
-    # print(x2y2.shape)
-    # print(confidence.shape)
-    # print(label.shape)
-    # print("---")
 
     iou_thr_ensemble = 0.5
     skip_box_thr = 0.0001  # skip boxes with confidence below this threshold
@@ -339,17 +408,19 @@ def test(
         image_width_height, (1, 2)
     )
 
-    # Remove rows with nan coordinates
-    slc_nan_rows = np.any(np.isnan(ensemble_x1y1_x2y2), axis=1)
+    # Combine x1y1, x2y2, scores and labels in one array
     ensemble_x1y2_x2y2_scores_labels = np.c_[
         ensemble_x1y1_x2y2, ensemble_scores, ensemble_labels
     ]
+
+    # Remove rows with nan coordinates
+    slc_nan_rows = np.any(np.isnan(ensemble_x1y1_x2y2), axis=1)
     ensemble_x1y2_x2y2_scores_labels = ensemble_x1y2_x2y2_scores_labels[
         ~slc_nan_rows
     ]
 
-    # Pad array to max_n_detections
-    # To have constant output dimension (n_annotations)
+    # Pad combinedarray to max_n_detections
+    # This is to have a constant output dimension in the `id` dimension
     ensemble_x1y2_x2y2_scores_labels = np.pad(
         ensemble_x1y2_x2y2_scores_labels,
         (
@@ -375,44 +446,41 @@ def test(
 
 
 # %%
-
+# timeit --- 1.37 s ± 11.1 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)
+# this will become a fn
 centroid_fused, shape_fused, confidence_fused, label_fused = xr.apply_ufunc(
-    test,
-    all_models_detections_ds.xy_min,
+    wbf_wrapper_arrays,
+    all_models_detections_ds.xy_min, # the underlaying .data array is passed
     all_models_detections_ds.xy_max,
     all_models_detections_ds.confidence,
     all_models_detections_ds.label,
-    input_core_dims=[
-        ["model", "id", "space"],  # do not broadcast across these
-        ["model", "id", "space"],  # do not broadcast across these
+    input_core_dims=[ # do not broadcast across these
+        ["model", "id", "space"],  
+        ["model", "id", "space"],  
         ["model", "id"],
         ["model", "id"],
     ],
     output_core_dims=[["space", "id"], ["space", "id"], ["id"], ["id"]],
     vectorize=True,
     # loop over non-core dims (i.e. image_id);
-    # assume `test` only takes arrays over core dims as input
+    # assumes function only takes arrays over core dims as input
     exclude_dims={"id"},
     # to allow dimensions that change size btw input and output
 )
 
 
-# Remove excessive pad
+# Remove pad across annotations
 centroid_fused = centroid_fused.dropna(dim="id", how="all")
 shape_fused = shape_fused.dropna(dim="id", how="all")
 confidence_fused = confidence_fused.dropna(dim="id", how="all")
 label_fused = label_fused.dropna(dim="id", how="all")
 
-print(centroid_fused.shape)  # image_id, 2, padded_id
-print(shape_fused.shape)  # image_id, 2, padded_id
-print(confidence_fused.shape)  # image_id, padded_id
-print(label_fused.shape)  # image_id, padded_id
 
 # Pad labels with -1 rather than nan
 label_fused = label_fused.fillna(-1)
 
 
-# Can I return a dataset?
+# Return a dataset
 fused_detections_ds = xr.Dataset(
     data_vars={
         "position": centroid_fused,
@@ -422,7 +490,7 @@ fused_detections_ds = xr.Dataset(
     }
 )
 
-print(fused_detections_ds)
+# print(fused_detections_ds)
 
 # %%
 
