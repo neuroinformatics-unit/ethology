@@ -17,7 +17,7 @@ from pycocotools.coco import COCO
 from torch.utils.data import random_split
 
 from ethology.datasets.create import create_coco_dataset
-from ethology.detectors.evaluate import evaluate_detections_hungarian
+from ethology.detectors.evaluate import evaluate_detections_hungarian_arrays
 from ethology.mlflow import (
     read_cli_args_from_mlflow_params,
     read_config_from_mlflow_params,
@@ -117,7 +117,7 @@ def compute_pred_gt_tables(iou_threshold, ds_predictions, val_dataset):
         gt_bboxes = annotations["boxes"].cpu().numpy()
 
         # Evaluate detections
-        tp, fp, md, _ = evaluate_detections_hungarian(
+        tp, fp, md, _ = evaluate_detections_hungarian_arrays(
             pred_bboxes, gt_bboxes, iou_threshold
         )
 
