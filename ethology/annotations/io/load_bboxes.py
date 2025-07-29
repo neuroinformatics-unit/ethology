@@ -25,9 +25,118 @@ STANDARD_BBOXES_DF_COLUMNS = [
 ]  # superset of columns in the standard dataframe
 
 
+# --- NEW FUNCTION (for issue #43) ---
+def _detect_format(file_path: Path) -> Literal["VIA", "COCO"]:
+    """Detect the format (VIA or COCO) of a JSON annotation file.
+
+    Detection is based on the presence of characteristic top-level keys.
+
+    Parameters
+    ----------
+    file_path : Path
+        Path to the input annotation file.
+
+    Returns
+    -------
+    Literal["VIA", "COCO"]
+        The detected format.
+
+    Raises
+    ------
+    ValueError
+        If the file cannot be read or parsed, or if the format cannot
+        be reliably determined from the top-level keys.
+
+    """
+    try:
+        with open(file_path) as f:
+            data = json.load(f)
+    except Exception as e:
+        # Keep this as a fallback for truly weird read issues
+        raise ValueError(
+            f"Could not read or parse JSON from file {file_path} "
+            f"for format detection: {e}"
+        ) from e
+
+    if not isinstance(data, dict):
+        raise ValueError(
+            f"Expected JSON root to be a dictionary for format detection, "
+            f"but got {type(data)} in file {file_path}"
+        )
+
+    # The validators will check if data is a dict,
+    # so we don't need to check here
+    top_level_keys = set(data.keys())
+
+    # Define characteristic keys
+    via_keys = {"_via_img_metadata", "_via_attributes", "_via_settings"}
+    coco_keys = {"images", "annotations", "categories"}
+
+    has_via_keys = bool(via_keys.intersection(top_level_keys))
+    has_coco_keys = coco_keys.issubset(top_level_keys)
+
+    if has_coco_keys and has_via_keys:
+        raise ValueError(
+            f"File {file_path} contains keys characteristic of *both* VIA "
+            "and COCO formats. "
+            "Cannot reliably determine format."
+        )
+    elif has_coco_keys:
+        return "COCO"
+    elif has_via_keys:
+        return "VIA"
+    else:
+        raise ValueError(
+            f"Could not automatically determine format for file {file_path}. "
+            "File does not contain characteristic top-level keys for VIA or "
+            "COCO."
+        )
+
+
+def _determine_format_from_paths(
+    input_file_list: list[Path],
+) -> Literal["VIA", "COCO"]:
+    """Determine the annotation format by inspecting files.
+
+    If multiple files are provided, ensure they are all of the same detected
+    format.
+    """
+    try:
+        # Should be caught by from_files
+        if not input_file_list:
+            raise ValueError(
+                "Cannot determine format from an empty list of files."
+            )
+
+        if len(input_file_list) == 1:
+            # Detect format based on the single file
+            return _detect_format(input_file_list[0])
+        else:
+            # For multiple files, check all files and ensure consistency
+            detected_formats = []
+            for file_path in input_file_list:
+                detected_format = _detect_format(file_path)
+                detected_formats.append(detected_format)
+
+            # Check if all formats are the same
+            unique_formats = set(detected_formats)
+            if len(unique_formats) > 1:
+                raise ValueError(
+                    f"Inconsistent formats detected across files: "
+                    f"{unique_formats}. All files must have the same format."
+                )
+            return detected_formats[0]
+    except (
+        FileNotFoundError,
+        ValueError,
+    ) as e:  # Catch errors from _detect_format
+        # Re-raise errors related to detection more informatively
+        raise ValueError(f"Automatic format detection failed: {e}") from e
+
+
 def from_files(
     file_paths: Path | str | list[Path | str],
-    format: Literal["VIA", "COCO"],
+    format: Literal["VIA", "COCO", "auto"] = "auto",
     images_dirs: Path | str | list[Path | str] | None = None,
 ) -> pd.DataFrame:
     """Read input annotation files as a bboxes dataframe.
@@ -36,8 +145,12 @@ def from_files(
     ----------
     file_paths : Path | str | list[Path | str]
         Path or list of paths to the input annotation files.
-    format : Literal["VIA", "COCO"]
-        Format of the input annotation files.
+    format : Literal["VIA", "COCO", "auto"], optional
+        Format of the input annotation files. If set to "auto" (default),
+        the format will be detected based on the content of the files
+        provided. Detection relies on characteristic top-level keys in the
+        JSON structure. For multiple files, all files must have the same
+        format.
     images_dirs : Path | str | list[Path | str], optional
         Path or list of paths to the directories containing the images the
         annotations refer to.
@@ -46,46 +159,91 @@ def from_files(
     -------
     pd.DataFrame
         Bounding boxes annotations dataframe. The dataframe is indexed
-        by "annotation_id" and has the following columns: "image_filename",
-        "image_id", "image_width", "image_height", "x_min", "y_min",
-        "width", "height", "supercategory", "category". It also has the
-        following attributes: "annotation_files", "annotation_format",
-        "images_directories". The "image_id" is assigned based
-        on the alphabetically sorted list of unique image filenames across all
-        input files. The "category_id" column is always a 0-based integer,
-        except for VIA files where the values specified in the input file
-        are retained.
+        by "annotation_id" and has the standard columns (see Notes).
+        It also has the following attributes: "annotation_files",
+        "annotation_format", "images_directories".
+
+    Raises
+    ------
+    ValueError
+        If format="auto" and the format cannot be detected, if multiple
+        files have inconsistent formats, or if an invalid format string
+        is provided.
+    FileNotFoundError
+        If format="auto" and any file path does not exist (this will be
+        the underlying cause of the ValueError from auto-detection).
+    json.JSONDecodeError
+        If format="auto" and any file cannot be parsed as JSON (this
+        will be the underlying cause of the ValueError from auto-detection).
+    TypeError
+        If `file_paths` is of an unsupported type.
 
     Notes
     -----
-    We use image filenames' to assign IDs to images, so if two images have the
-    same name but are in different input annotation files, they will be
-    assigned the same image ID and their annotations will be merged.
+    The standard dataframe has the following columns: "image_filename",
+    "image_id", "image_width", "image_height", "x_min", "y_min",
+    "width", "height", "supercategory", "category", "category_id".
 
-    If this behaviour is not desired, and you would like to assign different
-    image IDs to images that have the same name but appear in different input
-    annotation files, you can either make the image filenames distinct before
-    loading the data, or you can load the data from each file
-    as a separate dataframe, and then concatenate them as desired.
+    The "image_id" is assigned based on the alphabetically sorted list of
+    unique image filenames across all input files. The "category_id" column
+    is always a 0-based integer derived from the category names.
+
+    When loading multiple files:
+
+    - If `format="auto"`, the format is detected from all files and they must
+      all have the same format.
+    - Image filenames are used to assign unique image IDs. If the same
+      filename appears in multiple annotation files, annotations will be
+      merged under the same `image_id`.
+    - Duplicate annotations across files are dropped.
 
     See Also
     --------
     pandas.concat : Concatenate pandas objects along a particular axis.
-
     pandas.DataFrame.drop_duplicates : Return DataFrame with duplicate rows
-    removed.
+        removed.
 
     """
-    # Delegate to reader of either a single file or multiple files
-    if isinstance(file_paths, list):
-        df_all = _from_multiple_files(file_paths, format=format)
+    # Ensure file_paths is a list internally, even if single path is given
+    if isinstance(file_paths, str | Path):
+        input_file_list = [Path(file_paths)]
+        is_single_file = True
+    elif isinstance(file_paths, list):
+        if not file_paths:
+            raise ValueError("Input 'file_paths' list cannot be empty.")
+        input_file_list = [Path(p) for p in file_paths]
+        is_single_file = False
     else:
-        df_all = _from_single_file(file_paths, format=format)
+        raise TypeError(
+            f"Unsupported type for 'file_paths': {type(file_paths)}"
+        )
+
+    determined_format: Literal["VIA", "COCO"]
+    if format == "auto":
+        determined_format = _determine_format_from_paths(input_file_list)
+    elif format in ["VIA", "COCO"]:
+        determined_format = format
+    else:
+        raise ValueError(
+            f"Invalid format specified: '{format}'. Must be 'VIA', "
+            f"'COCO', or 'auto'."
+        )
+
+    # Delegate to reader of either a single file or multiple files
+    if is_single_file:  # or len(input_file_list) == 1
+        df_all = _from_single_file(
+            input_file_list[0], format=determined_format
+        )
+    else:
+        # Pass the list of Path objects
+        df_all = _from_multiple_files(
+            input_file_list, format=determined_format
+        )
 
     # Add metadata
     df_all.attrs = {
         "annotation_files": file_paths,
-        "annotation_format": format,
+        "annotation_format": determined_format,
         "images_directories": images_dirs,
     }
 
@@ -93,13 +251,13 @@ def from_files(
 
 
 def _from_multiple_files(
-    list_filepaths: list[Path | str], format: Literal["VIA", "COCO"]
+    list_filepaths: list[Path], format: Literal["VIA", "COCO"]
 ):
     """Read bounding boxes annotations from multiple files.
 
     Parameters
     ----------
-    list_filepaths : list[Path | str]
+    list_filepaths : list[Path]
         List of paths to the input annotation files
     format : Literal["VIA", "COCO"]
         Format of the input annotation files.

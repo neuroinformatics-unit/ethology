@@ -257,12 +257,12 @@ def test_from_single_file_unsupported():
 @pytest.mark.parametrize(
     ("input_file, format"),
     [
-        ("VIA_JSON_sample_1.json", "VIA"),  # medium VIA file
-        ("VIA_JSON_sample_2.json", "VIA"),  # medium VIA file
-        ("small_bboxes_VIA.json", "VIA"),  # small VIA file
-        ("COCO_JSON_sample_1.json", "COCO"),  # medium COCO file
-        ("COCO_JSON_sample_2.json", "COCO"),  # medium COCO file
-        ("small_bboxes_COCO.json", "COCO"),  # small COCO file
+        ("VIA_JSON_sample_1.json", "VIA"),
+        ("VIA_JSON_sample_2.json", "VIA"),
+        ("small_bboxes_VIA.json", "VIA"),
+        ("COCO_JSON_sample_1.json", "COCO"),
+        ("COCO_JSON_sample_2.json", "COCO"),
+        ("small_bboxes_COCO.json", "COCO"),
     ],
 )
 def test_from_single_file(
@@ -286,7 +286,6 @@ def test_from_single_file(
     )
 
     # Check dataframe
-    # (we only check annotations per image for the small datasets)
     assert_dataframe(
         df,
         expected_n_annotations,
@@ -361,7 +360,6 @@ def test_from_single_file_no_category(
     has annotations with no category.
     """
     # Compute bboxes dataframe with input file that has no categories
-    # (this should raise an error for COCO files)
     with expected_exception as excinfo:
         df = _from_single_file(
             file_path=annotations_test_data[
@@ -389,11 +387,11 @@ def test_from_single_file_no_category(
         ("VIA_JSON_sample_1.json", "VIA"),
         ("VIA_JSON_sample_2.json", "VIA"),
         ("small_bboxes_VIA.json", "VIA"),
-        ("small_bboxes_duplicates_VIA.json", "VIA"),  # contains duplicates
+        ("small_bboxes_duplicates_VIA.json", "VIA"),
         ("COCO_JSON_sample_1.json", "COCO"),
         ("COCO_JSON_sample_2.json", "COCO"),
         ("small_bboxes_COCO.json", "COCO"),
-        ("small_bboxes_duplicates_COCO.json", "COCO"),  # contains duplicates
+        ("small_bboxes_duplicates_COCO.json", "COCO"),
     ],
 )
 def test_df_rows_from_valid_file(
@@ -491,7 +489,6 @@ def test_from_files_duplicates(
         n_unique_annotations = n_total_annotations - n_duplicates
         expected_annots_per_image = 1
 
-    # Compute dataframe
     df = from_files(input_files, format=format)
 
     # Check dataframe content is as expected
@@ -687,3 +684,276 @@ def test_sorted_annotations_by_image_filename(
     assert df["image_filename"].to_list() == sorted(
         df["image_filename"].to_list()
     )
+
+
+# --- TESTS FOR format="auto" ---
+
+
+@pytest.mark.parametrize(
+    ("input_file, format"),
+    [
+        ("small_bboxes_VIA.json", "VIA"),
+        ("small_bboxes_COCO.json", "COCO"),
+        ("VIA_JSON_sample_1.json", "VIA"),
+        ("COCO_JSON_sample_1.json", "COCO"),
+    ],
+)
+def test_from_files_auto_detect_single_success(
+    input_file: str,
+    format: Literal["VIA", "COCO"],
+    annotations_test_data: dict,
+):
+    """Test `from_files` with format='auto' successfully detects format."""
+    filepath = annotations_test_data[input_file]
+
+    # Load with auto-detection
+    df = from_files(file_paths=filepath, format="auto")
+
+    # Check loaded data is correct (using existing helpers)
+    expected_n_images, expected_n_annotations = (
+        count_imgs_and_annots_in_input_file(filepath, format=format)
+    )
+    assert_dataframe(
+        df,
+        expected_n_annotations,
+        expected_n_images,
+        expected_supercategories="animal",
+        expected_categories="crab",
+        expected_annots_per_image=1 if "small" in input_file else None,
+    )
+    # Check the format stored in attributes is correct
+    assert df.attrs["annotation_format"] == format
+
+
+@pytest.mark.parametrize(
+    "format",
+    [
+        "VIA",
+        "COCO",
+    ],
+)
+def test_from_files_auto_detect_multiple_success(
+    format: Literal["VIA", "COCO"], multiple_files: dict
+):
+    """Test `from_files` with format='auto' detects format from files
+    in a list and loads correctly.
+    """
+    list_paths = multiple_files[format]
+
+    n_images_total = sum(
+        count_imgs_and_annots_in_input_file(file, format=format)[0]
+        for file in list_paths
+    )
+    n_annotations_total = sum(
+        count_imgs_and_annots_in_input_file(file, format=format)[1]
+        for file in list_paths
+    )
+
+    df_all = from_files(list_paths, format="auto")
+
+    assert_dataframe(
+        df_all,
+        expected_n_annotations=n_annotations_total,
+        expected_n_images=n_images_total,
+        expected_supercategories="animal",
+        expected_categories="crab",
+    )
+    assert df_all.attrs["annotation_format"] == format
+
+
+# --- Fixtures for creating invalid files for error testing ---
+
+
+@pytest.fixture
+def invalid_json_file(tmp_path: Path) -> Path:
+    """Create a file that is not valid JSON."""
+    p = tmp_path / "invalid.json"
+    p.write_text("{invalid json structure", encoding="utf-8")
+    return p
+
+
+@pytest.fixture
+def non_dict_json_file(tmp_path: Path) -> Path:
+    """Create a file containing a valid JSON list, not a dict."""
+    p = tmp_path / "list.json"
+    p.write_text('["a", "b", "c"]', encoding="utf-8")
+    return p
+
+
+@pytest.fixture
+def ambiguous_json_file(tmp_path: Path) -> Path:
+    """Create a file with both VIA and COCO top-level keys."""
+    p = tmp_path / "ambiguous.json"
+    data: dict = {
+        "_via_img_metadata": {},
+        "_via_attributes": {},
+        "images": [],
+        "annotations": [],
+        "categories": [],
+    }
+    p.write_text(json.dumps(data), encoding="utf-8")
+    return p
+
+
+@pytest.fixture
+def unknown_format_json_file(tmp_path: Path) -> Path:
+    """Create a valid JSON dict file with unknown keys."""
+    p = tmp_path / "unknown.json"
+    p.write_text('{"other_key": 1, "another": "data"}', encoding="utf-8")
+    return p
+
+
+# --- Tests for format="auto" error conditions ---
+
+
+def test_from_files_auto_detect_file_not_found():
+    """Test `from_files` with format='auto' raises error if file not found."""
+    non_existent_path = Path("./non_existent_file_for_sure.json")
+    assert not non_existent_path.exists()
+
+    with pytest.raises(ValueError) as excinfo:
+        from_files(non_existent_path, format="auto")
+
+    assert "Automatic format detection failed" in str(excinfo.value)
+    # Check the cause of the ValueError from from_files
+    assert isinstance(excinfo.value.__cause__, ValueError)
+    assert "Could not read or parse JSON" in str(excinfo.value.__cause__)
+    # Check the ultimate cause from _detect_format's open()
+    assert isinstance(excinfo.value.__cause__.__cause__, FileNotFoundError)
+    assert "No such file or directory" in str(
+        excinfo.value.__cause__.__cause__
+    )
+
+
+def test_from_files_auto_detect_invalid_json(
+    invalid_json_file: Path,
+):
+    """Test `from_files` with format='auto' raises error for invalid JSON."""
+    with pytest.raises(ValueError) as excinfo:
+        from_files(invalid_json_file, format="auto")
+
+    assert "Automatic format detection failed" in str(excinfo.value)
+    assert isinstance(excinfo.value.__cause__, ValueError)
+    assert "Could not read or parse JSON" in str(excinfo.value.__cause__)
+    assert isinstance(excinfo.value.__cause__.__cause__, json.JSONDecodeError)
+
+
+def test_from_files_auto_detect_non_dict_json(
+    non_dict_json_file: Path,
+):
+    """Test `from_files` with format='auto' raises error for non-dict JSON."""
+    with pytest.raises(ValueError) as excinfo:
+        from_files(non_dict_json_file, format="auto")
+
+    assert "Automatic format detection failed" in str(
+        excinfo.value
+    )  # Outer error from from_files
+    # Intermediate error from _detect_format
+    assert isinstance(excinfo.value.__cause__, ValueError)
+    assert "Expected JSON root to be a dictionary for format detection" in str(
+        excinfo.value.__cause__
+    )
+    assert "got <class 'list'>" in str(
+        excinfo.value.__cause__
+    )  # Check the type reported
+
+
+def test_from_files_auto_detect_ambiguous_format(ambiguous_json_file: Path):
+    """Test `from_files` with format='auto' raises error for ambiguous
+    format.
+    """
+    with pytest.raises(ValueError) as excinfo:
+        from_files(ambiguous_json_file, format="auto")
+
+    assert "Automatic format detection failed" in str(excinfo.value)
+    assert "contains keys characteristic of *both* VIA and COCO" in str(
+        excinfo.value.__cause__
+    )
+
+
+def test_from_files_auto_detect_unknown_format(
+    unknown_format_json_file: Path,
+):
+    """Test `from_files` with format='auto' raises error for unknown format."""
+    with pytest.raises(ValueError) as excinfo:
+        from_files(unknown_format_json_file, format="auto")
+
+    assert "Automatic format detection failed" in str(excinfo.value)
+    assert "Could not automatically determine format" in str(
+        excinfo.value.__cause__
+    )
+
+
+def test_from_files_empty_list_input():
+    """Test `from_files` raises ValueError for empty list input."""
+    with pytest.raises(ValueError) as excinfo:
+        from_files([])
+    assert "Input 'file_paths' list cannot be empty" in str(excinfo.value)
+
+
+def test_from_files_invalid_filepaths_type():
+    """Test from_files raises TypeError for invalid file_paths type."""
+    with pytest.raises(TypeError) as excinfo:
+        # Pass an integer or other unsupported type
+        from_files(file_paths=123)
+    assert "Unsupported type for 'file_paths'" in str(excinfo.value)
+
+
+def test_from_files_invalid_format_string(unknown_format_json_file: Path):
+    """Test `from_files` raises error for invalid explicit format string."""
+    valid_file = unknown_format_json_file
+    with pytest.raises(ValueError) as excinfo:
+        from_files(valid_file, format="invalid_format_string")  # type: ignore
+    assert "Invalid format specified: 'invalid_format_string'" in str(
+        excinfo.value
+    )
+
+
+def test_from_files_auto_detect_generic_read_error(tmp_path: Path):
+    """Test `from_files` with format='auto' handles generic Exception
+    during file read.
+    """
+    dummy_filepath = tmp_path / "dummy_generic_error.json"
+    dummy_filepath.touch()
+
+    simulated_error = Exception("Simulated generic I/O error")
+
+    with (
+        pytest.raises(ValueError) as excinfo,
+        patch(
+            "ethology.annotations.io.load_bboxes.open",
+            side_effect=simulated_error,
+        ),
+    ):
+        from_files(dummy_filepath, format="auto")
+
+    assert "Automatic format detection failed" in str(excinfo.value)
+    assert isinstance(excinfo.value.__cause__, ValueError)
+    assert "Could not read or parse JSON" in str(excinfo.value.__cause__)
+    assert isinstance(excinfo.value.__cause__.__cause__, Exception)
+    assert excinfo.value.__cause__.__cause__ is simulated_error
+
+
+def test_from_files_auto_detect_multiple_inconsistent_formats(
+    annotations_test_data: dict,
+):
+    """Test `from_files` with format='auto' raises error if multiple files
+    have inconsistent formats.
+    """
+    via_file = annotations_test_data["small_bboxes_VIA.json"]
+    coco_file = annotations_test_data["small_bboxes_COCO.json"]
+    mixed_files = [via_file, coco_file]
+
+    with pytest.raises(ValueError) as excinfo:
+        from_files(mixed_files, format="auto")
+
+    assert "Automatic format detection failed" in str(excinfo.value)
+    # The direct cause should be the ValueError from from_files about
+    # inconsistent formats
+    assert isinstance(excinfo.value.__cause__, ValueError)
+    assert "Inconsistent formats detected across files" in str(
+        excinfo.value.__cause__
+    )
+    assert "{'VIA', 'COCO'}" in str(
+        excinfo.value.__cause__
+    ) or "{'COCO', 'VIA'}" in str(excinfo.value.__cause__)
