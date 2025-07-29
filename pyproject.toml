@@ -20,6 +20,10 @@ classifiers = [
 ]
 dependencies = [
   "movement",
+  "mlflow-skinny",
+  "netCDF4",
+  "torch",
+  "ensemble-boxes",
 ]
 
 [project.urls]
