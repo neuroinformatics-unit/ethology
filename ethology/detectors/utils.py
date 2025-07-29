@@ -27,6 +27,23 @@ def concat_detections_ds(
     return ds
 
 
+def detections_dict_as_ds_batch(
+    list_detections: list[dict],
+) -> list[xr.Dataset]:
+    """Reshape list of detections dictionaries as xarray dataset.
+
+    Input is list of detections dictionaries with keys:
+    - "boxes": tensor of shape [N, 4], x1y1x2y2 in pixels
+    - "scores": tensor of shape [N]
+    - "labels": tensor of shape [N]
+
+    Output is a list of xarray datasets, one for each image in the batch.
+    """
+    return [
+        detections_dict_as_ds(detections) for detections in list_detections
+    ]
+
+
 def detections_dict_as_ds(detections: dict) -> xr.Dataset:
     """Reshape detections dictionaryas xarray dataset.
 
@@ -54,21 +71,15 @@ def detections_dict_as_ds(detections: dict) -> xr.Dataset:
     )
 
 
-def detections_x1y1_x2y2_as_ds(
+def detections_x1y1_x2y2_as_da_tuple(
     x1y1_x2y2_array: np.ndarray,
     scores_array: np.ndarray,
     labels_array: np.ndarray,
-) -> xr.Dataset:
+) -> tuple[xr.DataArray, xr.DataArray, xr.DataArray, xr.DataArray]:
     """Reshape detections array as xarray dataset.
 
     Input is detections array with shape [N, 4], x1y1x2y2 in pixels
     """
-    # Remove nan rows
-    slc_nan_rows = np.any(np.isnan(x1y1_x2y2_array), axis=1)
-    x1y1_x2y2_array = x1y1_x2y2_array[~slc_nan_rows]
-    scores_array = scores_array[~slc_nan_rows]
-    labels_array = labels_array[~slc_nan_rows]
-
     # Create xarray dataset
     n_detections = x1y1_x2y2_array.shape[0]
     centroid_da = xr.DataArray(
@@ -104,6 +115,31 @@ def detections_x1y1_x2y2_as_ds(
         data=labels_array,
         dims=["id"],
         coords={"id": list(range(n_detections))},
+    )
+
+    return centroid_da, shape_da, confidence_da, label_da
+
+
+def detections_x1y1_x2y2_as_ds(
+    x1y1_x2y2_array: np.ndarray,
+    scores_array: np.ndarray,
+    labels_array: np.ndarray,
+) -> xr.Dataset:
+    """Reshape detections array as xarray dataset.
+
+    Input is detections array with shape [N, 4], x1y1x2y2 in pixels
+    """
+    # Remove nan rows
+    slc_nan_rows = np.any(np.isnan(x1y1_x2y2_array), axis=1)
+    x1y1_x2y2_array = x1y1_x2y2_array[~slc_nan_rows]
+    scores_array = scores_array[~slc_nan_rows]
+    labels_array = labels_array[~slc_nan_rows]
+
+    # Create dataarrays for dataset
+    centroid_da, shape_da, confidence_da, label_da = (
+        detections_x1y1_x2y2_as_da_tuple(
+            x1y1_x2y2_array, scores_array, labels_array
+        )
     )
 
     return xr.Dataset(
