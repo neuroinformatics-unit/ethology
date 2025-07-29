@@ -7,12 +7,12 @@ import pandas as pd
 import torch
 import torchvision.transforms.v2 as transforms
 import xarray as xr
-from ensemble_boxes import weighted_boxes_fusion
 from torch.utils.data import DataLoader, random_split
 from tqdm import tqdm
 
 from ethology.datasets.create import create_coco_dataset
 from ethology.detectors.ensembles import combine_detections_across_models_wbf
+from ethology.detectors.evaluate import compute_precision_recall_ds
 from ethology.detectors.inference import (
     collate_fn_varying_n_bboxes,
     concat_detections_ds,
@@ -22,8 +22,6 @@ from ethology.detectors.inference import (
 from ethology.detectors.load import load_fasterrcnn_resnet50_fpn_v2
 from ethology.detectors.utils import (
     add_bboxes_min_max_corners,
-    detections_x1y1_x2y2_as_da_tuple,
-    detections_x1y1_x2y2_as_ds,
 )
 from ethology.mlflow import (
     read_cli_args_from_mlflow_params,
@@ -307,194 +305,154 @@ fused_detections_ds = combine_detections_across_models_wbf(
     },
 )
 
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# Define ground truth dataset
 
-# %%
-import torchvision
+from ethology.annotations.io import load_bboxes
 
+print(annotations_file_path.name)
+# VIA_JSON_combined_coco_gen_sorted_imageIDs.json -->
+# image_id assigned by sorted filename from 0 to n-1
 
-def padded_batched_nms(
-    bboxes: torch.Tensor,
-    scores: torch.Tensor,
-    labels: torch.Tensor,
-    iou_threshold: float,
-) -> torch.Tensor:
-    print(bboxes.shape)
-    print(scores.shape)
-    print(labels.shape)
+# read annotations as a dataset
+gt_bboxes_ds = load_bboxes.from_files(annotations_file_path, format="COCO")
 
-    n_input_detections = bboxes.shape[0]
-    idcs_to_keep = torchvision.ops.batched_nms(
-        bboxes, scores, labels, iou_threshold
-    )
-
-    print(idcs_to_keep.shape)
-
-    # # pad with -1
-    # idcs_to_keep = torch.nn.functional.pad(
-    #     idcs_to_keep,
-    #     (0, n_input_detections - idcs_to_keep.shape[0]),
-    #     value=-1,
-    # )
-    # print(idcs_to_keep)
-    return idcs_to_keep
-
-
-# %%
-
-# Prepare input for nms
-fused_detections_ds = add_bboxes_min_max_corners(fused_detections_ds)
-ensemble_x1y1_x2y2 = xr.concat(
-    [
-        fused_detections_ds.xy_min,
-        fused_detections_ds.xy_max,
-    ],
-    dim="space",
-).transpose("image_id", "id", "space")
-
-
-list_x1y1_x2y2_to_keep = []
-for image_id in range(ensemble_x1y1_x2y2.shape[0]):
-    idcs_to_keep = torchvision.ops.nms(
-        torch.from_numpy(ensemble_x1y1_x2y2.data[image_id]),
-        torch.from_numpy(fused_detections_ds.confidence.data[image_id]),
-        0.1,
-    )
-
-    list_x1y1_x2y2_to_keep.append(ensemble_x1y1_x2y2.data[image_id][idcs_to_keep,:])
-    print(idcs_to_keep.shape)
-
-
-# %%
-for idx in range(ensemble_x1y1_x2y2.shape[0]):
-    print(torch.from_numpy(ensemble_x1y1_x2y2.data[idx]).shape)
-    print(torch.from_numpy(fused_detections_ds.confidence.data[idx]).shape)
-    print(sum(fused_detections_ds.label.data[idx] != -1))
-
-    out = torchvision.ops.batched_nms(
-        torch.from_numpy(ensemble_x1y1_x2y2.data[idx]),
-        torch.from_numpy(fused_detections_ds.confidence.data[idx]),
-        torch.from_numpy(fused_detections_ds.label.data[idx]),
-        0.1,
-    )
-    print(out.shape)
-    # out = torch.nn.functional.pad(
-    #     out,
-    #     (0, ensemble_x1y1_x2y2.data[idx].shape[0] - out.shape[0]),
-    #     value=-1,
-    # ) --- not neede with batched_nms?
-    # print(out.shape)
-    print("---")
-
-
-# %%
-# def padded_nms(
-#     bboxes: torch.Tensor,
-#     scores: torch.Tensor,
-#     iou_threshold: float,
-# ) -> torch.Tensor:
-#     print(bboxes.shape)
-#     print(scores.shape)
-
-#     out = torchvision.ops.nms(bboxes, scores, iou_threshold)
-#     out_padded = torch.nn.functional.pad(
-#         out,
-#         (0, bboxes.shape[0] - out.shape[0]),
-#         value=-1,
-#     )
-#     print(out_padded.shape)
-#     return out_padded
-
-vectorised_batched_nms = torch.vmap(
-    torchvision.ops.batched_nms,
-    in_dims=(0, 0, 0, None),
-)
-idcs_to_keep = vectorised_batched_nms(
-    torch.from_numpy(ensemble_x1y1_x2y2.data),
-    torch.from_numpy(fused_detections_ds.confidence.data),
-    torch.from_numpy(fused_detections_ds.label.data),
-    0.1,
+# fix category ID
+gt_bboxes_ds["category"] = gt_bboxes_ds["category"].where(
+    gt_bboxes_ds["category"] != 0, 1
 )
 
+# select only image_id in val_dataset
+list_image_ids_val = [annot["image_id"] for img, annot in val_dataset]
+gt_bboxes_val_ds = gt_bboxes_ds.sel(image_id=list_image_ids_val)
 
-# %%
+
+# Alternatively: torch dataset into xarray dataset
+# .....
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Evaluate
 
+fused_detections_ds, gt_bboxes_val_ds = compute_precision_recall_ds(
+    pred_bboxes_ds=fused_detections_ds,
+    gt_bboxes_ds=gt_bboxes_val_ds,
+    iou_threshold=0.5,
+)
+
+
+
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-# Fuse detections across models -- Approach 2: vectorized
-# faster but less clear
+# Evaluate
+
+# fused_detections_ds, val_annotations_ds = evaluate_detections_hungarian_ds(
+#     pred_bboxes=fused_detections_ds,
+#     gt_bboxes=gt_bboxes_val_ds,
+#     iou_threshold=0.5,
+# )
+
+# # Add xy_min and xy_max if not present
+# if all(
+#     [
+#         var_str not in fused_detections_ds.variables
+#         for var_str in ["xy_min", "xy_max"]
+#     ]
+# ):
+#     fused_detections_ds = add_bboxes_min_max_corners(fused_detections_ds)
+
+# if all(
+#     [
+#         var_str not in gt_bboxes_val_ds.variables
+#         for var_str in ["xy_min", "xy_max"]
+#     ]
+# ):
+#     gt_bboxes_val_ds = add_bboxes_min_max_corners(gt_bboxes_val_ds)
 
 
 # %%
-# timeit --- 1.37 s ± 11.1 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)
-# this will become a fn
-# centroid_fused, shape_fused, confidence_fused, label_fused = xr.apply_ufunc(
-#     wbf_wrapper_arrays,
-#     all_models_detections_ds.xy_min,  # the underlaying .data array is passed
-#     all_models_detections_ds.xy_max,
-#     all_models_detections_ds.confidence,
-#     all_models_detections_ds.label,
-#     kwargs={
-#         "image_width_height": np.array(
-#             [
-#                 all_models_detections_ds.attrs[img_size]
-#                 for img_size in ["image_width", "image_height"]
-#             ]
-#         ),
-#         "iou_thr_ensemble": 0.5,
-#         "skip_box_thr": 0.0001,
-#         "max_n_detections": 300,
-#     },
-#     input_core_dims=[  # do not broadcast across these
-#         ["model", "id", "space"],
-#         ["model", "id", "space"],
-#         ["model", "id"],
-#         ["model", "id"],
+# Prepare input for hungarian
+# pred_bboxes_x1y1_x2y2 = xr.concat(
+#     [fused_detections_ds.xy_min, fused_detections_ds.xy_max], dim="space"
+# ).transpose("image_id", "id", "space")
+
+# # Prepare input for hungarian
+# gt_bboxes_x1y1_x2y2 = xr.concat(
+#     [gt_bboxes_val_ds.xy_min, gt_bboxes_val_ds.xy_max], dim="space"
+# ).transpose("image_id", "id", "space")
+
+
+# # rename id dimension in gt_bboxes_x1y1_x2y2
+# gt_bboxes_x1y1_x2y2 = gt_bboxes_x1y1_x2y2.rename({"id": "id_gt"})
+
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# Run hungarian one image
+# OJO False values in arrays are "unreliable"; always use True values
+# print(pred_bboxes_x1y1_x2y2.data[0].shape)
+# print(gt_bboxes_x1y1_x2y2.data[0].shape)
+# tp, fp, md, iou_tp = evaluate_detections_hungarian_arrays(
+#     pred_bboxes_x1y1_x2y2.data[0],
+#     gt_bboxes_x1y1_x2y2.data[0],
+#     iou_threshold=0.5,
+# )
+
+# print("---")
+# print(tp.shape)
+# print(fp.shape)
+# print(iou_tp.shape)
+# print(md.shape)
+
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# # Run hungarian vectorized
+
+
+# # def test(pred_bboxes_x1y1_x2y2, gt_bboxes_x1y1_x2y2, iou_threshold):
+# #     print(pred_bboxes_x1y1_x2y2.shape)
+# #     print(gt_bboxes_x1y1_x2y2.shape)
+# #     print(iou_threshold)
+# #     print('----')
+# #     return evaluate_detections_hungarian_arrays(
+# #         pred_bboxes_x1y1_x2y2,
+# #         gt_bboxes_x1y1_x2y2,
+# #         iou_threshold,
+# #     )
+
+
+# tp_array, fp_array, md_array, iou_tp_array = xr.apply_ufunc(
+#     evaluate_detections_hungarian_arrays,
+#     pred_bboxes_x1y1_x2y2,
+#     gt_bboxes_x1y1_x2y2,
+#     kwargs={"iou_threshold": 0.5},
+#     input_core_dims=[
+#         ["id", "space"],
+#         ["id_gt", "space"],
 #     ],
-#     output_core_dims=[["space", "id"], ["space", "id"], ["id"], ["id"]],
+#     output_core_dims=[
+#         ["id"],
+#         ["id"],
+#         ["id_gt"],
+#         ["id"],
+#     ],
 #     vectorize=True,
-#     # loop over non-core dims (i.e. image_id);
-#     # assumes function only takes arrays over core dims as input
-#     exclude_dims={"id"},
-#     # to allow dimensions that change size btw input and output
+#     exclude_dims={"id", "id_gt"},
 # )
 
 
-# # Remove pad across annotations
-# centroid_fused = centroid_fused.dropna(dim="id", how="all")
-# shape_fused = shape_fused.dropna(dim="id", how="all")
-# confidence_fused = confidence_fused.dropna(dim="id", how="all")
-# label_fused = label_fused.dropna(dim="id", how="all")
-
-
-# # Pad labels with -1 rather than nan
-# label_fused = label_fused.fillna(-1)
-
-
-# # Return a dataset
-# fused_detections_ds = xr.Dataset(
-#     data_vars={
-#         "position": centroid_fused,
-#         "shape": shape_fused,
-#         "confidence": confidence_fused,
-#         "label": label_fused,
-#     }
+# # %%
+# # Add to dataset
+# fused_detections_ds["tp"] = xr.DataArray(tp_array, dims=["image_id", "id"])
+# fused_detections_ds["fp"] = xr.DataArray(fp_array, dims=["image_id", "id"])
+# fused_detections_ds["iou_tp"] = xr.DataArray(
+#     iou_tp_array, dims=["image_id", "id"]
 # )
 
-# print(fused_detections_ds)
 
-# %%
-# %%
-# Evaluate detections with hungarian
+# # rename id dimension in md_array
+# md_array = md_array.rename({"id_gt": "id"})
+# gt_bboxes_val_ds["md"] = xr.DataArray(md_array, dims=["image_id", "id"])
 
-# ensemble_detections_ds = add_bboxes_min_max_corners(ensemble_detections_ds)
 
-# add tp, fp, tp_iou as arrays to dataset?
-# tp, fp, md, _ = evaluate_detections_hungarian(
-#         ensemble_x1_y1_x2_y2, annots["boxes"], iou_threshold_precision
-#     )
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
