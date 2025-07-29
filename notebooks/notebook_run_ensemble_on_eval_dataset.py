@@ -259,7 +259,8 @@ train_dataset, val_dataset, test_dataset = split_dataset_crab_repo(
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Define val dataloader
-# shuffle=False so that we dont shuffle the data after one pass over all batches
+# shuffle=False so that we dont shuffle the data 
+# after one pass over all batches
 val_dataloader = DataLoader(
     val_dataset,
     batch_size=ref_config["batch_size_val"],
@@ -336,7 +337,7 @@ gt_bboxes_val_ds = gt_bboxes_ds.sel(image_id=list_image_ids_val)
 fused_detections_ds, gt_bboxes_val_ds = compute_precision_recall_ds(
     pred_bboxes_ds=fused_detections_ds,
     gt_bboxes_ds=gt_bboxes_val_ds,
-    iou_threshold=0.1, # change to 0.5?
+    iou_threshold=0.1,  # change to 0.5?
 )
 
 
@@ -369,4 +370,3 @@ plot_and_save_ensemble_detections(
     precision=fused_detections_ds.isel(image_id=image_index).precision.values,
     recall=fused_detections_ds.isel(image_id=image_index).recall.values,
 )
-

@@ -1,13 +1,10 @@
 """Utils for ensembles of detectors."""
 
 import numpy as np
-import torch
-import torchvision
 import xarray as xr
 from ensemble_boxes import weighted_boxes_fusion
 
 from ethology.detectors.utils import (
-    add_bboxes_min_max_corners,
     detections_x1y1_x2y2_as_da_tuple,
 )
 
@@ -137,6 +134,7 @@ def combine_detections_across_models_wbf(
     -------
     xr.Dataset
         Detections dataset containing the fused detections.
+
     """
     # Prepare kwargs
     kwargs_wbf["image_width_height"] = np.array(
