@@ -30,6 +30,7 @@ from ethology.mlflow import (
     read_config_from_mlflow_params,
     read_mlflow_params,
 )
+import matplotlib.pyplot as plt
 
 # Set xarray options
 xr.set_options(display_expand_attrs=False)
@@ -37,11 +38,13 @@ xr.set_options(display_expand_attrs=False)
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Input data
 
-dataset_dir = Path("/home/sminano/swc/project_crabs/data/sep2023-full")
-annotations_dir = Path("/home/sminano/swc/project_ethology/large_annotations")
-annotations_file_path = (
-    annotations_dir / "VIA_JSON_combined_coco_gen_sorted_imageIDs.json"
+dataset_dir = Path("/home/sminano/swc/project_crabs/data/aug2023-full")
+# Path("/home/sminano/swc/project_crabs/data/sep2023-full")
+annotations_dir = Path(
+    "/home/sminano/swc/project_crabs/data/aug2023-full/annotations"
 )
+# Path("/home/sminano/swc/project_ethology/large_annotations")
+annotations_file_path = annotations_dir / "VIA_JSON_combined_coco_gen.json"
 
 experiment_ID = "617393114420881798"
 ml_runs_experiment_dir = (
@@ -113,6 +116,7 @@ def plot_and_save_ensemble_detections(
     output_dir,
     precision,
     recall,
+    extra_str="",
 ):
     """Plot ground truth and ensemble detections on image and save as PNG."""
     # Convert tensor to numpy array and transpose from (C, H, W) to (H, W, C)
@@ -186,7 +190,8 @@ def plot_and_save_ensemble_detections(
     )
 
     # Save the image as PNG
-    output_filename = output_dir / f"val_set_{image_id:06d}.png"
+    extra_str = f"{extra_str}_" if extra_str else ""
+    output_filename = output_dir / f"val_set_{extra_str}{image_id:06d}.png"
     cv2.imwrite(str(output_filename), image_cv)
     print(f"Saved: {output_filename}")
 
@@ -255,7 +260,10 @@ dataset_coco = create_coco_dataset(
 train_dataset, val_dataset, test_dataset = split_dataset_crab_repo(
     dataset_coco,
     seed_n=ref_cli_args["seed_n"],
-    config=ref_config,  # only uses train_fraction and val_over_test_fraction
+    config={
+        "train_fraction": 0.0,
+        "val_over_test_fraction": 1.0,
+    },  # only uses train_fraction and val_over_test_fraction
 )
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -314,7 +322,7 @@ fused_detections_ds = combine_detections_across_models_wbf(
 print(annotations_file_path.name)
 gt_bboxes_ds = load_bboxes.from_files(annotations_file_path, format="COCO")
 
-# fix category ID
+# fix category ID (to be fixed in loader)
 gt_bboxes_ds["category"] = gt_bboxes_ds["category"].where(
     gt_bboxes_ds["category"] != 0, 1
 )
@@ -323,51 +331,40 @@ gt_bboxes_ds["category"] = gt_bboxes_ds["category"].where(
 # Note that the max number of annotations per image in the val_dataset
 # will stay as in the original dataset (also, category = -1 is not considered
 # an empty value for xarrays .dropna())
-list_image_ids_val = [annot["image_id"] for img, annot in val_dataset] 
+list_image_ids_val = [annot["image_id"] for img, annot in val_dataset]
 gt_bboxes_val_ds = gt_bboxes_ds.sel(image_id=list_image_ids_val)
 
-
-# # %%
-# list_image_ids_test = [annot["image_id"] for img, annot in test_dataset]
-# list_image_ids_train = [annot["image_id"] for img, annot in train_dataset]
-
-# gt_bboxes_test_ds = gt_bboxes_ds.sel(image_id=list_image_ids_test)
-# gt_bboxes_train_ds = gt_bboxes_ds.sel(image_id=list_image_ids_train)
 
 # %%
 # Alternatively: convert torch dataset into xarray detections dataset
 # .....
+val_ds = torch_dataset_to_xr_dataset(val_dataset)
 
-val_ds = torch_dataset_to_xr_dataset(val_dataset)  # max -- annotations per image
-test_ds = torch_dataset_to_xr_dataset(test_dataset)  # max 129 annotations per image
-train_ds = torch_dataset_to_xr_dataset(train_dataset)  # max 136 annotations per image
-
-
-# %%
-# check data arrays are the same but with annotations in different order
-# There is no guarantee that annotation with id=15 is the same in the
-# xr dataset computed from the annotations file and the one computed from
-# the torch dataset.
-for idx in range(len(val_ds.image_id.values)):
-    idcs_sorted_x1 = np.lexsort(
-        (
-            gt_bboxes_val_ds.position.values[idx, 1, :],
-            gt_bboxes_val_ds.position.values[idx, 0, :],
-        )
-    )  # sort by x, then y
-    idcs_sorted_x2 = np.lexsort(
-        (
-            val_ds.position.values[idx, 1, :],
-            val_ds.position.values[idx, 0, :],
-        )
-    )  # sort by x, then y
-    assert np.allclose(
-        gt_bboxes_val_ds.position.values[idx, :, idcs_sorted_x1],
-        val_ds.position.values[idx, :, idcs_sorted_x2],
-        equal_nan=True,
-        rtol=1e-5,
-        atol=1e-8,
-    )
+# # %%
+# # check data arrays are the same but with annotations in different order
+# # There is no guarantee that annotation with id=15 is the same in the
+# # xr dataset computed from the annotations file and the one computed from
+# # the torch dataset.
+# for idx in range(len(val_ds.image_id.values)):
+#     idcs_sorted_x1 = np.lexsort(
+#         (
+#             gt_bboxes_val_ds.position.values[idx, 1, :],
+#             gt_bboxes_val_ds.position.values[idx, 0, :],
+#         )
+#     )  # sort by x, then y
+#     idcs_sorted_x2 = np.lexsort(
+#         (
+#             val_ds.position.values[idx, 1, :],
+#             val_ds.position.values[idx, 0, :],
+#         )
+#     )  # sort by x, then y
+#     assert np.allclose(
+#         gt_bboxes_val_ds.position.values[idx, :, idcs_sorted_x1],
+#         val_ds.position.values[idx, :, idcs_sorted_x2],
+#         equal_nan=True,
+#         rtol=1e-5,
+#         atol=1e-8,
+#     )
 
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -380,32 +377,63 @@ fused_detections_ds, gt_bboxes_val_ds = compute_precision_recall_ds(
 )
 
 
+# %%
+print(f"Precision: {fused_detections_ds.precision.mean().values:.4f}")
+print(f"Recall: {fused_detections_ds.recall.mean().values:.4f}")
+
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # plot ensemble detections on a selected image
 
+# idcs_low_precision = np.argwhere(fused_detections_ds.precision.data < 0.5)
+# idcs_high_precision = np.argwhere(fused_detections_ds.precision.data > 0.9)
+idcs_imgs_increasing_precision = np.argsort(fused_detections_ds.precision.data)
+
 # Get first image
-image_index = 0
-image = val_dataset[image_index][0]
-gt_annotations = val_dataset[image_index][1]
+for i in list(range(0, len(idcs_imgs_increasing_precision), 50)) + [
+    len(idcs_imgs_increasing_precision) - 1
+]:
+    image_index = idcs_imgs_increasing_precision[i].item()
+    image, gt_annotations = val_dataset[image_index]
 
-# fused_detections_ds_plot = add_bboxes_min_max_corners(fused_detections_ds)
+    plot_and_save_ensemble_detections(
+        image=image,
+        gt_boxes_x1_y1_x2_y2=gt_annotations["boxes"],
+        pred_boxes_x1_y1_x2_y2=np.hstack(
+            [
+                fused_detections_ds[xy_corner_str]
+                .isel(image_id=image_index)
+                .values.T
+                for xy_corner_str in ["xy_min", "xy_max"]
+            ]
+        ),
+        pred_boxes_scores=fused_detections_ds.isel(
+            image_id=image_index
+        ).confidence.values,
+        image_id=gt_annotations["image_id"],
+        output_dir=Path(
+            "/home/sminano/swc/project_ethology/aug2023-ood-ensemble"
+        ),
+        extra_str=f"{i:03d}",
+        precision=fused_detections_ds.isel(
+            image_id=image_index
+        ).precision.values,
+        recall=fused_detections_ds.isel(image_id=image_index).recall.values,
+    )
+    print(f"image id: {gt_annotations['image_id']}")
+# %%
+%matplotlib widget
+# %%
+fig, ax = plt.subplots()
+ax.hist(fused_detections_ds.precision.values)
+ax.set_xlabel("Precision per frame")
+ax.set_ylabel("count (frames)")
+ax.set_title(f"Precision OOD (n={fused_detections_ds.sizes['image_id']})")
 
-plot_and_save_ensemble_detections(
-    image=image,
-    gt_boxes_x1_y1_x2_y2=gt_annotations["boxes"],
-    pred_boxes_x1_y1_x2_y2=np.hstack(
-        [
-            fused_detections_ds[xy_corner_str]
-            .isel(image_id=image_index)
-            .values.T
-            for xy_corner_str in ["xy_min", "xy_max"]
-        ]
-    ),
-    pred_boxes_scores=fused_detections_ds.isel(
-        image_id=image_index
-    ).confidence.values,
-    image_id=gt_annotations["image_id"],
-    output_dir=Path.cwd(),
-    precision=fused_detections_ds.isel(image_id=image_index).precision.values,
-    recall=fused_detections_ds.isel(image_id=image_index).recall.values,
-)
+fig, ax = plt.subplots()
+ax.hist(fused_detections_ds.recall.values)
+ax.set_xlabel("Recall per frame")
+ax.set_ylabel("count (frames)")
+ax.set_title(f"Recall OOD (n={fused_detections_ds.sizes['image_id']})")
+
+# plt.show()
+# %%
