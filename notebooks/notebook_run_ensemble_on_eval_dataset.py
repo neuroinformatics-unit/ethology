@@ -274,61 +274,6 @@ val_dataloader = DataLoader(
     # else None,  # see https://github.com/pytorch/pytorch/issues/87688
 )
 
-
-# %%
-list_annot = [annot for img, annot in val_dataset]
-
-
-df_annot = pd.DataFrame(list_annot)
-df_annot["centroid"] = df_annot["boxes"].apply(
-    lambda x: (0.5 * (x[:, 0:2] + x[:, 2:4])).numpy().astype(float)
-)
-df_annot["shape"] = df_annot["boxes"].apply(
-    lambda x: (x[:, 2:4] - x[:, 0:2]).numpy().astype(float)
-)
-df_annot["labels"] = df_annot["labels"].apply(
-    lambda x: x.numpy().reshape(-1, 1).astype(int)
-)
-
-df_annot["n_annotations"] = df_annot["boxes"].apply(lambda x: x.shape[0])
-n_max_annotations_per_image = df_annot["n_annotations"].max()
-
-# %%
-array_dict = {}
-map_name_to_padding = {
-    "centroid": np.nan,
-    "shape": np.nan,
-    "labels": -1,
-}
-for array_name in map_name_to_padding:
-    array_dict[array_name] = np.stack(
-        [
-            np.pad(
-                arr,
-                ((0, n_max_annotations_per_image - arr.shape[0]), (0, 0)),
-                mode="constant",
-                constant_values=map_name_to_padding[array_name],
-            ).T
-            for arr in df_annot[array_name].to_list()
-        ]
-    )
-
-
-# %%
-val_ds = xr.Dataset(
-    data_vars={
-        "position": (["image_id", "space", "id"], array_dict["centroid"]),
-        "shape": (["image_id", "space", "id"], array_dict["shape"]),
-        "label": (["image_id", "id"], array_dict["labels"].squeeze()),
-    },
-    coords={
-        "image_id": df_annot["image_id"].values,
-        "space": ["x", "y"],
-        "id": range(n_max_annotations_per_image),
-    },
-)
-
-
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Compute detections per model -- can I make it faster?
 # can I vectorize this? (pytorch forum question)
@@ -358,19 +303,15 @@ fused_detections_ds = combine_detections_across_models_wbf(
     kwargs_wbf={
         "iou_thr_ensemble": 0.5,
         "skip_box_thr": 0.0001,
-        "max_n_detections": 300,
+        "max_n_detections": 300,  # set default?
     },
 )
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Define ground truth dataset
 
-
-print(annotations_file_path.name)
-# VIA_JSON_combined_coco_gen_sorted_imageIDs.json -->
-# image_id assigned by sorted filename from 0 to n-1
-
 # read annotations as a dataset
+print(annotations_file_path.name)
 gt_bboxes_ds = load_bboxes.from_files(annotations_file_path, format="COCO")
 
 # fix category ID
@@ -379,15 +320,55 @@ gt_bboxes_ds["category"] = gt_bboxes_ds["category"].where(
 )
 
 # select only image_id in val_dataset
-list_image_ids_val = [annot["image_id"] for img, annot in val_dataset]
+# Note that the max number of annotations per image in the val_dataset
+# will stay as in the original dataset (also, category = -1 is not considered
+# an empty value for xarrays .dropna())
+list_image_ids_val = [annot["image_id"] for img, annot in val_dataset] 
 gt_bboxes_val_ds = gt_bboxes_ds.sel(image_id=list_image_ids_val)
 
+
+# # %%
+# list_image_ids_test = [annot["image_id"] for img, annot in test_dataset]
+# list_image_ids_train = [annot["image_id"] for img, annot in train_dataset]
+
+# gt_bboxes_test_ds = gt_bboxes_ds.sel(image_id=list_image_ids_test)
+# gt_bboxes_train_ds = gt_bboxes_ds.sel(image_id=list_image_ids_train)
+
 # %%
-# Alternatively: torch dataset into xarray dataset
+# Alternatively: convert torch dataset into xarray detections dataset
 # .....
 
+val_ds = torch_dataset_to_xr_dataset(val_dataset)  # max -- annotations per image
+test_ds = torch_dataset_to_xr_dataset(test_dataset)  # max 129 annotations per image
+train_ds = torch_dataset_to_xr_dataset(train_dataset)  # max 136 annotations per image
 
-assert gt_bboxes_val_ds.equals(val_ds)
+
+# %%
+# check data arrays are the same but with annotations in different order
+# There is no guarantee that annotation with id=15 is the same in the
+# xr dataset computed from the annotations file and the one computed from
+# the torch dataset.
+for idx in range(len(val_ds.image_id.values)):
+    idcs_sorted_x1 = np.lexsort(
+        (
+            gt_bboxes_val_ds.position.values[idx, 1, :],
+            gt_bboxes_val_ds.position.values[idx, 0, :],
+        )
+    )  # sort by x, then y
+    idcs_sorted_x2 = np.lexsort(
+        (
+            val_ds.position.values[idx, 1, :],
+            val_ds.position.values[idx, 0, :],
+        )
+    )  # sort by x, then y
+    assert np.allclose(
+        gt_bboxes_val_ds.position.values[idx, :, idcs_sorted_x1],
+        val_ds.position.values[idx, :, idcs_sorted_x2],
+        equal_nan=True,
+        rtol=1e-5,
+        atol=1e-8,
+    )
+
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Evaluate
