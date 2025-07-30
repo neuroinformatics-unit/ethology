@@ -11,6 +11,7 @@ from torch.utils.data import DataLoader, random_split
 from tqdm import tqdm
 
 from ethology.annotations.io import load_bboxes
+from ethology.datasets.convert import torch_dataset_to_xr_dataset
 from ethology.datasets.create import create_coco_dataset
 from ethology.detectors.ensembles import combine_detections_across_models_wbf
 from ethology.detectors.evaluate import compute_precision_recall_ds
@@ -259,7 +260,7 @@ train_dataset, val_dataset, test_dataset = split_dataset_crab_repo(
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Define val dataloader
-# shuffle=False so that we dont shuffle the data 
+# shuffle=False so that we dont shuffle the data
 # after one pass over all batches
 val_dataloader = DataLoader(
     val_dataset,
@@ -271,6 +272,60 @@ val_dataloader = DataLoader(
     # multiprocessing_context="fork"
     # if ref_config["num_workers"] > 0 and torch.backends.mps.is_available()
     # else None,  # see https://github.com/pytorch/pytorch/issues/87688
+)
+
+
+# %%
+list_annot = [annot for img, annot in val_dataset]
+
+
+df_annot = pd.DataFrame(list_annot)
+df_annot["centroid"] = df_annot["boxes"].apply(
+    lambda x: (0.5 * (x[:, 0:2] + x[:, 2:4])).numpy().astype(float)
+)
+df_annot["shape"] = df_annot["boxes"].apply(
+    lambda x: (x[:, 2:4] - x[:, 0:2]).numpy().astype(float)
+)
+df_annot["labels"] = df_annot["labels"].apply(
+    lambda x: x.numpy().reshape(-1, 1).astype(int)
+)
+
+df_annot["n_annotations"] = df_annot["boxes"].apply(lambda x: x.shape[0])
+n_max_annotations_per_image = df_annot["n_annotations"].max()
+
+# %%
+array_dict = {}
+map_name_to_padding = {
+    "centroid": np.nan,
+    "shape": np.nan,
+    "labels": -1,
+}
+for array_name in map_name_to_padding:
+    array_dict[array_name] = np.stack(
+        [
+            np.pad(
+                arr,
+                ((0, n_max_annotations_per_image - arr.shape[0]), (0, 0)),
+                mode="constant",
+                constant_values=map_name_to_padding[array_name],
+            ).T
+            for arr in df_annot[array_name].to_list()
+        ]
+    )
+
+
+# %%
+val_ds = xr.Dataset(
+    data_vars={
+        "position": (["image_id", "space", "id"], array_dict["centroid"]),
+        "shape": (["image_id", "space", "id"], array_dict["shape"]),
+        "label": (["image_id", "id"], array_dict["labels"].squeeze()),
+    },
+    coords={
+        "image_id": df_annot["image_id"].values,
+        "space": ["x", "y"],
+        "id": range(n_max_annotations_per_image),
+    },
 )
 
 
@@ -327,9 +382,12 @@ gt_bboxes_ds["category"] = gt_bboxes_ds["category"].where(
 list_image_ids_val = [annot["image_id"] for img, annot in val_dataset]
 gt_bboxes_val_ds = gt_bboxes_ds.sel(image_id=list_image_ids_val)
 
-
+# %%
 # Alternatively: torch dataset into xarray dataset
 # .....
+
+
+assert gt_bboxes_val_ds.equals(val_ds)
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Evaluate
