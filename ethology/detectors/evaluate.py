@@ -205,29 +205,29 @@ def evaluate_detections_hungarian_arrays(
 
 
 def compute_precision_recall_ds(
-    fused_detections_ds: xr.Dataset,
+    pred_bboxes_ds: xr.Dataset,
     gt_bboxes_ds: xr.Dataset,
     iou_threshold: float,
 ) -> tuple[xr.Dataset, xr.Dataset]:
     """Compute precision and recall per image."""
     # Compute true positives, false positives, and missed detections
-    fused_detections_ds, gt_bboxes_ds = evaluate_detections_hungarian_ds(
-        pred_bboxes_ds=fused_detections_ds,
+    pred_bboxes_ds, gt_bboxes_ds = evaluate_detections_hungarian_ds(
+        pred_bboxes_ds=pred_bboxes_ds,
         gt_bboxes_ds=gt_bboxes_ds,
         iou_threshold=iou_threshold,
     )
 
     # Compute precision and recall per image
-    precision_per_img = fused_detections_ds.tp.sum(dim="id") / (
-        fused_detections_ds.tp.sum(dim="id")
-        + fused_detections_ds.fp.sum(dim="id")
+    precision_per_img = pred_bboxes_ds.tp.sum(dim="id") / (
+        pred_bboxes_ds.tp.sum(dim="id")
+        + pred_bboxes_ds.fp.sum(dim="id")
     )
-    recall_per_img = fused_detections_ds.tp.sum(dim="id") / (
-        fused_detections_ds.tp.sum(dim="id") + gt_bboxes_ds.md.sum(dim="id")
+    recall_per_img = pred_bboxes_ds.tp.sum(dim="id") / (
+        pred_bboxes_ds.tp.sum(dim="id") + gt_bboxes_ds.md.sum(dim="id")
     )
 
     # Add to datasets
-    fused_detections_ds["precision"] = precision_per_img
-    fused_detections_ds["recall"] = recall_per_img
+    pred_bboxes_ds["precision"] = precision_per_img
+    pred_bboxes_ds["recall"] = recall_per_img
 
-    return fused_detections_ds, gt_bboxes_ds
+    return pred_bboxes_ds, gt_bboxes_ds
