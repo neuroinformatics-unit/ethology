@@ -14,10 +14,7 @@ from tqdm import tqdm
 from ethology.annotations.io import load_bboxes
 from ethology.datasets.convert import torch_dataset_to_xr_dataset
 from ethology.datasets.create import create_coco_dataset
-from ethology.detectors.ensembles import (
-    combine_detections_across_models_wbf,
-    wbf_wrapper_arrays,
-)
+from ethology.detectors.ensembles import combine_detections_across_models_wbf
 from ethology.detectors.evaluate import compute_precision_recall_ds
 from ethology.detectors.inference import (
     collate_fn_varying_n_bboxes,
@@ -26,10 +23,7 @@ from ethology.detectors.inference import (
     # run_detector_on_dataset,
 )
 from ethology.detectors.load import load_fasterrcnn_resnet50_fpn_v2
-from ethology.detectors.utils import (
-    add_bboxes_min_max_corners,
-    detections_x1y1_x2y2_as_da_tuple,
-)
+from ethology.detectors.utils import add_bboxes_min_max_corners
 from ethology.mlflow import (
     read_cli_args_from_mlflow_params,
     read_config_from_mlflow_params,
@@ -92,6 +86,11 @@ def split_dataset_crab_repo(dataset_coco, seed_n, config):
         generator=rng_train_split,
     )
 
+    # TODO: return image ids per split-- check!
+    img_ids_coco = dataset_coco.coco.getImgIds()
+    img_ids_train = [img_ids_coco[x] for x in train_dataset.indices]
+    img_ids_test_val = [img_ids_coco[x] for x in test_val_dataset.indices]
+
     # Split test/val sets from the remainder
     test_dataset, val_dataset = random_split(
         test_val_dataset,
@@ -102,12 +101,23 @@ def split_dataset_crab_repo(dataset_coco, seed_n, config):
         generator=rng_val_split,
     )
 
+    # TODO: return image ids per split -- check!
+    img_ids_test = [img_ids_test_val[x] for x in test_dataset.indices]
+    img_ids_val = [img_ids_test_val[x] for x in val_dataset.indices]
+
     print(f"Seed: {seed_n}")
     print(f"Number of training samples: {len(train_dataset)}")  # images
     print(f"Number of validation samples: {len(val_dataset)}")  # images
     print(f"Number of test samples: {len(test_dataset)}")  # images
 
-    return train_dataset, val_dataset, test_dataset
+    return (
+        train_dataset,
+        val_dataset,
+        test_dataset,
+        img_ids_train,
+        img_ids_val,
+        img_ids_test,
+    )
 
 
 def plot_and_save_ensemble_detections(
@@ -128,6 +138,9 @@ def plot_and_save_ensemble_detections(
     image_cv = image.permute(1, 2, 0).numpy()
     image_cv = (image_cv * 255).astype(np.uint8)
     image_cv = cv2.cvtColor(image_cv, cv2.COLOR_RGB2BGR)
+
+    # create output directory if it does not exist
+    output_dir.mkdir(parents=True, exist_ok=True)
 
     # plot GT annotations as green boxes
     for gt_box in gt_boxes_x1_y1_x2_y2:
@@ -265,14 +278,16 @@ dataset_coco = create_coco_dataset(
 )
 
 # Split dataset like in crabs repo
-train_dataset, val_dataset, test_dataset = split_dataset_crab_repo(
-    dataset_coco,
-    seed_n=ref_cli_args["seed_n"],
-    # config=ref_config,
-    config={
-        "train_fraction": 0.0,
-        "val_over_test_fraction": 1.0,
-    },  # only uses train_fraction and val_over_test_fraction
+train_dataset, val_dataset, test_dataset, _, img_ids_val, _ = (
+    split_dataset_crab_repo(
+        dataset_coco,
+        seed_n=ref_cli_args["seed_n"],
+        # config=ref_config,
+        config={
+            "train_fraction": 0.0,
+            "val_over_test_fraction": 1.0,
+        },  # only uses train_fraction and val_over_test_fraction
+    )
 )
 
 print(annotations_file_path)
@@ -317,305 +332,39 @@ all_models_detections_ds = concat_detections_ds(
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Fuse detections across models
-fused_detections_ds = combine_detections_across_models_wbf(  # ------soft_nms?
+confidence_th_post_fusion = 0.7
+fused_detections_ds = combine_detections_across_models_wbf(
     all_models_detections_ds,
     kwargs_wbf={
         "iou_thr_ensemble": 0.5,
         "skip_box_thr": 0.0001,
         "max_n_detections": 300,  # set default?
+        "confidence_th_post_fusion": confidence_th_post_fusion,
     },
 )
 
-# %%
-from ensemble_boxes import weighted_boxes_fusion
+# print(
+#     f"N of total detections: {np.sum(~np.isnan(fused_detections_ds.confidence.values)).item()}"
+# )
 
+# plt.figure()
+# plt.hist(fused_detections_ds.confidence.values.reshape(-1,1))
+# plt.show()
 
-def wbf_wrapper_arrays_2(
-    bboxes_x1y1: np.ndarray,
-    bboxes_x2y2: np.ndarray,  # model, annot, 4
-    confidence: np.ndarray,  # model, annot
-    label: np.ndarray,  # model, annot
-    image_width_height: np.ndarray,  # = np.array([4096, 2160]),
-    iou_thr_ensemble: float = 0.5,
-    skip_box_thr: float = 0.0001,
-    max_n_detections: int = 300,  # should be larger than the max number of detections fused per image
-) -> tuple[xr.DataArray, xr.DataArray, xr.DataArray, xr.DataArray]:
-    """Wrap weighted boxes fusion to receive arrays as input.
-
-    Parameters
-    ----------
-    bboxes_x1y1: np.ndarray
-        Detected bounding boxes in a single imagein x1y1 format, with shape
-        n_models, n_annotations, 2.
-    bboxes_x2y2: np.ndarray
-        Detected bounding boxes in a single image in x2y2 format, with shape
-        n_models, n_annotations, 2.
-    confidence: np.ndarray
-        Confidence scores for each bounding box, with shape
-        n_models, n_annotations.
-    label: np.ndarray
-        Labels for each bounding box, with shape n_models, n_annotations.
-    image_width_height: np.ndarray
-        Width and height of the image, with shape 2.
-    iou_thr_ensemble: float
-        IoU threshold for detections to be considered for fusion.
-    skip_box_thr: float
-        Threshold for skipping boxes with confidence below this value.
-    max_n_detections: int
-        Fused bounding boxes arrays are padded to this total number of boxes.
-        Its value should be larger than the expected maximum number of detections
-        per image after fusing across models.
-
-    Returns
-    -------
-    tuple[xr.DataArray, xr.DataArray, xr.DataArray, xr.DataArray]
-        Tuple of xr.DataArrays containing the fused detections. The arrays
-        are padded to max_n_detections and contain the data for the centroid,
-        shape, confidence and label of the fused detections.
-
-    """
-    # Prepare bboxes for WBF
-    bboxes_x1y1_x2y2_normalised = np.concat(
-        [bboxes_x1y1, bboxes_x2y2], axis=-1
-    ) / np.tile(image_width_height, (1, 2))  # [:, :, :, None]
-
-    # ------------------------------------
-    # Run WBF
-    ensemble_x1y1_x2y2_norm, ensemble_scores, ensemble_labels = (
-        weighted_boxes_fusion(
-            bboxes_x1y1_x2y2_normalised,
-            confidence,
-            label,
-            iou_thr=iou_thr_ensemble,
-            skip_box_thr=skip_box_thr,
-        )
-    )
-
-    # ------------------------------------
-    # Undo x1y1 x2y2 normalization
-    ensemble_x1y1_x2y2 = ensemble_x1y1_x2y2_norm * np.tile(
-        image_width_height, (1, 2)
-    )
-
-    # Combine x1y1, x2y2, scores and labels in one array
-    ensemble_x1y2_x2y2_scores_labels = np.c_[
-        ensemble_x1y1_x2y2, ensemble_scores, ensemble_labels
-    ]
-
-    # Remove rows with nan coordinates
-    slc_nan_rows = np.any(np.isnan(ensemble_x1y1_x2y2), axis=1)
-    ensemble_x1y2_x2y2_scores_labels = ensemble_x1y2_x2y2_scores_labels[
-        ~slc_nan_rows
-    ]
-
-    # Pad combined array to max_n_detections
-    # (this is required to concatenate across image_ids
-    ensemble_x1y2_x2y2_scores_labels = np.pad(
-        ensemble_x1y2_x2y2_scores_labels,
-        (
-            (0, max_n_detections - ensemble_x1y2_x2y2_scores_labels.shape[0]),
-            (0, 0),
-        ),
-        "constant",
-        constant_values=np.nan,
-    )
-
-    # Format output as xarray dataarrays
-    centroid, shape, confidence, label = detections_x1y1_x2y2_as_da_tuple(
-        ensemble_x1y2_x2y2_scores_labels[:, 0:4],
-        ensemble_x1y2_x2y2_scores_labels[:, 4],
-        ensemble_x1y2_x2y2_scores_labels[:, 5],
-    )
-
-    return centroid, shape, confidence, label
-
-
-# %%
-from ensemble_boxes import soft_nms
-
-
-def soft_nms_wrapper_arrays_2(
-    bboxes_x1y1: np.ndarray,
-    bboxes_x2y2: np.ndarray,  # model, annot, 4
-    confidence: np.ndarray,  # model, annot
-    label: np.ndarray,  # model, annot
-    image_width_height: np.ndarray,  # = np.array([4096, 2160]),
-    iou_thr_ensemble: float = 0.5,
-    skip_box_thr: float = 0.0001,
-    max_n_detections: int = 300,  # should be larger than the max number of detections fused per image
-) -> tuple[xr.DataArray, xr.DataArray, xr.DataArray, xr.DataArray]:
-    """Wrap weighted boxes fusion to receive arrays as input.
-
-    Parameters
-    ----------
-    bboxes_x1y1: np.ndarray
-        Detected bounding boxes in a single imagein x1y1 format, with shape
-        n_models, n_annotations, 2.
-    bboxes_x2y2: np.ndarray
-        Detected bounding boxes in a single image in x2y2 format, with shape
-        n_models, n_annotations, 2.
-    confidence: np.ndarray
-        Confidence scores for each bounding box, with shape
-        n_models, n_annotations.
-    label: np.ndarray
-        Labels for each bounding box, with shape n_models, n_annotations.
-    image_width_height: np.ndarray
-        Width and height of the image, with shape 2.
-    iou_thr_ensemble: float
-        IoU threshold for detections to be considered for fusion.
-    skip_box_thr: float
-        Threshold for skipping boxes with confidence below this value.
-    max_n_detections: int
-        Fused bounding boxes arrays are padded to this total number of boxes.
-        Its value should be larger than the expected maximum number of detections
-        per image after fusing across models.
-
-    Returns
-    -------
-    tuple[xr.DataArray, xr.DataArray, xr.DataArray, xr.DataArray]
-        Tuple of xr.DataArrays containing the fused detections. The arrays
-        are padded to max_n_detections and contain the data for the centroid,
-        shape, confidence and label of the fused detections.
-
-    """
-    # Prepare bboxes for WBF
-    bboxes_x1y1_x2y2_normalised = np.concat(
-        [bboxes_x1y1, bboxes_x2y2], axis=-1
-    ) / np.tile(image_width_height, (1, 2))  # [:, :, :, None]
-
-    # Remove rows with nan coordinates
-    n_models = bboxes_x1y1_x2y2_normalised.shape[0]
-    list_bboxes_per_model = [
-        arr.squeeze() for arr in np.split(
-            bboxes_x1y1_x2y2_normalised, n_models, axis=0
-        )
-    ]
-    list_bboxes_per_model = [
-        arr[~np.any(np.isnan(arr), axis=1), :]
-        for arr in list_bboxes_per_model
-    ]
-    list_confidence_per_model = [
-        conf_arr.squeeze()[:bbox_arr.shape[0]]
-        for bbox_arr, conf_arr in zip(
-            list_bboxes_per_model,
-            np.split(confidence, n_models, axis=0),
-            strict=True,
-        )
-    ]
-    list_label_per_model = [
-        label_arr.squeeze()[:bbox_arr.shape[0]]
-        for bbox_arr, label_arr in zip(
-            list_bboxes_per_model,
-            np.split(label, n_models, axis=0),
-            strict=True,
-        )
-    ]
-    # list_label_per_model = [
-    #     label_arr[bbox_arr.shape[0], :]
-    #     for bbox_arr, label_arr in zip(
-    #         list_bboxes_per_model, np.split(label, n_models, axis=0)
-    #     )
-    # ]
-
-    # ------------------------------------
-    # Run WBF
-    ensemble_x1y1_x2y2_norm, ensemble_scores, ensemble_labels = soft_nms(
-        #bboxes_x1y1_x2y2_normalised,
-        list_bboxes_per_model,
-        list_confidence_per_model,
-        list_label_per_model,
-        iou_thr=iou_thr_ensemble,
-        thresh=skip_box_thr,  # threshold for boxes to keep
-        method=3,  # 1 - linear soft-NMS, 2 - gaussian soft-NMS, 3 - standard NMS
-        sigma=0.5,  # sigma for gaussian soft-NMS
-    )
-
-    # ------------------------------------
-    # Undo x1y1 x2y2 normalization
-    ensemble_x1y1_x2y2 = ensemble_x1y1_x2y2_norm * np.tile(
-        image_width_height, (1, 2)
-    )
-
-    # Combine x1y1, x2y2, scores and labels in one array
-    ensemble_x1y2_x2y2_scores_labels = np.c_[
-        ensemble_x1y1_x2y2, ensemble_scores, ensemble_labels
-    ]
-
-    # Remove rows with nan coordinates
-    slc_nan_rows = np.any(np.isnan(ensemble_x1y1_x2y2), axis=1)
-    ensemble_x1y2_x2y2_scores_labels = ensemble_x1y2_x2y2_scores_labels[
-        ~slc_nan_rows
-    ]
-
-    # Pad combined array to max_n_detections
-    # (this is required to concatenate across image_ids
-    ensemble_x1y2_x2y2_scores_labels = np.pad(
-        ensemble_x1y2_x2y2_scores_labels,
-        (
-            (0, max_n_detections - ensemble_x1y2_x2y2_scores_labels.shape[0]),
-            (0, 0),
-        ),
-        "constant",
-        constant_values=np.nan,
-    )
-
-    # Format output as xarray dataarrays
-    centroid, shape, confidence, label = detections_x1y1_x2y2_as_da_tuple(
-        ensemble_x1y2_x2y2_scores_labels[:, 0:4],
-        ensemble_x1y2_x2y2_scores_labels[:, 4],
-        ensemble_x1y2_x2y2_scores_labels[:, 5],
-    )
-
-    return centroid, shape, confidence, label
-
-
-# %%
-# Prepare kwargs
-kwargs_wbf = {
-    "iou_thr_ensemble": 0.5,
-    "skip_box_thr": 0.0001,
-    "max_n_detections": 500,  # set default?
-}
-kwargs_wbf["image_width_height"] = np.array(
-    [
-        all_models_detections_ds.attrs[img_size]
-        for img_size in ["image_width", "image_height"]
-    ]
-)
-
-# Run WBF vectorized
-centroid_fused, shape_fused, confidence_fused, label_fused = xr.apply_ufunc(
-    soft_nms_wrapper_arrays_2,  # ------------#wbf_wrapper_arrays,
-    all_models_detections_ds.xy_min,  # the underlaying .data array is passed
-    all_models_detections_ds.xy_max,
-    all_models_detections_ds.confidence,
-    all_models_detections_ds.label,
-    kwargs=kwargs_wbf,
-    input_core_dims=[  # do not broadcast across these
-        ["model", "id", "space"],
-        ["model", "id", "space"],
-        ["model", "id"],
-        ["model", "id"],
-    ],
-    output_core_dims=[
-        ["space", "id"],
-        ["space", "id"],
-        ["id"],
-        ["id"],
-    ],
-    vectorize=True,
-    # loop over non-core dims (i.e. image_id);
-    # assumes function only takes arrays over core dims as input
-    exclude_dims={"id"},
-    # to allow dimensions that change size btw input and output
-)
-
+# 6 models: 51798
+# 5 models: 50041
+# 4 models: 48314
+# 3 models: 46102
+# 2 models: 40637
+# 1 model: 34917
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Define ground truth dataset
 
 # read annotations as a dataset
 print(annotations_file_path)
+
+# %timeit 1min 18s ± 87.9 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)
 gt_bboxes_ds = load_bboxes.from_files(annotations_file_path, format="COCO")
 
 # fix category ID (to be fixed in loader)
@@ -631,10 +380,16 @@ list_image_ids_val = [annot["image_id"] for img, annot in val_dataset]
 gt_bboxes_val_ds = gt_bboxes_ds.sel(image_id=list_image_ids_val)
 
 
+assert set(img_ids_val) == set(list_image_ids_val)
+
 # %%
+
+# %%
+# %timeit 1min 17s ± 60.5 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)
 # Alternatively: convert torch dataset into xarray detections dataset
 # .....
-# is it faster?
+# is it faster? nope...
+# maybe faster if I read image_ids from json file?
 val_ds = torch_dataset_to_xr_dataset(val_dataset)
 
 # # %%
@@ -665,20 +420,21 @@ val_ds = torch_dataset_to_xr_dataset(val_dataset)
 
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-# Evaluate
-
-# ensemble model
+# Evaluate ensemble model
 fused_detections_ds, gt_bboxes_val_ds = compute_precision_recall_ds(
     pred_bboxes_ds=fused_detections_ds,
     gt_bboxes_ds=gt_bboxes_val_ds,
     iou_threshold=0.1,  # change to 0.5?
 )
 
+print(
+    f"Ensemble model with confidence threshold post fusion: {confidence_th_post_fusion}"
+)
 print(f"Precision: {fused_detections_ds.precision.mean().values:.4f}")
 print(f"Recall: {fused_detections_ds.recall.mean().values:.4f}")
 
-# %%
-# single models
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# Evaluate single models
 list_detections_ds_eval = []
 for k, ds in enumerate(list_detections_ds):
     detections_ds, _ = compute_precision_recall_ds(
@@ -693,15 +449,125 @@ for k, ds in enumerate(list_detections_ds):
     print(f"Recall: {detections_ds.recall.mean().values:.4f}")
     print("--------------------------------")
 
+# %%
+# Plot precision and recall for each model
+
+
+avg_precision_per_model = [
+    ds.precision.values.mean() for ds in list_detections_ds_eval
+]
+avg_recall_per_model = [
+    ds.recall.values.mean() for ds in list_detections_ds_eval
+]
+
+## precision and recall
+fig, ax = plt.subplots(1, 1, figsize=(10, 6))
+# single models
+ax.plot(avg_precision_per_model, ".-", color="blue")
+# ensemble
+ax.axhline(
+    fused_detections_ds.precision.mean().values,
+    color="blue",
+    linestyle="--",
+    label="ensemble",
+)
+ax.set_ylim(0, 1)
+ax.set_ylabel("average precision per frame", color="blue")
+ax.set_xlabel("model")
+
+ax2 = ax.twinx()
+ax2.plot(avg_recall_per_model, ".-", color="red")
+ax2.axhline(
+    fused_detections_ds.recall.mean().values,
+    color="red",
+    linestyle="--",
+    label="ensemble",
+)
+ax2.legend()
+ax2.set_ylim(0, 1)
+ax2.set_ylabel("average recall per frame", color="red")
+
+ax.set_title(
+    "Ensemble vs individual models OOD "
+    f"(confidence th ensemble: {confidence_th_post_fusion})"
+)
+
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-# plot ensemble detections on a selected image
+# Check calibration of ensemble model
+# see https://docs.xarray.dev/en/latest/user-guide/groupby.html#groupby
+
+bin_edges = np.arange(confidence_th_post_fusion, 1.01, 0.05)
+bin_centers = 0.5 * (bin_edges[:-1] + bin_edges[1:])
+
+grouped_ds = fused_detections_ds.groupby_bins(
+    "confidence", bin_edges, restore_coord_dims=True
+)
+print(grouped_ds)
+# grouped_ds = list_detections_ds_eval[0].groupby_bins(
+#     "confidence", bin_edges, restore_coord_dims=True
+# )
+
+# list(grouped_ds) --> tuples (bin_label, ds)
+# list(grouped_ds)[0][1]
+
+# if group is empty: I need to add empty result to list!
+
+# %%
+# plot histogram
+fig, ax = plt.subplots(1, 1, figsize=(10, 6))
+ax.bar(
+    bin_centers,
+    # [0,] + [g[1].tp.shape[0] for g in list(grouped_ds)],
+    [g[1].tp.shape[0] for g in list(grouped_ds)],
+    width=bin_edges[1] - bin_edges[0],
+    color="skyblue",
+    edgecolor="gray",
+)
+ax.set_xlabel("confidence")
+ax.set_ylabel("detections")
+ax.grid(True, alpha=0.3)
+ax.set_xlim(0, 1)
+
+# %%
+# plot precision per bin
+
+
+def compute_precision(ds_one_bin):
+    return sum(ds_one_bin.tp) / (sum(ds_one_bin.tp) + sum(ds_one_bin.fp))
+
+
+fig, ax = plt.subplots(1, 1, figsize=(10, 6))
+# show bar edges
+ax.bar(
+    0.5 * (bin_edges[:-1] + bin_edges[1:]),
+    # [0,] + [compute_precision(g[1]) for g in list(grouped_ds)],
+    [compute_precision(g[1]) for g in list(grouped_ds)],
+    width=bin_edges[1] - bin_edges[0],
+    color="skyblue",
+    edgecolor="gray",
+)
+ax.plot(
+    0.5 * (bin_edges[:-1] + bin_edges[1:]),
+    0.5 * (bin_edges[:-1] + bin_edges[1:]),  # perfect calibration
+    color="red",
+    linewidth=2,
+    marker="o",
+)
+ax.set_xlabel("confidence")
+ax.set_ylabel("precision")
+ax.grid(True, alpha=0.3)
+ax.set_xlim(0, 1)
+
+
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# Plot ensemble detections on a selected image
 
 # idcs_low_precision = np.argwhere(fused_detections_ds.precision.data < 0.5)
 # idcs_high_precision = np.argwhere(fused_detections_ds.precision.data > 0.9)
 
-fused_detections_ds = detections_ds
+# fused_detections_ds = detections_ds------------<
 idcs_imgs_increasing_precision = np.argsort(fused_detections_ds.precision.data)
-step = 5  # 50
+step = 50  # 50
 
 
 # Get first image
@@ -727,7 +593,7 @@ for i in list(range(0, len(idcs_imgs_increasing_precision), step)) + [
         ).confidence.values,
         image_id=gt_annotations["image_id"],
         output_dir=Path(
-            "/home/sminano/swc/project_ethology/0th-percentile-ood-aug2023"
+            f"/home/sminano/swc/project_ethology/ensemble-{confidence_th_post_fusion}-confth-ood-aug2023"
         ),
         extra_str=f"{i:03d}",
         precision=fused_detections_ds.isel(
