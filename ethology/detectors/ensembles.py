@@ -2,11 +2,112 @@
 
 import numpy as np
 import xarray as xr
-from ensemble_boxes import weighted_boxes_fusion
+from ensemble_boxes import soft_nms, weighted_boxes_fusion
 
 from ethology.detectors.utils import (
     detections_x1y1_x2y2_as_da_tuple,
 )
+
+
+def soft_nms_wrapper_arrays(
+    bboxes_x1y1: np.ndarray,
+    bboxes_x2y2: np.ndarray,  # model, annot, 4
+    confidence: np.ndarray,  # model, annot
+    label: np.ndarray,  # model, annot
+    image_width_height: np.ndarray,  # = np.array([4096, 2160]),
+    iou_thr_ensemble: float = 0.5,
+    skip_box_thr: float = 0.0001,
+    max_n_detections: int = 300,  # should be larger than the max number of detections fused per image
+) -> tuple[xr.DataArray, xr.DataArray, xr.DataArray, xr.DataArray]:
+    """Wrap weighted boxes fusion to receive arrays as input.
+
+    Parameters
+    ----------
+    bboxes_x1y1: np.ndarray
+        Detected bounding boxes in a single imagein x1y1 format, with shape
+        n_models, n_annotations, 2.
+    bboxes_x2y2: np.ndarray
+        Detected bounding boxes in a single image in x2y2 format, with shape
+        n_models, n_annotations, 2.
+    confidence: np.ndarray
+        Confidence scores for each bounding box, with shape
+        n_models, n_annotations.
+    label: np.ndarray
+        Labels for each bounding box, with shape n_models, n_annotations.
+    image_width_height: np.ndarray
+        Width and height of the image, with shape 2.
+    iou_thr_ensemble: float
+        IoU threshold for detections to be considered for fusion.
+    skip_box_thr: float
+        Threshold for skipping boxes with confidence below this value.
+    max_n_detections: int
+        Fused bounding boxes arrays are padded to this total number of boxes.
+        Its value should be larger than the expected maximum number of detections
+        per image after fusing across models.
+
+    Returns
+    -------
+    tuple[xr.DataArray, xr.DataArray, xr.DataArray, xr.DataArray]
+        Tuple of xr.DataArrays containing the fused detections. The arrays
+        are padded to max_n_detections and contain the data for the centroid,
+        shape, confidence and label of the fused detections.
+
+    """
+    # Prepare bboxes for WBF
+    bboxes_x1y1_x2y2_normalised = (
+        np.concat([bboxes_x1y1, bboxes_x2y2], axis=-1)
+        / np.tile(image_width_height, (1, 2))
+    ) #[:, :, :, None]
+
+    # ------------------------------------
+    # Run WBF
+    ensemble_x1y1_x2y2_norm, ensemble_scores, ensemble_labels = soft_nms(
+        bboxes_x1y1_x2y2_normalised,
+        confidence,
+        label,
+        iou_thr=iou_thr_ensemble,
+        thresh=skip_box_thr,  # threshold for boxes to keep
+        method=2,  # 1 - linear soft-NMS, 2 - gaussian soft-NMS, 3 - standard NMS
+        sigma=0.5,  # sigma for gaussian soft-NMS
+    )
+
+    # ------------------------------------
+    # Undo x1y1 x2y2 normalization
+    ensemble_x1y1_x2y2 = ensemble_x1y1_x2y2_norm * np.tile(
+        image_width_height, (1, 2)
+    )
+
+    # Combine x1y1, x2y2, scores and labels in one array
+    ensemble_x1y2_x2y2_scores_labels = np.c_[
+        ensemble_x1y1_x2y2, ensemble_scores, ensemble_labels
+    ]
+
+    # Remove rows with nan coordinates
+    slc_nan_rows = np.any(np.isnan(ensemble_x1y1_x2y2), axis=1)
+    ensemble_x1y2_x2y2_scores_labels = ensemble_x1y2_x2y2_scores_labels[
+        ~slc_nan_rows
+    ]
+
+    # Pad combined array to max_n_detections
+    # (this is required to concatenate across image_ids
+    ensemble_x1y2_x2y2_scores_labels = np.pad(
+        ensemble_x1y2_x2y2_scores_labels,
+        (
+            (0, max_n_detections - ensemble_x1y2_x2y2_scores_labels.shape[0]),
+            (0, 0),
+        ),
+        "constant",
+        constant_values=np.nan,
+    )
+
+    # Format output as xarray dataarrays
+    centroid, shape, confidence, label = detections_x1y1_x2y2_as_da_tuple(
+        ensemble_x1y2_x2y2_scores_labels[:, 0:4],
+        ensemble_x1y2_x2y2_scores_labels[:, 4],
+        ensemble_x1y2_x2y2_scores_labels[:, 5],
+    )
+
+    return centroid, shape, confidence, label
 
 
 def wbf_wrapper_arrays(
@@ -57,15 +158,42 @@ def wbf_wrapper_arrays(
     bboxes_x1y1_x2y2_normalised = (
         np.concat([bboxes_x1y1, bboxes_x2y2], axis=-1)
         / np.tile(image_width_height, (1, 2))
-    )[:, :, :, None]
+    ) #[:, :, :, None]
 
+    # Remove rows with nan coordinates
+    n_models = bboxes_x1y1_x2y2_normalised.shape[0]
+    list_bboxes_per_model = [
+        arr.squeeze() for arr in np.split(
+            bboxes_x1y1_x2y2_normalised, n_models, axis=0
+        )
+    ]
+    list_bboxes_per_model = [
+        arr[~np.any(np.isnan(arr), axis=1), :]
+        for arr in list_bboxes_per_model
+    ]
+    list_confidence_per_model = [
+        conf_arr.squeeze()[:bbox_arr.shape[0]]
+        for bbox_arr, conf_arr in zip(
+            list_bboxes_per_model,
+            np.split(confidence, n_models, axis=0),
+            strict=True,
+        )
+    ]
+    list_label_per_model = [
+        label_arr.squeeze()[:bbox_arr.shape[0]]
+        for bbox_arr, label_arr in zip(
+            list_bboxes_per_model,
+            np.split(label, n_models, axis=0),
+            strict=True,
+        )
+    ]
     # ------------------------------------
     # Run WBF
     ensemble_x1y1_x2y2_norm, ensemble_scores, ensemble_labels = (
         weighted_boxes_fusion(
-            bboxes_x1y1_x2y2_normalised,
-            confidence,
-            label,
+            list_bboxes_per_model,
+            list_confidence_per_model,
+            list_label_per_model,
             iou_thr=iou_thr_ensemble,
             skip_box_thr=skip_box_thr,
         )
@@ -147,7 +275,7 @@ def combine_detections_across_models_wbf(
     # Run WBF vectorized
     centroid_fused, shape_fused, confidence_fused, label_fused = (
         xr.apply_ufunc(
-            wbf_wrapper_arrays,
+            wbf_wrapper_arrays,  # ------------#wbf_wrapper_arrays,
             all_models_detections_ds.xy_min,  # the underlaying .data array is passed
             all_models_detections_ds.xy_max,
             all_models_detections_ds.confidence,
