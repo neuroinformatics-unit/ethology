@@ -2,11 +2,11 @@
 
 import pandas as pd
 import torch
+import xarray as xr
 
 from ethology.detectors.utils import (
     concat_detections_ds,
     detections_dict_as_ds,
-    detections_dict_as_ds_batch,
 )
 
 
@@ -78,8 +78,8 @@ def run_detector_on_dataloader(
     model.eval()
 
     # Run detection for each sample in the dataset
-    list_detections_ds = []
-    list_image_ids = []
+    list_detections_ds: list[xr.Dataset] = []
+    list_image_ids: list[int] = []
     for image_batch, annotations_batch in dataloader:
         # Place image batch on device
         image_batch = tuple(image.to(device) for image in image_batch)
@@ -89,7 +89,8 @@ def run_detector_on_dataloader(
 
         # Format as xarray dataset
         # [0] to select single batch dimension
-        detections_ds_batch = detections_dict_as_ds_batch(detections_batch)
+        # detections_ds_batch = detections_dict_as_ds_batch(detections_batch)
+        detections_ds_batch = detections_dict_as_ds(detections_batch)
 
         # Extend lists
         list_detections_ds.extend(detections_ds_batch)

@@ -9,16 +9,13 @@ import xarray as xr
 def concat_detections_ds(
     list_detections_ds: list[xr.Dataset], index: pd.Index
 ) -> xr.Dataset:
-    """Concatenate detections datasets along new dimension."""
+    """Concatenate detections datasets along new dimension defined by index."""
     # Check index has name
     if index.name is None:
         raise ValueError("Index must have a name")
 
     # Concatenate along new dimension
-    ds = xr.concat(
-        list_detections_ds,
-        index,
-    )
+    ds = xr.concat(list_detections_ds, index=index)
 
     # ensure "label" array is padded with -1 rather than nan
     if "label" in ds.data_vars:
@@ -27,10 +24,10 @@ def concat_detections_ds(
     return ds
 
 
-def detections_dict_as_ds_batch(
-    list_detections: list[dict],
-) -> list[xr.Dataset]:
-    """Reshape list of detections dictionaries as xarray dataset.
+def detections_dict_as_ds(
+    detections: dict | list[dict],
+) -> xr.Dataset | list[xr.Dataset]:
+    """Reshape detections dictionary(ies) as xarray dataset(s).
 
     Input is list of detections dictionaries with keys:
     - "boxes": tensor of shape [N, 4], x1y1x2y2 in pixels
@@ -38,14 +35,22 @@ def detections_dict_as_ds_batch(
     - "labels": tensor of shape [N]
 
     Output is a list of xarray datasets, one for each image in the batch.
+
+    Pytorch models return a list of detection dictionaries, one for each image
+    in the batch.
     """
-    return [
-        detections_dict_as_ds(detections) for detections in list_detections
-    ]
+    if isinstance(detections, dict):
+        return _detections_dict_as_ds(detections)
+    elif isinstance(detections, list):
+        return [detections_dict_as_ds(det) for det in detections]
+    else:
+        raise ValueError(
+            "Detections must be a dictionary or list of dictionaries"
+        )
 
 
-def detections_dict_as_ds(detections: dict) -> xr.Dataset:
-    """Reshape detections dictionaryas xarray dataset.
+def _detections_dict_as_ds(detections: dict) -> xr.Dataset:
+    """Reshape detections dictionary for a single image as xarray dataset.
 
     Input is detections dictionary with keys:
     - "boxes": tensor of shape [N, 4], x1y1x2y2 in pixels
