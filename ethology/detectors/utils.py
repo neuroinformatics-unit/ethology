@@ -1,5 +1,7 @@
 """Utility functions for transforming detection datasets."""
 
+from typing import Literal
+
 import numpy as np
 import pandas as pd
 import torch
@@ -127,10 +129,10 @@ def detections_x1y1_x2y2_as_da_tuple(
 
 def detections_x1y1_x2y2_as_ds(
     x1y1_x2y2_array: np.ndarray,
-    scores_array: np.ndarray,
-    labels_array: np.ndarray,
+    scores_array: np.ndarray,  # rename to confidence
+    labels_array: np.ndarray,  # rename to category
 ) -> xr.Dataset:
-    """Reshape detections array as xarray dataset.
+    """Reshape detections array for a single image as xarray dataset.
 
     Input is detections array with shape [N, 4], x1y1x2y2 in pixels
     """
@@ -157,10 +159,42 @@ def detections_x1y1_x2y2_as_ds(
     )
 
 
+def detections_ds_as_x1y1_x2y2(
+    ds: xr.Dataset,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Express detections dataset for a single image as tuple of numpy arrays.
+
+    The output arrays are:
+    - x1y1_x2y2_array: numpy array of shape [N, 4], x1y1x2y2 in pixels
+    - scores_array: numpy array of shape [N]
+    - labels_array: numpy array of shape [N]
+    """
+    # Add xy_min and xy_max if not present
+    if all([var_str not in ds.variables for var_str in ["xy_min", "xy_max"]]):
+        ds = add_bboxes_min_max_corners(ds)
+
+    # Check dimensions are "space" and "id"
+    if ds.dims != {"space", "id"}:
+        raise ValueError(
+            "Detections dataset must have exactly two dimensions: space and id"
+        )
+
+    # Extract x1y1x2y2 array
+    x1y1_x2y2_array = np.c_[ds.xy_min.values.T, ds.xy_max.values.T]
+
+    # Remove nan rows
+    slc_nan_rows = np.any(np.isnan(x1y1_x2y2_array), axis=1)
+    x1y1_x2y2_array = x1y1_x2y2_array[~slc_nan_rows]
+    scores_array = ds.confidence.values[~slc_nan_rows]
+    labels_array = ds.label.values[~slc_nan_rows]
+
+    return x1y1_x2y2_array, scores_array, labels_array
+
+
 def add_bboxes_min_max_corners(ds):
     """Add xy_min and xy_max arrays to ds.
 
-    # Compare to box_convert in testing?
+    # Compare to torchvision.ops.box_convert in testing?
     box_convert(
         torch.from_numpy(np.c_[ds.position.T, ds.shape.T]),
         in_fmt="cxcywh",
@@ -169,4 +203,41 @@ def add_bboxes_min_max_corners(ds):
     """
     ds["xy_min"] = ds.position - 0.5 * ds.shape
     ds["xy_max"] = ds.position + 0.5 * ds.shape
+    return ds
+
+
+def detections_ds_to_movement_ds(
+    ds: xr.Dataset, type: Literal["poses", "bboxes"]
+) -> xr.Dataset:
+    """Convert detections dataset to movement dataset."""
+    # add id coordinate (FIX this)
+    # ds = ds.assign_coords(
+    #     id=np.arange(ds.sizes['id'])
+    # )
+
+    # ensure relevant dimensions exist
+    if not all(dim in ds.dims for dim in ["image_id", "space", "id"]):
+        raise ValueError(
+            "Detections dataset must have image_id, space, and id dimensions"
+        )
+
+    # if exporting as a poses dataset, add keypoint dimension
+    # as second-to-last dimension
+    if type == "poses":
+        ds = ds.expand_dims("keypoints", axis=-2).assign_coords(
+            keypoints=["centroid"]
+        )
+
+    # remove "label" data array
+    # ds = ds.drop_vars("label")
+
+    # rename dimensions
+    ds = ds.rename({"image_id": "time", "id": "individuals"})
+
+    # make time coordinate a float
+    ds["time"] = ds.time.astype(float)
+
+    # make individuals coordinate a string
+    ds["individuals"] = [f"id_{id}" for id in ds.individuals.values]
+
     return ds
