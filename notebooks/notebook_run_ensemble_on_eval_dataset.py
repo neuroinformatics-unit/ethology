@@ -20,7 +20,6 @@ from ethology.detectors.inference import (
     collate_fn_varying_n_bboxes,
     concat_detections_ds,
     run_detector_on_dataloader,
-    # run_detector_on_dataset,
 )
 from ethology.detectors.load import load_fasterrcnn_resnet50_fpn_v2
 from ethology.detectors.utils import add_bboxes_min_max_corners
@@ -36,11 +35,9 @@ xr.set_options(display_expand_attrs=False)
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Input data
 
-dataset_dir = Path("/home/sminano/swc/project_crabs/data/aug2023-full")
-# Path("/home/sminano/swc/project_crabs/data/sep2023-full")
-annotations_dir = Path(
-    "/home/sminano/swc/project_crabs/data/aug2023-full/annotations"
-)
+dataset_dir = Path("/home/sminano/swc/project_crabs/data/sep2023-full")
+# Path("/home/sminano/swc/project_crabs/data/aug2023-full")
+annotations_dir = dataset_dir / "annotations"
 annotations_file_path = annotations_dir / "VIA_JSON_combined_coco_gen.json"
 
 experiment_ID = "617393114420881798"
@@ -282,11 +279,11 @@ train_dataset, val_dataset, test_dataset, _, img_ids_val, _ = (
     split_dataset_crab_repo(
         dataset_coco,
         seed_n=ref_cli_args["seed_n"],
-        # config=ref_config,
-        config={
-            "train_fraction": 0.0,
-            "val_over_test_fraction": 1.0,
-        },  # only uses train_fraction and val_over_test_fraction
+        config=ref_config, #------
+        # config={
+        #     "train_fraction": 0.0,
+        #     "val_over_test_fraction": 1.0,
+        # },  # only uses train_fraction and val_over_test_fraction
     )
 )
 
@@ -320,7 +317,8 @@ for model in tqdm(list_models):
         dataloader=val_dataloader,
         device=device,
     )
-    detections_ds = add_bboxes_min_max_corners(detections_ds)
+    detections_ds = add_bboxes_min_max_corners(detections_ds)  
+    # -- this could be done after concatenating if we are not tracking
     list_detections_ds.append(detections_ds)
 
 
@@ -334,7 +332,7 @@ all_models_detections_ds = concat_detections_ds(
 # Fuse detections across models
 confidence_th_post_fusion = 0.7
 fused_detections_ds = combine_detections_across_models_wbf(
-    all_models_detections_ds,
+    all_models_detections_ds.sel(model=[1, 2, 3, 4, 5]),
     kwargs_wbf={
         "iou_thr_ensemble": 0.5,
         "skip_box_thr": 0.0001,
@@ -361,28 +359,38 @@ fused_detections_ds = combine_detections_across_models_wbf(
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Define ground truth dataset
 
-# read annotations as a dataset
+
 print(annotations_file_path)
 
-# %timeit 1min 18s ± 87.9 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)
 gt_bboxes_ds = load_bboxes.from_files(annotations_file_path, format="COCO")
 
 # fix category ID (to be fixed in loader)
 gt_bboxes_ds["category"] = gt_bboxes_ds["category"].where(
     gt_bboxes_ds["category"] != 0, 1
 )
-
-# select only image_id in val_dataset
-# Note that the max number of annotations per image in the val_dataset
-# will stay as in the original dataset (also, category = -1 is not considered
-# an empty value for xarrays .dropna())
-list_image_ids_val = [annot["image_id"] for img, annot in val_dataset]
-gt_bboxes_val_ds = gt_bboxes_ds.sel(image_id=list_image_ids_val)
+gt_bboxes_val_ds = gt_bboxes_ds.sel(image_id=img_ids_val)
 
 
-assert set(img_ids_val) == set(list_image_ids_val)
+# # read annotations as a dataset
+# print(annotations_file_path)
 
-# %%
+# # %timeit 1min 18s ± 87.9 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)
+# gt_bboxes_ds = load_bboxes.from_files(annotations_file_path, format="COCO")
+
+# # fix category ID (to be fixed in loader)
+# gt_bboxes_ds["category"] = gt_bboxes_ds["category"].where(
+#     gt_bboxes_ds["category"] != 0, 1
+# )
+
+# # select only image_id in val_dataset
+# # Note that the max number of annotations per image in the val_dataset
+# # will stay as in the original dataset (also, category = -1 is not considered
+# # an empty value for xarrays .dropna())
+# list_image_ids_val = [annot["image_id"] for img, annot in val_dataset]
+# gt_bboxes_val_ds = gt_bboxes_ds.sel(image_id=list_image_ids_val)
+
+
+# assert set(img_ids_val) == set(list_image_ids_val)
 
 # %%
 # %timeit 1min 17s ± 60.5 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)
@@ -392,31 +400,6 @@ assert set(img_ids_val) == set(list_image_ids_val)
 # maybe faster if I read image_ids from json file?
 val_ds = torch_dataset_to_xr_dataset(val_dataset)
 
-# # %%
-# # check data arrays are the same but with annotations in different order
-# # There is no guarantee that annotation with id=15 is the same in the
-# # xr dataset computed from the annotations file and the one computed from
-# # the torch dataset.
-# for idx in range(len(val_ds.image_id.values)):
-#     idcs_sorted_x1 = np.lexsort(
-#         (
-#             gt_bboxes_val_ds.position.values[idx, 1, :],
-#             gt_bboxes_val_ds.position.values[idx, 0, :],
-#         )
-#     )  # sort by x, then y
-#     idcs_sorted_x2 = np.lexsort(
-#         (
-#             val_ds.position.values[idx, 1, :],
-#             val_ds.position.values[idx, 0, :],
-#         )
-#     )  # sort by x, then y
-#     assert np.allclose(
-#         gt_bboxes_val_ds.position.values[idx, :, idcs_sorted_x1],
-#         val_ds.position.values[idx, :, idcs_sorted_x2],
-#         equal_nan=True,
-#         rtol=1e-5,
-#         atol=1e-8,
-#     )
 
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -488,7 +471,7 @@ ax2.set_ylim(0, 1)
 ax2.set_ylabel("average recall per frame", color="red")
 
 ax.set_title(
-    "Ensemble vs individual models OOD "
+    "Ensemble vs individual models in-domain "
     f"(confidence th ensemble: {confidence_th_post_fusion})"
 )
 
@@ -496,6 +479,7 @@ ax.set_title(
 # Check calibration of ensemble model
 # see https://docs.xarray.dev/en/latest/user-guide/groupby.html#groupby
 
+# bins are defined from confidence cutoff
 bin_edges = np.arange(confidence_th_post_fusion, 1.01, 0.05)
 bin_centers = 0.5 * (bin_edges[:-1] + bin_edges[1:])
 
@@ -536,6 +520,9 @@ def compute_precision(ds_one_bin):
     return sum(ds_one_bin.tp) / (sum(ds_one_bin.tp) + sum(ds_one_bin.fp))
 
 
+# grouped_ds.apply(compute_precision) throws an error
+
+# %%
 fig, ax = plt.subplots(1, 1, figsize=(10, 6))
 # show bar edges
 ax.bar(
@@ -557,17 +544,17 @@ ax.set_xlabel("confidence")
 ax.set_ylabel("precision")
 ax.grid(True, alpha=0.3)
 ax.set_xlim(0, 1)
+ax.set_title(
+    "Ensemble model in-domain "
+    f"(confidence th ensemble: {confidence_th_post_fusion})"
+)
 
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-# Plot ensemble detections on a selected image
+# Plot ensemble detections on a selected images
 
-# idcs_low_precision = np.argwhere(fused_detections_ds.precision.data < 0.5)
-# idcs_high_precision = np.argwhere(fused_detections_ds.precision.data > 0.9)
-
-# fused_detections_ds = detections_ds------------<
 idcs_imgs_increasing_precision = np.argsort(fused_detections_ds.precision.data)
-step = 50  # 50
+step = 1  # 50
 
 
 # Get first image
@@ -593,7 +580,7 @@ for i in list(range(0, len(idcs_imgs_increasing_precision), step)) + [
         ).confidence.values,
         image_id=gt_annotations["image_id"],
         output_dir=Path(
-            f"/home/sminano/swc/project_ethology/ensemble-{confidence_th_post_fusion}-confth-ood-aug2023"
+            f"/home/sminano/swc/project_ethology/ensemble-{confidence_th_post_fusion}-confth-indomain-sep2023"
         ),
         extra_str=f"{i:03d}",
         precision=fused_detections_ds.isel(
@@ -605,25 +592,25 @@ for i in list(range(0, len(idcs_imgs_increasing_precision), step)) + [
 # %%
 # %matplotlib widget
 # %%
-fig, ax = plt.subplots()
-ax.hist(fused_detections_ds.precision.values)
-ax.axvline(
-    fused_detections_ds.precision.values.mean(), color="red", linestyle="--"
-)
-ax.set_xlim(0, 1)
-ax.set_xlabel("Precision per frame")
-ax.set_ylabel("count (frames)")
-ax.set_title(f"Precision OOD (n={fused_detections_ds.sizes['image_id']})")
+# fig, ax = plt.subplots()
+# ax.hist(fused_detections_ds.precision.values)
+# ax.axvline(
+#     fused_detections_ds.precision.values.mean(), color="red", linestyle="--"
+# )
+# ax.set_xlim(0, 1)
+# ax.set_xlabel("Precision per frame")
+# ax.set_ylabel("count (frames)")
+# ax.set_title(f"Precision (n={fused_detections_ds.sizes['image_id']})")
 
-fig, ax = plt.subplots()
-ax.hist(fused_detections_ds.recall.values)
-ax.axvline(
-    fused_detections_ds.recall.values.mean(), color="red", linestyle="--"
-)
-ax.set_xlim(0, 1)
-ax.set_xlabel("Recall per frame")
-ax.set_ylabel("count (frames)")
-ax.set_title(f"Recall OOD (n={fused_detections_ds.sizes['image_id']})")
+# fig, ax = plt.subplots()
+# ax.hist(fused_detections_ds.recall.values)
+# ax.axvline(
+#     fused_detections_ds.recall.values.mean(), color="red", linestyle="--"
+# )
+# ax.set_xlim(0, 1)
+# ax.set_xlabel("Recall per frame")
+# ax.set_ylabel("count (frames)")
+# ax.set_title(f"Recall (n={fused_detections_ds.sizes['image_id']})")
 
 # plt.show()
 # %%
