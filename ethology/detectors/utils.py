@@ -17,7 +17,7 @@ def concat_detections_ds(
         raise ValueError("Index must have a name")
 
     # Concatenate along new dimension
-    ds = xr.concat(list_detections_ds, index=index)
+    ds = xr.concat(list_detections_ds, index)
 
     # ensure "label" array is padded with -1 rather than nan
     if "label" in ds.data_vars:
