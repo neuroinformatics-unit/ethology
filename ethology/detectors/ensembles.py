@@ -319,6 +319,8 @@ def combine_detections_across_models_wbf(
     label_fused = label_fused.fillna(-1).astype(int)
 
     # Return a dataset
+    # FIX: why is id not a coordinate in the output dataset?
+    # FIX: order of dimensions should be image_id, space, id
     return xr.Dataset(
         data_vars={
             "position": centroid_fused,
