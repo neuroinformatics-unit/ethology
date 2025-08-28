@@ -9,7 +9,7 @@ import pandas as pd
 import torch
 import torchvision.transforms.v2 as transforms
 import xarray as xr
-from boxmot import BotSort
+from boxmot import BoostTrack
 from movement.io import save_poses
 from tqdm import tqdm
 
@@ -23,6 +23,7 @@ from ethology.detectors.utils import (
     add_bboxes_min_max_corners,
     detections_ds_as_x1y1_x2y2,
     detections_ds_to_movement_ds,
+    tracks_x1y1_x2y2_as_ds,
 )
 from ethology.mlflow import (
     read_cli_args_from_mlflow_params,
@@ -54,6 +55,12 @@ models_dict = {
     "above_25th": ml_runs_experiment_dir / "fdcf88fcbcc84fbeb94b45ca6b6f8914",
     "above_50th": ml_runs_experiment_dir / "daa05ded0ea047388c9134bf044061c5",
 }
+
+output_dir = Path("/home/sminano/swc/project_ethology/ensemble_tracking_output")
+
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# Create output directory
+output_dir.mkdir(parents=True, exist_ok=True)
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Set default device: CUDA if available, otherwise mps, otherwise CPU
@@ -293,59 +300,8 @@ fused_detections_ds = combine_detections_across_models_wbf(
     },
 )
 
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-# Track detections using boxmot
-
-# Initialize the tracker
-tracker = BotSort(
-    reid_weights=Path("osnet_x0_25_msmt17.pt"),  # Path to ReID model
-    device=device,  # "0" # why not device? why is this in GPU if we then copy to CPU?
-    half=False,
-)
-
-# Consider detections with confidence > 0.5
-# confidence_th_tracker = 0.5
-# fused_detections_ds = fused_detections_ds.where(
-#     fused_detections_ds.confidence > confidence_th_tracker,
-#     drop=True,  # drops all nan entries
-# )
-
-
-# TODO: vectorize with apply_ufunc?
-list_tracked_ds = []
-for image_id in np.sort(fused_detections_ds.image_id.values):
-    # Convert detections to numpy arrays
-    detections_one_img_ds = fused_detections_ds.sel(image_id=image_id)
-    x1y1_x2y2_array, scores_array, labels_array = detections_ds_as_x1y1_x2y2(
-        detections_one_img_ds
-    )
-    # Update the tracker
-    tracked_boxes_array = tracker.update(
-        np.c_[x1y1_x2y2_array, scores_array, labels_array],
-        # frame, # how can I use image? pass video optionally?
-    )
-    # returns: M X 8, 8 being (x, y, x, y, id, conf, cls, ind)
-    # ind is the index of the corresponding detection in the detections_array
-
-    # Can I do away with reordering the predictions
-    ind = tracked_boxes_array[:, 7]
-    # reorder ids
-    detections_one_img_ds = detections_one_img_ds.reindex({"id": ind})
-    # reset index to 0
-    detections_one_img_ds = detections_one_img_ds.assign_coords(
-        {"id": range(len(ind))}
-    )
-
-    # ds = tracks_x1y1_x2y2_as_ds(
-    #     tracked_boxes_array[:, :4],  # x1y1x2y2
-    #     tracked_boxes_array[:, 4],  # id
-    #     tracked_boxes_array[:, 5],  # confidence
-    #     tracked_boxes_array[:, 6],  # label
-    # )
-
-
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%
-# Format detections dataset as a movement dataset
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# Format detections as a movement dataset
 
 # add id coordinate (FIX this)
 fused_detections_ds = fused_detections_ds.assign_coords(
@@ -357,13 +313,110 @@ fused_detections_as_movement_ds = detections_ds_to_movement_ds(
     fused_detections_ds, type="poses"
 )
 
-
-# %%
 # save as sleap analysis file
 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 save_poses.to_sleap_analysis_file(
     fused_detections_as_movement_ds,
-    f"detections_ensemble_{video_path.stem}_{timestamp}.h5",
+    output_dir / f"detections_ensemble_{video_path.stem}_{timestamp}.h5",
+)
+
+
+
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# Track detections using boxmot
+
+# Initialize the tracker
+# tracker = BotSort(
+#     reid_weights=Path("osnet_x0_25_msmt17.pt"),  # Path to ReID model
+#     device=device,  # "0" # why not device? why is this in GPU if we then copy to CPU?
+#     half=False,
+# )
+
+tracker = BoostTrack(
+    reid_weights=Path("osnet_x0_25_msmt17.pt"),
+    device=device,
+    half=False,
+    max_age=1000, # frames
+    min_hits=1,
+    det_thresh=0,  # already filtered by confidence_th_post_fusion
+    iou_threshold=0.1,  # for association
+    aspect_ratio_thresh=1000,
+    min_box_area=0, # no minimum box area
+)
+
+
+# %%
+
+# TODO: vectorize with apply_ufunc?
+list_tracked_ds = []
+input_video_object = open_video(video_path)
+for image_id in np.sort(fused_detections_ds.image_id.values):
+    # Convert detections to numpy arrays
+    detections_one_img_ds = fused_detections_ds.sel(image_id=image_id)
+    x1y1_x2y2_array, scores_array, labels_array = detections_ds_as_x1y1_x2y2(
+        detections_one_img_ds
+    )
+
+    # Get frame from video
+    ret, frame = input_video_object.read()
+    if not ret:
+        break
+
+    # Update the tracker
+    #   INPUT:  M X (x, y, x, y, conf, cls)
+    #   OUTPUT: M X (x, y, x, y, id, conf, cls, ind)
+    # ind is the index of the corresponding detection in the detections_array
+    tracked_boxes_array = tracker.update(
+        np.c_[x1y1_x2y2_array, scores_array, labels_array],
+        frame,
+    )
+
+    # # Can I do away with reordering the predictions
+    # ind = tracked_boxes_array[:, -1].astype(int)
+    # # select detections
+    # tracked_ds = detections_one_img_ds.sel(id=ind)
+    # # reorder ids per frame
+    # detections_one_img_ds = detections_one_img_ds.reindex({"id": ind})
+    # # reset index to 0
+    # detections_one_img_ds = detections_one_img_ds.assign_coords(
+    #     {"id": range(len(ind))}
+    # )
+
+    tracked_ds = tracks_x1y1_x2y2_as_ds(
+        tracked_boxes_array[:, :4],  # centroid x1y1x2y2
+        tracked_boxes_array[:, 5],  # confidence
+        tracked_boxes_array[:, 6].astype(int),  # label
+        tracked_boxes_array[:, 4].astype(int),  # id
+    )
+
+    # add image_id coordinate
+    tracked_ds = tracked_ds.assign_coords(image_id=image_id)
+
+    list_tracked_ds.append(tracked_ds)
+
+# Concatenate all tracked detections datasets along image_id dimension
+tracked_ds_all_frames = concat_detections_ds(
+    list_tracked_ds, pd.Index(range(len(list_tracked_ds)), name="image_id")
+)
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# Format tracked detections dataset as a movement dataset
+
+# reindex id coordinate to start from 0
+tracked_ds_all_frames = tracked_ds_all_frames.assign_coords(
+    id=np.arange(tracked_ds_all_frames.sizes["id"])
+)
+
+# format as movement dataset
+tracks_as_movement_ds = detections_ds_to_movement_ds(
+    tracked_ds_all_frames, type="poses"
+)
+
+
+# save as sleap analysis file
+timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+save_poses.to_sleap_analysis_file(
+    tracks_as_movement_ds,
+    output_dir / f"tracks_ensemble_{video_path.stem}_{timestamp}.h5",
 )
 
 

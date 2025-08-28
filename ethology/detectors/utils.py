@@ -78,17 +78,21 @@ def _detections_dict_as_ds(detections: dict) -> xr.Dataset:
     )
 
 
-def detections_x1y1_x2y2_as_da_tuple(
+def x1y1_x2y2_as_da_tuple(
     x1y1_x2y2_array: np.ndarray,
     scores_array: np.ndarray,
     labels_array: np.ndarray,
+    id_array: np.ndarray | None = None,
 ) -> tuple[xr.DataArray, xr.DataArray, xr.DataArray, xr.DataArray]:
-    """Reshape detections array as xarray dataset.
+    """Reshape detections / tracks array as xarray dataset.
 
     Input is detections array with shape [N, 4], x1y1x2y2 in pixels
     """
-    # Create xarray dataset
     n_detections = x1y1_x2y2_array.shape[0]
+    if id_array is None:
+        id_array = np.arange(n_detections)
+
+    # centroid dataarray
     centroid_da = xr.DataArray(
         data=0.5
         * (
@@ -97,10 +101,11 @@ def detections_x1y1_x2y2_as_da_tuple(
         dims=["space", "id"],
         coords={
             "space": ["x", "y"],
-            "id": list(range(n_detections)),
+            "id": id_array,
         },
     )
 
+    # shape dataarray
     shape_da = xr.DataArray(
         data=(
             x1y1_x2y2_array[:, 2:4] - x1y1_x2y2_array[:, 0:2]
@@ -108,20 +113,22 @@ def detections_x1y1_x2y2_as_da_tuple(
         dims=["space", "id"],
         coords={
             "space": ["x", "y"],
-            "id": list(range(n_detections)),
+            "id": id_array,
         },
     )
 
+    # confidence dataarray
     confidence_da = xr.DataArray(
         data=scores_array,
         dims=["id"],
-        coords={"id": list(range(n_detections))},
+        coords={"id": id_array},
     )
 
+    # label dataarray
     label_da = xr.DataArray(
         data=labels_array,
         dims=["id"],
-        coords={"id": list(range(n_detections))},
+        coords={"id": id_array},
     )
 
     return centroid_da, shape_da, confidence_da, label_da
@@ -137,16 +144,48 @@ def detections_x1y1_x2y2_as_ds(
     Input is detections array with shape [N, 4], x1y1x2y2 in pixels
     """
     # Remove nan rows
-    slc_nan_rows = np.any(np.isnan(x1y1_x2y2_array), axis=1)
-    x1y1_x2y2_array = x1y1_x2y2_array[~slc_nan_rows]
-    scores_array = scores_array[~slc_nan_rows]
-    labels_array = labels_array[~slc_nan_rows]
+    x1y1_x2y2_array, scores_array, labels_array = (
+        remove_rows_with_nan_in_first_array(
+            [x1y1_x2y2_array, scores_array, labels_array]
+        )
+    )
 
     # Create dataarrays for dataset
-    centroid_da, shape_da, confidence_da, label_da = (
-        detections_x1y1_x2y2_as_da_tuple(
-            x1y1_x2y2_array, scores_array, labels_array
+    centroid_da, shape_da, confidence_da, label_da = x1y1_x2y2_as_da_tuple(
+        x1y1_x2y2_array, scores_array, labels_array
+    )
+
+    return xr.Dataset(
+        data_vars={
+            "position": centroid_da,
+            "shape": shape_da,
+            "confidence": confidence_da,
+            "label": label_da,
+        }
+    )
+
+
+def tracks_x1y1_x2y2_as_ds(
+    x1y1_x2y2_array: np.ndarray,
+    scores_array: np.ndarray,  # rename to confidence
+    labels_array: np.ndarray,  # rename to category
+    id_array: np.ndarray,
+) -> xr.Dataset:
+    """Reshape tracks array for a single image as xarray dataset.
+
+    Input is tracks array with shape [N, 4], x1y1x2y2 in pixels
+    and shape [N, 2], id and ind
+    """
+    # Remove nan rows
+    x1y1_x2y2_array, scores_array, labels_array, id_array = (
+        remove_rows_with_nan_in_first_array(
+            [x1y1_x2y2_array, scores_array, labels_array, id_array]
         )
+    )
+
+    # Create dataarrays for dataset
+    centroid_da, shape_da, confidence_da, label_da = x1y1_x2y2_as_da_tuple(
+        x1y1_x2y2_array, scores_array, labels_array, id_array
     )
 
     return xr.Dataset(
@@ -173,20 +212,21 @@ def detections_ds_as_x1y1_x2y2(
     if all([var_str not in ds.variables for var_str in ["xy_min", "xy_max"]]):
         ds = add_bboxes_min_max_corners(ds)
 
-    # Check dimensions are "space" and "id"
-    if ds.dims != {"space", "id"}:
-        raise ValueError(
-            "Detections dataset must have exactly two dimensions: space and id"
-        )
+    # # Check dimensions are "space" and "id"
+    # if ds.dims != {"space", "id"}:
+    #     raise ValueError(
+    #         "Detections dataset must have exactly two dimensions: space and id"
+    #     )
 
     # Extract x1y1x2y2 array
     x1y1_x2y2_array = np.c_[ds.xy_min.values.T, ds.xy_max.values.T]
 
     # Remove nan rows
-    slc_nan_rows = np.any(np.isnan(x1y1_x2y2_array), axis=1)
-    x1y1_x2y2_array = x1y1_x2y2_array[~slc_nan_rows]
-    scores_array = ds.confidence.values[~slc_nan_rows]
-    labels_array = ds.label.values[~slc_nan_rows]
+    x1y1_x2y2_array, scores_array, labels_array = (
+        remove_rows_with_nan_in_first_array(
+            [x1y1_x2y2_array, ds.confidence.values, ds.label.values]
+        )
+    )
 
     return x1y1_x2y2_array, scores_array, labels_array
 
@@ -241,3 +281,11 @@ def detections_ds_to_movement_ds(
     ds["individuals"] = [f"id_{id}" for id in ds.individuals.values]
 
     return ds
+
+
+def remove_rows_with_nan_in_first_array(
+    list_arrays: list[np.ndarray],
+) -> list[np.ndarray]:
+    """Remove rows with nan values from list of arrays."""
+    slc_nan_rows = np.any(np.isnan(list_arrays[0]), axis=1)
+    return [arr[~slc_nan_rows] for arr in list_arrays]
