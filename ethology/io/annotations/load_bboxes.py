@@ -6,7 +6,7 @@ from typing import Literal
 
 import pandas as pd
 
-from ethology.annotations.validators import ValidCOCO, ValidVIA
+from ethology.io.annotations.validate import ValidCOCO, ValidVIA
 
 # definition of standard bboxes dataframe
 STANDARD_BBOXES_DF_INDEX = "annotation_id"

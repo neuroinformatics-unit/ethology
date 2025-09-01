@@ -5,7 +5,7 @@ from pathlib import Path
 
 from attrs import define, field
 
-from ethology.annotations.json_schemas.utils import (
+from ethology.io.annotations.json_schemas.utils import (
     _check_file_is_json,
     _check_file_matches_schema,
     _check_required_keys_in_dict,
