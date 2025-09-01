@@ -56,7 +56,9 @@ models_dict = {
     "above_50th": ml_runs_experiment_dir / "daa05ded0ea047388c9134bf044061c5",
 }
 
-output_dir = Path("/home/sminano/swc/project_ethology/ensemble_tracking_output")
+output_dir = Path(
+    "/home/sminano/swc/project_ethology/ensemble_tracking_output"
+)
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Create output directory
@@ -208,7 +210,6 @@ def run_detector_on_video(
     inference_transforms: transforms.Compose,
 ) -> xr.Dataset:
     """Run detection on a video."""
-
     # Ensure model is in evaluation mode
     model.eval()
 
@@ -301,7 +302,7 @@ fused_detections_ds = combine_detections_across_models_wbf(
 )
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-# Format detections as a movement dataset
+# Format detections as a movement dataset and export
 
 # add id coordinate (FIX this)
 fused_detections_ds = fused_detections_ds.assign_coords(
@@ -321,28 +322,34 @@ save_poses.to_sleap_analysis_file(
 )
 
 
-
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Track detections using boxmot
-
 # Initialize the tracker
 # tracker = BotSort(
 #     reid_weights=Path("osnet_x0_25_msmt17.pt"),  # Path to ReID model
-#     device=device,  # "0" # why not device? why is this in GPU if we then copy to CPU?
+#     device=device,
 #     half=False,
+#     track_high_thresh=0,  # already filtered by confidence_th_post_fusion
+#     track_low_thresh=0,  # already filtered by confidence_th_post_fusion
+#     new_track_thresh=0,  # already filtered by confidence_th_post_fusion
+#     track_buffer=1000,  # frames to keep a track alive after last detection
+#     match_thresh=0.8,  # default 0.8
+#     proximity_thresh=0.1,  # IoU threshold for first-round association
+#     frame_rate=30,
+#     with_reid=False,
 # )
 
 tracker = BoostTrack(
     reid_weights=Path("osnet_x0_25_msmt17.pt"),
     device=device,
     half=False,
-    max_age=1000, # frames
+    max_age=1000,  # frames
     min_hits=1,
     det_thresh=0,  # already filtered by confidence_th_post_fusion
     iou_threshold=0.1,  # for association
     aspect_ratio_thresh=1000,
-    min_box_area=0, # no minimum box area
-)
+    min_box_area=0,  # no minimum box area
+)  # seems better?
 
 
 # %%

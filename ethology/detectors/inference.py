@@ -27,6 +27,7 @@ def run_detector_on_dataset(
     """
     # Ensure model is in evaluation mode
     model.eval()
+    model.to(device)
 
     # Run detection for each sample in the dataset
     list_detections_ds = []
@@ -76,6 +77,7 @@ def run_detector_on_dataloader(
     """
     # Ensure model is in evaluation mode
     model.eval()
+    model.to(device)
 
     # Run detection for each sample in the dataset
     list_detections_ds: list[xr.Dataset] = []

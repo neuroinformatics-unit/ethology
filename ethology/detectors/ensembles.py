@@ -4,9 +4,7 @@ import numpy as np
 import xarray as xr
 from ensemble_boxes import weighted_boxes_fusion
 
-from ethology.detectors.utils import (
-    detections_x1y1_x2y2_as_da_tuple,
-)
+from ethology.detectors.utils import x1y1_x2y2_as_da_tuple
 
 # def soft_nms_wrapper_arrays(
 #     bboxes_x1y1: np.ndarray,
@@ -233,7 +231,7 @@ def wbf_wrapper_arrays(
     )
 
     # Format output as xarray dataarrays
-    centroid, shape, confidence, label = detections_x1y1_x2y2_as_da_tuple(
+    centroid, shape, confidence, label = x1y1_x2y2_as_da_tuple(
         ensemble_x1y2_x2y2_scores_labels[:, 0:4],
         ensemble_x1y2_x2y2_scores_labels[:, 4],
         ensemble_x1y2_x2y2_scores_labels[:, 5],

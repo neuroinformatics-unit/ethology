@@ -44,7 +44,7 @@ def detections_dict_as_ds(
     if isinstance(detections, dict):
         return _detections_dict_as_ds(detections)
     elif isinstance(detections, list):
-        return [detections_dict_as_ds(det) for det in detections]
+        return [_detections_dict_as_ds(det) for det in detections]
     else:
         raise ValueError(
             "Detections must be a dictionary or list of dictionaries"
