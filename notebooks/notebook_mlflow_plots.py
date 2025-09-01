@@ -1,7 +1,6 @@
-"""Run detection on a Pytorch dataset and export results as a movement dataset.
+"""Plot precision and recall values for different models.
 
-A script to run detection only (no tracking) on a Pytorch dataset and
-export the results in a format that can be loaded in movement napari widget.
+Uses MLflow output csv files.
 """
 
 # %%
@@ -133,7 +132,7 @@ ax1.set_ylabel("count")
 # run_slurm_1103832_0_17_val_set_full -- evaluated using corrected full GT annotations
 # (with 0-based image ID)
 csv_file = Path(
-    "/home/sminano/swc/project_ethology/figs_subset_annotations/run_slurm_1103832_0_17_val_set_full.csv"
+    "/home/sminano/swc/project_ethology/figs_subset_annotations/run_slurm_1098903_0_17_full_Aug.csv"
 )
 
 # read csv
@@ -163,6 +162,8 @@ print(f"Evaluating on {eval_set} set")
 # plot precision and recall
 fig, ax = plt.subplots(figsize=(10, 6))
 
+ymin = 0.4
+
 # Precision plot
 ax.scatter(
     df["percentile"],
@@ -181,7 +182,7 @@ ax.hlines(
     linewidth=4,
     color="blue",
 )
-ax.set_ylim(0.4, 1.00)
+ax.set_ylim(ymin, 1.00)
 ax.set_xlabel("model trained on bboxes > percentile")
 ax.set_ylabel(f"{eval_set} precision", color="blue")
 ax.tick_params(axis="y", labelcolor="blue")
@@ -204,7 +205,7 @@ ax.hlines(
     linewidth=4,
     color="red",
 )
-ax2.set_ylim(0.4, 1.00)
+ax2.set_ylim(ymin, 1.00)
 ax2.set_ylabel(f"{eval_set} recall", color="red")
 ax2.tick_params(axis="y", labelcolor="red")
 
