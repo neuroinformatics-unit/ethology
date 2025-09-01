@@ -4,8 +4,10 @@ from pathlib import Path
 from typing import Literal
 from unittest.mock import patch
 
+import numpy as np
 import pandas as pd
 import pytest
+import xarray as xr
 
 from ethology.io.annotations.load_bboxes import (
     STANDARD_BBOXES_DF_COLUMNS,
@@ -103,6 +105,7 @@ def multiple_files_duplicates(annotations_test_data: dict) -> dict:
             ],
             "duplicates": 2,
             "n_images": 3,
+            "max_annots_per_image": 1,
         },
         "COCO": {
             "files": [
@@ -113,6 +116,7 @@ def multiple_files_duplicates(annotations_test_data: dict) -> dict:
             ],
             "duplicates": 2,
             "n_images": 3,
+            "max_annots_per_image": 2,
         },
     }
 
@@ -152,6 +156,47 @@ def assert_dataframe(
             df.groupby("image_id").count()["x_min"]
             == expected_annots_per_image
         )  # count number of "x_min" values when grouping by "image_id"
+
+
+def assert_dataset(
+    ds: xr.Dataset,
+    expected_n_images: int,
+    expected_n_annotations: int,
+    expected_max_annots_per_image: int,
+    expected_space_dim: int,
+    expected_n_categories: int,
+    expected_category_str: list[str],
+):
+    """Check that the dataset has the expected shape and content."""
+    # Check shape of position array
+    assert ds.position.shape == (
+        expected_n_images,
+        expected_space_dim,
+        expected_max_annots_per_image,
+    )
+
+    # Check shape of category array
+    assert ds.category.shape == (
+        expected_n_images,
+        expected_max_annots_per_image,
+    )
+
+    # Check total number of no nan annotations
+    assert (
+        np.sum(np.any(~np.isnan(ds.position.values), axis=1))
+        == expected_n_annotations
+    )
+
+    # Check total number of non -1 categories
+    assert (
+        np.sum(np.unique(ds.category.values.flatten()) != -1)
+        == expected_n_categories
+    )
+
+    # Check map from category_id to category name is as expected
+    assert sorted(ds.attrs["map_category_to_str"].values()) == sorted(
+        expected_category_str
+    )
 
 
 @pytest.mark.parametrize(
@@ -463,13 +508,17 @@ def test_from_files_duplicates(
     """Test the behaviour of the `from_files` function when passing
     input files with duplicates (in single files or across files).
     """
-    # Get expected size of dataframe when passing multiple files with
+    # Get expected size of dataset when passing multiple files with
     # duplicates
+
     if "MULTIPLE" in input_file:
         # Get input data
         input_files = multiple_files_duplicates[format]["files"]
         n_duplicates = multiple_files_duplicates[format]["duplicates"]
         n_unique_images = multiple_files_duplicates[format]["n_images"]
+        max_annots_per_image = multiple_files_duplicates[format][
+            "max_annots_per_image"
+        ]
 
         # Compute number of annotations, with and without duplicates
         n_total_annotations = sum(
@@ -479,7 +528,6 @@ def test_from_files_duplicates(
             ]
         )
         n_unique_annotations = n_total_annotations - n_duplicates
-        expected_annots_per_image = None
 
     # Get expected size of dataframe when passing a single file with duplicates
     else:
@@ -489,19 +537,20 @@ def test_from_files_duplicates(
             count_imgs_and_annots_in_input_file(input_files, format)
         )
         n_unique_annotations = n_total_annotations - n_duplicates
-        expected_annots_per_image = 1
+        max_annots_per_image = 1
 
-    # Compute dataframe
-    df = from_files(input_files, format=format)
+    # Compute dataset
+    ds = from_files(input_files, format=format)
 
     # Check dataframe content is as expected
-    assert_dataframe(
-        df,
-        expected_n_annotations=n_unique_annotations,
+    assert_dataset(
+        ds,
         expected_n_images=n_unique_images,
-        expected_supercategories="animal",
-        expected_categories="crab",
-        expected_annots_per_image=expected_annots_per_image,
+        expected_n_annotations=n_unique_annotations,
+        expected_max_annots_per_image=max_annots_per_image,
+        expected_space_dim=2,
+        expected_n_categories=1,
+        expected_category_str=["crab"],
     )
 
 
@@ -556,26 +605,45 @@ def test_image_id_assignment(
     assert pairs_img_id_filename_out == pairs_img_id_to_filename_alphabetical
 
 
-def test_dataframe_from_same_annotations(annotations_test_data: dict):
+def test_dataset_from_same_annotations(annotations_test_data: dict):
     """Test whether the same annotations exported to VIA and COCO formats
-    produce the same dataframe, except for the image width and height columns.
+    produce the same dataset, except for the image width and height columns.
 
     We use the `_subset` files because we know they contain the
     same annotations.
     """
     # Read data into dataframes
-    df_via = from_files(
+    ds_via = from_files(
         annotations_test_data["small_bboxes_VIA_subset.json"],
         format="VIA",
     )
-    df_coco = from_files(
+    ds_coco = from_files(
         annotations_test_data["small_bboxes_COCO_subset.json"],
         format="COCO",
     )
 
-    # Compare dataframes excluding `image_width`, `image_height` columns
-    assert df_via.drop(columns=["image_width", "image_height"]).equals(
-        df_coco.drop(columns=["image_width", "image_height"])
+    # Compare datasets ignoring attributes
+    # Two Datasets are equal if they have matching variables and coordinates,
+    assert ds_via.equals(ds_coco)
+
+    # Check specific attributes
+    assert (
+        ds_via.attrs["annotation_files"] != ds_coco.attrs["annotation_files"]
+    )
+    assert (
+        ds_via.attrs["annotation_format"] != ds_coco.attrs["annotation_format"]
+    )
+    assert (
+        ds_via.attrs["map_category_to_str"]
+        == ds_coco.attrs["map_category_to_str"]
+    )
+    assert (
+        ds_via.attrs["map_image_id_to_filename"]
+        == ds_coco.attrs["map_image_id_to_filename"]
+    )
+    assert (
+        ds_via.attrs["images_directories"]
+        == ds_coco.attrs["images_directories"]
     )
 
 

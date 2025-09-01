@@ -59,11 +59,11 @@ def from_files(
         - "position": (image_id, space, id)
         - "shape": (image_id, space, id)
         - "category": (image_id, id)
-        The "category" array holds 0-based integers, except for VIA
-        files where the values specified in the input file are retained.
+        The "category" array holds 1-based integers, as specified in the input
+        file.
 
         The dataset attributes include:
-        - "map_category_id_to_category": map from category_id to category name
+        - "map_category_to_str": map from category_id to category name
         - "map_image_id_to_filename": map from image_id to image filename
         - "images_directories": list of paths to the directories containing
         the images the annotations refer to (optional)
@@ -114,7 +114,7 @@ def from_files(
     ]
 
     # Get map from category_id to category
-    map_category_id_to_category = (
+    map_category_to_str = (
         df_all[["category_id", "category"]]
         .drop_duplicates()
         .set_index("category_id")
@@ -128,7 +128,7 @@ def from_files(
     ds.attrs = {
         "annotation_files": file_paths,
         "annotation_format": format,
-        "map_category_id_to_category": map_category_id_to_category,
+        "map_category_to_str": map_category_to_str,
         "map_image_id_to_filename": map_image_id_to_filename,
         "images_directories": images_dirs,
     }
@@ -476,7 +476,7 @@ def _df_to_xarray_ds(df: pd.DataFrame) -> xr.Dataset:
 
     # Compute indices of the rows where the image ID switches
     bool_id_diff_from_prev = df["image_id"].ne(df["image_id"].shift())
-    indices_id_switch = np.argwhere(bool_id_diff_from_prev).squeeze()[1:]
+    indices_id_switch = np.argwhere(bool_id_diff_from_prev)[1:, 0]
 
     # Stack position, shape and confidence arrays along ID axis
     map_key_to_columns = {
@@ -497,7 +497,7 @@ def _df_to_xarray_ds(df: pd.DataFrame) -> xr.Dataset:
                 dtype=map_key_to_padding[key][0]  # type: ignore
             ),
             indices_id_switch,  # indices along axis=0
-        )
+        )  # each array: (n_annotations, N_DIM)
 
         # pad arrays with NaN values along the annotation ID axis
         list_arrays_padded = [
@@ -507,10 +507,12 @@ def _df_to_xarray_ds(df: pd.DataFrame) -> xr.Dataset:
                 constant_values=map_key_to_padding[key][1],  # type: ignore
             )
             for arr in list_arrays
-        ]
+        ]  # each array: (n_max_annotations, N_DIM)
 
         # stack along the first axis (image_id)
-        array_dict[key] = np.stack(list_arrays_padded, axis=0).squeeze()
+        array_dict[key] = np.stack(
+            list_arrays_padded, axis=0
+        )  # (n_images, n_max_annotations, N_DIM)
 
         # reorder axes if required
         if "category" not in key:
@@ -528,7 +530,10 @@ def _df_to_xarray_ds(df: pd.DataFrame) -> xr.Dataset:
                 array_dict["position_array"],
             ),
             shape=(["image_id", "space", "id"], array_dict["shape_array"]),
-            category=(["image_id", "id"], array_dict["category_array"]),
+            category=(
+                ["image_id", "id"],
+                array_dict["category_array"].squeeze(axis=-1),
+            ),
         ),
         coords=dict(
             image_id=df["image_id"].unique(),
