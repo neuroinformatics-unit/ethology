@@ -5,12 +5,12 @@ from pathlib import Path
 import jsonschema
 import pytest
 
-from ethology.annotations.json_schemas.utils import (
+from ethology.io.annotations.json_schemas.utils import (
     _check_required_keys_in_dict,
     _check_required_properties_keys,
     _extract_properties_keys,
 )
-from ethology.annotations.validators import ValidCOCO, ValidVIA
+from ethology.io.annotations.validate import ValidCOCO, ValidVIA
 
 
 @pytest.fixture()
@@ -110,7 +110,7 @@ def small_schema() -> dict:
 @pytest.fixture()
 def default_VIA_schema() -> dict:
     """Get default VIA schema."""
-    from ethology.annotations.json_schemas.utils import _get_default_schema
+    from ethology.io.annotations.json_schemas.utils import _get_default_schema
 
     return _get_default_schema("VIA")
 
@@ -118,7 +118,7 @@ def default_VIA_schema() -> dict:
 @pytest.fixture()
 def default_COCO_schema() -> dict:
     """Get default COCO schema."""
-    from ethology.annotations.json_schemas.utils import _get_default_schema
+    from ethology.io.annotations.json_schemas.utils import _get_default_schema
 
     return _get_default_schema("COCO")
 
@@ -174,7 +174,7 @@ def test_validators_valid_input_files(
             "VIA_file_schema_mismatch",
             ValidVIA,
             pytest.raises(jsonschema.exceptions.ValidationError),
-            "'49' is not of type 'integer'",
+            "'49' is not of type 'number'",
         ),
         (
             "COCO_file_schema_mismatch",
