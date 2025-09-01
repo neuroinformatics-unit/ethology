@@ -6,8 +6,8 @@ from pathlib import Path
 import pandas as pd
 import pytest
 
-from ethology.annotations.io.load_bboxes import from_files
-from ethology.annotations.io.save_bboxes import (
+from ethology.io.annotations.load_bboxes import from_files
+from ethology.io.annotations.save_bboxes import (
     STANDARD_BBOXES_DF_COLUMNS_TO_COCO,
     _create_COCO_dict,
     _fill_in_COCO_required_data,

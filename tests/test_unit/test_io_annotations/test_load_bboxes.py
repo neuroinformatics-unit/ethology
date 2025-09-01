@@ -7,7 +7,7 @@ from unittest.mock import patch
 import pandas as pd
 import pytest
 
-from ethology.annotations.io.load_bboxes import (
+from ethology.io.annotations.load_bboxes import (
     STANDARD_BBOXES_DF_COLUMNS,
     STANDARD_BBOXES_DF_INDEX,
     _df_rows_from_valid_COCO_file,
@@ -174,11 +174,11 @@ def assert_dataframe(
     [
         (
             Path("/path/to/file"),  # single file
-            "ethology.annotations.io.load_bboxes._from_single_file",
+            "ethology.io.annotations.load_bboxes._from_single_file",
         ),
         (
             [Path("/path/to/file1"), Path("/path/to/file2")],  # multiple files
-            "ethology.annotations.io.load_bboxes._from_multiple_files",
+            "ethology.io.annotations.load_bboxes._from_multiple_files",
         ),
     ],
 )
@@ -573,12 +573,9 @@ def test_dataframe_from_same_annotations(annotations_test_data: dict):
         format="COCO",
     )
 
-    # Compare dataframes excluding `image_width`, `image_height` and
-    # `category_id` columns
-    assert df_via.drop(
-        columns=["image_width", "image_height", "category_id"]
-    ).equals(
-        df_coco.drop(columns=["image_width", "image_height", "category_id"])
+    # Compare dataframes excluding `image_width`, `image_height` columns
+    assert df_via.drop(columns=["image_width", "image_height"]).equals(
+        df_coco.drop(columns=["image_width", "image_height"])
     )
 
 
@@ -602,16 +599,16 @@ def test_dataframe_from_same_annotations(annotations_test_data: dict):
             "VIA_JSON_sample_1.json",
             "VIA",
             "string_category",
-            0,
-        ),  # category ID is a string ("crab") ---> should be factorized
+            1,
+        ),  # category ID is a string ("crab") ---> should be 1 in df
         (
             "small_bboxes_COCO.json",
             "COCO",
             "integer",
-            0,
-        ),  # category ID is an integer (1) ---> should be 0 in df
-        # COCO category IDs are always 1-based indices, and transformed to
-        # 0-based indices when read into df
+            1,
+        ),  # category ID is an integer (1) ---> should be 1 in df
+        # COCO category IDs are always 1-based indices, and maintained
+        # when read into df (0 is reserved for the background class)
     ],
 )
 def test_category_id_extraction(
@@ -630,14 +627,12 @@ def test_category_id_extraction(
     if case_category_id == "empty":
         df["category_id"].apply(lambda x: x is expected_category_id).all()
 
-    elif case_category_id in ["string_integer", "integer"]:
+    elif case_category_id in ["string_integer", "integer", "string_category"]:
         assert df["category_id"].dtype == int
         assert df["category_id"].unique() == [expected_category_id]
 
     elif case_category_id == "string_category":
-        assert df["category_id"].dtype == int
-        assert df["category_id"].unique() == [expected_category_id]
-        assert all(df["category_id"] == df["category"].factorize()[0])
+        assert all(df["category_id"] == df["category"].factorize()[0] + 1)
 
 
 @pytest.mark.parametrize(
