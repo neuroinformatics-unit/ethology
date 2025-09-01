@@ -219,8 +219,7 @@ def compute_precision_recall_ds(
 
     # Compute precision and recall per image
     precision_per_img = pred_bboxes_ds.tp.sum(dim="id") / (
-        pred_bboxes_ds.tp.sum(dim="id")
-        + pred_bboxes_ds.fp.sum(dim="id")
+        pred_bboxes_ds.tp.sum(dim="id") + pred_bboxes_ds.fp.sum(dim="id")
     )
     recall_per_img = pred_bboxes_ds.tp.sum(dim="id") / (
         pred_bboxes_ds.tp.sum(dim="id") + gt_bboxes_ds.md.sum(dim="id")

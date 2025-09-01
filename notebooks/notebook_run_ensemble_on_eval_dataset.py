@@ -279,7 +279,7 @@ train_dataset, val_dataset, test_dataset, _, img_ids_val, _ = (
     split_dataset_crab_repo(
         dataset_coco,
         seed_n=ref_cli_args["seed_n"],
-        config=ref_config, 
+        config=ref_config,
         # if Aug dataset, use:
         # config={
         #     "train_fraction": 0.0,
@@ -342,7 +342,7 @@ all_models_detections_ds = concat_detections_ds(
 # Fuse detections across models
 confidence_th_post_fusion = 0.0
 fused_detections_ds = combine_detections_across_models_wbf(
-    all_models_detections_ds.sel(model=[1,2,3,4,5]),  # before: [1,2,3,4,5]
+    all_models_detections_ds.sel(model=[1, 2, 3, 4, 5]),  # before: [1,2,3,4,5]
     kwargs_wbf={
         "iou_thr_ensemble": 0.5,
         "skip_box_thr": 0.0001,
@@ -515,7 +515,10 @@ print(grouped_ds)
 fig, ax = plt.subplots(1, 1, figsize=(10, 6))
 ax.bar(
     bin_centers,
-    [0,] + [g[1].tp.shape[0] for g in list(grouped_ds)],
+    [
+        0,
+    ]
+    + [g[1].tp.shape[0] for g in list(grouped_ds)],
     # [g[1].tp.shape[0] for g in list(grouped_ds)],
     width=bin_edges[1] - bin_edges[0],
     color="skyblue",
@@ -542,7 +545,10 @@ fig, ax = plt.subplots(1, 1, figsize=(10, 6))
 # show bar edges
 ax.bar(
     0.5 * (bin_edges[:-1] + bin_edges[1:]),
-    [0,] + [compute_precision(g[1]) for g in list(grouped_ds)],
+    [
+        0,
+    ]
+    + [compute_precision(g[1]) for g in list(grouped_ds)],
     # [compute_precision(g[1]) for g in list(grouped_ds)],
     width=bin_edges[1] - bin_edges[0],
     color="skyblue",
