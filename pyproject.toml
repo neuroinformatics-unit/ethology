@@ -24,6 +24,7 @@ dependencies = [
   "netCDF4",
   "torch",
   "ensemble-boxes",
+  "boxmot",
 ]
 
 [project.urls]
