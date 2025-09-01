@@ -342,7 +342,7 @@ def plot_missed_detections_per_bin(
 
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%
-# Compute bins using full GT annotations
+# Compute diagonal bins using full GT annotations
 # We bin the size of the bbox diagonal
 
 coco_full_gt = COCO(str(full_gt_annotations_file))
@@ -442,10 +442,11 @@ for model_key in list_models:
         Path(cli_args["annotation_files"][0]).name
         == "VIA_JSON_combined_coco_gen.json"
     ):
+        # need to use the old annotations file because the new one has 
+        # different image IDs
         dataset_coco = create_coco_dataset(
             images_dir=Path(dataset_dir) / "frames",
-            annotations_file=annotations_dir
-            / "VIA_JSON_combined_coco_gen.json",
+            annotations_file="/home/sminano/swc/project_ethology/sept2023_annotations.bk/VIA_JSON_combined_coco_gen.json",
             composed_transform=inference_transforms,
         )
     else:
@@ -536,6 +537,8 @@ bin_edges = np.arange(0, 1.01, 0.05)
 predictions_df["confidence_bins"] = pd.cut(
     predictions_df["confidence"],
     bins=bin_edges,
+    right=False,
+    include_lowest=True,
 )
 
 precision_per_confidence_bin = predictions_df.groupby(
@@ -563,6 +566,7 @@ calibration_df["precision"].plot(
     ax=ax,
 )
 
+# plot perfect calibration line
 ax.plot(
     np.arange(len(calibration_df)),  # bin indices
     (bin_edges[:-1] + bin_edges[1:]) / 2,  # perfect calibration
@@ -576,7 +580,7 @@ ax.set_title(
     f"{model_key} - calibration curve (n={precision_per_confidence_bin.sum()})"
 )
 ax.set_xlabel("confidence")
-ax.set_ylabel("Precision")
+ax.set_ylabel("precision")
 ax.tick_params(axis="x", rotation=45)
 ax.grid(True, alpha=0.3)
 
