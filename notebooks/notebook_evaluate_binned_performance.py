@@ -442,7 +442,7 @@ for model_key in list_models:
         Path(cli_args["annotation_files"][0]).name
         == "VIA_JSON_combined_coco_gen.json"
     ):
-        # need to use the old annotations file because the new one has 
+        # need to use the old annotations file because the new one has
         # different image IDs
         dataset_coco = create_coco_dataset(
             images_dir=Path(dataset_dir) / "frames",
