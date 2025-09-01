@@ -9,8 +9,8 @@ import numpy as np
 import pandas as pd
 import pytz
 
-from ethology.annotations.io.load_bboxes import STANDARD_BBOXES_DF_INDEX
-from ethology.annotations.validators import ValidCOCO
+from ethology.io.annotations.load_bboxes import STANDARD_BBOXES_DF_INDEX
+from ethology.io.annotations.validate import ValidCOCO
 
 # Mapping of dataframe columns to COCO keys
 STANDARD_BBOXES_DF_COLUMNS_TO_COCO = {
