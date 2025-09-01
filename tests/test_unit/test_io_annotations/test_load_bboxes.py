@@ -564,24 +564,22 @@ def test_from_files_duplicates(
 def test_image_id_assignment(
     format: Literal["VIA", "COCO"], annotations_test_data: dict
 ):
-    """Test if the bboxes dataframe image_id is assigned based on the
+    """Test if the bboxes dataset image_id is assigned based on the
     alphabetically sorted list of filenames.
     """
     # Get path to file
     filepath = annotations_test_data[f"small_bboxes_image_id_{format}.json"]
 
     # Read data
-    df = from_files(filepath, format=format)
+    ds = from_files(filepath, format=format)
 
     # Get image_id and filename pairs from the input data file
     with open(filepath) as f:
         data = json.load(f)
 
     # Compute expected image ID - filename pairs if ID computed alphabetically
-    pairs_img_id_to_filename_alphabetical = {
-        id: file
-        for id, file in enumerate(sorted(df["image_filename"].tolist()))
-    }
+    sorted_filenames = sorted(ds.attrs["map_image_id_to_filename"].values())
+    pairs_img_id_to_filename_alphabetical = dict(enumerate(sorted_filenames))
 
     # Check image ID in input data file is not assigned alphabetically
     if format == "VIA":
@@ -598,11 +596,10 @@ def test_image_id_assignment(
     assert pairs_img_id_to_filename_in != pairs_img_id_to_filename_alphabetical
 
     # Check image_id in dataframe is assigned alphabetically
-    pairs_img_id_filename_out = {
-        id: file
-        for file, id in zip(df["image_filename"], df["image_id"], strict=True)
-    }
-    assert pairs_img_id_filename_out == pairs_img_id_to_filename_alphabetical
+    assert (
+        pairs_img_id_to_filename_alphabetical
+        == ds.attrs["map_image_id_to_filename"]
+    )
 
 
 def test_dataset_from_same_annotations(annotations_test_data: dict):
@@ -744,9 +741,9 @@ def test_sorted_annotations_by_image_filename(
     assert list_input_images != sorted(list_input_images)
 
     # Compute bboxes dataframe
-    df = from_files(file_paths=input_filepaths, format=format)
+    ds = from_files(file_paths=input_filepaths, format=format)
 
-    # Check that the annotations in the dataframe are sorted by image filename
-    assert df["image_filename"].to_list() == sorted(
-        df["image_filename"].to_list()
-    )
+    # Check that the image_id to filename map in the dataframe is sorted
+    sorted_filenames = sorted(ds.attrs["map_image_id_to_filename"].values())
+    sorted_map = dict(enumerate(sorted_filenames))
+    assert ds.attrs["map_image_id_to_filename"] == sorted_map
