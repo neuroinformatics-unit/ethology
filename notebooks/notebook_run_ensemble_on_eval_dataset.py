@@ -279,7 +279,8 @@ train_dataset, val_dataset, test_dataset, _, img_ids_val, _ = (
     split_dataset_crab_repo(
         dataset_coco,
         seed_n=ref_cli_args["seed_n"],
-        config=ref_config, #------
+        config=ref_config, 
+        # if Aug dataset, use:
         # config={
         #     "train_fraction": 0.0,
         #     "val_over_test_fraction": 1.0,
@@ -310,14 +311,23 @@ val_dataloader = DataLoader(
 # can I vectorize this? (pytorch forum question)
 list_detections_ds = []
 for model in tqdm(list_models):
-    model.to(device)
+    # model.to(device)
 
+    # with dataloader
     detections_ds = run_detector_on_dataloader(
         model=model,
         dataloader=val_dataloader,
         device=device,
     )
-    detections_ds = add_bboxes_min_max_corners(detections_ds)  
+
+    # # compare with dataset
+    # detections_ds = run_detector_on_dataset(
+    #     model=model,
+    #     dataset=val_dataset,
+    #     device=device,
+    # )
+
+    detections_ds = add_bboxes_min_max_corners(detections_ds)
     # -- this could be done after concatenating if we are not tracking
     list_detections_ds.append(detections_ds)
 
@@ -330,9 +340,9 @@ all_models_detections_ds = concat_detections_ds(
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Fuse detections across models
-confidence_th_post_fusion = 0.7
+confidence_th_post_fusion = 0.0
 fused_detections_ds = combine_detections_across_models_wbf(
-    all_models_detections_ds.sel(model=[1, 2, 3, 4, 5]),
+    all_models_detections_ds.sel(model=[1,2,3,4,5]),  # before: [1,2,3,4,5]
     kwargs_wbf={
         "iou_thr_ensemble": 0.5,
         "skip_box_thr": 0.0001,
@@ -401,7 +411,6 @@ gt_bboxes_val_ds = gt_bboxes_ds.sel(image_id=img_ids_val)
 val_ds = torch_dataset_to_xr_dataset(val_dataset)
 
 
-
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Evaluate ensemble model
 fused_detections_ds, gt_bboxes_val_ds = compute_precision_recall_ds(
@@ -409,6 +418,7 @@ fused_detections_ds, gt_bboxes_val_ds = compute_precision_recall_ds(
     gt_bboxes_ds=gt_bboxes_val_ds,
     iou_threshold=0.1,  # change to 0.5?
 )
+
 
 print(
     f"Ensemble model with confidence threshold post fusion: {confidence_th_post_fusion}"
@@ -484,7 +494,11 @@ bin_edges = np.arange(confidence_th_post_fusion, 1.01, 0.05)
 bin_centers = 0.5 * (bin_edges[:-1] + bin_edges[1:])
 
 grouped_ds = fused_detections_ds.groupby_bins(
-    "confidence", bin_edges, restore_coord_dims=True
+    "confidence",
+    bin_edges,
+    restore_coord_dims=True,
+    right=False,
+    include_lowest=True,
 )
 print(grouped_ds)
 # grouped_ds = list_detections_ds_eval[0].groupby_bins(
@@ -501,8 +515,8 @@ print(grouped_ds)
 fig, ax = plt.subplots(1, 1, figsize=(10, 6))
 ax.bar(
     bin_centers,
-    # [0,] + [g[1].tp.shape[0] for g in list(grouped_ds)],
-    [g[1].tp.shape[0] for g in list(grouped_ds)],
+    [0,] + [g[1].tp.shape[0] for g in list(grouped_ds)],
+    # [g[1].tp.shape[0] for g in list(grouped_ds)],
     width=bin_edges[1] - bin_edges[0],
     color="skyblue",
     edgecolor="gray",
@@ -512,8 +526,8 @@ ax.set_ylabel("detections")
 ax.grid(True, alpha=0.3)
 ax.set_xlim(0, 1)
 
-# %%
-# plot precision per bin
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# Plot calibration curve
 
 
 def compute_precision(ds_one_bin):
@@ -522,13 +536,14 @@ def compute_precision(ds_one_bin):
 
 # grouped_ds.apply(compute_precision) throws an error
 
-# %%
+# plot precision per bin
 fig, ax = plt.subplots(1, 1, figsize=(10, 6))
+
 # show bar edges
 ax.bar(
     0.5 * (bin_edges[:-1] + bin_edges[1:]),
-    # [0,] + [compute_precision(g[1]) for g in list(grouped_ds)],
-    [compute_precision(g[1]) for g in list(grouped_ds)],
+    [0,] + [compute_precision(g[1]) for g in list(grouped_ds)],
+    # [compute_precision(g[1]) for g in list(grouped_ds)],
     width=bin_edges[1] - bin_edges[0],
     color="skyblue",
     edgecolor="gray",
