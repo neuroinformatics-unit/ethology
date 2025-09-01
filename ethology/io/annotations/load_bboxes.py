@@ -237,15 +237,10 @@ def _from_single_file(
         inplace=False,
     )
 
-    # Fix category_id for VIA files if required
-    # Cast as an int if possible, otherwise factorize it
+    # Cast category_id for VIA files from str to int if possible,
+    # otherwise factorize it
     if format == "VIA" and not df["category_id"].isna().all():
-        df = _VIA_category_id_as_int(df)
-    elif format == "COCO":
-        # In COCO files exported with the VIA tool, the category_id
-        # is always a 1-based integer. Here we coerce it to a 0-based
-        # integer
-        df["category_id"] = df["category"].factorize(sort=True)[0]
+        df = _category_id_as_int(df)
 
     # Reorder columns to match standard columns
     # If columns dont exist they are filled with nan / na values
@@ -422,7 +417,7 @@ def _df_rows_from_valid_COCO_file(file_path: Path) -> list[dict]:
     return list_rows
 
 
-def _VIA_category_id_as_int(df: pd.DataFrame) -> pd.DataFrame:
+def _category_id_as_int(df: pd.DataFrame) -> pd.DataFrame:
     """Convert category_id to int if possible, otherwise factorize it.
 
     Parameters
@@ -439,7 +434,12 @@ def _VIA_category_id_as_int(df: pd.DataFrame) -> pd.DataFrame:
     try:
         df["category_id"] = df["category_id"].astype(int)
     except ValueError:
+        # Factorise to 0-based integers
         df["category_id"] = df["category"].factorize(sort=True)[0]
+        # Add 1 to the factorised values to make them 1-based
+        # (0 is reserved for the background class)
+        # (-1 is reserved for missing values in factorisation)
+        df.loc[df["category_id"] >= 0, "category_id"] += 1
     return df
 
 
