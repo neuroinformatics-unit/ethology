@@ -237,16 +237,38 @@ def test_from_files(
     correctly to the single or multiple file readers, and check the
     metadata is added correctly.
     """
+    # Create a mock intermediate DataFrame with one image and one annotation,
+    # to return from the mocked function
+    mock_df_all = pd.DataFrame(
+        {
+            "image_filename": ["test_image.jpg"],
+            "image_id": [0],
+            "x_min": [10.0],
+            "y_min": [20.0],
+            "width": [100.0],
+            "height": [200.0],
+            "supercategory": ["animal"],
+            "category": ["crab"],
+            "category_id": [1],
+            "image_width": [800],
+            "image_height": [600],
+        }
+    )
+
     # Call general function and see if mocked function is called
-    with patch(function_to_mock) as mock:
-        df = from_files(file_path, format=format, images_dirs=images_dirs)
+    with patch(function_to_mock, return_value=mock_df_all) as mock:
+        ds = from_files(file_path, format=format, images_dirs=images_dirs)
         mock.assert_called_once_with(file_path, format=format)
 
     # Check metadata
-    assert df.attrs["annotation_files"] == file_path
-    assert df.attrs["annotation_format"] == format
+    assert ds.attrs["annotation_files"] == file_path
+    assert ds.attrs["annotation_format"] == format
     if images_dirs:
-        assert df.attrs["images_directories"] == images_dirs
+        assert ds.attrs["images_directories"] == images_dirs
+
+    # Check that the maps exist and are not empty
+    assert ds.attrs["map_category_to_str"] == {1: "crab"}
+    assert ds.attrs["map_image_id_to_filename"] == {0: "test_image.jpg"}
 
 
 @pytest.mark.parametrize(

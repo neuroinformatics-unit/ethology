@@ -128,9 +128,9 @@ def from_files(
     ds.attrs = {
         "annotation_files": file_paths,
         "annotation_format": format,
+        "images_directories": images_dirs,
         "map_category_to_str": map_category_to_str,
         "map_image_id_to_filename": map_image_id_to_filename,
-        "images_directories": images_dirs,
     }
 
     return ds
