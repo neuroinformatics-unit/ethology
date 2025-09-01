@@ -182,7 +182,6 @@ for model_key in models_dict:
     # )
 
 
-
 # %%%%%%%%%%%%%%%%%%%%%%%
 # %%time
 # Use dataloader to run detection on validation set

@@ -12,7 +12,6 @@ from torch.func import functional_call, stack_module_state
 from torch.utils.data import random_split
 
 from ethology.datasets.create import create_coco_dataset
-from ethology.detectors.inference import run_detector_on_dataset
 from ethology.detectors.load import load_fasterrcnn_resnet50_fpn_v2
 from ethology.mlflow import (
     read_cli_args_from_mlflow_params,
@@ -252,7 +251,7 @@ def wrapper_model(params, buffers, img):
 
 model = list_models[0]
 
-model.eval() #
+model.eval()  #
 
 params_one_model = dict(model.named_parameters())
 buffers_one_model = dict(model.named_buffers())
@@ -270,8 +269,6 @@ val_dataset_images = torch.stack(
 # %%
 out = wrapper_model(params_one_model, buffers_one_model, val_dataset_images)
 # %%
-
-
 
 
 # %%
@@ -298,7 +295,6 @@ predictions_val_set_per_model_vmap = vmap(wrapper_model, in_dims=(0, 0, None))(
     buffers,
     val_dataset_images,
 )
-
 
 
 # %%
