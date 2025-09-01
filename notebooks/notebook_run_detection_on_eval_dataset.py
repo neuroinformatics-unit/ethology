@@ -39,12 +39,12 @@ ml_runs_experiment_dir = (
 
 # I pick seed 42 for each set of models
 models_dict = {
-    "above_0th": ml_runs_experiment_dir / "f348d9d196934073bece1b877cbc4d38",
+    # "above_0th": ml_runs_experiment_dir / "f348d9d196934073bece1b877cbc4d38",
     "above_1st": ml_runs_experiment_dir / "879d2f77e2b24adcb06b87d2fede6a04",
-    "above_5th": ml_runs_experiment_dir / "75583ec227e3444ab692b99c64795325",
-    "above_10th": ml_runs_experiment_dir / "4acc37206b1e4f679d535c837bee2c2f",
-    "above_25th": ml_runs_experiment_dir / "fdcf88fcbcc84fbeb94b45ca6b6f8914",
-    "above_50th": ml_runs_experiment_dir / "daa05ded0ea047388c9134bf044061c5",
+    # "above_5th": ml_runs_experiment_dir / "75583ec227e3444ab692b99c64795325",
+    # "above_10th": ml_runs_experiment_dir / "4acc37206b1e4f679d535c837bee2c2f",
+    # "above_25th": ml_runs_experiment_dir / "fdcf88fcbcc84fbeb94b45ca6b6f8914",
+    # "above_50th": ml_runs_experiment_dir / "daa05ded0ea047388c9134bf044061c5",
 }
 
 output_dir = Path(
@@ -175,34 +175,12 @@ for model_key in models_dict:
     detections_ds.attrs["coco_crabs_dataset_split"] = "val"
 
     # ------------------------------------
-    # Save detections dataset
-    detections_ds.to_netcdf(
-        output_dir
-        / f"{model_key}_detections_val_set_seed_{cli_args['seed_n']}_{timestamp}.nc"
-    )
-
-    # # Save evaluation dataset with pickle
-    # with open(
+    # # Save detections dataset
+    # detections_ds.to_netcdf(
     #     output_dir
-    #     / f"{model_key}_evaluation_val_set_seed_{cli_args['seed_n']}_{timestamp}.pkl",
-    #     "wb",
-    # ) as f:
-    #     pickle.dump(val_dataset, f)
+    #     / f"{model_key}_detections_val_set_seed_{cli_args['seed_n']}_{timestamp}.nc"
+    # )
 
-# %%
-# # reshape
-# detections_per_validation_sample = {}
-# for val_idx in range(len(val_dataset)):
-#     detections_dict = detections_dict_per_sample[val_idx]
-#     bboxes_xyxy = detections_dict["boxes"].cpu().numpy()
-
-#     detections_per_validation_sample[val_idx] = {
-#         "bbox_xyxy": bboxes_xyxy,
-#         "bbox_centroids": (bboxes_xyxy[:, 0:2] + bboxes_xyxy[:, 2:4]) / 2,
-#         "bbox_shapes": bboxes_xyxy[:, 2:4] - bboxes_xyxy[:, 0:2],
-#         "bbox_confidences": detections_dict["scores"].cpu().numpy(),
-#         "bbox_labels": detections_dict["labels"].cpu().numpy(),
-#     }
 
 
 # %%%%%%%%%%%%%%%%%%%%%%%
