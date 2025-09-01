@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 
-from ethology.annotations.validators import ValidCOCO, ValidVIA
+from ethology.io.annotations.validate import ValidCOCO, ValidVIA
 
 # definition of standard bboxes dataframe
 STANDARD_BBOXES_DF_INDEX = "annotation_id"
