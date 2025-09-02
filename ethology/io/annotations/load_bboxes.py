@@ -9,8 +9,6 @@ import pandas as pd
 import xarray as xr
 
 from ethology.io.annotations.validate import (
-    STANDARD_BBOXES_DF_COLUMNS,
-    STANDARD_BBOXES_DF_INDEX,
     ValidCOCO,
     ValidVIA,
 )
@@ -170,7 +168,7 @@ def _df_from_multiple_files(
     df_all = df_all.drop_duplicates(ignore_index=True, inplace=False)
 
     # Set the index name back to "annotation_id"
-    df_all.index.name = STANDARD_BBOXES_DF_INDEX
+    df_all.index.name = "annotation_id"
 
     return df_all
 
@@ -229,12 +227,27 @@ def _df_from_single_file(
     if format == "VIA" and not df["category_id"].isna().all():
         df = _category_id_as_int(df)
 
-    # Reorder columns to match standard columns
+    # Reorder columns
     # If columns dont exist they are filled with nan / na values
-    df = df.reindex(columns=STANDARD_BBOXES_DF_COLUMNS + ["annotation_id"])
+    df = df.reindex(
+        columns=[
+            "annotation_id",
+            "image_filename",
+            "image_id",
+            "x_min",
+            "y_min",
+            "width",
+            "height",
+            "supercategory",
+            "category",
+            "category_id",
+            "image_width",
+            "image_height",
+        ]
+    )
 
     # Set the index name to "annotation_id"
-    df = df.set_index(STANDARD_BBOXES_DF_INDEX)
+    df = df.set_index("annotation_id")
 
     return df
 
