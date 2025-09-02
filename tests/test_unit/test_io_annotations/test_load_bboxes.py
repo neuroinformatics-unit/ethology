@@ -10,8 +10,6 @@ import pytest
 import xarray as xr
 
 from ethology.io.annotations.load_bboxes import (
-    STANDARD_BBOXES_DF_COLUMNS,
-    STANDARD_BBOXES_DF_INDEX,
     _df_from_multiple_files,
     _df_from_single_file,
     _df_rows_from_valid_COCO_file,
@@ -134,7 +132,7 @@ def assert_dataframe(
     assert df.shape[0] == expected_n_annotations
 
     # Check annotation_id is the index name, and that IDs are unique
-    assert df.index.name == STANDARD_BBOXES_DF_INDEX
+    assert df.index.name == "annotation_id"
     assert len(set(df.index)) == expected_n_annotations
 
     # Check number of images
@@ -142,7 +140,19 @@ def assert_dataframe(
     assert len(df["image_id"].unique()) == expected_n_images
 
     # Check columns are as expected
-    assert df.columns.tolist() == STANDARD_BBOXES_DF_COLUMNS
+    assert df.columns.tolist() == [
+        "image_filename",
+        "image_id",
+        "x_min",
+        "y_min",
+        "width",
+        "height",
+        "supercategory",
+        "category",
+        "category_id",
+        "image_width",
+        "image_height",
+    ]
 
     # Check supercategories are as expected
     assert df["supercategory"].unique() == expected_supercategories
@@ -489,7 +499,20 @@ def test_df_rows_from_valid_file(
     # Check each row contains required column data
     # Note that "image_width" and "image_height" are not defined in the
     # VIA file, so we exclude them from the required keys.
-    required_keys = [STANDARD_BBOXES_DF_INDEX] + STANDARD_BBOXES_DF_COLUMNS
+    required_keys = [
+        "annotation_id",
+        "image_filename",
+        "image_id",
+        "x_min",
+        "y_min",
+        "width",
+        "height",
+        "supercategory",
+        "category",
+        "category_id",
+        "image_width",
+        "image_height",
+    ]
     if format == "VIA":
         required_keys = [
             key
