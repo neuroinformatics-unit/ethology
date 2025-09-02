@@ -9,16 +9,19 @@ import pandas as pd
 import xarray as xr
 
 from ethology.io.annotations.validate import (
+    ValidBboxesDataset,
     ValidCOCO,
     ValidVIA,
+    _check_output,
 )
 
 
+@_check_output(ValidBboxesDataset)
 def from_files(
     file_paths: Path | str | list[Path | str],
     format: Literal["VIA", "COCO"],
     images_dirs: Path | str | list[Path | str] | None = None,
-) -> pd.DataFrame:
+) -> xr.Dataset:
     """Read input annotation files as a bboxes xarray dataset.
 
     Parameters
@@ -34,7 +37,7 @@ def from_files(
 
     Returns
     -------
-    xr.Dataset
+    ds : xr.Dataset
         An annotations dataset holding bounding boxes data. The dataset has the
         following dimensions: "image_id", "space", "id".
         - The "image_id" is assigned based on the alphabetically sorted list
@@ -109,7 +112,10 @@ def from_files(
     # Convert dataframe to xarray dataset
     ds = _df_to_xarray_ds(df_all)
 
-    # Add metadata to the xarraydataset
+    # Validate
+    # ValidBboxesDataset(ds)
+
+    # Add metadata to the xarray dataset
     ds.attrs = {
         "annotation_files": file_paths,
         "annotation_format": format,

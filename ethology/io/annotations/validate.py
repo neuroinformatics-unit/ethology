@@ -1,13 +1,14 @@
 """Validators for supported annotation files."""
 
 import json
+from collections.abc import Callable
+from functools import wraps
 from pathlib import Path
 
 import pandas as pd
 import pandera.pandas as pa
 import xarray as xr
 from attrs import define, field
-from loguru import logger
 from pandera.typing import Index, Series
 
 from ethology.io.annotations.json_schemas.utils import (
@@ -225,21 +226,17 @@ class ValidCOCO:
             )
 
 
-# TODO: change to use attrs?
-def validate_dataset(
-    ds: xr.Dataset,
-) -> None:
-    """Check that the input dataset is a valid bboxes annotations dataset.
+@define
+class ValidBboxesDataset:
+    """Class for validating bboxes annotations datasets.
 
-    An bboxes annotations dataset is defined by:
-    - having image_id, space and id as dimensions, and
-    - having position and shape as arrays.
+    It checks that the input dataset has the required dimensions and data
+    variables for a valid bboxes annotations dataset.
 
-
-    Parameters
+    Attributes
     ----------
-    ds : xarray.Dataset
-        Dataset to validate.
+    dataset : xarray.Dataset
+        The dataset to validate.
 
     Raises
     ------
@@ -250,30 +247,44 @@ def validate_dataset(
         for a valid bboxes annotations dataset.
 
     """
+
+    dataset: xr.Dataset = field()
+
     # Minimum requirements for annotations datasets holding bboxes
-    REQUIRED_ANNOTATIONS_DIMS = {"bboxes": ["image_id", "space", "id"]}
-    REQUIRED_ANNOTATIONS_ARRAYS = {"bboxes": ["position", "shape"]}
+    required_dims: set = field(
+        default={"image_id", "space", "id"},
+        init=False,
+    )
+    required_data_vars: set = field(
+        default={"position", "shape"},
+        init=False,
+    )
 
-    if not isinstance(ds, xr.Dataset):
-        raise logger.error(
-            TypeError(f"Expected an xarray Dataset, but got {type(ds)}.")
-        )
+    @dataset.validator
+    def _check_dataset_type(self, attribute, value):
+        """Ensure the input is an xarray Dataset."""
+        if not isinstance(value, xr.Dataset):
+            raise TypeError(
+                f"Expected an xarray Dataset, but got {type(value)}."
+            )
 
-    required_vars = REQUIRED_ANNOTATIONS_ARRAYS["bboxes"]
-    missing_vars = set(required_vars) - set(ds.data_vars)
-    if missing_vars:
-        raise logger.error(
-            ValueError(
+    @dataset.validator
+    def _check_required_data_variables(self, attribute, value):
+        """Ensure the dataset has all required data variables."""
+        missing_vars = self.required_data_vars - set(value.data_vars)
+        if missing_vars:
+            raise ValueError(
                 f"Missing required data variables: {sorted(missing_vars)}"
             )
-        )
 
-    required_dims = REQUIRED_ANNOTATIONS_DIMS["bboxes"]
-    missing_dims = set(required_dims) - set(ds.dims)
-    if missing_dims:
-        raise logger.error(
-            ValueError(f"Missing required dimensions: {sorted(missing_dims)}")
-        )
+    @dataset.validator
+    def _check_required_dimensions(self, attribute, value):
+        """Ensure the dataset has all required dimensions."""
+        missing_dims = self.required_dims - set(value.dims)
+        if missing_dims:
+            raise ValueError(
+                f"Missing required dimensions: {sorted(missing_dims)}"
+            )
 
 
 class ValidBBoxesDataFrameCOCO(pa.DataFrameModel):
@@ -336,3 +347,18 @@ class ValidBBoxesDataFrameCOCO(pa.DataFrameModel):
     def check_idx_and_annotation_id(cls, df: pd.DataFrame) -> Series[bool]:
         """Check that the index and the "annotation_id" column are equal."""
         return all(df.index == df["annotation_id"])
+
+
+def _check_output(validator: type):
+    """Return a decorator that validates the output of a function."""
+
+    def decorator(function: Callable) -> Callable:
+        @wraps(function)  # to preserve metadata
+        def wrapper(*args, **kwargs):
+            result = function(*args, **kwargs)
+            validator(result)
+            return result
+
+        return wrapper
+
+    return decorator
