@@ -3,11 +3,12 @@
 import json
 from pathlib import Path
 
+import pandas as pd
 import pandera.pandas as pa
 import xarray as xr
 from attrs import define, field
 from loguru import logger
-from pandera.typing import Index
+from pandera.typing import Index, Series
 
 from ethology.io.annotations.json_schemas.utils import (
     _check_file_is_json,
@@ -281,8 +282,11 @@ class ValidBBoxesDataFrameCOCO(pa.DataFrameModel):
     See https://cocodataset.org/#format-data for more details.
     """
 
-    # annotation id as index
-    annotation_id: Index[int] = pa.Field(
+    # index
+    idx: Index[int] = pa.Field(ge=0, check_name=False)
+
+    # annotation_id
+    annotation_id: int = pa.Field(
         description="Unique identifier for the annotation (index)",
     )
 
@@ -327,3 +331,8 @@ class ValidBBoxesDataFrameCOCO(pa.DataFrameModel):
         description="Whether the annotation is a crowd",
         nullable=True,
     )
+
+    @pa.dataframe_check
+    def check_idx_and_annotation_id(cls, df: pd.DataFrame) -> Series[bool]:
+        """Check that the index and the "annotation_id" column are equal."""
+        return all(df.index == df["annotation_id"])
