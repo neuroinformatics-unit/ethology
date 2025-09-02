@@ -1,3 +1,4 @@
+import copy
 import json
 from collections.abc import Callable
 from contextlib import nullcontext as does_not_raise
@@ -11,9 +12,9 @@ from ethology.io.annotations.save_bboxes import (
     STANDARD_BBOXES_DF_COLUMNS_TO_COCO,
     _create_COCO_dict,
     _fill_in_COCO_required_data,
-    _validate_df_bboxes,
     to_COCO_file,
 )
+from ethology.io.annotations.validate import validate_df_bboxes
 
 
 def read_JSON_as_dict(file_path: str | Path) -> dict:
@@ -132,9 +133,24 @@ def sample_bboxes_df() -> Callable:
             "Expected index name to be 'annotation_id', but got 'None'.",
         ),
         (
-            pd.DataFrame({"annotation_id": [1, 2, 3]}).set_index(
-                "annotation_id"
-            ),
+            pd.DataFrame(
+                {
+                    "annotation_id": [1, 2, 3],
+                }
+            ).set_index("annotation_id"),
+            pytest.raises(ValueError),
+            "Required columns "
+            "['image_id', 'image_filename'] are not present in "
+            "the dataframe.",
+        ),
+        (
+            pd.DataFrame(
+                {
+                    "annotation_id": [1, 2, 3],
+                    "image_id": [0, 0, 0],
+                    "image_filename": ["00000.jpg", "00000.jpg", "00000.jpg"],
+                }
+            ).set_index("annotation_id"),
             pytest.raises(ValueError),
             "Required bounding box coordinates "
             "'x_min', 'y_min', 'width', 'height', are not present in "
@@ -160,7 +176,7 @@ def test_validate_df_bboxes(
         df_factory = request.getfixturevalue(df)
         df = df_factory()
     with expected_exception as excinfo:
-        _validate_df_bboxes(df)
+        validate_df_bboxes(df)
     if excinfo:
         assert expected_error_message == str(excinfo.value)
 
@@ -221,12 +237,14 @@ def test_fill_in_COCO_required_data(
 
 
 def test_create_COCO_dict(sample_bboxes_df: Callable):
-    """Test that the function that transforms the modified bboxes dataframe to
-    a COCO dictionary creates a dictionary as expected.
+    """Test the function that transforms the modified bboxes dataframe to
+    a COCO dictionary.
     """
     # Prepare input data
     df = sample_bboxes_df()
-    df["annotation_id"] = df.index  # required to extract the COCO dict
+
+    # Fill in COCO required data
+    df["annotation_id"] = df.index
 
     # Extract COCO dictionary
     COCO_dict = _create_COCO_dict(df)
@@ -236,7 +254,10 @@ def test_create_COCO_dict(sample_bboxes_df: Callable):
     assert all(x in COCO_dict for x in ["images", "categories", "annotations"])
 
     # Check keys in each section
-    for section, section_mapping in STANDARD_BBOXES_DF_COLUMNS_TO_COCO.items():
+    map_df_columns_to_coco = copy.deepcopy(STANDARD_BBOXES_DF_COLUMNS_TO_COCO)
+    if "confidence" not in df.columns:
+        del map_df_columns_to_coco["annotations"]["confidence"]
+    for section, section_mapping in map_df_columns_to_coco.items():
         assert all(
             [
                 x in elem
@@ -253,59 +274,55 @@ def test_create_COCO_dict(sample_bboxes_df: Callable):
         "COCO_JSON_sample_1.json",
     ],
 )
-def test_df_bboxes_to_COCO_file(
+def test_to_COCO_file(
     filename: str, annotations_test_data: dict, tmp_path: Path
 ):
-    # Get input JSON file
+    """Test the function that exports a bboxes dataset to a COCO JSON file."""
+    # Read input file as bboxes dataset
     input_file = annotations_test_data[filename]
+    ds = from_files(input_file, format="COCO")
 
-    # Read as bboxes dataframe
-    df = from_files(input_file, format="COCO")
+    # Export dataset to COCO format
+    output_file = to_COCO_file(ds, output_filepath=tmp_path / "output.json")
 
-    # Export dataframe to COCO format
-    output_file = to_COCO_file(df, output_filepath=tmp_path / "output.json")
-
+    # Read input and output files as dictionaries
     input_dict = read_JSON_as_dict(input_file)
     output_dict = read_JSON_as_dict(output_file)
+
+    # Format "area" and "bbox" as floats in input dict
+    # (we export them as floats)
+    input_dict["annotations"] = [
+        {
+            **ann,
+            "area": float(ann["area"]),
+            "bbox": [float(x) for x in ann["bbox"]],
+        }
+        for ann in input_dict["annotations"]
+    ]
 
     # Check lists of "categories" dictionaries match
     assert_list_of_dicts_match(
         input_dict["categories"],
         output_dict["categories"],
-        keys_to_exclude=["id"],  # "id" is expected to be different
+        keys_to_exclude=["supercategory"],
+        # we do not retain supercategory in dataset
     )
 
     # Check lists of "images" dictionaries match
+    # when exporting COCO file from VIA, it tries to extract image ID
+    # from image filename. This means it will be different from the
+    # "image_id" in the dataset.
     assert_list_of_dicts_match(
         input_dict["images"],
         output_dict["images"],
-        keys_to_exclude=["id"],  # "id" is expected to be different,
+        keys_to_exclude=["height", "width", "id"],
     )
 
     # Check lists of "annotations" dictionaries match
-    # check same length
+    # We export a 0-based annotation ID and image ID under "id" and "image_id"
+    # respectively.
     assert_list_of_dicts_match(
         input_dict["annotations"],
         output_dict["annotations"],
-        keys_to_exclude=["id", "category_id", "image_id"],
-    )
-
-    # Check category_id is as expected for COCO files exported with VIA tool
-    # under categories
-    assert all(
-        categories_out["id"] == categories_in["id"] - 1
-        for categories_in, categories_out in zip(
-            input_dict["categories"],
-            output_dict["categories"],
-            strict=True,
-        )
-    )
-    # under annotations
-    assert all(
-        annotations_out["category_id"] == annotations_in["category_id"] - 1
-        for annotations_in, annotations_out in zip(
-            input_dict["annotations"],
-            output_dict["annotations"],
-            strict=True,
-        )
+        keys_to_exclude=["id", "image_id"],
     )
