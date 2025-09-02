@@ -13,7 +13,10 @@ from pandera.typing.pandas import DataFrame
 
 from ethology.io.annotations.validate import (
     ValidBBoxesDataFrameCOCO,
+    ValidBboxesDataset,
     ValidCOCO,
+    _check_input,
+    _check_output,
 )
 
 # Mapping of dataframe columns to COCO fields
@@ -42,6 +45,8 @@ MAP_COLUMNS_TO_COCO_FIELDS = {
 }
 
 
+@_check_input(validator=ValidBboxesDataset)
+@_check_output(validator=ValidCOCO)  # check output is ethology importable
 def to_COCO_file(ds: xr.Dataset, output_filepath: str | Path):
     """Write bounding boxes annotations dataset to a COCO JSON file.
 
@@ -65,9 +70,6 @@ def to_COCO_file(ds: xr.Dataset, output_filepath: str | Path):
     COCO_dict = _create_COCO_dict(df)
     with open(output_filepath, "w") as f:
         json.dump(COCO_dict, f, sort_keys=True, indent=2)
-
-    # Check output JSON file is importable by ethology
-    ValidCOCO(output_filepath)
 
     return output_filepath
 

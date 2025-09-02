@@ -230,8 +230,9 @@ class ValidCOCO:
 class ValidBboxesDataset:
     """Class for validating bboxes annotations datasets.
 
-    It checks that the input dataset has the required dimensions and data
-    variables for a valid bboxes annotations dataset.
+    It checks that the input dataset has:
+    - dimensions: "image_id", "space", "id"
+    - data variables: "position" and "shape"
 
     Attributes
     ----------
@@ -243,8 +244,12 @@ class ValidBboxesDataset:
     TypeError
         If the input is not an xarray Dataset.
     ValueError
-        If the dataset is missing required data variables or dimensions
-        for a valid bboxes annotations dataset.
+        If the dataset is missing required data variables or dimensions.
+
+    Notes
+    -----
+    The dataset can have other data variables and dimensions, but they are not
+    checked.
 
     """
 
@@ -357,6 +362,27 @@ def _check_output(validator: type):
         def wrapper(*args, **kwargs):
             result = function(*args, **kwargs)
             validator(result)
+            return result
+
+        return wrapper
+
+    return decorator
+
+
+def _check_input(validator: type, input_index: int = 0):
+    """Return a decorator that validates a specific input of a function.
+
+    By default, the first input is validated.
+    """
+
+    def decorator(function: Callable) -> Callable:
+        @wraps(function)
+        def wrapper(*args, **kwargs):
+            if len(args) > input_index:
+                validator(args[input_index])
+            else:
+                pass
+            result = function(*args, **kwargs)
             return result
 
         return wrapper
