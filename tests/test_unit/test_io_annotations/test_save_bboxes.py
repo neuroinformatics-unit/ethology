@@ -3,18 +3,21 @@ import json
 from collections.abc import Callable
 from contextlib import nullcontext as does_not_raise
 from pathlib import Path
+from typing import Literal
 
 import pandas as pd
+import pandera.pandas as pa
 import pytest
 
 from ethology.io.annotations.load_bboxes import from_files
 from ethology.io.annotations.save_bboxes import (
-    STANDARD_BBOXES_DF_COLUMNS_TO_COCO,
+    MAP_COLUMNS_TO_COCO_FIELDS,
+    _add_COCO_data_to_df,
     _create_COCO_dict,
-    _fill_in_COCO_required_data,
+    _get_raw_df_from_ds,
     to_COCO_file,
 )
-from ethology.io.annotations.validate import validate_df_bboxes
+from ethology.io.annotations.validate import ValidBBoxesDataFrameCOCO
 
 
 def read_JSON_as_dict(file_path: str | Path) -> dict:
@@ -63,7 +66,7 @@ def assert_list_of_dicts_match(
 
 @pytest.fixture
 def sample_bboxes_df() -> Callable:
-    """Return a factory function for a sample bboxes dataframe.
+    """Return a factory function for a COCO-exportable bboxes dataframe.
 
     The factory function can be called with the `columns_to_drop` parameter
     """
@@ -71,7 +74,7 @@ def sample_bboxes_df() -> Callable:
     def _sample_bboxes_df_drop(
         columns_to_drop: list | None = None,
     ) -> pd.DataFrame:
-        """Return a sample bboxes dataframe with the specified columns dropped.
+        """Return a COCO-exportable bboxes df with specified columns dropped.
 
         The original dataframe is from "small_bboxes_COCO.json" data with the
         relevant columns for COCO export added. The index is set to
@@ -86,29 +89,65 @@ def sample_bboxes_df() -> Callable:
                     2: "00166.jpg",
                 },
                 "image_id": {0: 0, 1: 83, 2: 166},
-                "x_min": {0: 963, 1: 376, 2: 458},
-                "y_min": {0: 283, 1: 314, 2: 329},
-                "width": {0: 302, 1: 301, 2: 301},
-                "height": {0: 172, 1: 123, 2: 131},
-                "area": {0: 51944, 1: 37023, 2: 39431},
+                "x_min": {0: 963.0, 1: 376.0, 2: 458.0},
+                "y_min": {0: 283.0, 1: 314.0, 2: 329.0},
+                "width": {0: 302.0, 1: 301.0, 2: 301.0},
+                "height": {0: 172.0, 1: 123.0, 2: 131.0},
+                "area": {0: 51944.0, 1: 37023.0, 2: 39431.0},
                 "supercategory": {0: "animal", 1: "animal", 2: "animal"},
                 "category": {0: "crab", 1: "crab", 2: "crab"},
                 "category_id": {0: 1, 1: 1, 2: 1},
                 "iscrowd": {0: 0, 1: 0, 2: 0},
                 "segmentation": {
-                    0: [[963, 283, 1265, 283, 1265, 455, 963, 455]],
-                    1: [[376, 314, 677, 314, 677, 437, 376, 437]],
-                    2: [[458, 329, 759, 329, 759, 460, 458, 460]],
+                    0: [
+                        [
+                            963.0,
+                            283.0,
+                            1265.0,
+                            283.0,
+                            1265.0,
+                            455.0,
+                            963.0,
+                            455.0,
+                        ]
+                    ],
+                    1: [
+                        [
+                            376.0,
+                            314.0,
+                            677.0,
+                            314.0,
+                            677.0,
+                            437.0,
+                            376.0,
+                            437.0,
+                        ]
+                    ],
+                    2: [
+                        [
+                            458.0,
+                            329.0,
+                            759.0,
+                            329.0,
+                            759.0,
+                            460.0,
+                            458.0,
+                            460.0,
+                        ]
+                    ],
                 },
                 "bbox": {
-                    0: [963, 283, 302, 172],
-                    1: [376, 314, 301, 123],
-                    2: [458, 329, 301, 131],
+                    0: [963.0, 283.0, 302.0, 172.0],
+                    1: [376.0, 314.0, 301.0, 123.0],
+                    2: [458.0, 329.0, 301.0, 131.0],
                 },
                 "image_width": {0: 1280, 1: 1280, 2: 1280},
                 "image_height": {0: 720, 1: 720, 2: 720},
             }
-        ).set_index("annotation_id")
+        ).set_index("annotation_id", drop=False)
+
+        # Validate as COCO-exportable
+        df = ValidBBoxesDataFrameCOCO.validate(df)
 
         # Drop columns if specified
         if columns_to_drop:
@@ -124,24 +163,26 @@ def sample_bboxes_df() -> Callable:
     [
         (
             [],
-            pytest.raises(TypeError),
-            "Expected a pandas DataFrame, but got <class 'list'>.",
+            pytest.raises(pa.errors.BackendNotFoundError),
+            "Backend not found for backend, class: "
+            "(<class 'pandera.api.pandas.container.DataFrameSchema'>, "
+            "<class 'list'>)",
         ),
         (
             pd.DataFrame(),
-            pytest.raises(ValueError),
-            "Expected index name to be 'annotation_id', but got 'None'.",
+            pytest.raises(pa.errors.SchemaError),
+            "column 'annotation_id' not in dataframe. "
+            "Columns in dataframe: []",
         ),
         (
             pd.DataFrame(
                 {
                     "annotation_id": [1, 2, 3],
                 }
-            ).set_index("annotation_id"),
-            pytest.raises(ValueError),
-            "Required columns "
-            "['image_id', 'image_filename'] are not present in "
-            "the dataframe.",
+            ).set_index("annotation_id", drop=False),
+            pytest.raises(pa.errors.SchemaError),
+            "column 'image_id' not in dataframe. "
+            "Columns in dataframe: ['annotation_id']",
         ),
         (
             pd.DataFrame(
@@ -150,11 +191,11 @@ def sample_bboxes_df() -> Callable:
                     "image_id": [0, 0, 0],
                     "image_filename": ["00000.jpg", "00000.jpg", "00000.jpg"],
                 }
-            ).set_index("annotation_id"),
-            pytest.raises(ValueError),
-            "Required bounding box coordinates "
-            "'x_min', 'y_min', 'width', 'height', are not present in "
-            "the dataframe.",
+            ).set_index("annotation_id", drop=False),
+            pytest.raises(pa.errors.SchemaError),
+            "column 'image_width' not in dataframe. "
+            "Columns in dataframe: "
+            "['annotation_id', 'image_id', 'image_filename']",
         ),
         (
             "sample_bboxes_df",
@@ -163,88 +204,144 @@ def sample_bboxes_df() -> Callable:
         ),
     ],
 )
-def test_validate_df_bboxes(
+def test_validate_bboxes_df_COCO(
     df: pd.DataFrame,
     expected_exception: pytest.raises,
     expected_error_message: str,
     request: pytest.FixtureRequest,
 ):
-    """Test the validation function for the bboxes dataframe throws the
+    """Test the validation of the COCO-exportable bboxes dataframe throws the
     expected errors.
     """
     if not expected_error_message:
         df_factory = request.getfixturevalue(df)
         df = df_factory()
     with expected_exception as excinfo:
-        validate_df_bboxes(df)
+        ValidBBoxesDataFrameCOCO(df)
     if excinfo:
-        assert expected_error_message == str(excinfo.value)
+        assert expected_error_message in str(excinfo.value)
 
 
 @pytest.mark.parametrize(
-    "columns_to_drop",
+    "input_file",
     [
-        [],
-        ["category"],
-        ["category_id"],
-        ["area"],
-        ["iscrowd"],
-        ["segmentation"],
-        ["bbox"],
+        "small_bboxes_COCO.json",
+        "small_bboxes_VIA.json",
     ],
 )
-def test_fill_in_COCO_required_data(
-    columns_to_drop: list, sample_bboxes_df: Callable
+@pytest.mark.parametrize(
+    "drop_category",
+    [
+        True,
+        False,
+    ],
+)
+def test_get_raw_df_from_ds(
+    annotations_test_data: dict, input_file: str, drop_category: bool
 ):
-    """Test the fill-in function for exporting to COCO fills in any
-    columns required by COCO that may be missing.
+    """Test the function that gets the raw dataframe derived from the xarray
+    dataset.
     """
-    # Get sample dataframe and drop columns
-    df_full = sample_bboxes_df()
-    df_input = sample_bboxes_df(columns_to_drop=columns_to_drop)
+    input_file = annotations_test_data[input_file]
+    format: Literal["VIA", "COCO"] = (
+        "VIA" if "VIA" in str(input_file) else "COCO"
+    )
+    ds = from_files(input_file, format=format)
 
-    # Check relevant column is missing from the input
-    if columns_to_drop:
-        assert all(x not in df_input.columns for x in columns_to_drop)
+    # Drop category column if specified
+    if drop_category:
+        ds = ds.drop_vars(["category"])  # type: ignore
 
-    # Fill in missing columns
-    df_output = _fill_in_COCO_required_data(df_input.copy())
+    # Get raw dataframe
+    df_raw = _get_raw_df_from_ds(ds)
 
-    # Check columns exist
-    assert df_output.index.name == "annotation_id"
+    # Check relevant columns
+    assert df_raw.columns.tolist() == [
+        "image_id",
+        "id",
+        "category",
+        "position_x",
+        "position_y",
+        "shape_x",
+        "shape_y",
+    ]
+
+
+def test_add_COCO_data_to_df(annotations_test_data: dict):
+    """Test the function that prepares a COCO-exportable bboxes dataframe
+    fills in any required columns that may be missing.
+    """
+    # Read input file as bboxes dataset
+    input_file = annotations_test_data["small_bboxes_COCO.json"]
+    ds = from_files(input_file, format="COCO")
+
+    # Get raw dataframe
+    df_raw = _get_raw_df_from_ds(ds)
+
+    # Fill in missing columns with defaults
+    df_output = _add_COCO_data_to_df(df_raw, ds.attrs)
+
+    # Check image columns
     assert all(
-        x in df_output.columns
-        for x in [
-            "category",
-            "category_id",
-            "area",
-            "iscrowd",
-            "segmentation",
-            "bbox",
-        ]
+        df_output["image_filename"]
+        == df_raw["image_id"].map(ds.attrs["map_image_id_to_filename"])
+    )
+    assert all(df_output["image_width"] == ds.attrs.get("image_width", 0))
+    assert all(df_output["image_height"] == ds.attrs.get("image_height", 0))
+
+    # bbox
+    assert all(
+        df_output["bbox"]
+        == df_raw.apply(
+            lambda row: [
+                row["position_x"] - row["shape_x"] / 2,  # xmin
+                row["position_y"] - row["shape_y"] / 2,  # ymin
+                row["shape_x"],  # width
+                row["shape_y"],  # height
+            ],
+            axis=1,
+        )
+    )
+    assert all(df_output["area"] == df_raw["shape_x"] * df_raw["shape_y"])
+    assert all(
+        df_output["segmentation"]
+        == df_raw.apply(
+            lambda row: [
+                [
+                    row["position_x"] - row["shape_x"] / 2,  # xmin
+                    row["position_y"] - row["shape_y"] / 2,  # ymin, top-left
+                    row["position_x"] + row["shape_x"] / 2,  # xmax
+                    row["position_y"] - row["shape_y"] / 2,  # ymin, top-right
+                    row["position_x"] + row["shape_x"] / 2,  # xmax
+                    row["position_y"]
+                    + row["shape_y"] / 2,  # ymax, bottom-right
+                    row["position_x"] - row["shape_x"] / 2,  # xmin
+                    row["position_y"]
+                    + row["shape_y"] / 2,  # ymax, bottom-left
+                ]
+            ],
+            axis=1,
+        )
     )
 
-    # Check fill in values are as original
-    if columns_to_drop == ["category"]:
-        assert all(df_output["category"] == "")
-    elif columns_to_drop == ["category_id"]:
-        assert all(
-            df_output["category_id"]
-            == df_full["category"].factorize(sort=True)[0] + 1
-        )
-    else:
-        assert df_full[columns_to_drop].equals(df_output[columns_to_drop])
+    # category
+    assert "category_id" in df_output.columns
+    assert all(
+        df_output["category"]
+        == df_output["category_id"].map(ds.attrs["map_category_to_str"])
+    )
+    assert all(df_output["supercategory"] == "")
+
+    # other
+    assert all(df_output["iscrowd"] == 0)
 
 
 def test_create_COCO_dict(sample_bboxes_df: Callable):
     """Test the function that transforms the modified bboxes dataframe to
     a COCO dictionary.
     """
-    # Prepare input data
+    # Take an COCO-exportable df
     df = sample_bboxes_df()
-
-    # Fill in COCO required data
-    df["annotation_id"] = df.index
 
     # Extract COCO dictionary
     COCO_dict = _create_COCO_dict(df)
@@ -254,9 +351,7 @@ def test_create_COCO_dict(sample_bboxes_df: Callable):
     assert all(x in COCO_dict for x in ["images", "categories", "annotations"])
 
     # Check keys in each section
-    map_df_columns_to_coco = copy.deepcopy(STANDARD_BBOXES_DF_COLUMNS_TO_COCO)
-    if "confidence" not in df.columns:
-        del map_df_columns_to_coco["annotations"]["confidence"]
+    map_df_columns_to_coco = copy.deepcopy(MAP_COLUMNS_TO_COCO_FIELDS)
     for section, section_mapping in map_df_columns_to_coco.items():
         assert all(
             [

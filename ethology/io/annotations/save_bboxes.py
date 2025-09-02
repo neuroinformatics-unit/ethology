@@ -5,6 +5,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
+import pandas as pd
 import pandera.pandas as pa
 import pytz
 import xarray as xr
@@ -41,6 +42,36 @@ MAP_COLUMNS_TO_COCO_FIELDS = {
 }
 
 
+def to_COCO_file(ds: xr.Dataset, output_filepath: str | Path):
+    """Write bounding boxes annotations dataset to a COCO JSON file.
+
+    Parameters
+    ----------
+    ds : xr.Dataset
+        Bounding boxes annotations xarray dataset.
+    output_filepath : str or Path
+        Output file path.
+
+    Returns
+    -------
+    output_filepath : str
+        Output file path.
+
+    """
+    # Compute valid COCO dataframe from xarray dataset
+    df = _to_COCO_exportable_df(ds)
+
+    # Create COCO dictionary from dataframe and export
+    COCO_dict = _create_COCO_dict(df)
+    with open(output_filepath, "w") as f:
+        json.dump(COCO_dict, f, sort_keys=True, indent=2)
+
+    # Check output JSON file is importable by ethology
+    ValidCOCO(output_filepath)
+
+    return output_filepath
+
+
 @pa.check_types
 def _to_COCO_exportable_df(
     ds: xr.Dataset,
@@ -60,83 +91,9 @@ def _to_COCO_exportable_df(
         A valid dataframe of bounding boxes annotations exportable to COCO.
 
     """
-    # Create dataframe from xarray dataset
-    df_raw = ds.to_dataframe(dim_order=["image_id", "id", "space"])
-    df_raw = df_raw.reset_index()
-
-    # Remove rows where position or shape data is nan
-    # (where at least one of the specified columns contains a NaN value.)
-    df_raw = df_raw.dropna(subset=["position", "shape"])
-
-    # Add "category" column if not present
-    if "category" not in df_raw.columns:
-        df_raw["category"] = -1
-
-    # Pivot the dataframe to get position_x, position_y, shape_x, shape_y
-    index_cols = ["image_id", "id", "category"]
-    df_raw = df_raw.pivot_table(
-        index=index_cols,
-        columns="space",
-        values=["position", "shape"],
-    ).reset_index()
-
-    # Flatten the columns
-    df_raw.columns = [
-        "_".join(col).strip() if col[1] != "" else col[0]
-        for col in df_raw.columns.values
-    ]
-
-    # Rename "id" to "id_per_frame" and "category" to "category_id"
-    # (Note that category in dataset is an integer)
-    # df_raw.rename(columns={"id": "id_per_frame"}, inplace=True)
-    df_raw.rename(columns={"category": "category_id"}, inplace=True)
-
-    # Compute bbox coordinates for each annotation
-    df_raw["x_min"] = df_raw["position_x"] - df_raw["shape_x"] / 2
-    df_raw["y_min"] = df_raw["position_y"] - df_raw["shape_y"] / 2
-    df_raw["width"] = df_raw["shape_x"]
-    df_raw["height"] = df_raw["shape_y"]
-    df_raw["bbox"] = df_raw[
-        ["x_min", "y_min", "width", "height"]
-    ].values.tolist()
-
-    # Compute "image_filename" from "image_id"
-    map_image_id_to_filename = ds.attrs["map_image_id_to_filename"]
-    df_raw["image_filename"] = df_raw["image_id"].map(map_image_id_to_filename)
-
-    # Compute "category" as string from "category_id"
-    map_category_to_str = ds.attrs["map_category_to_str"]
-    df_raw["category"] = df_raw["category_id"].map(map_category_to_str)
-
-    # Compute "area" for each annotation
-    df_raw["area"] = df_raw["width"] * df_raw["height"]
-
-    # Compute "segmentation" for each annotation
-    # top-left -> top-right -> bottom-right -> bottom-left
-    df_raw["segmentation"] = df_raw["bbox"].apply(
-        lambda bbox: [
-            [
-                bbox[0],  # top-left x
-                bbox[1],  # top-left y
-                bbox[0] + bbox[2],  # top-right x
-                bbox[1],  # top-right y
-                bbox[0] + bbox[2],  # bottom-right x
-                bbox[1] + bbox[3],  # bottom-right y
-                bbox[0],  # bottom-left x
-                bbox[1] + bbox[3],  # bottom-left y
-            ]
-        ]
-    )
-
-    # Fill in default values
-    df_raw["iscrowd"] = 0
-    df_raw["supercategory"] = ""
-    df_raw["image_width"] = ds.attrs.get("image_width", 0)
-    df_raw["image_height"] = ds.attrs.get("image_height", 0)
-
-    # Set index name
-    df_raw.index.name = "annotation_id"
-    df_raw["annotation_id"] = df_raw.index
+    # Prepare dataframe from xarray dataset
+    df_raw = _get_raw_df_from_ds(ds)
+    df = _add_COCO_data_to_df(df_raw, ds.attrs)
 
     # Select columns to keep
     cols_to_select = [
@@ -153,15 +110,7 @@ def _to_COCO_exportable_df(
         "supercategory",
         "iscrowd",
     ]
-    df_output = df_raw[cols_to_select]
-
-    # Sort by "image_filename" and remove duplicates
-    df_output = df_output.sort_values(by=["image_filename"])
-    df_output = df_output.loc[
-        df_output.astype(str).drop_duplicates(ignore_index=True).index
-    ]
-
-    return df_output
+    return df[cols_to_select]
 
 
 @pa.check_types
@@ -208,31 +157,116 @@ def _create_COCO_dict(df: DataFrame[ValidBBoxesDataFrameCOCO]) -> dict:
     return COCO_dict
 
 
-def to_COCO_file(ds: xr.Dataset, output_filepath: str | Path):
-    """Write bounding boxes annotations dataset to a COCO JSON file.
+def _get_raw_df_from_ds(ds: xr.Dataset) -> pd.DataFrame:
+    """Get raw dataframe derived from xarray dataset.
 
     Parameters
     ----------
     ds : xr.Dataset
         Bounding boxes annotations xarray dataset.
-    output_filepath : str or Path
-        Output file path.
 
     Returns
     -------
-    output_filepath : str
-        Output file path.
+    df : pd.DataFrame
+        Wrangled dataframe derived from the xarray dataset.
 
     """
-    # Compute valid COCO dataframe from xarray dataset
-    df = _to_COCO_exportable_df(ds)
+    # Create dataframe from xarray dataset
+    df_raw = ds.to_dataframe(dim_order=["image_id", "id", "space"])
+    df_raw = df_raw.reset_index()
 
-    # Create COCO dictionary from dataframe and export
-    COCO_dict = _create_COCO_dict(df)
-    with open(output_filepath, "w") as f:
-        json.dump(COCO_dict, f, sort_keys=True, indent=2)
+    # Remove rows where position or shape data is nan
+    # (where at least one of the specified columns contains a NaN value.)
+    df_raw = df_raw.dropna(subset=["position", "shape"])
 
-    # Check output JSON file is importable by ethology
-    ValidCOCO(output_filepath)
+    # Add "category" column if not present
+    if "category" not in df_raw.columns:
+        df_raw["category"] = -1
 
-    return output_filepath
+    # Pivot the dataframe to get position_x, position_y, shape_x, shape_y
+    index_cols = ["image_id", "id", "category"]
+    df_raw = df_raw.pivot_table(
+        index=index_cols,
+        columns="space",
+        values=["position", "shape"],
+    ).reset_index()
+
+    # Flatten the columns
+    df_raw.columns = [
+        "_".join(col).strip() if col[1] != "" else col[0]
+        for col in df_raw.columns.values
+    ]
+
+    return df_raw
+
+
+def _add_COCO_data_to_df(df: pd.DataFrame, ds_attrs: dict) -> pd.DataFrame:
+    """Add COCO required data to ds-derived dataframe.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Dataset-derived dataframe.
+    ds_attrs : dict
+        Dataset attributes.
+
+    Returns
+    -------
+    df : pd.DataFrame
+        Dataset-derived dataframe with COCO required data.
+
+    """
+    # image
+    map_image_id_to_filename = ds_attrs["map_image_id_to_filename"]
+    df["image_filename"] = df["image_id"].map(map_image_id_to_filename)
+
+    df["image_width"] = ds_attrs.get("image_width", 0)
+    df["image_height"] = ds_attrs.get("image_height", 0)
+
+    # bbox
+    df["x_min"] = df["position_x"] - df["shape_x"] / 2
+    df["y_min"] = df["position_y"] - df["shape_y"] / 2
+    df["width"] = df["shape_x"]
+    df["height"] = df["shape_y"]
+    df["bbox"] = df[["x_min", "y_min", "width", "height"]].values.tolist()
+
+    df["area"] = df["width"] * df["height"]
+
+    # segmentation as list of lists of coordinates
+    # top-left -> top-right -> bottom-right -> bottom-left
+    df["segmentation"] = df["bbox"].apply(
+        lambda bbox: [
+            [
+                bbox[0],  # top-left x
+                bbox[1],  # top-left y
+                bbox[0] + bbox[2],  # top-right x
+                bbox[1],  # top-right y
+                bbox[0] + bbox[2],  # bottom-right x
+                bbox[1] + bbox[3],  # bottom-right y
+                bbox[0],  # bottom-left x
+                bbox[1] + bbox[3],  # bottom-left y
+            ]
+        ]
+    )
+
+    # Compute "category" as string from "category_id"
+    # rename "category" to "category_id" (in dataset it is an integer)
+    map_category_to_str = ds_attrs["map_category_to_str"]
+    df.rename(columns={"category": "category_id"}, inplace=True)
+    df["category"] = df["category_id"].map(map_category_to_str)
+    df["supercategory"] = ""
+
+    # other
+    df["iscrowd"] = 0
+
+    # Set index name and add "annotation_id" as column
+    df.index.name = "annotation_id"
+    df["annotation_id"] = df.index
+
+    # Sort by "image_filename" and remove duplicates
+    df = df.sort_values(by=["image_filename"])
+    df = df.loc[
+        df.astype(str).drop_duplicates(ignore_index=True).index
+    ]  # need to serialise lists first before dropping duplicates
+
+    return df
