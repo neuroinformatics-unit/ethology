@@ -8,24 +8,12 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 
-from ethology.io.annotations.validate import ValidCOCO, ValidVIA
-
-# TODO: use pandera
-# definition of standard bboxes dataframe
-STANDARD_BBOXES_DF_INDEX = "annotation_id"
-STANDARD_BBOXES_DF_COLUMNS = [
-    "image_filename",
-    "image_id",
-    "x_min",
-    "y_min",
-    "width",
-    "height",
-    "supercategory",
-    "category",
-    "category_id",
-    "image_width",
-    "image_height",
-]  # superset of columns in the standard dataframe
+from ethology.io.annotations.validate import (
+    STANDARD_BBOXES_DF_COLUMNS,
+    STANDARD_BBOXES_DF_INDEX,
+    ValidCOCO,
+    ValidVIA,
+)
 
 
 def from_files(

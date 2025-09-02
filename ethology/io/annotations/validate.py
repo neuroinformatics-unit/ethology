@@ -3,6 +3,7 @@
 import json
 from pathlib import Path
 
+import pandas as pd
 import xarray as xr
 from attrs import define, field
 from loguru import logger
@@ -15,8 +16,51 @@ from ethology.io.annotations.json_schemas.utils import (
 )
 
 # Minimum requirements for annotation datasets
-REQUIRED_DIMS = {"bboxes": ["image_id", "space", "id"]}
-REQUIRED_DATA_ARRAYS = {"bboxes": ["position", "shape"]}
+REQUIRED_ANNOTATIONS_DIMS = {"bboxes": ["image_id", "space", "id"]}
+REQUIRED_ANNOTATIONS_ARRAYS = {"bboxes": ["position", "shape"]}
+
+
+# Mapping of dataframe columns to COCO keys
+STANDARD_BBOXES_DF_COLUMNS_TO_COCO = {
+    "images": {
+        "image_id": "id",
+        "image_filename": "file_name",
+        "image_width": "width",
+        "image_height": "height",
+    },
+    "categories": {
+        "category_id": "id",
+        "category": "name",
+        "supercategory": "supercategory",
+    },
+    "annotations": {
+        "annotation_id": "id",
+        "area": "area",
+        "bbox": "bbox",
+        "image_id": "image_id",
+        "category_id": "category_id",
+        "iscrowd": "iscrowd",
+        "segmentation": "segmentation",
+        "confidence": "score",  # only for predictions
+    },
+}
+
+# TODO: use pandera
+# definition of standard bboxes dataframe
+STANDARD_BBOXES_DF_INDEX = "annotation_id"
+STANDARD_BBOXES_DF_COLUMNS = [
+    "image_filename",
+    "image_id",
+    "x_min",
+    "y_min",
+    "width",
+    "height",
+    "supercategory",
+    "category",
+    "category_id",
+    "image_width",
+    "image_height",
+]  # superset of columns in the standard dataframe
 
 
 @define
@@ -250,7 +294,8 @@ def validate_dataset(
             TypeError(f"Expected an xarray Dataset, but got {type(ds)}.")
         )
 
-    missing_vars = set(REQUIRED_DATA_ARRAYS.keys()) - set(ds.data_vars)
+    required_vars = REQUIRED_ANNOTATIONS_ARRAYS["bboxes"]
+    missing_vars = set(required_vars) - set(ds.data_vars)
     if missing_vars:
         raise logger.error(
             ValueError(
@@ -258,8 +303,41 @@ def validate_dataset(
             )
         )
 
-    missing_dims = set(REQUIRED_DIMS.keys()) - set(ds.dims)
+    required_dims = REQUIRED_ANNOTATIONS_DIMS["bboxes"]
+    missing_dims = set(required_dims) - set(ds.dims)
     if missing_dims:
         raise logger.error(
             ValueError(f"Missing required dimensions: {sorted(missing_dims)}")
+        )
+
+
+def validate_df_bboxes(df: pd.DataFrame):
+    """Check if the input dataframe is a valid bounding boxes dataframe."""
+    # Check type
+    if not isinstance(df, pd.DataFrame):
+        raise TypeError(f"Expected a pandas DataFrame, but got {type(df)}.")
+
+    # Check index name is as expected
+    if df.index.name != STANDARD_BBOXES_DF_INDEX:
+        raise ValueError(
+            f"Expected index name to be '{STANDARD_BBOXES_DF_INDEX}', "
+            f"but got '{df.index.name}'."
+        )
+
+    # Check image_filename is present
+    missing_img_columns = [
+        x for x in ["image_id", "image_filename"] if x not in df.columns
+    ]
+    if missing_img_columns:
+        raise ValueError(
+            f"Required columns {missing_img_columns} are not present "
+            "in the dataframe."
+        )
+
+    # Check bboxes coordinates exist as df columns
+    if not all(x in df.columns for x in ["x_min", "y_min", "width", "height"]):
+        raise ValueError(
+            "Required bounding box coordinates "
+            "'x_min', 'y_min', 'width', 'height', are not present in "
+            "the dataframe."
         )
