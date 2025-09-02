@@ -10,6 +10,7 @@ import xarray as xr
 
 from ethology.io.annotations.validate import ValidCOCO, ValidVIA
 
+# TODO: use pandera
 # definition of standard bboxes dataframe
 STANDARD_BBOXES_DF_INDEX = "annotation_id"
 STANDARD_BBOXES_DF_COLUMNS = [
@@ -42,48 +43,53 @@ def from_files(
         Format of the input annotation files.
     images_dirs : Path | str | list[Path | str], optional
         Path or list of paths to the directories containing the images the
-        annotations refer to.
+        annotations refer to. The paths are added to the dataset
+        attributes.
 
     Returns
     -------
     xr.Dataset
-        Bounding boxes annotations xarray dataset. The dataset has the
+        An annotations dataset holding bounding boxes data. The dataset has the
         following dimensions: "image_id", "space", "id".
-        The "image_id" is assigned based on the alphabetically sorted list
-        of unique image filenames across all input files. The "space"
-        dimension holds the "x" or "y" coordinates. The "id" dimension
-        corresponds to the annotation ID per image and it is assigned from
-        0 to the max number of annotations per image in the full dataset.
+        - The "image_id" is assigned based on the alphabetically sorted list
+        of unique image filenames across all input files.
+        -The "space" dimension holds the "x" or "y" coordinates.
+        - The "id" dimension corresponds to the annotation ID per image and
+        it is assigned from 0 to the max number of annotations per image in
+        the full dataset.
 
         The dataset consists of three arrays:
-        - "position": (image_id, space, id)
-        - "shape": (image_id, space, id)
-        - "category": (image_id, id)
-        The "category" array holds 1-based integers, as specified in the input
-        file.
+        - "position", with dimensions (image_id, space, id)
+        - "shape", with dimensions (image_id, space, id)
+        - "category", with dimensions (image_id, id)
+        The "category" array holds category IDs as 1-based integers,
+        matching the category IDs in the input file.
 
         The dataset attributes include:
-        - "map_category_to_str": map from category_id to category name
-        - "map_image_id_to_filename": map from image_id to image filename
-        - "images_directories": list of paths to the directories containing
-        the images the annotations refer to (optional)
-        - "annotation_files": list of paths to the input annotation files
-        - "annotation_format": format of the input annotation files
+        - "annotation_files": a list of paths to the input annotation files
+        - "annotation_format": the format of the input annotation files
+        - "map_category_to_str": a map from category ID to category name
+        - "map_image_id_to_filename": a map from image ID to image filename
+        - "images_directories": a list of directory paths for the images
+        the annotations refer to (optional)
+
 
     Notes
     -----
-    We use image filenames' to assign IDs to images, so if two images have the
-    same name but are in different input annotation files, they will be
-    assigned the same image ID and their annotations will be merged.
+    We use the sorted list of unique image filenames to assign IDs to images,
+    so if two images have the same filename but are in different input
+    annotation files, they will be assigned the same image ID and their
+    annotations will be merged.
 
     If this behaviour is not desired, and you would like to assign different
-    image IDs to images that have the same name but appear in different input
-    annotation files, you can either make the image filenames distinct before
-    loading the data, or you can load the data from each file
-    as a separate xarray dataset, and then concatenate them as desired.
+    image IDs to images that have the same filename and appear in different
+    input annotation files, you can either make the image filenames distinct
+    before loading the data, or you can load the data from each file as a
+    separate xarray dataset, and then concatenate them as desired.
 
     Examples
     --------
+    Load annotations from two files following VIA format:
     >>> ds = from_files(
     ...     file_paths=[
     ...         "path/to/annotation_file_1.json",
@@ -93,27 +99,20 @@ def from_files(
     ...     images_dirs=["path/to/images_dir_1", "path/to/images_dir_2"],
     ... )
 
-    See Also
-    --------
-    pandas.concat : Concatenate pandas objects along a particular axis.
-
-    pandas.DataFrame.drop_duplicates : Return DataFrame with duplicate rows
-    removed.
-
     """
-    # Delegate to reader of either a single file or multiple files
+    # Compute intermediate dataframe df
     if isinstance(file_paths, list):
-        df_all = _from_multiple_files(file_paths, format=format)
+        df_all = _df_from_multiple_files(file_paths, format=format)
     else:
-        df_all = _from_single_file(file_paths, format=format)
+        df_all = _df_from_single_file(file_paths, format=format)
 
-    # Get map from image_id to image_filename
+    # Get map from "image_id" to image_filename
     mapping_df = df_all[["image_filename", "image_id"]].drop_duplicates()
     map_image_id_to_filename = mapping_df.set_index("image_id").to_dict()[
         "image_filename"
     ]
 
-    # Get map from category_id to category
+    # Get map from "category_id" to category name
     map_category_to_str = (
         df_all[["category_id", "category"]]
         .drop_duplicates()
@@ -121,10 +120,10 @@ def from_files(
         .to_dict()["category"]
     )
 
-    # Convert to xarray dataset
+    # Convert dataframe to xarray dataset
     ds = _df_to_xarray_ds(df_all)
 
-    # Add metadata to the dataset
+    # Add metadata to the xarraydataset
     ds.attrs = {
         "annotation_files": file_paths,
         "annotation_format": format,
@@ -136,10 +135,10 @@ def from_files(
     return ds
 
 
-def _from_multiple_files(
+def _df_from_multiple_files(
     list_filepaths: list[Path | str], format: Literal["VIA", "COCO"]
 ):
-    """Read bounding boxes annotations from multiple files.
+    """Read bounding boxes annotations from multiple files as a dataframe.
 
     Parameters
     ----------
@@ -160,7 +159,7 @@ def _from_multiple_files(
     """
     # Get list of dataframes
     df_list = [
-        _from_single_file(file_path=file, format=format)
+        _df_from_single_file(file_path=file, format=format)
         for file in list_filepaths
     ]
 
@@ -188,7 +187,7 @@ def _from_multiple_files(
     return df_all
 
 
-def _from_single_file(
+def _df_from_single_file(
     file_path: Path | str, format: Literal["VIA", "COCO"]
 ) -> pd.DataFrame:
     """Read bounding boxes annotations from a single file.
