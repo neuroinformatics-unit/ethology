@@ -3,7 +3,9 @@
 import json
 from pathlib import Path
 
+import xarray as xr
 from attrs import define, field
+from loguru import logger
 
 from ethology.io.annotations.json_schemas.utils import (
     _check_file_is_json,
@@ -11,6 +13,10 @@ from ethology.io.annotations.json_schemas.utils import (
     _check_required_keys_in_dict,
     _get_default_schema,
 )
+
+# Minimum requirements for annotation datasets
+REQUIRED_DIMS = {"bboxes": ["image_id", "space", "id"]}
+REQUIRED_DATA_ARRAYS = {"bboxes": ["position", "shape"]}
 
 
 @define
@@ -218,3 +224,42 @@ class ValidCOCO:
                 f"There are {n_images} image entries, but only "
                 f"{len(unique_image_ids)} unique image IDs."
             )
+
+
+def validate_dataset(
+    ds: xr.Dataset,
+) -> None:
+    """Check that the input dataset is a valid annotations dataset.
+
+    Parameters
+    ----------
+    ds : xarray.Dataset
+        Dataset to validate.
+
+    Raises
+    ------
+    TypeError
+        If the input is not an xarray Dataset.
+    ValueError
+        If the dataset is missing required data variables or dimensions
+        for a valid annotations dataset.
+
+    """
+    if not isinstance(ds, xr.Dataset):
+        raise logger.error(
+            TypeError(f"Expected an xarray Dataset, but got {type(ds)}.")
+        )
+
+    missing_vars = set(REQUIRED_DATA_ARRAYS.keys()) - set(ds.data_vars)
+    if missing_vars:
+        raise logger.error(
+            ValueError(
+                f"Missing required data variables: {sorted(missing_vars)}"
+            )
+        )
+
+    missing_dims = set(REQUIRED_DIMS.keys()) - set(ds.dims)
+    if missing_dims:
+        raise logger.error(
+            ValueError(f"Missing required dimensions: {sorted(missing_dims)}")
+        )
