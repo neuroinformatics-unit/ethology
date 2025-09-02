@@ -5,20 +5,49 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-import pandas as pd
+import pandera.pandas as pa
 import pytz
 import xarray as xr
+from pandera.typing.pandas import DataFrame
 
 from ethology.io.annotations.validate import (
-    STANDARD_BBOXES_DF_COLUMNS_TO_COCO,
-    STANDARD_BBOXES_DF_INDEX,
+    ValidBBoxesDataFrameCOCO,
     ValidCOCO,
-    validate_df_bboxes,
 )
 
+# Mapping of dataframe columns to COCO fields
+MAP_COLUMNS_TO_COCO_FIELDS = {
+    "images": {
+        "image_id": "id",
+        "image_filename": "file_name",
+        "image_width": "width",
+        "image_height": "height",
+    },
+    "categories": {
+        "category_id": "id",
+        "category": "name",
+        "supercategory": "supercategory",
+    },
+    "annotations": {
+        "annotation_id": "id",
+        "area": "area",
+        "bbox": "bbox",
+        "image_id": "image_id",
+        "category_id": "category_id",
+        "iscrowd": "iscrowd",
+        "segmentation": "segmentation",
+        # "confidence": "score",  # only for predictions
+    },
+}
 
-def _annotations_ds_to_df(ds: xr.Dataset) -> pd.DataFrame:
-    """Convert annotations xarray dataset to a dataframe.
+
+@pa.check_types
+def _to_COCO_exportable_df(
+    ds: xr.Dataset,
+) -> DataFrame[ValidBBoxesDataFrameCOCO]:
+    """Convert annotations xarray dataset to a COCO exportable dataframe.
+
+    The returned dataframe is validated using ValidBBoxesDataFrameCOCO.
 
     Parameters
     ----------
@@ -28,7 +57,7 @@ def _annotations_ds_to_df(ds: xr.Dataset) -> pd.DataFrame:
     Returns
     -------
     df : pd.DataFrame
-        Bounding boxes annotations dataframe.
+        A valid dataframe of bounding boxes annotations exportable to COCO.
 
     """
     # Create dataframe from xarray dataset
@@ -38,6 +67,10 @@ def _annotations_ds_to_df(ds: xr.Dataset) -> pd.DataFrame:
     # Remove rows where position or shape data is nan
     # (where at least one of the specified columns contains a NaN value.)
     df_raw = df_raw.dropna(subset=["position", "shape"])
+
+    # Add "category" column if not present
+    if "category" not in df_raw.columns:
+        df_raw["category"] = -1
 
     # Pivot the dataframe to get position_x, position_y, shape_x, shape_y
     index_cols = ["image_id", "id", "category"]
@@ -55,14 +88,17 @@ def _annotations_ds_to_df(ds: xr.Dataset) -> pd.DataFrame:
 
     # Rename "id" to "id_per_frame" and "category" to "category_id"
     # (Note that category in dataset is an integer)
-    df_raw.rename(columns={"id": "id_per_frame"}, inplace=True)
+    # df_raw.rename(columns={"id": "id_per_frame"}, inplace=True)
     df_raw.rename(columns={"category": "category_id"}, inplace=True)
 
-    # Compute x_min, y_min, width, height for each annotation
+    # Compute bbox coordinates for each annotation
     df_raw["x_min"] = df_raw["position_x"] - df_raw["shape_x"] / 2
     df_raw["y_min"] = df_raw["position_y"] - df_raw["shape_y"] / 2
     df_raw["width"] = df_raw["shape_x"]
     df_raw["height"] = df_raw["shape_y"]
+    df_raw["bbox"] = df_raw[
+        ["x_min", "y_min", "width", "height"]
+    ].values.tolist()
 
     # Compute "image_filename" from "image_id"
     map_image_id_to_filename = ds.attrs["map_image_id_to_filename"]
@@ -72,98 +108,70 @@ def _annotations_ds_to_df(ds: xr.Dataset) -> pd.DataFrame:
     map_category_to_str = ds.attrs["map_category_to_str"]
     df_raw["category"] = df_raw["category_id"].map(map_category_to_str)
 
-    # Set index name to STANDARD_BBOXES_DF_INDEX
-    df_raw.index.name = STANDARD_BBOXES_DF_INDEX
+    # Compute "area" for each annotation
+    df_raw["area"] = df_raw["width"] * df_raw["height"]
+
+    # Compute "segmentation" for each annotation
+    # top-left -> top-right -> bottom-right -> bottom-left
+    df_raw["segmentation"] = df_raw["bbox"].apply(
+        lambda bbox: [
+            [
+                bbox[0],  # top-left x
+                bbox[1],  # top-left y
+                bbox[0] + bbox[2],  # top-right x
+                bbox[1],  # top-right y
+                bbox[0] + bbox[2],  # bottom-right x
+                bbox[1] + bbox[3],  # bottom-right y
+                bbox[0],  # bottom-left x
+                bbox[1] + bbox[3],  # bottom-left y
+            ]
+        ]
+    )
+
+    # Fill in default values
+    df_raw["iscrowd"] = 0
+    df_raw["supercategory"] = ""
+    df_raw["image_width"] = ds.attrs.get("image_width", 0)
+    df_raw["image_height"] = ds.attrs.get("image_height", 0)
+
+    # Set index name
+    df_raw.index.name = "annotation_id"
+    df_raw["annotation_id"] = df_raw.index
 
     # Select columns to keep
     cols_to_select = [
+        "annotation_id",
         "image_id",
         "image_filename",
-        "x_min",
-        "y_min",
-        "width",
-        "height",
-        "category",
-        "category_id",
-        "id_per_frame",
+        "image_width",
+        "image_height",
+        "bbox",
+        "area",
+        "segmentation",
+        "category",  # str
+        "category_id",  # int
+        "supercategory",
+        "iscrowd",
     ]
     df_output = df_raw[cols_to_select]
+
+    # Sort by "image_filename" and remove duplicates
+    df_output = df_output.sort_values(by=["image_filename"])
+    df_output = df_output.loc[
+        df_output.astype(str).drop_duplicates(ignore_index=True).index
+    ]
 
     return df_output
 
 
-def _fill_in_COCO_required_data(df: pd.DataFrame) -> pd.DataFrame:
-    """Return the bboxes input dataframe with any COCO required data added.
+@pa.check_types
+def _create_COCO_dict(df: DataFrame[ValidBBoxesDataFrameCOCO]) -> dict:
+    """Extract COCO dictionary from a COCO exportable dataframe.
 
     Parameters
     ----------
-    df : pd.DataFrame
-        Bounding boxes dataframe for "annotations" or "predictions".
-
-    Returns
-    -------
-    df : pd.DataFrame
-        Bounding boxes dataframe with COCO required data added.
-
-    """
-    # Add annotation_id as column
-    df["annotation_id"] = df.index
-
-    # Define default values for missing columns
-    defaults = {
-        "category": "",
-        "supercategory": "",
-        "iscrowd": 0,
-        "image_width": 0,
-        "image_height": 0,
-    }
-
-    # Fill missing columns with defaults
-    for col, default_val in defaults.items():
-        if col not in df.columns:
-            df[col] = default_val
-
-    # Handle category_id - convert to int or create from category
-    if "category_id" not in df.columns:
-        df["category_id"] = df["category"].factorize(sort=True)[0] + 1
-    elif df["category_id"].dtype != int:
-        try:
-            df["category_id"] = df["category_id"].astype(int)
-        except (ValueError, TypeError):
-            df["category_id"] = df["category"].factorize(sort=True)[0] + 1
-
-    # Calculate area if missing
-    if "area" not in df.columns:
-        df["area"] = df["width"] * df["height"]
-
-    # Create bbox if missing
-    if "bbox" not in df.columns:
-        df["bbox"] = df[["x_min", "y_min", "width", "height"]].values.tolist()
-
-    # Create segmentation if missing (simplified polygon from bbox corners)
-    if "segmentation" not in df.columns:
-        # Create polygon from bbox corners:
-        # top-left -> top-right -> bottom-right -> bottom-left
-        x_min, y_min = df["x_min"], df["y_min"]
-        x_max = x_min + df["width"]
-        y_max = y_min + df["height"]
-
-        # Format: [[x1, y1, x2, y2, x3, y3, x4, y4]] for each row
-        df["segmentation"] = [
-            [[x1, y1, x2, y1, x2, y2, x1, y2]]
-            for x1, y1, x2, y2 in zip(x_min, y_min, x_max, y_max, strict=True)
-        ]
-
-    return df
-
-
-def _create_COCO_dict(df: pd.DataFrame) -> dict:
-    """Extract COCO dictionary from a bounding boxes dataframe.
-
-    Parameters
-    ----------
-    df : pd.DataFrame
-        Bounding boxes dataframe for "annotations" or "predictions".
+    df : DataFrame[ValidBBoxesDataFrameCOCO]
+        COCO exportable dataframe.
 
     Returns
     -------
@@ -173,18 +181,11 @@ def _create_COCO_dict(df: pd.DataFrame) -> dict:
     """
     COCO_dict: dict[str, Any] = {}
     for sections in ["images", "categories", "annotations"]:
-        # Extract required columns
-        list_required_columns = list(
-            STANDARD_BBOXES_DF_COLUMNS_TO_COCO[sections].keys()
-        )
-        if "confidence" in list_required_columns:
-            list_required_columns.remove("confidence")
-
+        # Extract and rename required columns for this section
+        list_required_columns = MAP_COLUMNS_TO_COCO_FIELDS[sections].keys()
         df_section = df[list_required_columns].copy()
-
-        # Rename columns to COCO standard
         df_section = df_section.rename(
-            columns=STANDARD_BBOXES_DF_COLUMNS_TO_COCO[sections]
+            columns=MAP_COLUMNS_TO_COCO_FIELDS[sections]
         )
 
         # Extract rows as lists of dictionaries
@@ -193,7 +194,6 @@ def _create_COCO_dict(df: pd.DataFrame) -> dict:
         else:
             row_dicts = df_section.drop_duplicates().to_dict(orient="records")
 
-        # Append to COCO_dict
         COCO_dict[sections] = row_dicts
 
     # Add info section to COCO_dict
@@ -224,27 +224,15 @@ def to_COCO_file(ds: xr.Dataset, output_filepath: str | Path):
         Output file path.
 
     """
-    # Compute dataframe from xarray dataset
-    df = _annotations_ds_to_df(ds)
+    # Compute valid COCO dataframe from xarray dataset
+    df = _to_COCO_exportable_df(ds)
 
-    # Validate dataframe
-    validate_df_bboxes(df)
-
-    # Sort, drop duplicate annotations and reindex
-    df = df.sort_values(by=["image_filename"])
-    df = df.drop_duplicates(ignore_index=True)
-
-    # Fill in COCO required data
-    df = _fill_in_COCO_required_data(df)
-
-    # Create COCO dictionary
+    # Create COCO dictionary from dataframe and export
     COCO_dict = _create_COCO_dict(df)
-
-    # Write to JSON file
     with open(output_filepath, "w") as f:
         json.dump(COCO_dict, f, sort_keys=True, indent=2)
 
-    # Check output file is a valid COCO file for ethology
+    # Check output JSON file is importable by ethology
     ValidCOCO(output_filepath)
 
     return output_filepath

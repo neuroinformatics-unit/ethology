@@ -3,10 +3,11 @@
 import json
 from pathlib import Path
 
-import pandas as pd
+import pandera.pandas as pa
 import xarray as xr
 from attrs import define, field
 from loguru import logger
+from pandera.typing import Index
 
 from ethology.io.annotations.json_schemas.utils import (
     _check_file_is_json,
@@ -14,53 +15,6 @@ from ethology.io.annotations.json_schemas.utils import (
     _check_required_keys_in_dict,
     _get_default_schema,
 )
-
-# Minimum requirements for annotation datasets
-REQUIRED_ANNOTATIONS_DIMS = {"bboxes": ["image_id", "space", "id"]}
-REQUIRED_ANNOTATIONS_ARRAYS = {"bboxes": ["position", "shape"]}
-
-
-# Mapping of dataframe columns to COCO keys
-STANDARD_BBOXES_DF_COLUMNS_TO_COCO = {
-    "images": {
-        "image_id": "id",
-        "image_filename": "file_name",
-        "image_width": "width",
-        "image_height": "height",
-    },
-    "categories": {
-        "category_id": "id",
-        "category": "name",
-        "supercategory": "supercategory",
-    },
-    "annotations": {
-        "annotation_id": "id",
-        "area": "area",
-        "bbox": "bbox",
-        "image_id": "image_id",
-        "category_id": "category_id",
-        "iscrowd": "iscrowd",
-        "segmentation": "segmentation",
-        "confidence": "score",  # only for predictions
-    },
-}
-
-# TODO: use pandera
-# definition of standard bboxes dataframe
-STANDARD_BBOXES_DF_INDEX = "annotation_id"
-STANDARD_BBOXES_DF_COLUMNS = [
-    "image_filename",
-    "image_id",
-    "x_min",
-    "y_min",
-    "width",
-    "height",
-    "supercategory",
-    "category",
-    "category_id",
-    "image_width",
-    "image_height",
-]  # superset of columns in the standard dataframe
 
 
 @define
@@ -270,10 +224,16 @@ class ValidCOCO:
             )
 
 
+# TODO: change to use attrs?
 def validate_dataset(
     ds: xr.Dataset,
 ) -> None:
-    """Check that the input dataset is a valid annotations dataset.
+    """Check that the input dataset is a valid bboxes annotations dataset.
+
+    An bboxes annotations dataset is defined by:
+    - having image_id, space and id as dimensions, and
+    - having position and shape as arrays.
+
 
     Parameters
     ----------
@@ -286,9 +246,13 @@ def validate_dataset(
         If the input is not an xarray Dataset.
     ValueError
         If the dataset is missing required data variables or dimensions
-        for a valid annotations dataset.
+        for a valid bboxes annotations dataset.
 
     """
+    # Minimum requirements for annotations datasets holding bboxes
+    REQUIRED_ANNOTATIONS_DIMS = {"bboxes": ["image_id", "space", "id"]}
+    REQUIRED_ANNOTATIONS_ARRAYS = {"bboxes": ["position", "shape"]}
+
     if not isinstance(ds, xr.Dataset):
         raise logger.error(
             TypeError(f"Expected an xarray Dataset, but got {type(ds)}.")
@@ -311,33 +275,55 @@ def validate_dataset(
         )
 
 
-def validate_df_bboxes(df: pd.DataFrame):
-    """Check if the input dataframe is a valid bounding boxes dataframe."""
-    # Check type
-    if not isinstance(df, pd.DataFrame):
-        raise TypeError(f"Expected a pandas DataFrame, but got {type(df)}.")
+class ValidBBoxesDataFrameCOCO(pa.DataFrameModel):
+    """Validate a dataframe of bounding boxes annotations for COCO export.
 
-    # Check index name is as expected
-    if df.index.name != STANDARD_BBOXES_DF_INDEX:
-        raise ValueError(
-            f"Expected index name to be '{STANDARD_BBOXES_DF_INDEX}', "
-            f"but got '{df.index.name}'."
-        )
+    See https://cocodataset.org/#format-data for more details.
+    """
 
-    # Check image_filename is present
-    missing_img_columns = [
-        x for x in ["image_id", "image_filename"] if x not in df.columns
-    ]
-    if missing_img_columns:
-        raise ValueError(
-            f"Required columns {missing_img_columns} are not present "
-            "in the dataframe."
-        )
+    # annotation id as index
+    annotation_id: Index[int] = pa.Field(
+        description="Unique identifier for the annotation (index)",
+    )
 
-    # Check bboxes coordinates exist as df columns
-    if not all(x in df.columns for x in ["x_min", "y_min", "width", "height"]):
-        raise ValueError(
-            "Required bounding box coordinates "
-            "'x_min', 'y_min', 'width', 'height', are not present in "
-            "the dataframe."
-        )
+    # image columns
+    image_id: int = pa.Field(
+        description="Unique identifier for the image",
+    )
+    image_filename: str = pa.Field(
+        description="Filename of the image",
+    )
+    image_width: int = pa.Field(
+        description="Width of the image", ge=0, nullable=True
+    )
+    image_height: int = pa.Field(
+        description="Height of the image", ge=0, nullable=True
+    )
+
+    # bbox data
+    bbox: list[float] = pa.Field(
+        description="Bounding box coordinates as xmin, ymin, width, height"
+    )
+    area: float = pa.Field(
+        description="Bounding box area",
+        ge=0,
+    )
+    segmentation: list[list[float]] = pa.Field(
+        description="Bounding box segmentation as list of lists of coordinates"
+    )
+
+    # category columns
+    category: str = pa.Field(
+        description="Category of the annotation",
+        nullable=True,
+    )
+    supercategory: str = pa.Field(
+        description="Supercategory of the annotation",
+        nullable=True,
+    )
+
+    # other
+    iscrowd: int = pa.Field(
+        description="Whether the annotation is a crowd",
+        nullable=True,
+    )
