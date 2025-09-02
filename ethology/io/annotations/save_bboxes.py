@@ -5,7 +5,6 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-import numpy as np
 import pandas as pd
 import pytz
 import xarray as xr
@@ -107,67 +106,53 @@ def _fill_in_COCO_required_data(df: pd.DataFrame) -> pd.DataFrame:
         Bounding boxes dataframe with COCO required data added.
 
     """
-    # Add "annotation_id" as column
+    # Add annotation_id as column
     df["annotation_id"] = df.index
 
-    # Add COCO required data
-    # if not defined: set as empty string
-    if "category" not in df.columns:
-        df["category"] = ""
+    # Define default values for missing columns
+    defaults = {
+        "category": "",
+        "supercategory": "",
+        "iscrowd": 0,
+        "image_width": 0,
+        "image_height": 0,
+    }
 
-    # if "supercategory" not defined: set as empty string
-    if "supercategory" not in df.columns:
-        df["supercategory"] = ""
+    # Fill missing columns with defaults
+    for col, default_val in defaults.items():
+        if col not in df.columns:
+            df[col] = default_val
 
-    # if "category_id" not defined or not an integer: set as
-    # 1-based integer factorized category
-    if "category_id" not in df.columns or df["category_id"].dtype != int:
+    # Handle category_id - convert to int or create from category
+    if "category_id" not in df.columns:
+        df["category_id"] = df["category"].factorize(sort=True)[0] + 1
+    elif df["category_id"].dtype != int:
         try:
             df["category_id"] = df["category_id"].astype(int)
-        except ValueError:
+        except (ValueError, TypeError):
             df["category_id"] = df["category"].factorize(sort=True)[0] + 1
 
-    # if "area" not defined: set as width * height
+    # Calculate area if missing
     if "area" not in df.columns:
         df["area"] = df["width"] * df["height"]
 
-    # if "iscrowd" not defined: set as 0 (default value)
-    if "iscrowd" not in df.columns:
-        df["iscrowd"] = 0
-
-    # if "segmentation" not defined: set as a polygon defined by the
-    # 4 corners of the bounding box
-    if "segmentation" not in df.columns:
-        top_left_corner = df[["x_min", "y_min"]].to_numpy()
-        delta_xy = df[["width", "height"]].to_numpy()
-        delta_x_only = np.vstack([df["width"], np.zeros_like(df["height"])]).T
-        delta_y_only = np.vstack([np.zeros_like(df["width"]), df["height"]]).T
-
-        df["segmentation"] = np.hstack(
-            [
-                top_left_corner,
-                top_left_corner + delta_x_only,  # top right corner
-                top_left_corner + delta_xy,  # bottom right corner
-                top_left_corner + delta_y_only,  # bottom left corner
-            ]
-        ).tolist()
-
-        # Wrap in a list of lists, to match VIA format
-        df["segmentation"] = df["segmentation"].apply(lambda x: [x])
-
-    # if "bbox" not defined: set as x_min, y_min, width, height
+    # Create bbox if missing
     if "bbox" not in df.columns:
-        df["bbox"] = (
-            df[["x_min", "y_min", "width", "height"]].to_numpy().tolist()
-        )
+        df["bbox"] = df[["x_min", "y_min", "width", "height"]].values.tolist()
 
-    # if "image_width" not defined: set as 0
-    if "image_width" not in df.columns:
-        df["image_width"] = 0
+    # Create segmentation if missing (simplified polygon from bbox corners)
+    if "segmentation" not in df.columns:
+        # Create polygon from bbox corners:
+        # top-left -> top-right -> bottom-right -> bottom-left
+        x_min, y_min = df["x_min"], df["y_min"]
+        x_max = x_min + df["width"]
+        y_max = y_min + df["height"]
 
-    # if "image_height" not defined: set as 0
-    if "image_height" not in df.columns:
-        df["image_height"] = 0
+        # Format: [[x1, y1, x2, y2, x3, y3, x4, y4]] for each row
+        df["segmentation"] = [
+            [[x1, y1, x2, y1, x2, y2, x1, y2]]
+            for x1, y1, x2, y2 in zip(x_min, y_min, x_max, y_max, strict=True)
+        ]
 
     return df
 

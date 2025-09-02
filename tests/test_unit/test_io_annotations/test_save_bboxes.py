@@ -199,7 +199,7 @@ def test_fill_in_COCO_required_data(
     """Test the fill-in function for exporting to COCO fills in any
     columns required by COCO that may be missing.
     """
-    # Get dataframe with dropped columns
+    # Get sample dataframe and drop columns
     df_full = sample_bboxes_df()
     df_input = sample_bboxes_df(columns_to_drop=columns_to_drop)
 
@@ -210,7 +210,7 @@ def test_fill_in_COCO_required_data(
     # Fill in missing columns
     df_output = _fill_in_COCO_required_data(df_input.copy())
 
-    # Check
+    # Check columns exist
     assert df_output.index.name == "annotation_id"
     assert all(
         x in df_output.columns
@@ -230,7 +230,7 @@ def test_fill_in_COCO_required_data(
     elif columns_to_drop == ["category_id"]:
         assert all(
             df_output["category_id"]
-            == df_full["category"].factorize(sort=True)[0]
+            == df_full["category"].factorize(sort=True)[0] + 1
         )
     else:
         assert df_full[columns_to_drop].equals(df_output[columns_to_drop])
