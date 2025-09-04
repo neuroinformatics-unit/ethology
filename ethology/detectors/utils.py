@@ -1,0 +1,291 @@
+"""Utility functions for transforming detection datasets."""
+
+from typing import Literal
+
+import numpy as np
+import pandas as pd
+import torch
+import xarray as xr
+
+
+def concat_detections_ds(
+    list_detections_ds: list[xr.Dataset], index: pd.Index
+) -> xr.Dataset:
+    """Concatenate detections datasets along new dimension defined by index."""
+    # Check index has name
+    if index.name is None:
+        raise ValueError("Index must have a name")
+
+    # Concatenate along new dimension
+    ds = xr.concat(list_detections_ds, index)
+
+    # ensure "label" array is padded with -1 rather than nan
+    if "label" in ds.data_vars:
+        ds["label"] = ds.label.fillna(-1).astype(int)
+
+    return ds
+
+
+def detections_dict_as_ds(
+    detections: dict | list[dict],
+) -> xr.Dataset | list[xr.Dataset]:
+    """Reshape detections dictionary(ies) as xarray dataset(s).
+
+    Input is list of detections dictionaries with keys:
+    - "boxes": tensor of shape [N, 4], x1y1x2y2 in pixels
+    - "scores": tensor of shape [N]
+    - "labels": tensor of shape [N]
+
+    Output is a list of xarray datasets, one for each image in the batch.
+
+    Pytorch models return a list of detection dictionaries, one for each image
+    in the batch.
+    """
+    if isinstance(detections, dict):
+        return _detections_dict_as_ds(detections)
+    elif isinstance(detections, list):
+        return [_detections_dict_as_ds(det) for det in detections]
+    else:
+        raise ValueError(
+            "Detections must be a dictionary or list of dictionaries"
+        )
+
+
+def _detections_dict_as_ds(detections: dict) -> xr.Dataset:
+    """Reshape detections dictionary for a single image as xarray dataset.
+
+    Input is detections dictionary with keys:
+    - "boxes": tensor of shape [N, 4], x1y1x2y2 in pixels
+    - "scores": tensor of shape [N]
+    - "labels": tensor of shape [N]
+
+    Output is xarray dataset with keys:
+    - "position": xarray.DataArray of shape [2, N] (space, annot_id)
+    - "shape": xarray.DataArray of shape [2, N] (space, annot_id)
+    - "confidence": xarray.DataArray of shape [N] (annot_id)
+    - "label": xarray.DataArray of shape [N] (annot_id)
+    """
+    # Place tensors on cpu if required & convert to numpy array
+    detections = {
+        key: value.cpu().numpy() if isinstance(value, torch.Tensor) else value
+        for key, value in detections.items()
+    }
+
+    return detections_x1y1_x2y2_as_ds(
+        detections["boxes"],
+        detections["scores"],
+        detections["labels"],
+    )
+
+
+def x1y1_x2y2_as_da_tuple(
+    x1y1_x2y2_array: np.ndarray,
+    scores_array: np.ndarray,
+    labels_array: np.ndarray,
+    id_array: np.ndarray | None = None,
+) -> tuple[xr.DataArray, xr.DataArray, xr.DataArray, xr.DataArray]:
+    """Reshape detections / tracks array as xarray dataset.
+
+    Input is detections array with shape [N, 4], x1y1x2y2 in pixels
+    """
+    n_detections = x1y1_x2y2_array.shape[0]
+    if id_array is None:
+        id_array = np.arange(n_detections)
+
+    # centroid dataarray
+    centroid_da = xr.DataArray(
+        data=0.5
+        * (
+            x1y1_x2y2_array[:, 0:2] + x1y1_x2y2_array[:, 2:4]
+        ).T,  # space, annot ID
+        dims=["space", "id"],
+        coords={
+            "space": ["x", "y"],
+            "id": id_array,
+        },
+    )
+
+    # shape dataarray
+    shape_da = xr.DataArray(
+        data=(
+            x1y1_x2y2_array[:, 2:4] - x1y1_x2y2_array[:, 0:2]
+        ).T,  # space, annot ID
+        dims=["space", "id"],
+        coords={
+            "space": ["x", "y"],
+            "id": id_array,
+        },
+    )
+
+    # confidence dataarray
+    confidence_da = xr.DataArray(
+        data=scores_array,
+        dims=["id"],
+        coords={"id": id_array},
+    )
+
+    # label dataarray
+    label_da = xr.DataArray(
+        data=labels_array,
+        dims=["id"],
+        coords={"id": id_array},
+    )
+
+    return centroid_da, shape_da, confidence_da, label_da
+
+
+def detections_x1y1_x2y2_as_ds(
+    x1y1_x2y2_array: np.ndarray,
+    scores_array: np.ndarray,  # rename to confidence
+    labels_array: np.ndarray,  # rename to category
+) -> xr.Dataset:
+    """Reshape detections array for a single image as xarray dataset.
+
+    Input is detections array with shape [N, 4], x1y1x2y2 in pixels
+    """
+    # Remove nan rows
+    x1y1_x2y2_array, scores_array, labels_array = (
+        remove_rows_with_nan_in_first_array(
+            [x1y1_x2y2_array, scores_array, labels_array]
+        )
+    )
+
+    # Create dataarrays for dataset
+    centroid_da, shape_da, confidence_da, label_da = x1y1_x2y2_as_da_tuple(
+        x1y1_x2y2_array, scores_array, labels_array
+    )
+
+    return xr.Dataset(
+        data_vars={
+            "position": centroid_da,
+            "shape": shape_da,
+            "confidence": confidence_da,
+            "label": label_da,
+        }
+    )
+
+
+def tracks_x1y1_x2y2_as_ds(
+    x1y1_x2y2_array: np.ndarray,
+    scores_array: np.ndarray,  # rename to confidence
+    labels_array: np.ndarray,  # rename to category
+    id_array: np.ndarray,
+) -> xr.Dataset:
+    """Reshape tracks array for a single image as xarray dataset.
+
+    Input is tracks array with shape [N, 4], x1y1x2y2 in pixels
+    and shape [N, 2], id and ind
+    """
+    # Remove nan rows
+    x1y1_x2y2_array, scores_array, labels_array, id_array = (
+        remove_rows_with_nan_in_first_array(
+            [x1y1_x2y2_array, scores_array, labels_array, id_array]
+        )
+    )
+
+    # Create dataarrays for dataset
+    centroid_da, shape_da, confidence_da, label_da = x1y1_x2y2_as_da_tuple(
+        x1y1_x2y2_array, scores_array, labels_array, id_array
+    )
+
+    return xr.Dataset(
+        data_vars={
+            "position": centroid_da,
+            "shape": shape_da,
+            "confidence": confidence_da,
+            "label": label_da,
+        }
+    )
+
+
+def detections_ds_as_x1y1_x2y2(
+    ds: xr.Dataset,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Express detections dataset for a single image as tuple of numpy arrays.
+
+    The output arrays are:
+    - x1y1_x2y2_array: numpy array of shape [N, 4], x1y1x2y2 in pixels
+    - scores_array: numpy array of shape [N]
+    - labels_array: numpy array of shape [N]
+    """
+    # Add xy_min and xy_max if not present
+    if all([var_str not in ds.variables for var_str in ["xy_min", "xy_max"]]):
+        ds = add_bboxes_min_max_corners(ds)
+
+    # # Check dimensions are "space" and "id"
+    # if ds.dims != {"space", "id"}:
+    #     raise ValueError(
+    #         "Detections dataset must have exactly two dimensions: space and id"
+    #     )
+
+    # Extract x1y1x2y2 array
+    x1y1_x2y2_array = np.c_[ds.xy_min.values.T, ds.xy_max.values.T]
+
+    # Remove nan rows
+    x1y1_x2y2_array, scores_array, labels_array = (
+        remove_rows_with_nan_in_first_array(
+            [x1y1_x2y2_array, ds.confidence.values, ds.label.values]
+        )
+    )
+
+    return x1y1_x2y2_array, scores_array, labels_array
+
+
+def add_bboxes_min_max_corners(ds):
+    """Add xy_min and xy_max arrays to ds.
+
+    # Compare to torchvision.ops.box_convert in testing?
+    box_convert(
+        torch.from_numpy(np.c_[ds.position.T, ds.shape.T]),
+        in_fmt="cxcywh",
+        out_fmt="xyxy",
+    )
+    """
+    ds["xy_min"] = ds.position - 0.5 * ds.shape
+    ds["xy_max"] = ds.position + 0.5 * ds.shape
+    return ds
+
+
+def detections_ds_to_movement_ds(
+    ds: xr.Dataset, type: Literal["poses", "bboxes"]
+) -> xr.Dataset:
+    """Convert detections dataset to movement dataset."""
+    # add id coordinate (FIX this)
+    # ds = ds.assign_coords(
+    #     id=np.arange(ds.sizes['id'])
+    # )
+
+    # ensure relevant dimensions exist
+    if not all(dim in ds.dims for dim in ["image_id", "space", "id"]):
+        raise ValueError(
+            "Detections dataset must have image_id, space, and id dimensions"
+        )
+
+    # if exporting as a poses dataset, add keypoint dimension
+    # as second-to-last dimension
+    if type == "poses":
+        ds = ds.expand_dims("keypoints", axis=-2).assign_coords(
+            keypoints=["centroid"]
+        )
+
+    # remove "label" data array
+    # ds = ds.drop_vars("label")
+
+    # rename dimensions
+    ds = ds.rename({"image_id": "time", "id": "individuals"})
+
+    # make time coordinate a float
+    ds["time"] = ds.time.astype(float)
+
+    # make individuals coordinate a string
+    ds["individuals"] = [f"id_{id}" for id in ds.individuals.values]
+
+    return ds
+
+
+def remove_rows_with_nan_in_first_array(
+    list_arrays: list[np.ndarray],
+) -> list[np.ndarray]:
+    """Remove rows with nan values from list of arrays."""
+    slc_nan_rows = np.any(np.isnan(list_arrays[0]), axis=1)
+    return [arr[~slc_nan_rows] for arr in list_arrays]
