@@ -127,6 +127,7 @@ html_favicon = "_static/light-logo-niu.png"
 linkcheck_anchors_ignore_for_url = [
     "https://neuroinformatics.zulipchat.com/",
     "https://gin.g-node.org/G-Node/Info/wiki/",
+    "https://cocodataset.org/",
 ]
 # A list of regular expressions that match URIs that should not be checked
 linkcheck_ignore = [
