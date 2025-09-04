@@ -1,0 +1,473 @@
+"""Validators for annotation files and datasets."""
+
+import json
+from collections.abc import Callable
+from functools import wraps
+from pathlib import Path
+
+import pandas as pd
+import pandera.pandas as pa
+import xarray as xr
+from attrs import define, field
+from pandera.typing import Index, Series
+
+from ethology.io.annotations.json_schemas.utils import (
+    _check_file_is_json,
+    _check_file_matches_schema,
+    _check_required_keys_in_dict,
+    _get_default_schema,
+)
+
+
+@define
+class ValidVIA:
+    """Class for valid VIA JSON annotation files.
+
+    It checks the input file is a valid JSON file, matches
+    the VIA schema and contains the required keys.
+
+
+    Attributes
+    ----------
+    path : Path | str
+        Path to the VIA JSON file, passed as an input.
+    schema : dict
+        The JSON schema is set to the default VIA schema.
+    required_keys : dict
+        The required keys for the VIA JSON file.
+
+    Raises
+    ------
+    ValueError
+        If the JSON file cannot be decoded.
+    jsonschema.exceptions.ValidationError
+        If the type of any of the keys in the JSON file
+        does not match the type specified in the schema.
+    jsonschema.exceptions.SchemaError
+        If the schema is invalid.
+    ValueError
+        If the VIA JSON file is missing any of the required keys.
+
+    """
+
+    path: Path = field(converter=Path)
+    schema: dict = field(
+        default=_get_default_schema("VIA"),
+        init=False,
+    )
+    required_keys: dict = field(
+        default={
+            "main": ["_via_img_metadata", "_via_attributes"],
+            "images": ["filename"],
+            "regions": ["shape_attributes"],
+            "shape_attributes": ["x", "y", "width", "height"],
+        },
+        init=False,
+        # with init=False the attribute is always initialized
+        # with the default value
+    )
+
+    # Note: the validators are applied in order
+    @path.validator
+    def _file_is_json(self, attribute, value):
+        _check_file_is_json(value)
+
+    @path.validator
+    def _file_matches_JSON_schema(self, attribute, value):
+        _check_file_matches_schema(value, self.schema)
+
+    @path.validator
+    def _file_contains_required_keys(self, attribute, value):
+        """Ensure that the VIA JSON file contains the required keys."""
+        # Read data as dict
+        with open(value) as file:
+            data = json.load(file)
+
+        # Check first level keys
+        _check_required_keys_in_dict(self.required_keys["main"], data)
+
+        # Check keys in nested dicts
+        for img_str, img_dict in data["_via_img_metadata"].items():
+            # Check keys for each image dictionary
+            _check_required_keys_in_dict(
+                self.required_keys["images"],
+                img_dict,
+                additional_message=f" for {img_str}",
+            )
+
+            # Check keys for each region in an image
+            for i, region in enumerate(img_dict["regions"]):
+                # Check keys under first level per region
+                _check_required_keys_in_dict(
+                    self.required_keys["regions"],
+                    region,
+                    additional_message=f" for region {i} under {img_str}",
+                )
+
+                # Check keys under "shape_attributes" per region
+                _check_required_keys_in_dict(
+                    self.required_keys["shape_attributes"],
+                    region["shape_attributes"],
+                    additional_message=f" for region {i} under {img_str}",
+                )
+
+
+@define
+class ValidCOCO:
+    """Class for valid COCO JSON annotation files.
+
+    It checks the input file is a valid JSON file, matches
+    the COCO schema and contains the required keys.
+
+    Attributes
+    ----------
+    path : Path | str
+        Path to the COCO JSON file, passed as an input.
+    schema : dict
+        The JSON schema is set to the default COCO schema.
+    required_keys : dict
+        The required keys for the COCO JSON file.
+
+    Raises
+    ------
+    ValueError
+        If the JSON file cannot be decoded.
+    jsonschema.exceptions.ValidationError
+        If the type of any of the keys in the JSON file
+        does not match the type specified in the schema.
+    jsonschema.exceptions.SchemaError
+        If the schema is invalid.
+    ValueError
+        If the COCO JSON file is missing any of the required keys.
+
+    """
+
+    path: Path = field(converter=Path)
+    schema: dict = field(
+        default=_get_default_schema("COCO"),
+        init=False,
+        # with init=False the attribute is always initialized
+        # with the default value
+    )
+
+    # The keys of "required_keys" match the 1st level keys in a COCO JSON file
+    required_keys: dict = field(
+        default={
+            "main": ["images", "annotations", "categories"],
+            "images": ["id", "file_name"],
+            "annotations": ["id", "image_id", "bbox", "category_id"],
+            "categories": ["id", "name", "supercategory"],
+        },
+        init=False,
+    )
+
+    # Note: the validators are applied in order
+    @path.validator
+    def _file_is_json(self, attribute, value):
+        _check_file_is_json(value)
+
+    @path.validator
+    def _file_matches_JSON_schema(self, attribute, value):
+        _check_file_matches_schema(value, self.schema)
+
+    @path.validator
+    def _file_contains_required_keys(self, attribute, value):
+        """Ensure that the COCO JSON file contains the required keys."""
+
+        # Helper function to singularise the input key for the
+        # error message
+        def _singularise_err_msg(key):
+            return key[:-1] if key != "categories" else key[:-3] + "y"
+
+        # Read file as dict
+        with open(value) as file:
+            data = json.load(file)
+
+        # Check first level keys
+        _check_required_keys_in_dict(self.required_keys["main"], data)
+
+        # Check keys in every dict listed under the "images", "annotations"
+        # and "categories" keys
+        for ky in list(self.required_keys.keys())[1:]:
+            for instance_dict in data[ky]:
+                _check_required_keys_in_dict(
+                    self.required_keys[ky],
+                    instance_dict,
+                    additional_message=(
+                        f" for {_singularise_err_msg(ky)} {instance_dict}"
+                    ),
+                )
+
+    @path.validator
+    def _file_contains_unique_image_IDs(self, attribute, value):
+        """Ensure that the COCO JSON file contains unique image IDs.
+
+        When exporting to COCO format, the VIA tool attempts to extract the
+        image ID from the image filename using ``parseInt``. As a result, if
+        two or more images have the same number-based filename, the image IDs
+        can be non-unique (i.e., more image filenames than image IDs). This is
+        probably a bug in the VIA tool, but we need to check for this issue.
+        """
+        with open(value) as file:
+            data = json.load(file)
+
+        # Get number of elements in "images" list
+        n_images = len(data["images"])
+
+        # Get the image IDs
+        unique_image_ids = set([img["id"] for img in data["images"]])
+
+        # Check for duplicate image IDs
+        if n_images != len(unique_image_ids):
+            raise ValueError(
+                "The image IDs in the input COCO file are not unique. "
+                f"There are {n_images} image entries, but only "
+                f"{len(unique_image_ids)} unique image IDs."
+            )
+
+
+@define
+class ValidBboxesDataset:
+    """Class for valid ``ethology`` datasets with bounding boxes annotations.
+
+    It checks that the input dataset has:
+
+    - ``image_id``, ``space``, ``id`` as dimensions
+    - ``position`` and ``shape`` as data variables
+
+    Attributes
+    ----------
+    dataset : xarray.Dataset
+        The xarray dataset to validate.
+
+    Raises
+    ------
+    TypeError
+        If the input is not an xarray Dataset.
+    ValueError
+        If the dataset is missing required data variables or dimensions.
+
+    Notes
+    -----
+    The dataset can have other data variables and dimensions, but only the
+    required ones are checked.
+
+    """
+
+    dataset: xr.Dataset = field()
+
+    # Minimum requirements for annotations datasets holding bboxes
+    required_dims: set = field(
+        default={"image_id", "space", "id"},
+        init=False,
+    )
+    required_data_vars: set = field(
+        default={"position", "shape"},
+        init=False,
+    )
+
+    @dataset.validator
+    def _check_dataset_type(self, attribute, value):
+        """Ensure the input is an xarray Dataset."""
+        if not isinstance(value, xr.Dataset):
+            raise TypeError(
+                f"Expected an xarray Dataset, but got {type(value)}."
+            )
+
+    @dataset.validator
+    def _check_required_data_variables(self, attribute, value):
+        """Ensure the dataset has all required data variables."""
+        missing_vars = self.required_data_vars - set(value.data_vars)
+        if missing_vars:
+            raise ValueError(
+                f"Missing required data variables: {sorted(missing_vars)}"
+            )
+
+    @dataset.validator
+    def _check_required_dimensions(self, attribute, value):
+        """Ensure the dataset has all required dimensions."""
+        missing_dims = self.required_dims - set(value.dims)
+        if missing_dims:
+            raise ValueError(
+                f"Missing required dimensions: {sorted(missing_dims)}"
+            )
+
+    # @dataset.validator
+    # def _check_space_dimensions(self, attribute, value):
+    #     """Ensure the space dimensions are either 'x', 'y'
+    # or 'x','y', 'z'."""
+    #     if set(value.dims) - {"x", "y"}:
+    #         raise ValueError(
+    #             f"Space dimensions must be either 'x' or 'y',
+    # but got {set(value.dims)}"
+    #         )
+
+
+class ValidBBoxesDataFrameCOCO(pa.DataFrameModel):
+    """Class for valid bounding boxes annotations dataframes for COCO export.
+
+    The validation checks the required columns exists and their types are
+    correct. It additionally checks that the index and the
+    ``annotation_id`` column are equal.
+
+    Attributes
+    ----------
+    idx : Index[int]
+        Index of the dataframe. Should be greater than or equal to 0 and equal
+        to the ``annotation_id`` column.
+    annotation_id : int
+        Unique identifier for the annotation. Should be equal to the index.
+    image_id : int
+        Unique identifier for each of the images.
+    image_filename : str
+        Filename of the image.
+    image_width : int
+        Width of each of the images.
+    image_height : int
+        Height of each of the images.
+    bbox : list[float]
+        Bounding box coordinates as xmin, ymin, width, height.
+    area : float
+        Bounding box area.
+    segmentation : list[list[float]]
+        Bounding box segmentation masks as list of lists of coordinates.
+    category : str
+        Category of the annotation.
+    supercategory : str
+        Supercategory of the annotation.
+    iscrowd : int
+        Whether the annotation is a crowd. Should be 0 or 1.
+
+    Raises
+    ------
+    pa.errors.SchemaError
+        If the dataframe does not match the schema.
+
+    Notes
+    -----
+    See `COCO format documentation <https://cocodataset.org/#format-data>`_
+    for more details.
+
+    See Also
+    --------
+    :class:`pandera.api.pandas.model.DataFrameModel`
+
+    """
+
+    # index
+    idx: Index[int] = pa.Field(ge=0, check_name=False)
+
+    # annotation_id
+    annotation_id: int = pa.Field(
+        description="Unique identifier for the annotation (index)",
+    )
+
+    # image columns
+    image_id: int = pa.Field(
+        description="Unique identifier for the image",
+    )
+    image_filename: str = pa.Field(
+        description="Filename of the image",
+    )
+    image_width: int = pa.Field(
+        description="Width of the image", ge=0, nullable=True
+    )
+    image_height: int = pa.Field(
+        description="Height of the image", ge=0, nullable=True
+    )
+
+    # bbox data
+    bbox: list[float] = pa.Field(
+        description="Bounding box coordinates as xmin, ymin, width, height"
+    )
+    area: float = pa.Field(
+        description="Bounding box area",
+        ge=0,
+    )
+    segmentation: list[list[float]] = pa.Field(
+        description="Bounding box segmentation as list of lists of coordinates"
+    )
+
+    # category columns
+    category: str = pa.Field(
+        description="Category of the annotation",
+        nullable=True,
+    )
+    supercategory: str = pa.Field(
+        description="Supercategory of the annotation",
+        nullable=True,
+    )
+
+    # other
+    iscrowd: int = pa.Field(
+        description="Whether the annotation is a crowd",
+        isin=[0, 1],
+        nullable=True,
+    )
+
+    @staticmethod
+    def map_df_columns_to_COCO_fields() -> dict:
+        """Map COCO-exportable dataframe columns to COCO fields."""
+        return {
+            "images": {
+                "image_id": "id",
+                "image_filename": "file_name",
+                "image_width": "width",
+                "image_height": "height",
+            },
+            "categories": {
+                "category_id": "id",
+                "category": "name",
+                "supercategory": "supercategory",
+            },
+            "annotations": {
+                "annotation_id": "id",
+                "area": "area",
+                "bbox": "bbox",
+                "image_id": "image_id",
+                "category_id": "category_id",
+                "iscrowd": "iscrowd",
+                "segmentation": "segmentation",
+            },
+        }
+
+    @pa.dataframe_check
+    def check_idx_and_annotation_id(cls, df: pd.DataFrame) -> Series[bool]:
+        """Check that the index and the "annotation_id" column are equal."""
+        return all(df.index == df["annotation_id"])
+
+
+def _check_output(validator: type):
+    """Return a decorator that validates the output of a function."""
+
+    def decorator(function: Callable) -> Callable:
+        @wraps(function)  # to preserve metadata
+        def wrapper(*args, **kwargs):
+            result = function(*args, **kwargs)
+            validator(result)
+            return result
+
+        return wrapper
+
+    return decorator
+
+
+def _check_input(validator: type, input_index: int = 0):
+    """Return a decorator that validates a specific input of a function.
+
+    By default, the first input is validated.
+    """
+
+    def decorator(function: Callable) -> Callable:
+        @wraps(function)
+        def wrapper(*args, **kwargs):
+            if len(args) > input_index:
+                validator(args[input_index])
+            else:
+                pass
+            result = function(*args, **kwargs)
+            return result
+
+        return wrapper
+
+    return decorator

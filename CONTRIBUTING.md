@@ -189,17 +189,17 @@ Docstrings in the `.py` files for the [API reference](target-api)  are converted
 :::{tab-item} Markdown
 For referencing ethology objects in `.md` files, use the `` {role}`target` `` syntax with the appropriate [Python object role](sphinx-doc:domains/python.html#cross-referencing-python-objects).
 
-For example, to reference the {mod}`ethology.annotations.io.load_bboxes` module, use:
+For example, to reference the {mod}`ethology.io.annotations.load_bboxes` module, use:
 ```markdown
-{mod}`ethology.annotations.io.load_bboxes`
+{mod}`ethology.io.annotations.load_bboxes`
 ```
 :::
 :::{tab-item} RestructuredText
 For referencing ethology objects in `.rst` files, use the `` :role:`target` `` syntax with the appropriate [Python object role](sphinx-doc:domains/python.html#cross-referencing-python-objects).
 
-For example, to reference the {mod}`ethology.io.load_bboxes` module, use:
+For example, to reference the {mod}`ethology.io.annotations.load_bboxes` module, use:
 ```rst
-:mod:`ethology.io.load_bboxes`
+:mod:`ethology.io.annotations.load_bboxes`
 ```
 :::
 ::::

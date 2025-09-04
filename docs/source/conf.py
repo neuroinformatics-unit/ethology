@@ -127,6 +127,7 @@ html_favicon = "_static/light-logo-niu.png"
 linkcheck_anchors_ignore_for_url = [
     "https://neuroinformatics.zulipchat.com/",
     "https://gin.g-node.org/G-Node/Info/wiki/",
+    "https://cocodataset.org/",
 ]
 # A list of regular expressions that match URIs that should not be checked
 linkcheck_ignore = [
@@ -149,6 +150,16 @@ myst_url_schemes = {
     "mamba": "https://mamba.readthedocs.io/en/latest/",
     "myst-parser": "https://myst-parser.readthedocs.io/en/latest/{{path}}#{{fragment}}",
     "napari": "https://napari.org/dev/{{path}}",
+}
+
+intersphinx_mapping = {
+    "xarray": ("https://docs.xarray.dev/en/stable/", None),
+    "pandas": ("https://pandas.pydata.org/pandas-docs/stable/", None),
+    "python": ("https://docs.python.org/3", None),
+    "loguru": ("https://loguru.readthedocs.io/en/stable/", None),
+    "matplotlib": ("https://matplotlib.org/stable/", None),
+    "numpy": ("https://numpy.org/doc/stable/", None),
+    "pandera": ("https://pandera.readthedocs.io/en/stable/", None),
 }
 
 

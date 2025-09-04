@@ -4,16 +4,16 @@ from pathlib import Path
 from typing import Literal
 from unittest.mock import patch
 
+import numpy as np
 import pandas as pd
 import pytest
+import xarray as xr
 
-from ethology.annotations.io.load_bboxes import (
-    STANDARD_BBOXES_DF_COLUMNS,
-    STANDARD_BBOXES_DF_INDEX,
+from ethology.io.annotations.load_bboxes import (
+    _df_from_multiple_files,
+    _df_from_single_file,
     _df_rows_from_valid_COCO_file,
     _df_rows_from_valid_VIA_file,
-    _from_multiple_files,
-    _from_single_file,
     from_files,
 )
 
@@ -103,6 +103,7 @@ def multiple_files_duplicates(annotations_test_data: dict) -> dict:
             ],
             "duplicates": 2,
             "n_images": 3,
+            "max_annots_per_image": 1,
         },
         "COCO": {
             "files": [
@@ -113,6 +114,7 @@ def multiple_files_duplicates(annotations_test_data: dict) -> dict:
             ],
             "duplicates": 2,
             "n_images": 3,
+            "max_annots_per_image": 2,
         },
     }
 
@@ -130,7 +132,7 @@ def assert_dataframe(
     assert df.shape[0] == expected_n_annotations
 
     # Check annotation_id is the index name, and that IDs are unique
-    assert df.index.name == STANDARD_BBOXES_DF_INDEX
+    assert df.index.name == "annotation_id"
     assert len(set(df.index)) == expected_n_annotations
 
     # Check number of images
@@ -138,7 +140,19 @@ def assert_dataframe(
     assert len(df["image_id"].unique()) == expected_n_images
 
     # Check columns are as expected
-    assert df.columns.tolist() == STANDARD_BBOXES_DF_COLUMNS
+    assert df.columns.tolist() == [
+        "image_filename",
+        "image_id",
+        "x_min",
+        "y_min",
+        "width",
+        "height",
+        "supercategory",
+        "category",
+        "category_id",
+        "image_width",
+        "image_height",
+    ]
 
     # Check supercategories are as expected
     assert df["supercategory"].unique() == expected_supercategories
@@ -152,6 +166,47 @@ def assert_dataframe(
             df.groupby("image_id").count()["x_min"]
             == expected_annots_per_image
         )  # count number of "x_min" values when grouping by "image_id"
+
+
+def assert_dataset(
+    ds: xr.Dataset,
+    expected_n_images: int,
+    expected_n_annotations: int,
+    expected_max_annots_per_image: int,
+    expected_space_dim: int,
+    expected_n_categories: int,
+    expected_category_str: list[str],
+):
+    """Check that the dataset has the expected shape and content."""
+    # Check shape of position array
+    assert ds.position.shape == (
+        expected_n_images,
+        expected_space_dim,
+        expected_max_annots_per_image,
+    )
+
+    # Check shape of category array
+    assert ds.category.shape == (
+        expected_n_images,
+        expected_max_annots_per_image,
+    )
+
+    # Check total number of no nan annotations
+    assert (
+        np.sum(np.any(~np.isnan(ds.position.values), axis=1))
+        == expected_n_annotations
+    )
+
+    # Check total number of non -1 categories
+    assert (
+        np.sum(np.unique(ds.category.values.flatten()) != -1)
+        == expected_n_categories
+    )
+
+    # Check map from category_id to category name is as expected
+    assert sorted(ds.attrs["map_category_to_str"].values()) == sorted(
+        expected_category_str
+    )
 
 
 @pytest.mark.parametrize(
@@ -174,11 +229,11 @@ def assert_dataframe(
     [
         (
             Path("/path/to/file"),  # single file
-            "ethology.annotations.io.load_bboxes._from_single_file",
+            "ethology.io.annotations.load_bboxes._df_from_single_file",
         ),
         (
             [Path("/path/to/file1"), Path("/path/to/file2")],  # multiple files
-            "ethology.annotations.io.load_bboxes._from_multiple_files",
+            "ethology.io.annotations.load_bboxes._df_from_multiple_files",
         ),
     ],
 )
@@ -190,18 +245,40 @@ def test_from_files(
 ):
     """Test that the general bounding boxes loading function delegates
     correctly to the single or multiple file readers, and check the
-    metadata is added correctly.
+    metadata is added correctly to the xarray dataset.
     """
+    # Create a mock intermediate DataFrame with one image and one annotation,
+    # to return from the mocked reader function
+    mock_df_all = pd.DataFrame(
+        {
+            "image_filename": ["test_image.jpg"],
+            "image_id": [0],
+            "x_min": [10.0],
+            "y_min": [20.0],
+            "width": [100.0],
+            "height": [200.0],
+            "supercategory": ["animal"],
+            "category": ["crab"],
+            "category_id": [1],
+            "image_width": [800],
+            "image_height": [600],
+        }
+    )
+
     # Call general function and see if mocked function is called
-    with patch(function_to_mock) as mock:
-        df = from_files(file_path, format=format, images_dirs=images_dirs)
+    with patch(function_to_mock, return_value=mock_df_all) as mock:
+        ds = from_files(file_path, format=format, images_dirs=images_dirs)
         mock.assert_called_once_with(file_path, format=format)
 
     # Check metadata
-    assert df.attrs["annotation_files"] == file_path
-    assert df.attrs["annotation_format"] == format
+    assert ds.attrs["annotation_files"] == file_path
+    assert ds.attrs["annotation_format"] == format
     if images_dirs:
-        assert df.attrs["images_directories"] == images_dirs
+        assert ds.attrs["images_directories"] == images_dirs
+
+    # Check that the maps exist and are not empty
+    assert ds.attrs["map_category_to_str"] == {1: "crab"}
+    assert ds.attrs["map_image_id_to_filename"] == {0: "test_image.jpg"}
 
 
 @pytest.mark.parametrize(
@@ -211,12 +288,11 @@ def test_from_files(
         "COCO",
     ],
 )
-def test_from_multiple_files(
+def test_df_from_multiple_files(
     format: Literal["VIA", "COCO"], multiple_files: dict
 ):
-    """Test that the general bounding boxes loading function reads
-    correctly multiple files of the supported formats without any
-    duplicates.
+    """Test that the multiple files reader reads correctly multiple files
+    of the supported formats without any duplicates as a dataframe.
     """
     # Get list of paths
     list_paths = multiple_files[format]
@@ -232,7 +308,7 @@ def test_from_multiple_files(
     )
 
     # Read all files as a dataframe
-    df_all = _from_multiple_files(list_paths, format=format)
+    df_all = _df_from_multiple_files(list_paths, format=format)
 
     # Check dataframe
     assert_dataframe(
@@ -244,13 +320,15 @@ def test_from_multiple_files(
     )
 
 
-def test_from_single_file_unsupported():
-    """Test that unsupported formats throw the expected errors."""
+def test_df_from_single_file_unsupported():
+    """Test that the single file reader throws the expected errors
+    for unsupported formats.
+    """
     file_path = Path("/mock/path/to/file")
     format = "unsupported"
-
     with pytest.raises(ValueError) as excinfo:
-        _from_single_file(file_path=file_path, format=format)
+        _df_from_single_file(file_path=file_path, format=format)
+
     assert "Unsupported format" in str(excinfo.value)
 
 
@@ -265,24 +343,26 @@ def test_from_single_file_unsupported():
         ("small_bboxes_COCO.json", "COCO"),  # small COCO file
     ],
 )
-def test_from_single_file(
+def test_df_from_single_file(
     input_file: str,
     format: Literal["VIA", "COCO"],
     annotations_test_data: dict,
 ):
-    """Test the specific bounding box format readers."""
-    # Compute bboxes dataframe from a single file
-    df = _from_single_file(
-        file_path=annotations_test_data[input_file],
-        format=format,
-    )
-
+    """Test the single file reader reads correctly a single file
+    of the supported formats as a dataframe.
+    """
     # Compute number of annotations and images in input file
     expected_n_images, expected_n_annotations = (
         count_imgs_and_annots_in_input_file(
             file_path=annotations_test_data[input_file],
             format=format,
         )
+    )
+
+    # Compute bboxes dataframe from a single file
+    df = _df_from_single_file(
+        file_path=annotations_test_data[input_file],
+        format=format,
     )
 
     # Check dataframe
@@ -304,35 +384,33 @@ def test_from_single_file(
         "COCO",
     ],
 )
-def test_from_single_file_duplicates(
+def test_df_from_single_file_duplicates(
     format: Literal["VIA", "COCO"],
     annotations_test_data: dict,
 ):
-    """Test the specific bounding box format readers when the input file
+    """Test the single file reader reads correctly a single file
+    of the supported formats as a dataframe when the input file
     contains duplicate annotations.
     """
-    # Properties of input data
-    # in the "small_bboxes_duplicates_" files, one annotation is duplicated
+    # In the "small_bboxes_duplicates_" files, one annotation is duplicated
     # in the first frame
     filepath = annotations_test_data[f"small_bboxes_duplicates_{format}.json"]
-    expected_n_images, expected_n_annotations_w_duplicates = (
+    expected_n_images, n_annotations_with_duplicates = (
         count_imgs_and_annots_in_input_file(filepath, format=format)
     )
     n_duplicates = 1
+    expected_n_annotations = n_annotations_with_duplicates - n_duplicates
 
     # Compute bboxes dataframe
-    df = _from_single_file(
-        file_path=annotations_test_data[
-            f"small_bboxes_duplicates_{format}.json"
-        ],
+    df = _df_from_single_file(
+        file_path=filepath,
         format=format,
     )
 
     # Check dataframe has no duplicates
     assert_dataframe(
         df,
-        expected_n_annotations=expected_n_annotations_w_duplicates
-        - n_duplicates,
+        expected_n_annotations=expected_n_annotations,
         expected_n_images=expected_n_images,
         expected_supercategories="animal",
         expected_categories="crab",
@@ -357,18 +435,15 @@ def test_from_single_file_no_category(
     expected_exception: pytest.raises,
     annotations_test_data: dict,
 ):
-    """Test the specific bounding box format readers when the input file
+    """Test the single file reader reads correctly a single file
+    of the supported formats as a dataframe when the input file
     has annotations with no category.
     """
     # Compute bboxes dataframe with input file that has no categories
     # (this should raise an error for COCO files)
     with expected_exception as excinfo:
-        df = _from_single_file(
-            file_path=annotations_test_data[
-                f"small_bboxes_no_cat_{format}.json"
-            ],
-            format=format,
-        )
+        filepath = annotations_test_data[f"small_bboxes_no_cat_{format}.json"]
+        df = _df_from_single_file(file_path=filepath, format=format)
 
     # Check that the error message is as expected
     if excinfo:
@@ -376,7 +451,8 @@ def test_from_single_file_no_category(
             "Empty value(s) found for the required key(s) "
             "['annotations', 'categories']." in str(excinfo.value)
         )
-    # If no error expected, check that the dataframe has empty categories
+    # If no error expected (i.e. for VIA files), check that the dataframe
+    # has empty category columns
     else:
         assert df["category"].isna().all()
         assert df["supercategory"].isna().all()
@@ -401,7 +477,7 @@ def test_df_rows_from_valid_file(
     format: Literal["VIA", "COCO"],
     annotations_test_data: dict,
 ):
-    """Test the extraction of rows from a valid input file."""
+    """Test the extraction of dataframe rows from a valid input file."""
     # Determine row function to test
     if format == "VIA":
         row_function_to_test = _df_rows_from_valid_VIA_file
@@ -423,7 +499,20 @@ def test_df_rows_from_valid_file(
     # Check each row contains required column data
     # Note that "image_width" and "image_height" are not defined in the
     # VIA file, so we exclude them from the required keys.
-    required_keys = [STANDARD_BBOXES_DF_INDEX] + STANDARD_BBOXES_DF_COLUMNS
+    required_keys = [
+        "annotation_id",
+        "image_filename",
+        "image_id",
+        "x_min",
+        "y_min",
+        "width",
+        "height",
+        "supercategory",
+        "category",
+        "category_id",
+        "image_width",
+        "image_height",
+    ]
     if format == "VIA":
         required_keys = [
             key
@@ -463,13 +552,16 @@ def test_from_files_duplicates(
     """Test the behaviour of the `from_files` function when passing
     input files with duplicates (in single files or across files).
     """
-    # Get expected size of dataframe when passing multiple files with
+    # Get expected size of dataset when passing multiple files with
     # duplicates
     if "MULTIPLE" in input_file:
         # Get input data
         input_files = multiple_files_duplicates[format]["files"]
         n_duplicates = multiple_files_duplicates[format]["duplicates"]
         n_unique_images = multiple_files_duplicates[format]["n_images"]
+        max_annots_per_image = multiple_files_duplicates[format][
+            "max_annots_per_image"
+        ]
 
         # Compute number of annotations, with and without duplicates
         n_total_annotations = sum(
@@ -479,7 +571,6 @@ def test_from_files_duplicates(
             ]
         )
         n_unique_annotations = n_total_annotations - n_duplicates
-        expected_annots_per_image = None
 
     # Get expected size of dataframe when passing a single file with duplicates
     else:
@@ -489,19 +580,20 @@ def test_from_files_duplicates(
             count_imgs_and_annots_in_input_file(input_files, format)
         )
         n_unique_annotations = n_total_annotations - n_duplicates
-        expected_annots_per_image = 1
+        max_annots_per_image = 1
 
-    # Compute dataframe
-    df = from_files(input_files, format=format)
+    # Compute dataset
+    ds = from_files(input_files, format=format)
 
-    # Check dataframe content is as expected
-    assert_dataframe(
-        df,
-        expected_n_annotations=n_unique_annotations,
+    # Check dataset content is as expected
+    assert_dataset(
+        ds,
         expected_n_images=n_unique_images,
-        expected_supercategories="animal",
-        expected_categories="crab",
-        expected_annots_per_image=expected_annots_per_image,
+        expected_n_annotations=n_unique_annotations,
+        expected_max_annots_per_image=max_annots_per_image,
+        expected_space_dim=2,
+        expected_n_categories=1,
+        expected_category_str=["crab"],
     )
 
 
@@ -515,70 +607,82 @@ def test_from_files_duplicates(
 def test_image_id_assignment(
     format: Literal["VIA", "COCO"], annotations_test_data: dict
 ):
-    """Test if the bboxes dataframe image_id is assigned based on the
-    alphabetically sorted list of filenames.
+    """Test that the bboxes dataset "image_id" is assigned based on the
+    alphabetically sorted list of image filenames.
     """
-    # Get path to file
-    filepath = annotations_test_data[f"small_bboxes_image_id_{format}.json"]
-
     # Read data
-    df = from_files(filepath, format=format)
+    filepath = annotations_test_data[f"small_bboxes_image_id_{format}.json"]
+    ds = from_files(filepath, format=format)
 
-    # Get image_id and filename pairs from the input data file
+    # Read input data file as a dictionary
     with open(filepath) as f:
         data = json.load(f)
 
-    # Compute expected image ID - filename pairs if ID computed alphabetically
-    pairs_img_id_to_filename_alphabetical = {
-        id: file
-        for id, file in enumerate(sorted(df["image_filename"].tolist()))
-    }
+    # Compute expected map from image ID to filename if image ID assigned
+    # alphabetically
+    sorted_filenames = sorted(ds.attrs["map_image_id_to_filename"].values())
+    map_img_id_to_filename_alphabetical = dict(enumerate(sorted_filenames))
 
     # Check image ID in input data file is not assigned alphabetically
     if format == "VIA":
         list_via_images = data["_via_image_id_list"]
-        pairs_img_id_to_filename_in = {
+        map_img_id_to_filename_in = {
             list_via_images.index(img_via_ky): img_dict["filename"]
             for img_via_ky, img_dict in data["_via_img_metadata"].items()
         }
     elif format == "COCO":
-        pairs_img_id_to_filename_in = {
+        map_img_id_to_filename_in = {
             img_dict["id"]: img_dict["file_name"]
             for img_dict in data["images"]
         }
-    assert pairs_img_id_to_filename_in != pairs_img_id_to_filename_alphabetical
+    assert map_img_id_to_filename_in != map_img_id_to_filename_alphabetical
 
-    # Check image_id in dataframe is assigned alphabetically
-    pairs_img_id_filename_out = {
-        id: file
-        for file, id in zip(df["image_filename"], df["image_id"], strict=True)
-    }
-    assert pairs_img_id_filename_out == pairs_img_id_to_filename_alphabetical
+    # Check image_id in output dataset is assigned alphabetically
+    assert (
+        ds.attrs["map_image_id_to_filename"]
+        == map_img_id_to_filename_alphabetical
+    )
 
 
-def test_dataframe_from_same_annotations(annotations_test_data: dict):
-    """Test whether the same annotations exported to VIA and COCO formats
-    produce the same dataframe, except for the image width and height columns.
+def test_dataset_from_same_annotations(annotations_test_data: dict):
+    """Test that the same annotations exported to VIA and COCO formats
+    produce the same dataset, except for the image width and height columns.
 
-    We use the `_subset` files because we know they contain the
+    We use the `_subset.json` test files because we know they contain the
     same annotations.
     """
     # Read data into dataframes
-    df_via = from_files(
+    ds_via = from_files(
         annotations_test_data["small_bboxes_VIA_subset.json"],
         format="VIA",
     )
-    df_coco = from_files(
+    ds_coco = from_files(
         annotations_test_data["small_bboxes_COCO_subset.json"],
         format="COCO",
     )
 
-    # Compare dataframes excluding `image_width`, `image_height` and
-    # `category_id` columns
-    assert df_via.drop(
-        columns=["image_width", "image_height", "category_id"]
-    ).equals(
-        df_coco.drop(columns=["image_width", "image_height", "category_id"])
+    # Compare datasets ignoring datasetattributes
+    # Two datasets are equal if they have matching variables and coordinates
+    assert ds_via.equals(ds_coco)
+
+    # Check attributes individually
+    assert (
+        ds_via.attrs["annotation_files"] != ds_coco.attrs["annotation_files"]
+    )
+    assert (
+        ds_via.attrs["annotation_format"] != ds_coco.attrs["annotation_format"]
+    )
+    assert (
+        ds_via.attrs["map_category_to_str"]
+        == ds_coco.attrs["map_category_to_str"]
+    )
+    assert (
+        ds_via.attrs["map_image_id_to_filename"]
+        == ds_coco.attrs["map_image_id_to_filename"]
+    )
+    assert (
+        ds_via.attrs["images_directories"]
+        == ds_coco.attrs["images_directories"]
     )
 
 
@@ -597,21 +701,18 @@ def test_dataframe_from_same_annotations(annotations_test_data: dict):
             "string_integer",
             1,
         ),  # category ID is a string ("1") ---> should be 1 in df
-        # VIA category IDs are retained
         (
             "VIA_JSON_sample_1.json",
             "VIA",
             "string_category",
-            0,
-        ),  # category ID is a string ("crab") ---> should be factorized
+            1,
+        ),  # category ID is a string ("crab") ---> should be 1 in df
         (
             "small_bboxes_COCO.json",
             "COCO",
             "integer",
-            0,
-        ),  # category ID is an integer (1) ---> should be 0 in df
-        # COCO category IDs are always 1-based indices, and transformed to
-        # 0-based indices when read into df
+            1,
+        ),  # category ID is an integer (1) ---> should be 1 in df
     ],
 )
 def test_category_id_extraction(
@@ -621,45 +722,51 @@ def test_category_id_extraction(
     expected_category_id: int | None,
     annotations_test_data: dict,
 ):
-    """Test that the category_id is extracted correctly from the input file."""
-    df = _from_single_file(
-        file_path=annotations_test_data[input_file],
-        format=format,
+    """Test that the category_id is extracted correctly from the input file.
+
+    VIA categories are saved as strings, while COCO categories are saved as
+    integers. Note that COCO category IDs are always 1-based indices, and
+    maintained when read into the ethology dataframe (0 is reserved for the
+    background class).
+    """
+    df = _df_from_single_file(
+        file_path=annotations_test_data[input_file], format=format
     )
 
+    # If no category in input file, the category_id column should be None
     if case_category_id == "empty":
         df["category_id"].apply(lambda x: x is expected_category_id).all()
 
-    elif case_category_id in ["string_integer", "integer"]:
+    # Category ID should be an integer
+    elif case_category_id in ["string_integer", "integer", "string_category"]:
         assert df["category_id"].dtype == int
         assert df["category_id"].unique() == [expected_category_id]
 
+    # Category ID should be factorized into 1-based integers if saved as
+    # strings
     elif case_category_id == "string_category":
-        assert df["category_id"].dtype == int
-        assert df["category_id"].unique() == [expected_category_id]
-        assert all(df["category_id"] == df["category"].factorize()[0])
+        assert all(df["category_id"] == df["category"].factorize()[0] + 1)
 
 
 @pytest.mark.parametrize(
     "input_file_type, format",
     [
-        ("multiple", "VIA"),
         ("single", "COCO"),
         ("multiple", "COCO"),
+        ("multiple", "VIA"),
     ],
 )
-def test_sorted_annotations_by_image_filename(
+def test_annotations_sorted_by_image_filename(
     input_file_type: str,
     format: Literal["VIA", "COCO"],
     annotations_test_data: dict,
-    # multiple_files: dict,
 ):
-    """Test that the annotations are sorted by image filename.
+    """Test that the annotations in the dataset are sorted by image filename.
 
-    We use the `small_bboxes_image_id_COCO` data because the list of
-    image filenames is not sorted.
+    We use the `small_bboxes_image_id_COCO.json` data because the list of
+    image filenames in them is not sorted.
 
-    We don't test with a single VIA file because the VIA tool always
+    We don't test the case of a single VIA file because the VIA tool always
     outputs the image dictionaries under `_via_img_metadata` sorted by
     filename.
     """
@@ -680,10 +787,12 @@ def test_sorted_annotations_by_image_filename(
     list_input_images = get_list_images(input_filepaths, format=format)
     assert list_input_images != sorted(list_input_images)
 
-    # Compute bboxes dataframe
-    df = from_files(file_paths=input_filepaths, format=format)
+    # Compute annotations dataset
+    ds = from_files(file_paths=input_filepaths, format=format)
 
-    # Check that the annotations in the dataframe are sorted by image filename
-    assert df["image_filename"].to_list() == sorted(
-        df["image_filename"].to_list()
+    # Check that the image_id to filename map in the dataset is sorted
+    sorted_filenames = sorted(ds.attrs["map_image_id_to_filename"].values())
+    map_img_id_to_filename_sorted = dict(enumerate(sorted_filenames))
+    assert (
+        ds.attrs["map_image_id_to_filename"] == map_img_id_to_filename_sorted
     )
