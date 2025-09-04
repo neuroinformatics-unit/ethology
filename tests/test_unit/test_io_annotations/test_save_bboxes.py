@@ -11,7 +11,6 @@ import pytest
 
 from ethology.io.annotations.load_bboxes import from_files
 from ethology.io.annotations.save_bboxes import (
-    MAP_COLUMNS_TO_COCO_FIELDS,
     _add_COCO_data_to_df,
     _create_COCO_dict,
     _get_raw_df_from_ds,
@@ -351,7 +350,9 @@ def test_create_COCO_dict(sample_bboxes_df: Callable):
     assert all(x in COCO_dict for x in ["images", "categories", "annotations"])
 
     # Check keys in each section
-    map_df_columns_to_coco = copy.deepcopy(MAP_COLUMNS_TO_COCO_FIELDS)
+    map_df_columns_to_coco = copy.deepcopy(
+        ValidBBoxesDataFrameCOCO.map_df_columns_to_COCO_fields()
+    )
     for section, section_mapping in map_df_columns_to_coco.items():
         assert all(
             [

@@ -405,6 +405,32 @@ class ValidBBoxesDataFrameCOCO(pa.DataFrameModel):
         nullable=True,
     )
 
+    @staticmethod
+    def map_df_columns_to_COCO_fields() -> dict:
+        """Map COCO-exportable dataframe columns to COCO fields."""
+        return {
+            "images": {
+                "image_id": "id",
+                "image_filename": "file_name",
+                "image_width": "width",
+                "image_height": "height",
+            },
+            "categories": {
+                "category_id": "id",
+                "category": "name",
+                "supercategory": "supercategory",
+            },
+            "annotations": {
+                "annotation_id": "id",
+                "area": "area",
+                "bbox": "bbox",
+                "image_id": "image_id",
+                "category_id": "category_id",
+                "iscrowd": "iscrowd",
+                "segmentation": "segmentation",
+            },
+        }
+
     @pa.dataframe_check
     def check_idx_and_annotation_id(cls, df: pd.DataFrame) -> Series[bool]:
         """Check that the index and the "annotation_id" column are equal."""

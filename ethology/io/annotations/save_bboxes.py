@@ -19,31 +19,6 @@ from ethology.io.annotations.validate import (
     _check_output,
 )
 
-# Mapping of dataframe columns to COCO fields
-MAP_COLUMNS_TO_COCO_FIELDS = {
-    "images": {
-        "image_id": "id",
-        "image_filename": "file_name",
-        "image_width": "width",
-        "image_height": "height",
-    },
-    "categories": {
-        "category_id": "id",
-        "category": "name",
-        "supercategory": "supercategory",
-    },
-    "annotations": {
-        "annotation_id": "id",
-        "area": "area",
-        "bbox": "bbox",
-        "image_id": "image_id",
-        "category_id": "category_id",
-        "iscrowd": "iscrowd",
-        "segmentation": "segmentation",
-        # "confidence": "score",  # only for predictions
-    },
-}
-
 
 @_check_input(validator=ValidBboxesDataset)
 @_check_output(validator=ValidCOCO)  # check output is ethology importable
@@ -55,12 +30,12 @@ def to_COCO_file(ds: xr.Dataset, output_filepath: str | Path):
     ds : xr.Dataset
         Bounding boxes annotations xarray dataset.
     output_filepath : str or Path
-        Output file path.
+        Path for the output COCO JSON file.
 
     Returns
     -------
     output_filepath : str
-        Output file path.
+        Path for the output COCO JSON file.
 
     """
     # Compute valid COCO dataframe from xarray dataset
@@ -74,23 +49,24 @@ def to_COCO_file(ds: xr.Dataset, output_filepath: str | Path):
     return output_filepath
 
 
+@_check_input(validator=ValidBboxesDataset)
 @pa.check_types
 def _to_COCO_exportable_df(
     ds: xr.Dataset,
 ) -> DataFrame[ValidBBoxesDataFrameCOCO]:
-    """Convert annotations xarray dataset to a COCO exportable dataframe.
+    """Convert dataset of bounding boxes annotations to a COCO-exportable df.
 
     The returned dataframe is validated using ValidBBoxesDataFrameCOCO.
 
     Parameters
     ----------
     ds : xr.Dataset
-        Bounding boxes annotations xarray dataset.
+        A valid dataset of bounding boxes annotations.
 
     Returns
     -------
     df : pd.DataFrame
-        A valid dataframe of bounding boxes annotations exportable to COCO.
+        A dataframe of bounding boxes annotations exportable to COCO.
 
     """
     # Prepare dataframe from xarray dataset
@@ -115,62 +91,21 @@ def _to_COCO_exportable_df(
     return df[cols_to_select]
 
 
-@pa.check_types
-def _create_COCO_dict(df: DataFrame[ValidBBoxesDataFrameCOCO]) -> dict:
-    """Extract COCO dictionary from a COCO exportable dataframe.
-
-    Parameters
-    ----------
-    df : DataFrame[ValidBBoxesDataFrameCOCO]
-        COCO exportable dataframe.
-
-    Returns
-    -------
-    COCO_dict : dict
-        COCO dictionary.
-
-    """
-    COCO_dict: dict[str, Any] = {}
-    for sections in ["images", "categories", "annotations"]:
-        # Extract and rename required columns for this section
-        list_required_columns = MAP_COLUMNS_TO_COCO_FIELDS[sections].keys()
-        df_section = df[list_required_columns].copy()
-        df_section = df_section.rename(
-            columns=MAP_COLUMNS_TO_COCO_FIELDS[sections]
-        )
-
-        # Extract rows as lists of dictionaries
-        if sections == "annotations":
-            row_dicts = df_section.to_dict(orient="records")
-        else:
-            row_dicts = df_section.drop_duplicates().to_dict(orient="records")
-
-        COCO_dict[sections] = row_dicts
-
-    # Add info section to COCO_dict
-    COCO_dict["info"] = {
-        "date_created": datetime.now(pytz.utc).strftime(
-            "%a %b %d %Y %H:%M:%S GMT%z"
-        ),
-        "description": "Bounding boxes annotations exported from ethology",
-        "url": "https://github.com/neuroinformatics-unit/ethology",
-    }
-
-    return COCO_dict
-
-
+@_check_input(validator=ValidBboxesDataset)
 def _get_raw_df_from_ds(ds: xr.Dataset) -> pd.DataFrame:
-    """Get raw dataframe derived from xarray dataset.
+    """Get preliminary dataframe from a dataset of bounding boxes annotations.
+
+    The returned dataframe is not COCO-exportable.
 
     Parameters
     ----------
     ds : xr.Dataset
-        Bounding boxes annotations xarray dataset.
+        A valid dataset of bounding boxes annotations.
 
     Returns
     -------
     df : pd.DataFrame
-        Wrangled dataframe derived from the xarray dataset.
+        A preliminary dataframe of bounding boxes annotations.
 
     """
     # Create dataframe from xarray dataset
@@ -202,20 +137,27 @@ def _get_raw_df_from_ds(ds: xr.Dataset) -> pd.DataFrame:
     return df_raw
 
 
-def _add_COCO_data_to_df(df: pd.DataFrame, ds_attrs: dict) -> pd.DataFrame:
-    """Add COCO required data to ds-derived dataframe.
+@pa.check_types
+def _add_COCO_data_to_df(
+    df: pd.DataFrame, ds_attrs: dict
+) -> DataFrame[ValidBBoxesDataFrameCOCO]:
+    """Add COCO-required data to preliminary dataframe.
+
+    The input dataframe is obtained from a dataset of bounding boxes
+    annotations using ``_get_raw_df_from_ds`` and is not COCO-exportable.
 
     Parameters
     ----------
     df : pd.DataFrame
-        Dataset-derived dataframe.
+        Preliminary dataframe of bounding boxes annotations derived
+        from a dataset of bounding boxes annotations.
     ds_attrs : dict
-        Dataset attributes.
+        Attributes of the dataset of bounding boxes annotations.
 
     Returns
     -------
     df : pd.DataFrame
-        Dataset-derived dataframe with COCO required data.
+        COCO-exportable dataframe of bounding boxes annotations.
 
     """
     # image
@@ -251,8 +193,8 @@ def _add_COCO_data_to_df(df: pd.DataFrame, ds_attrs: dict) -> pd.DataFrame:
         ]
     )
 
-    # Compute "category" as string from "category_id"
-    # rename "category" to "category_id" (in dataset it is an integer)
+    # Rename "category" to "category_id" (in dataset it is an integer)
+    # and compute "category" as string from "category_id"
     map_category_to_str = ds_attrs["map_category_to_str"]
     df.rename(columns={"category": "category_id"}, inplace=True)
     df["category"] = df["category_id"].map(map_category_to_str)
@@ -272,3 +214,50 @@ def _add_COCO_data_to_df(df: pd.DataFrame, ds_attrs: dict) -> pd.DataFrame:
     ]  # need to serialise lists first before dropping duplicates
 
     return df
+
+
+@pa.check_types
+def _create_COCO_dict(df: DataFrame[ValidBBoxesDataFrameCOCO]) -> dict:
+    """Extract COCO dictionary from a COCO-exportable dataframe.
+
+    Parameters
+    ----------
+    df : DataFrame[ValidBBoxesDataFrameCOCO]
+        COCO exportable dataframe.
+
+    Returns
+    -------
+    COCO_dict : dict
+        COCO dictionary.
+
+    """
+    COCO_dict: dict[str, Any] = {}
+    map_columns_to_COCO_fields = (
+        ValidBBoxesDataFrameCOCO.map_df_columns_to_COCO_fields()
+    )
+    for sections in ["images", "categories", "annotations"]:
+        # Extract and rename required columns for this section
+        list_required_columns = map_columns_to_COCO_fields[sections].keys()
+        df_section = df[list_required_columns].copy()
+        df_section = df_section.rename(
+            columns=map_columns_to_COCO_fields[sections]
+        )
+
+        # Extract rows as lists of dictionaries
+        if sections == "annotations":
+            row_dicts = df_section.to_dict(orient="records")
+        else:
+            row_dicts = df_section.drop_duplicates().to_dict(orient="records")
+
+        COCO_dict[sections] = row_dicts
+
+    # Add info section to COCO_dict
+    COCO_dict["info"] = {
+        "date_created": datetime.now(pytz.utc).strftime(
+            "%a %b %d %Y %H:%M:%S GMT%z"
+        ),
+        "description": "Bounding boxes annotations exported from ethology",
+        "url": "https://github.com/neuroinformatics-unit/ethology",
+    }
+
+    return COCO_dict
