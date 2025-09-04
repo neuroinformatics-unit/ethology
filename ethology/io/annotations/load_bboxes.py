@@ -45,7 +45,10 @@ def from_files(
         -The "space" dimension holds the "x" or "y" coordinates.
         - The "id" dimension corresponds to the annotation ID per image and
         it is assigned from 0 to the max number of annotations per image in
-        the full dataset.
+        the full dataset. Note that the annotation IDs are not necessarily
+        consistent across images. This means that the annotations with ID `m`
+        in image `t` and image `t+1` will likely not correspond to the same
+        individual.
 
         The dataset consists of three arrays:
         - "position", with dimensions (image_id, space, id)
@@ -95,13 +98,13 @@ def from_files(
     else:
         df_all = _df_from_single_file(file_paths, format=format)
 
-    # Get map from "image_id" to image_filename
+    # Compute dataset attributes from intermediate dataframe
+    # map from "image_id" to image_filename
     mapping_df = df_all[["image_filename", "image_id"]].drop_duplicates()
     map_image_id_to_filename = mapping_df.set_index("image_id").to_dict()[
         "image_filename"
     ]
-
-    # Get map from "category_id" to category name
+    # map from "category_id" to category name
     map_category_to_str = (
         df_all[["category_id", "category"]]
         .drop_duplicates()
@@ -112,10 +115,7 @@ def from_files(
     # Convert dataframe to xarray dataset
     ds = _df_to_xarray_ds(df_all)
 
-    # Validate
-    # ValidBboxesDataset(ds)
-
-    # Add metadata to the xarray dataset
+    # Add attributes to the xarray dataset
     ds.attrs = {
         "annotation_files": file_paths,
         "annotation_format": format,
@@ -461,16 +461,19 @@ def _df_to_xarray_ds(df: pd.DataFrame) -> xr.Dataset:
     -------
     xr.Dataset
         an xarray dataset with the following dimensions:
-        - "image_id": holds the 0-based index of the image in the "images"
+        - `image_id`: holds the 0-based index of the image in the "images"
         list of the COCO JSON file;
-        - "space": "x" or "y";
-        - "id": annotation ID per image, assigned from 0 to the max number of
-        annotations per image in the full dataset.
+        - `space`: `x` or `y`;
+        - `id`: annotation ID per image, assigned from 0 to the max number of
+        annotations per image in the full dataset. Note that the annotation IDs
+        are not necessarily consistent across images. This means that the
+        annotations with ID `m` in image `t` and image `t+1` will likely not
+        correspond to the same individual.
 
         The dataset is made up of the following arrays:
-        - position: (image_id, space, id)
-        - shape: (image_id, space, id)
-        - category: (image_id, id)
+        - `position`: (`image_id`, `space`, `id`)
+        - `shape`: (`image_id`, `space`, `id`)
+        - `category`: (`image_id`, `id`)
 
     """
     # Compute max number of annotations per image
@@ -520,15 +523,17 @@ def _df_to_xarray_ds(df: pd.DataFrame) -> xr.Dataset:
             list_arrays_padded, axis=0
         )  # (n_images, n_max_annotations, N_DIM)
 
-        # reorder axes if required
+        # reorder axes for "position" and "shape"
+        # to have (n_images, N_DIM, n_max_annotations)
         if "category" not in key:
             array_dict[key] = np.moveaxis(array_dict[key], -1, 1)
+        # squeeze the last axis (N_DIM=1) for "category"
+        else:
+            array_dict[key] = array_dict[key].squeeze(axis=-1)
 
-    # ----
     # Modify x_min and y_min to represent the bbox centre
     array_dict["position_array"] += array_dict["shape_array"] / 2
 
-    # Create xarray dataset
     return xr.Dataset(
         data_vars=dict(
             position=(
@@ -538,14 +543,12 @@ def _df_to_xarray_ds(df: pd.DataFrame) -> xr.Dataset:
             shape=(["image_id", "space", "id"], array_dict["shape_array"]),
             category=(
                 ["image_id", "id"],
-                array_dict["category_array"].squeeze(axis=-1),
+                array_dict["category_array"],
             ),
         ),
         coords=dict(
             image_id=df["image_id"].unique(),
             space=["x", "y"],
             id=range(max_annotations_per_image),
-            # annotation ID per frame; could be consistent across frames
-            # or not
         ),
     )
