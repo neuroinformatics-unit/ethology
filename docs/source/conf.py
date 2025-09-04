@@ -151,6 +151,16 @@ myst_url_schemes = {
     "napari": "https://napari.org/dev/{{path}}",
 }
 
+intersphinx_mapping = {
+    "xarray": ("https://docs.xarray.dev/en/stable/", None),
+    "pandas": ("https://pandas.pydata.org/pandas-docs/stable/", None),
+    "python": ("https://docs.python.org/3", None),
+    "loguru": ("https://loguru.readthedocs.io/en/stable/", None),
+    "matplotlib": ("https://matplotlib.org/stable/", None),
+    "numpy": ("https://numpy.org/doc/stable/", None),
+    "pandera": ("https://pandera.readthedocs.io/en/stable/", None),
+}
+
 
 # What to show on the 404 page
 notfound_context = {

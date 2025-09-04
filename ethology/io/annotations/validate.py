@@ -1,4 +1,4 @@
-"""Validators for supported annotation files."""
+"""Validators for annotation files and datasets."""
 
 import json
 from collections.abc import Callable
@@ -21,7 +21,7 @@ from ethology.io.annotations.json_schemas.utils import (
 
 @define
 class ValidVIA:
-    """Class for valid VIA JSON files.
+    """Class for valid VIA JSON annotation files.
 
     It checks the input file is a valid JSON file, matches
     the VIA schema and contains the required keys.
@@ -114,7 +114,7 @@ class ValidVIA:
 
 @define
 class ValidCOCO:
-    """Class for valid COCO JSON files.
+    """Class for valid COCO JSON annotation files.
 
     It checks the input file is a valid JSON file, matches
     the COCO schema and contains the required keys.
@@ -228,16 +228,17 @@ class ValidCOCO:
 
 @define
 class ValidBboxesDataset:
-    """Class for validating bboxes annotations datasets.
+    """Class for valid ``ethology`` datasets with bounding boxes annotations.
 
     It checks that the input dataset has:
-    - dimensions: "image_id", "space", "id"
-    - data variables: "position" and "shape"
+
+    - ``image_id``, ``space``, ``id`` as dimensions
+    - ``position`` and ``shape`` as data variables
 
     Attributes
     ----------
     dataset : xarray.Dataset
-        The dataset to validate.
+        The xarray dataset to validate.
 
     Raises
     ------
@@ -248,8 +249,8 @@ class ValidBboxesDataset:
 
     Notes
     -----
-    The dataset can have other data variables and dimensions, but they are not
-    checked.
+    The dataset can have other data variables and dimensions, but only the
+    required ones are checked.
 
     """
 
@@ -291,11 +292,66 @@ class ValidBboxesDataset:
                 f"Missing required dimensions: {sorted(missing_dims)}"
             )
 
+    # @dataset.validator
+    # def _check_space_dimensions(self, attribute, value):
+    #     """Ensure the space dimensions are either 'x', 'y'
+    # or 'x','y', 'z'."""
+    #     if set(value.dims) - {"x", "y"}:
+    #         raise ValueError(
+    #             f"Space dimensions must be either 'x' or 'y',
+    # but got {set(value.dims)}"
+    #         )
+
 
 class ValidBBoxesDataFrameCOCO(pa.DataFrameModel):
-    """Validate a dataframe of bounding boxes annotations for COCO export.
+    """Class for valid bounding boxes annotations dataframes for COCO export.
 
-    See https://cocodataset.org/#format-data for more details.
+    The validation checks the required columns exists and their types are
+    correct. It additionally checks that the index and the
+    ``annotation_id`` column are equal.
+
+    Attributes
+    ----------
+    idx : Index[int]
+        Index of the dataframe. Should be greater than or equal to 0 and equal
+        to the ``annotation_id`` column.
+    annotation_id : int
+        Unique identifier for the annotation. Should be equal to the index.
+    image_id : int
+        Unique identifier for each of the images.
+    image_filename : str
+        Filename of the image.
+    image_width : int
+        Width of each of the images.
+    image_height : int
+        Height of each of the images.
+    bbox : list[float]
+        Bounding box coordinates as xmin, ymin, width, height.
+    area : float
+        Bounding box area.
+    segmentation : list[list[float]]
+        Bounding box segmentation masks as list of lists of coordinates.
+    category : str
+        Category of the annotation.
+    supercategory : str
+        Supercategory of the annotation.
+    iscrowd : int
+        Whether the annotation is a crowd. Should be 0 or 1.
+
+    Raises
+    ------
+    pa.errors.SchemaError
+        If the dataframe does not match the schema.
+
+    Notes
+    -----
+    See `COCO format documentation <https://cocodataset.org/#format-data>`_
+    for more details.
+
+    See Also
+    --------
+    :class:`pandera.api.pandas.model.DataFrameModel`
+
     """
 
     # index
@@ -345,6 +401,7 @@ class ValidBBoxesDataFrameCOCO(pa.DataFrameModel):
     # other
     iscrowd: int = pa.Field(
         description="Whether the annotation is a crowd",
+        isin=[0, 1],
         nullable=True,
     )
 
