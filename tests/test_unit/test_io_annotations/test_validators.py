@@ -382,6 +382,51 @@ def test_no_categories_behaviour(
         ) in str(excinfo.value)
 
 
+@pytest.mark.parametrize(
+    "validator, input_file, expected_exception",
+    [
+        (
+            ValidCOCO,
+            "small_bboxes_no_supercat_COCO.json",
+            does_not_raise(),
+        ),
+        (
+            ValidVIA,
+            "small_bboxes_no_supercat_VIA.json",
+            does_not_raise(),
+        ),
+    ],
+)
+def test_no_supercategories_behaviour(
+    validator: type[ValidVIA | ValidCOCO],
+    input_file: str,
+    expected_exception: pytest.raises,
+    annotations_test_data: dict,
+):
+    """Test the behaviour of the validators when the input file does not
+    specify any supercategories.
+
+    COCO and VIA files exported with the VIA tool will always have a
+    supercategory, but this can be set to " " (i.e., whitespace).
+
+    COCO files not exported with the VIA tool may not have a supercategory.
+
+    In this test we use a COCO file that does not have a supercategory, and
+    a VIA file that has supercategory set to " " (i.e., whitespace).
+
+    """
+    filepath = annotations_test_data[input_file]
+
+    with expected_exception as excinfo:
+        _ = validator(path=filepath)
+
+    if excinfo:
+        assert (
+            "Empty value(s) found for the required key(s) "
+            "['annotations', 'categories']"
+        ) in str(excinfo.value)
+
+
 def test_null_category_ID_behaviour(annotations_test_data: dict):
     """Test the behaviour of the validators when the input file contains
     annotations with null category IDs.

@@ -156,7 +156,7 @@ class ValidCOCO:
             "main": ["images", "annotations", "categories"],
             "images": ["id", "file_name"],
             "annotations": ["id", "image_id", "bbox", "category_id"],
-            "categories": ["id", "name", "supercategory"],
+            "categories": ["id", "name"],  # exclude "supercategory"
         },
         init=False,
     )
@@ -389,12 +389,10 @@ class ValidBBoxesDataFrameCOCO(pa.DataFrameModel):
     )
 
     # category columns
+    # we do not require supercategories to be present in the
+    # dataframe since they are not currently added to the xarray dataset
     category: str = pa.Field(
         description="Category of the annotation",
-        nullable=True,
-    )
-    supercategory: str = pa.Field(
-        description="Supercategory of the annotation",
         nullable=True,
     )
 
