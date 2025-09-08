@@ -100,14 +100,14 @@ def get_paths_test_data() -> Callable[[dict, str], dict]:
         """
         filename_to_path = {}
 
-        files_to_exclude = [".DS_Store"]
+        filenames_to_exclude = [".DS_Store"]
 
         # In the pooch registry, each file is indexed by its path relative to
         # the test_data directory.
         for relative_filepath in pooch_registry.registry:
             if (
                 relative_filepath.startswith(f"{subdir_name}/")
-                and Path(relative_filepath).name not in files_to_exclude
+                and Path(relative_filepath).name not in filenames_to_exclude
             ):
                 fetched_filepath = Path(
                     pooch_registry.fetch(

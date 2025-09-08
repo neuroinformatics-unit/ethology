@@ -19,7 +19,9 @@ from ethology.io.annotations.load_bboxes import (
 
 
 def count_imgs_and_annots_in_input_file(
-    file_path: Path, format: Literal["VIA", "COCO"]
+    file_path: Path,
+    format: Literal["VIA", "COCO"],
+    unique_images_with_annotations: bool = False,
 ) -> tuple[int, int]:
     """Compute the number of images and annotations in the input file.
 
@@ -36,7 +38,13 @@ def count_imgs_and_annots_in_input_file(
             for img_dict in data["_via_img_metadata"].values()
         )
     elif format == "COCO":
-        n_images = len(data["images"])
+        if unique_images_with_annotations:
+            n_images = len(
+                set([annot["image_id"] for annot in data["annotations"]])
+            )
+        else:
+            n_images = len(data["images"])
+            # includes duplicates and images without annotations
         n_annotations = len(data["annotations"])
     else:
         raise ValueError("Unsupported format")
@@ -123,8 +131,8 @@ def assert_dataframe(
     df: pd.DataFrame,
     expected_n_annotations: int,
     expected_n_images: int,
-    expected_supercategories: str | list[str],
-    expected_categories: str | list[str],
+    expected_supercategories: str | list[str] | None = None,
+    expected_categories: str | list[str] | None = None,
     expected_annots_per_image: int | None = None,
 ):
     """Check that the dataframe has the expected shape and content."""
@@ -154,11 +162,13 @@ def assert_dataframe(
         "image_height",
     ]
 
-    # Check supercategories are as expected
-    assert df["supercategory"].unique() == expected_supercategories
+    # Check supercategories if all annotations have the same supercategory
+    if expected_supercategories:
+        assert df["supercategory"].unique() == expected_supercategories
 
-    # Check categories are as expected
-    assert df["category"].unique() == expected_categories
+    # Check categories if all annotations have the same category
+    if expected_categories:
+        assert df["category"].unique() == expected_categories
 
     # Check number of annotations per image if provided
     if expected_annots_per_image:
@@ -333,29 +343,62 @@ def test_df_from_single_file_unsupported():
 
 
 @pytest.mark.parametrize(
-    ("input_file, format"),
+    ("input_file, format, expected_category_data"),
     [
-        ("VIA_JSON_sample_1.json", "VIA"),  # medium VIA file
-        ("VIA_JSON_sample_2.json", "VIA"),  # medium VIA file
-        ("small_bboxes_VIA.json", "VIA"),  # small VIA file
-        ("COCO_JSON_sample_1.json", "COCO"),  # medium COCO file
-        ("COCO_JSON_sample_2.json", "COCO"),  # medium COCO file
-        ("small_bboxes_COCO.json", "COCO"),  # small COCO file
+        (
+            "VIA_JSON_sample_1.json",
+            "VIA",
+            ("crab", "animal"),
+        ),  # medium VIA file
+        (
+            "VIA_JSON_sample_2.json",
+            "VIA",
+            ("crab", "animal"),
+        ),  # medium VIA file
+        ("small_bboxes_VIA.json", "VIA", ("crab", "animal")),  # small VIA file
+        (
+            "COCO_JSON_sample_1.json",
+            "COCO",
+            ("crab", "animal"),
+        ),  # medium COCO file
+        (
+            "COCO_JSON_sample_2.json",
+            "COCO",
+            ("crab", "animal"),
+        ),  # medium COCO file
+        (
+            "small_bboxes_COCO.json",
+            "COCO",
+            ("crab", "animal"),
+        ),  # small COCO file
+        (
+            "ACTD_1_Terrestrial_group_data_CCT.json",
+            "COCO",
+            (None, ""),  # do not check categories
+        ),  # external COCO file 1
+        (
+            "SnapshotSerengetiBboxes_20190903.json",
+            "COCO",
+            (None, ""),  # do not check categories
+        ),  # external COCO file 2
     ],
 )
 def test_df_from_single_file(
     input_file: str,
     format: Literal["VIA", "COCO"],
+    expected_category_data: tuple[str, str],
     annotations_test_data: dict,
 ):
     """Test the single file reader reads correctly a single file
     of the supported formats as a dataframe.
     """
-    # Compute number of annotations and images in input file
-    expected_n_images, expected_n_annotations = (
+    # Compute number of annotations and unique images with annotations
+    # in input file
+    expected_n_unique_images_with_annotations, expected_n_annotations = (
         count_imgs_and_annots_in_input_file(
             file_path=annotations_test_data[input_file],
             format=format,
+            unique_images_with_annotations=True,
         )
     )
 
@@ -370,10 +413,12 @@ def test_df_from_single_file(
     assert_dataframe(
         df,
         expected_n_annotations,
-        expected_n_images,
-        expected_supercategories="animal",
-        expected_categories="crab",
-        expected_annots_per_image=1 if expected_n_images < 5 else None,
+        expected_n_unique_images_with_annotations,
+        expected_categories=expected_category_data[0],
+        expected_supercategories=expected_category_data[1],
+        expected_annots_per_image=1
+        if expected_n_unique_images_with_annotations < 5
+        else None,
     )
 
 
