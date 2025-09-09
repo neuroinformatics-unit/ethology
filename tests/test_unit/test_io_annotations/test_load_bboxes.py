@@ -18,6 +18,33 @@ from ethology.io.annotations.load_bboxes import (
 )
 
 
+def check_if_file_includes_image_shape_data(
+    file_path: Path, format: Literal["VIA", "COCO"]
+) -> bool:
+    """Check if the input file includes image shape data."""
+    with open(file_path) as f:
+        data = json.load(f)
+
+    if format == "VIA":
+        return any(
+            all(
+                ky in img_dict["file_attributes"] for ky in ["width", "height"]
+            )
+            and img_dict["file_attributes"]["width"] != 0
+            and img_dict["file_attributes"]["height"] != 0
+            for img_dict in data["_via_img_metadata"].values()
+        )
+    elif format == "COCO":
+        return any(
+            [
+                img_dict["width"] != 0 and img_dict["height"] != 0
+                for img_dict in data["images"]
+            ]
+        )
+    else:
+        raise ValueError("Unsupported format")
+
+
 def count_imgs_and_annots_in_input_file(
     file_path: Path,
     format: Literal["VIA", "COCO"],
@@ -32,12 +59,29 @@ def count_imgs_and_annots_in_input_file(
         data = json.load(f)
 
     if format == "VIA":
-        n_images = len(data["_via_img_metadata"])
         n_annotations = sum(
             len(img_dict["regions"]) if "regions" in img_dict else 0
             for img_dict in data["_via_img_metadata"].values()
         )
+        if unique_images_with_annotations:
+            unique_filenames = set(
+                [
+                    (ky, img_dict["filename"])
+                    for ky, img_dict in data["_via_img_metadata"].items()
+                ]
+            )
+            n_images = sum(
+                [
+                    "regions" in data["_via_img_metadata"][ky]
+                    and len(data["_via_img_metadata"][ky]["regions"]) != 0
+                    for ky, _ in unique_filenames
+                ]
+            )
+        else:
+            n_images = len(data["_via_img_metadata"])
+
     elif format == "COCO":
+        n_annotations = len(data["annotations"])
         if unique_images_with_annotations:
             n_images = len(
                 set([annot["image_id"] for annot in data["annotations"]])
@@ -45,7 +89,6 @@ def count_imgs_and_annots_in_input_file(
         else:
             n_images = len(data["images"])
             # includes duplicates and images without annotations
-        n_annotations = len(data["annotations"])
     else:
         raise ValueError("Unsupported format")
 
@@ -349,38 +392,52 @@ def test_df_from_single_file_unsupported():
             "VIA_JSON_sample_1.json",
             "VIA",
             ("crab", "animal"),
-        ),  # medium VIA file
+        ),  # medium VIA file, no image shape data
         (
             "VIA_JSON_sample_2.json",
             "VIA",
             ("crab", "animal"),
-        ),  # medium VIA file
-        ("small_bboxes_VIA.json", "VIA", ("crab", "animal")),  # small VIA file
+        ),  # medium VIA file, no image shape data
+        (
+            "small_bboxes_VIA.json",
+            "VIA",
+            ("crab", "animal"),
+        ),  # small VIA file, no image shape data
+        (
+            "small_bboxes_VIA_subset.json",
+            "VIA",
+            ("crab", "animal"),
+        ),  # small VIA file, includes image shape data
         (
             "COCO_JSON_sample_1.json",
             "COCO",
             ("crab", "animal"),
-        ),  # medium COCO file
+        ),  # medium COCO file, no image shape data (width and height are 0)
         (
             "COCO_JSON_sample_2.json",
             "COCO",
             ("crab", "animal"),
-        ),  # medium COCO file
+        ),  # medium COCO file, no image shape data (width and height are 0)
         (
             "small_bboxes_COCO.json",
             "COCO",
             ("crab", "animal"),
-        ),  # small COCO file
+        ),  # small COCO file, includes image shape data
+        (
+            "small_bboxes_COCO_subset.json",
+            "COCO",
+            ("crab", "animal"),
+        ),  # small COCO file, includes image shape data
         (
             "ACTD_1_Terrestrial_group_data_CCT.json",
             "COCO",
             (None, ""),  # do not check categories
-        ),  # external COCO file 1
+        ),  # external COCO file 1, includes image shape data
         (
             "SnapshotSerengetiBboxes_20190903.json",
             "COCO",
             (None, ""),  # do not check categories
-        ),  # external COCO file 2
+        ),  # external COCO file 2, includes image shape data
     ],
 )
 def test_df_from_single_file(
@@ -394,9 +451,10 @@ def test_df_from_single_file(
     """
     # Compute number of annotations and unique images with annotations
     # in input file
+    input_file_path = annotations_test_data[input_file]
     expected_n_unique_images_with_annotations, expected_n_annotations = (
         count_imgs_and_annots_in_input_file(
-            file_path=annotations_test_data[input_file],
+            file_path=input_file_path,
             format=format,
             unique_images_with_annotations=True,
         )
@@ -404,7 +462,7 @@ def test_df_from_single_file(
 
     # Compute bboxes dataframe from a single file
     df = _df_from_single_file(
-        file_path=annotations_test_data[input_file],
+        file_path=input_file_path,
         format=format,
     )
 
@@ -420,6 +478,14 @@ def test_df_from_single_file(
         if expected_n_unique_images_with_annotations < 5
         else None,
     )
+
+    # Check image shape data is present if present in the input file
+    if check_if_file_includes_image_shape_data(input_file_path, format):
+        assert not df["image_width"].isna().all()
+        assert not df["image_height"].isna().all()
+    else:
+        assert df["image_width"].isna().all()
+        assert df["image_height"].isna().all()
 
 
 @pytest.mark.parametrize(
@@ -542,8 +608,6 @@ def test_df_rows_from_valid_file(
     assert len(rows) == expected_n_annotations
 
     # Check each row contains required column data
-    # Note that "image_width" and "image_height" are not defined in the
-    # VIA file, so we exclude them from the required keys.
     required_keys = [
         "annotation_id",
         "image_filename",
@@ -558,12 +622,6 @@ def test_df_rows_from_valid_file(
         "image_width",
         "image_height",
     ]
-    if format == "VIA":
-        required_keys = [
-            key
-            for key in required_keys
-            if key not in ["image_width", "image_height"]
-        ]
     assert all([key in row for key in required_keys for row in rows])
 
 
