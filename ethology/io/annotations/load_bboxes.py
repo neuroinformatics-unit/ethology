@@ -55,7 +55,9 @@ def from_files(
         - "shape", with dimensions (image_id, space, id)
         - "category", with dimensions (image_id, id)
         The "category" array holds category IDs as 1-based integers,
-        matching the category IDs in the input file.
+        matching the category IDs in the input file. Note that supercategories
+        are not currently added to the xarray dataset, even if specified in the
+        input file.
 
         The dataset attributes include:
         - "annotation_files": a list of paths to the input annotation files
@@ -171,7 +173,17 @@ def _df_from_multiple_files(
     df_all = df_all.sort_values(by=["image_filename"])
 
     # Remove duplicates that may exist across files and reindex
-    df_all = df_all.drop_duplicates(ignore_index=True, inplace=False)
+    # Exclude image_width and image_height from the set of columns
+    # to identify duplicates, as these may differ across files.
+    df_all = df_all.drop_duplicates(
+        subset=[
+            col
+            for col in df_all.columns
+            if col not in ["image_width", "image_height"]
+        ],
+        ignore_index=True,
+        inplace=False,
+    )
 
     # Set the index name back to "annotation_id"
     df_all.index.name = "annotation_id"
@@ -196,9 +208,9 @@ def _df_from_single_file(
     -------
     pd.DataFrame
         Bounding boxes annotations dataframe. The dataframe is indexed
-        by "annotation_id" and has the following columns: "image_filename",
-        "image_id", "image_width", "image_height", "x_min", "y_min",
-        "width", "height", "supercategory", "category", "category_id".
+        by "annotation_id" and has the following columns: 'image_filename',
+        'image_id', 'x_min', 'y_min', 'width', 'height', 'supercategory',
+        'category', 'category_id', 'image_width', 'image_height'.
 
     """
     # Choose the appropriate validator and row-extraction function
@@ -294,6 +306,17 @@ def _df_rows_from_valid_VIA_file(file_path: Path) -> list[dict]:
     annotation_id = 0
     # loop through images
     for _, img_dict in image_metadata_dict.items():
+        # Extract width and height and cast to int if possible, otherwise
+        # set to None in the dataframe
+        image_width = img_dict["file_attributes"].get("width", None)
+        image_height = img_dict["file_attributes"].get("height", None)
+        try:
+            image_width = int(image_width)
+            image_height = int(image_height)
+        except (TypeError, ValueError):
+            image_width = None
+            image_height = None
+
         # loop thru annotations in the image
         for region in img_dict["regions"]:
             # Extract region data
@@ -322,6 +345,8 @@ def _df_rows_from_valid_VIA_file(file_path: Path) -> list[dict]:
                 "annotation_id": annotation_id,
                 "image_filename": img_dict["filename"],
                 "image_id": list_sorted_filenames.index(img_dict["filename"]),
+                "image_width": image_width,
+                "image_height": image_height,
                 "x_min": region_shape["x"],
                 "y_min": region_shape["y"],
                 "width": region_shape["width"],
@@ -376,11 +401,11 @@ def _df_rows_from_valid_COCO_file(file_path: Path) -> list[dict]:
     map_img_id_coco_to_width_height = {
         img_dict["id"]: (img_dict["width"], img_dict["height"])
         for img_dict in data_dict["images"]
-    }
+    }  # COCO files always have image width and height (can be 0)
     map_category_id_to_category_data = {
-        cat_dict["id"]: (cat_dict["name"], cat_dict["supercategory"])
+        cat_dict["id"]: (cat_dict["name"], cat_dict.get("supercategory", ""))
         for cat_dict in data_dict["categories"]
-    }  # category data: category name, supercategor name
+    }  # category data: category name, supercategory name
 
     # Build standard dataframe
     list_rows = []
@@ -406,8 +431,8 @@ def _df_rows_from_valid_COCO_file(file_path: Path) -> list[dict]:
             "annotation_id": annot_id,
             "image_filename": image_filename,
             "image_id": img_id_ethology,
-            "image_width": image_width,
-            "image_height": image_height,
+            "image_width": image_width if image_width != 0 else None,
+            "image_height": image_height if image_height != 0 else None,
             "x_min": x_min,
             "y_min": y_min,
             "width": width,
@@ -487,7 +512,14 @@ def _df_to_xarray_ds(df: pd.DataFrame) -> xr.Dataset:
     bool_id_diff_from_prev = df["image_id"].ne(df["image_id"].shift())
     indices_id_switch = np.argwhere(bool_id_diff_from_prev)[1:, 0]
 
-    # Stack position, shape and confidence arrays along ID axis
+    # Determine whether to store image shape in the dataset
+    # (if columns are present and not all rows are NaN)
+    include_image_shape = all(
+        img_dim in df.columns and not df[img_dim].isna().all()
+        for img_dim in ["image_width", "image_height"]
+    )
+
+    # Prepare mappings of keys to columns, padding and dtype
     map_key_to_columns = {
         "position_array": ["x_min", "y_min"],
         "shape_array": ["width", "height"],
@@ -498,6 +530,14 @@ def _df_to_xarray_ds(df: pd.DataFrame) -> xr.Dataset:
         "shape_array": (np.float64, np.nan),
         "category_array": (int, -1),
     }
+    if include_image_shape:
+        map_key_to_columns["image_shape_array"] = [
+            "image_width",
+            "image_height",
+        ]
+        map_key_to_padding["image_shape_array"] = (int, -1)
+
+    # Stack position, shape and confidence arrays along ID axis
     array_dict = {}
     for key in map_key_to_columns:
         # extract annotations per image
@@ -523,29 +563,39 @@ def _df_to_xarray_ds(df: pd.DataFrame) -> xr.Dataset:
             list_arrays_padded, axis=0
         )  # (n_images, n_max_annotations, N_DIM)
 
-        # reorder axes for "position" and "shape"
-        # to have (n_images, N_DIM, n_max_annotations)
-        if "category" not in key:
-            array_dict[key] = np.moveaxis(array_dict[key], -1, 1)
-        # squeeze the last axis (N_DIM=1) for "category"
-        else:
-            array_dict[key] = array_dict[key].squeeze(axis=-1)
+        # Reorder dimensions to have (n_images, N_DIM, n_max_annotations)
+        array_dict[key] = np.moveaxis(array_dict[key], -1, 1)
+
+        # squeeze the NDIM axis (N_DIM=1) for "category"
+        if key == "category_array":
+            array_dict[key] = array_dict[key].squeeze(axis=1)
 
     # Modify x_min and y_min to represent the bbox centre
     array_dict["position_array"] += array_dict["shape_array"] / 2
 
-    return xr.Dataset(
-        data_vars=dict(
-            position=(
-                ["image_id", "space", "id"],
-                array_dict["position_array"],
-            ),
-            shape=(["image_id", "space", "id"], array_dict["shape_array"]),
-            category=(
-                ["image_id", "id"],
-                array_dict["category_array"],
-            ),
+    # Build data vars dictionary
+    data_vars = dict(
+        position=(
+            ["image_id", "space", "id"],
+            array_dict["position_array"],
         ),
+        shape=(
+            ["image_id", "space", "id"],
+            array_dict["shape_array"],
+        ),
+        category=(
+            ["image_id", "id"],
+            array_dict["category_array"],
+        ),
+    )
+    if include_image_shape:
+        data_vars["image_shape"] = (
+            ["image_id", "space", "id"],
+            array_dict["image_shape_array"],
+        )
+
+    return xr.Dataset(
+        data_vars=data_vars,
         coords=dict(
             image_id=df["image_id"].unique(),
             space=["x", "y"],

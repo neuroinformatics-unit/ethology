@@ -224,22 +224,23 @@ def test_validate_bboxes_df_COCO(
 @pytest.mark.parametrize(
     "input_file",
     [
-        "small_bboxes_COCO.json",
-        "small_bboxes_VIA.json",
+        "small_bboxes_COCO_subset.json",  # includes image shape data
+        "small_bboxes_VIA_subset.json",  # includes image shape data
     ],
 )
 @pytest.mark.parametrize(
-    "drop_category",
+    "drop_variables",
     [
         True,
         False,
     ],
 )
 def test_get_raw_df_from_ds(
-    annotations_test_data: dict, input_file: str, drop_category: bool
+    annotations_test_data: dict, input_file: str, drop_variables: bool
 ):
     """Test the function that gets the raw dataframe derived from the xarray
-    dataset.
+    dataset fills in the appropriate category values, and includes the image
+    shape columns if present in the original dataset.
     """
     input_file = annotations_test_data[input_file]
     format: Literal["VIA", "COCO"] = (
@@ -247,15 +248,21 @@ def test_get_raw_df_from_ds(
     )
     ds = from_files(input_file, format=format)
 
-    # Drop category column if specified
-    if drop_category:
-        ds = ds.drop_vars(["category"])  # type: ignore
+    # Drop data arrays if specified
+    if drop_variables:
+        vars_to_drop = [
+            var
+            for var in ["category", "image_shape"]
+            if var in list(ds.data_vars.keys())
+        ]
+        ds = ds.drop_vars(vars_to_drop)  # type: ignore
 
     # Get raw dataframe
     df_raw = _get_raw_df_from_ds(ds)
 
-    # Check relevant columns
-    assert df_raw.columns.tolist() == [
+    # The "category" column should always be present in the raw dataframe,
+    # even if the category array was not present in the original dataset
+    list_expected_columns = [
         "image_id",
         "id",
         "category",
@@ -264,6 +271,14 @@ def test_get_raw_df_from_ds(
         "shape_x",
         "shape_y",
     ]
+
+    # The image_shape_x and image_shape_y columns should be present only if
+    # the image shape array was present in the original dataset
+    if "image_shape" in list(ds.data_vars.keys()):
+        list_expected_columns.extend(["image_shape_x", "image_shape_y"])
+
+    # Check columns
+    assert sorted(df_raw.columns.tolist()) == sorted(list_expected_columns)
 
 
 def test_add_COCO_data_to_df(annotations_test_data: dict):
@@ -285,8 +300,8 @@ def test_add_COCO_data_to_df(annotations_test_data: dict):
         df_output["image_filename"]
         == df_raw["image_id"].map(ds.attrs["map_image_id_to_filename"])
     )
-    assert all(df_output["image_width"] == ds.attrs.get("image_width", 0))
-    assert all(df_output["image_height"] == ds.attrs.get("image_height", 0))
+    assert all(df_output["image_width"] == 1280)
+    assert all(df_output["image_height"] == 720)
 
     # bbox
     assert all(

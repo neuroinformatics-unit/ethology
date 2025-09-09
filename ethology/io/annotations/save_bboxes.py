@@ -95,6 +95,12 @@ def _to_COCO_exportable_df(
 def _get_raw_df_from_ds(ds: xr.Dataset) -> pd.DataFrame:
     """Get preliminary dataframe from a dataset of bounding boxes annotations.
 
+    If the dataset has an "image_shape" array, the returned dataframe
+    will have "image_shape_x" and "image_shape_y" columns. The returned
+    dataframe will have a "category" column, filled with the relevant category
+    values, or filled with -1 if no category array was present in the
+    original dataset.
+
     The returned dataframe is not COCO-exportable.
 
     Parameters
@@ -120,12 +126,16 @@ def _get_raw_df_from_ds(ds: xr.Dataset) -> pd.DataFrame:
     if "category" not in df_raw.columns:
         df_raw["category"] = -1
 
-    # Pivot the dataframe to get position_x, position_y, shape_x, shape_y
+    # Pivot the dataframe to get position_x, position_y, shape_x, shape_y, etc.
     index_cols = ["image_id", "id", "category"]
+    pivot_values = ["position", "shape"]
+    if "image_shape" in df_raw.columns:
+        pivot_values.append("image_shape")
+
     df_raw = df_raw.pivot_table(
         index=index_cols,
         columns="space",
-        values=["position", "shape"],
+        values=pivot_values,
     ).reset_index()
 
     # Flatten the columns
@@ -133,6 +143,13 @@ def _get_raw_df_from_ds(ds: xr.Dataset) -> pd.DataFrame:
         "_".join(col).strip() if col[1] != "" else col[0]
         for col in df_raw.columns.values
     ]
+
+    # Reset type for image_shape columns if present
+    if all(
+        col in df_raw.columns for col in ["image_shape_x", "image_shape_y"]
+    ):
+        df_raw["image_shape_x"] = df_raw["image_shape_x"].astype(int)
+        df_raw["image_shape_y"] = df_raw["image_shape_y"].astype(int)
 
     return df_raw
 
@@ -158,14 +175,36 @@ def _add_COCO_data_to_df(
     -------
     df : pd.DataFrame
         COCO-exportable dataframe of bounding boxes annotations.
+        The dataframe has the following columns:
+        'id', 'annotation_id',
+        'image_filename', 'image_id', 'image_width', 'image_height',
+        'position_x', 'position_y', 'shape_x', 'shape_y',
+        'x_min',  'y_min', 'width', 'height',
+        'bbox', 'area', 'segmentation',
+        'category', 'supercategory', 'category_id', 'iscrowd'.
+
+    Notes
+    -----
+    The 'id' column holds the annotation ID per frame, whereas
+    the 'annotation_id' column holds the annotation ID across the
+    whole dataset.
 
     """
-    # image
+    # image filename
     map_image_id_to_filename = ds_attrs["map_image_id_to_filename"]
     df["image_filename"] = df["image_id"].map(map_image_id_to_filename)
 
-    df["image_width"] = ds_attrs.get("image_width", 0)
-    df["image_height"] = ds_attrs.get("image_height", 0)
+    # image width and height
+    if all(col in df.columns for col in ["image_shape_x", "image_shape_y"]):
+        df = df.rename(
+            columns={
+                "image_shape_x": "image_width",
+                "image_shape_y": "image_height",
+            },
+        )
+    else:
+        df["image_width"] = ds_attrs.get("image_width", 0)
+        df["image_height"] = ds_attrs.get("image_height", 0)
 
     # bbox
     df["x_min"] = df["position_x"] - df["shape_x"] / 2
@@ -198,7 +237,10 @@ def _add_COCO_data_to_df(
     map_category_to_str = ds_attrs["map_category_to_str"]
     df.rename(columns={"category": "category_id"}, inplace=True)
     df["category"] = df["category_id"].map(map_category_to_str)
-    df["supercategory"] = ""
+
+    # supercategory
+    if "supercategory" not in df.columns:
+        df["supercategory"] = ""
 
     # other
     df["iscrowd"] = 0

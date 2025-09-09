@@ -691,7 +691,7 @@ def test_image_id_assignment(
 
 def test_dataset_from_same_annotations(annotations_test_data: dict):
     """Test that the same annotations exported to VIA and COCO formats
-    produce the same dataset, except for the image width and height columns.
+    produce the same dataset, except for the relevant dataset attributes.
 
     We use the `_subset.json` test files because we know they contain the
     same annotations.
@@ -706,7 +706,7 @@ def test_dataset_from_same_annotations(annotations_test_data: dict):
         format="COCO",
     )
 
-    # Compare datasets ignoring datasetattributes
+    # Compare datasets ignoring dataset attributes
     # Two datasets are equal if they have matching variables and coordinates
     assert ds_via.equals(ds_coco)
 
