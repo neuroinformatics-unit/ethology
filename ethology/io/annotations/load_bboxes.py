@@ -385,6 +385,74 @@ def _df_rows_from_valid_VIA_file(file_path: Path) -> list[dict]:
     return list_rows
 
 
+def _get_image_shape_attr_as_integer(
+    file_attrs: dict, attr_name: Literal["width", "height"]
+) -> int:
+    """Safely extract the image shape attribute as an integer.
+
+    If the attribute is not present or invalid, return the default value for
+    the image shape attribute defined in
+    ValidBboxesDataFrame.get_empty_values().
+
+    Parameters
+    ----------
+    file_attrs : dict
+        File attributes dictionary.
+    attr_name : Literal["width", "height"]
+        Name of the image shape attribute.
+
+    Returns
+    -------
+    int
+        Attribute value as int. If the attribute is not present or invalid,
+        return the default value for the image shape attribute defined in
+        ValidBboxesDataFrame.get_empty_values().
+
+    """
+    default_value = ValidBboxesDataFrame.get_empty_values()[
+        f"image_{attr_name}"
+    ]
+    try:
+        return int(file_attrs.get(attr_name, default_value))
+    except (TypeError, ValueError):
+        return default_value
+
+
+def _category_id_as_int(
+    category_id_str: str, list_categories: list[str]
+) -> int:
+    """Convert category_id to int if possible, otherwise factorize it.
+
+    The category_id is a string in VIA files. If it cannot be converted to an
+    integer, it is factorized to a 1-based integer (0 is reserved for the
+    background class) based on the alphabetically sorted list of categories.
+
+    Parameters
+    ----------
+    category_id_str : str
+        Category ID as string.
+    list_categories : list[str]
+        List of categories.
+
+    Returns
+    -------
+    int
+        Category ID as int.
+
+    """
+    # get category_id as int
+    try:
+        category_id = int(category_id_str)
+    except ValueError:
+        # factorize to 0-based integers
+        list_sorted_options = sorted(list_categories)
+        category_id = list_sorted_options.index(category_id_str)
+        # Add 1 to the factorised values to make them 1-based
+        category_id = category_id + 1
+
+    return category_id
+
+
 def _df_rows_from_valid_COCO_file(file_path: Path) -> list[dict]:
     """Extract list of dataframe rows from a validated COCO JSON file.
 
@@ -468,41 +536,6 @@ def _df_rows_from_valid_COCO_file(file_path: Path) -> list[dict]:
     return list_rows
 
 
-def _category_id_as_int(
-    category_id_str: str, list_categories: list[str]
-) -> int:
-    """Convert category_id to int if possible, otherwise factorize it.
-
-    The category_id is a string in VIA files. If it cannot be converted to an
-    integer, it is factorized to a 1-based integer (0 is reserved for the
-    background class) based on the alphabetically sorted list of categories.
-
-    Parameters
-    ----------
-    category_id_str : str
-        Category ID as string.
-    list_categories : list[str]
-        List of categories.
-
-    Returns
-    -------
-    int
-        Category ID as int.
-
-    """
-    # get category_id as int
-    try:
-        category_id = int(category_id_str)
-    except ValueError:
-        # factorize to 0-based integers
-        list_sorted_options = sorted(list_categories)
-        category_id = list_sorted_options.index(category_id_str)
-        # Add 1 to the factorised values to make them 1-based
-        category_id = category_id + 1
-
-    return category_id
-
-
 @pa.check_types
 def _df_to_xarray_ds(df: DataFrame[ValidBboxesDataFrame]) -> xr.Dataset:
     """Convert a bounding boxes annotations dataframe to an xarray dataset.
@@ -542,76 +575,143 @@ def _df_to_xarray_ds(df: DataFrame[ValidBboxesDataFrame]) -> xr.Dataset:
     max_annotations_per_image = df["image_id"].value_counts().max()
 
     # Sort the dataframe by image_id
-    # Note: the input annotation ID is unique across the dataframe
     df = df.sort_values(by=["image_id"])
 
     # Compute indices of the rows where the image ID switches
     bool_id_diff_from_prev = df["image_id"].ne(df["image_id"].shift())
     indices_id_switch = np.argwhere(bool_id_diff_from_prev)[1:, 0]
 
-    # Prepare mappings of arrays to columns, padding and dtype
-    map_array_to_columns: dict[str, list[str]] = {
-        "position_array": ["x_min", "y_min"],
-        "shape_array": ["width", "height"],
+    # Extract arrays from the dataframe
+    arrays_metadata = _prepare_array_dicts(df)
+    array_dict = _extract_arrays_from_df(
+        df, arrays_metadata, indices_id_switch, max_annotations_per_image
+    )
+
+    # Build data vars dictionary
+    data_vars = {
+        array_key.split("_array")[0]: (
+            arrays_metadata[array_key]["dims"],
+            array_dict[array_key],
+        )
+        for array_key in array_dict
     }
-    map_array_to_padding: dict[str, tuple[type, Any]] = {
-        "position_array": (np.float64, np.nan),
-        "shape_array": (np.float64, np.nan),
-    }
-    map_array_to_dims: dict[str, tuple[str, ...]] = {
-        "position_array": ("image_id", "space", "id"),
-        "shape_array": ("image_id", "space", "id"),
+
+    return xr.Dataset(
+        data_vars=data_vars,
+        coords=dict(
+            image_id=df["image_id"].unique(),
+            space=["x", "y"],
+            id=range(max_annotations_per_image),
+        ),
+    )
+
+
+def _prepare_array_dicts(
+    df: pd.DataFrame,
+) -> dict[str, dict[str, Any]]:
+    """Prepare the metadata for the arrays in the xarray dataset.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        A dataframe for bounding boxes annotations.
+
+    Returns
+    -------
+    dict[str, dict[str, Any]]
+        A dictionary with the metadata for the arrays in the xarray dataset.
+
+    """
+    arrays_metadata: dict[str, dict[str, Any]] = {
+        "position_array": {
+            "columns": ["x_min", "y_min"],
+            "type": np.float64,
+            "pad_value": np.nan,
+            "dims": ("image_id", "space", "id"),
+        },
+        "shape_array": {
+            "columns": ["width", "height"],
+            "type": np.float64,
+            "pad_value": np.nan,
+            "dims": ("image_id", "space", "id"),
+        },
     }
 
     # Add image shape data if present
     if all(col in df.columns for col in ["image_width", "image_height"]):
-        map_array_to_columns["image_shape_array"] = [
-            "image_width",
-            "image_height",
-        ]
-        map_array_to_padding["image_shape_array"] = (int, -1)
-        map_array_to_dims["image_shape_array"] = ("image_id", "space")
+        arrays_metadata["image_shape_array"] = {
+            "columns": ["image_width", "image_height"],
+            "type": int,
+            "pad_value": -1,
+            "dims": ("image_id", "space"),
+        }
 
     # Add category data if present
     if all(col in df.columns for col in ["category_id", "category"]):
-        map_array_to_columns["category_array"] = ["category_id"]
-        map_array_to_padding["category_array"] = (int, -1)
-        map_array_to_dims["category_array"] = ("image_id", "id")
+        arrays_metadata["category_array"] = {
+            "columns": ["category_id"],
+            "type": int,
+            "pad_value": -1,
+            "dims": ("image_id", "id"),
+        }
 
-    # Stack position, shape and confidence arrays along ID axis
+    return arrays_metadata
+
+
+def _extract_arrays_from_df(
+    df: pd.DataFrame,
+    arrays_metadata: dict[str, dict[str, Any]],
+    indices_id_switch: np.ndarray,
+    max_annotations_per_image: int,
+) -> dict[str, np.ndarray]:
+    """Extract arrays in metadata dict from a df of bounding boxes annotations.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        A dataframe for bounding boxes annotations.
+    arrays_metadata : dict[str, dict[str, Any]]
+        A dictionary with the metadata for the arrays to extract.
+    indices_id_switch : np.ndarray
+        Indices of the rows where the image ID switches.
+    max_annotations_per_image : int
+        The maximum number of annotations per image.
+
+    Returns
+    -------
+    dict[str, np.ndarray]
+        A dictionary with the arrays extracted from the dataframe.
+
+    """
     array_dict = {}
-    for key in map_array_to_columns:
+    for key in arrays_metadata:
         # Extract annotations per image
         list_arrays = np.split(
-            df[map_array_to_columns[key]].to_numpy(
-                dtype=map_array_to_padding[key][0]  # type: ignore
+            df[arrays_metadata[key]["columns"]].to_numpy(
+                dtype=arrays_metadata[key]["type"]
             ),
-            indices_id_switch,  # indices along axis=0
+            indices_id_switch,
         )  # each array: (n_annotations, N_DIM)
 
         if key == "image_shape_array":
-            # (n_images, N_DIM)
             array_dict[key] = np.stack(
                 [np.unique(arr, axis=0) for arr in list_arrays], axis=0
-            ).squeeze(axis=1)
+            ).squeeze(axis=1)  # (n_images, N_DIM)
 
         else:
             # Pad arrays with NaN values along the annotation ID axis
-            # each array: (n_max_annotations, N_DIM)
+            # and stack to (n_images, n_max_annotations, N_DIM)
             list_arrays_padded = [
                 np.pad(
                     arr,
                     ((0, max_annotations_per_image - arr.shape[0]), (0, 0)),
-                    constant_values=map_array_to_padding[key][1],  # type: ignore
+                    constant_values=arrays_metadata[key]["pad_value"],
                 )
                 for arr in list_arrays
             ]
-
-            # Stack along the first axis (image_id)
-            # (n_images, n_max_annotations, N_DIM)
             array_dict[key] = np.stack(list_arrays_padded, axis=0)
 
-            # Reorder dimensions to have (n_images, N_DIM, n_max_annotations)
+            # Reorder dimensions to (n_images, N_DIM, n_max_annotations)
             # (squeeze the N_DIM axis (N_DIM=1) for "category")
             array_dict[key] = np.moveaxis(array_dict[key], -1, 1)
             if key == "category_array":
@@ -620,54 +720,4 @@ def _df_to_xarray_ds(df: DataFrame[ValidBboxesDataFrame]) -> xr.Dataset:
     # Modify x_min and y_min to represent the bbox centre
     array_dict["position_array"] += array_dict["shape_array"] / 2
 
-    # Build data vars dictionary
-    data_vars = {
-        array_key.split("_array")[0]: (
-            map_array_to_dims[array_key],
-            array_dict[array_key],
-        )
-        for array_key in array_dict
-    }
-
-    ds_all = xr.Dataset(
-        data_vars=data_vars,
-        coords=dict(
-            image_id=df["image_id"].unique(),
-            space=["x", "y"],
-            id=range(max_annotations_per_image),
-        ),
-    )
-    return ds_all
-
-
-def _get_image_shape_attr_as_integer(
-    file_attrs: dict, attr_name: Literal["width", "height"]
-) -> int:
-    """Safely extract the image shape attribute as an integer.
-
-    If the attribute is not present or invalid, return the default value for
-    the image shape attribute defined in
-    ValidBboxesDataFrame.get_empty_values().
-
-    Parameters
-    ----------
-    file_attrs : dict
-        File attributes dictionary.
-    attr_name : Literal["width", "height"]
-        Name of the image shape attribute.
-
-    Returns
-    -------
-    int
-        Attribute value as int. If the attribute is not present or invalid,
-        return the default value for the image shape attribute defined in
-        ValidBboxesDataFrame.get_empty_values().
-
-    """
-    default_value = ValidBboxesDataFrame.get_empty_values()[
-        f"image_{attr_name}"
-    ]
-    try:
-        return int(file_attrs.get(attr_name, default_value))
-    except (TypeError, ValueError):
-        return default_value
+    return array_dict
