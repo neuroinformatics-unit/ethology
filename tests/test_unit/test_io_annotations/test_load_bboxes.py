@@ -419,50 +419,30 @@ def test_df_from_single_file_unsupported():
             ("crab", "animal"),
         ),  # medium VIA file, no image shape data
         (
-            "VIA_JSON_sample_2.json",
+            "small_bboxes_image_shape_VIA.json",
             "VIA",
             ("crab", "animal"),
-        ),  # medium VIA file, no image shape data
-        (
-            "small_bboxes_VIA.json",
-            "VIA",
-            ("crab", "animal"),
-        ),  # small VIA file, no image shape data
-        (
-            "small_bboxes_VIA_subset.json",
-            "VIA",
-            ("crab", "animal"),
-        ),  # small VIA file, includes image shape data
+        ),  # small VIA file, includes image shape data as a string
         (
             "COCO_JSON_sample_1.json",
             "COCO",
             ("crab", "animal"),
         ),  # medium COCO file, no image shape data (width and height are 0)
         (
-            "COCO_JSON_sample_2.json",
+            "small_bboxes_image_shape_COCO.json",
             "COCO",
             ("crab", "animal"),
-        ),  # medium COCO file, no image shape data (width and height are 0)
-        (
-            "small_bboxes_COCO.json",
-            "COCO",
-            ("crab", "animal"),
-        ),  # small COCO file, includes image shape data
-        (
-            "small_bboxes_COCO_subset.json",
-            "COCO",
-            ("crab", "animal"),
-        ),  # small COCO file, includes image shape data
+        ),  # small COCO file, includes image shape data as integers
         (
             "ACTD_1_Terrestrial_group_data_CCT.json",
             "COCO",
             (None, ""),  # do not check categories
-        ),  # external COCO file 1, includes image shape data
+        ),  # external COCO file 1, includes image shape data as integers
         (
             "SnapshotSerengetiBboxes_20190903.json",
             "COCO",
             (None, ""),  # do not check categories
-        ),  # external COCO file 2, includes image shape data
+        ),  # external COCO file 2, includes image shape data as integers
     ],
 )
 def test_df_from_single_file(
