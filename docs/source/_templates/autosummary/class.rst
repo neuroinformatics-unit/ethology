@@ -6,6 +6,7 @@
    :members:
    :show-inheritance:
    :inherited-members:
+   :no-index:
 
    {% block methods %}
    {% set ns = namespace(has_public_methods=false) %}
