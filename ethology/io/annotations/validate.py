@@ -294,11 +294,11 @@ class ValidBboxesDataset:
 
 
 class ValidBboxesDataFrame(pa.DataFrameModel):
-    """Class for a valid bounding boxes intermediate dataframe.
+    """Class for valid bounding boxes intermediate dataframes.
 
     We use this dataframe internally as an intermediate step in the process of
     converting an input annotation file (VIA or COCO) to an xarray bounding
-    boxes annotations dataset.The validation checks the required columns
+    boxes annotations dataset. The validation checks the required columns
     exists and their types are correct.
 
     All the specified columns are required.
@@ -579,8 +579,6 @@ def _check_input(validator: type, input_index: int = 0):
         def wrapper(*args, **kwargs):
             if len(args) > input_index:
                 validator(args[input_index])
-            else:
-                pass
             result = function(*args, **kwargs)
             return result
 

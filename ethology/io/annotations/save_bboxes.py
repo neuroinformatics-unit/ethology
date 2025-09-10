@@ -1,4 +1,4 @@
-"""Module for exporting manually labelled bounding boxes."""
+"""Module for exporting bounding boxes annotations to files."""
 
 import json
 from datetime import datetime
@@ -27,15 +27,21 @@ def to_COCO_file(ds: xr.Dataset, output_filepath: str | Path):
 
     Parameters
     ----------
-    ds : xr.Dataset
+    ds : xarray.Dataset
         Bounding boxes annotations xarray dataset.
-    output_filepath : str or Path
+    output_filepath : str or pathlib.Path
         Path for the output COCO JSON file.
 
     Returns
     -------
-    output_filepath : str
+    str
         Path for the output COCO JSON file.
+
+    Examples
+    --------
+    Save annotations to a COCO JSON file:
+
+    >>> to_COCO_file(ds, "path/to/output_file.json")
 
     """
     # Compute valid COCO dataframe from xarray dataset

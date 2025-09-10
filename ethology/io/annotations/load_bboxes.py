@@ -1,4 +1,4 @@
-"""Module for reading and writing manually labelled annotations."""
+"""Module for loading bounding boxes annotations from files."""
 
 import json
 from pathlib import Path
@@ -29,64 +29,61 @@ def from_files(
 
     Parameters
     ----------
-    file_paths : Path | str | list[Path | str]
+    file_paths : pathlib.Path | str | list[pathlib.Path | str]
         Path or list of paths to the input annotation files.
-    format : Literal["VIA", "COCO"]
+    format : {"VIA", "COCO"}
         Format of the input annotation files.
-    images_dirs : Path | str | list[Path | str], optional
+    images_dirs : pathlib.Path | str | list[pathlib.Path | str], optional
         Path or list of paths to the directories containing the images the
         annotations refer to. The paths are added to the dataset
         attributes.
 
     Returns
     -------
-    ds : xr.Dataset
-        An annotations dataset holding bounding boxes data. The dataset has the
-        following dimensions: "image_id", "space", "id".
-        - The "image_id" is assigned based on the alphabetically sorted list
-        of unique image filenames across all input files.
-        -The "space" dimension holds the "x" or "y" coordinates.
-        - The "id" dimension corresponds to the annotation ID per image and
-        it is assigned from 0 to the max number of annotations per image in
-        the full dataset. Note that the annotation IDs are not necessarily
-        consistent across images. This means that the annotations with ID `m`
-        in image `t` and image `t+1` will likely not correspond to the same
-        individual.
+    xarray.Dataset
 
-        The dataset consists of three arrays:
-        - "position", with dimensions (image_id, space, id)
-        - "shape", with dimensions (image_id, space, id)
-        - "category", with dimensions (image_id, id)
-        The "category" array holds category IDs as 1-based integers,
-        matching the category IDs in the input file. Note that supercategories
-        are not currently added to the xarray dataset, even if specified in the
-        input file.
+        A valid bounding boxes annotations dataset with dimensions
+        `image_id`, `space`, `id`, and the following arrays:
 
-        The dataset attributes include:
-        - "annotation_files": a list of paths to the input annotation files
-        - "annotation_format": the format of the input annotation files
-        - "map_category_to_str": a map from category ID to category name
-        - "map_image_id_to_filename": a map from image ID to image filename
-        - "images_directories": a list of directory paths for the images
-        the annotations refer to (optional)
+        - `position`, with dimensions (image_id, space, id),
+        - `shape`, with dimensions (image_id, space, id),
+        - `category`, with dimensions (image_id, id) - optional,
+        - `image_shape`, with dimensions (image_id, space) - optional.
+
+        The `category` array, if present, holds category IDs as 1-based
+        integers, matching the category IDs in the input file. The dataset
+        attributes include:
+
+        - `annotation_files`: a list of paths to the input annotation files
+        - `annotation_format`: the format of the input annotation files
+        - `map_category_to_str`: a map from category ID to category name
+        - `map_image_id_to_filename`: a map from image ID to image filename
+        - `images_directories`: directory paths for the images (optional)
 
 
     Notes
     -----
-    We use the sorted list of unique image filenames to assign IDs to images,
-    so if two images have the same filename but are in different input
-    annotation files, they will be assigned the same image ID and their
-    annotations will be merged.
+    The `image_id` is assigned based on the alphabetically sorted list of
+    unique image filenames across all input files. So if two images have
+    the same filename but are in different input annotation files, they will
+    be assigned the same image ID and their annotations will be merged.
 
-    If this behaviour is not desired, and you would like to assign different
-    image IDs to images that have the same filename and appear in different
-    input annotation files, you can either make the image filenames distinct
-    before loading the data, or you can load the data from each file as a
-    separate xarray dataset, and then concatenate them as desired.
+    The `id` dimension corresponds to the annotation ID per image. It
+    ranges from 0 to the maximum number of annotations per image in
+    the dataset. Note that the annotation IDs are not necessarily
+    consistent across images. This means that the annotations with ID=3
+    in image `t` and image `t+1` will likely not correspond to the same
+    individual.
+
+    The `space` dimension holds the "x" and "y" coordinates.
+
+    Note that supercategories are not currently added to the xarray dataset,
+    even if specified in the input file.
 
     Examples
     --------
     Load annotations from two files following VIA format:
+
     >>> ds = from_files(
     ...     file_paths=[
     ...         "path/to/annotation_file_1.json",

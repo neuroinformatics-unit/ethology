@@ -18,16 +18,20 @@ def make_api_index():
     for path in sorted(api_path.rglob("*.py")):
         if path.name.startswith("_"):
             continue
+
         # Convert file path to module name
         rel_path = path.relative_to(api_path.parent)
         module_name = str(rel_path.with_suffix("")).replace(os.sep, ".")
+
         # Split the module name into parts
         # (e.g., ["ethology", "annotations", ...])
         module_parts = module_name.split(".")
+
         # Check against each excluded module's path
         exclude = False
         for excluded in exclude_modules:
             excluded_parts = excluded.split(".")
+
             # Only exclude if the module is a submodule of the excluded path
             if (
                 len(module_parts) >= len(excluded_parts)
@@ -42,6 +46,7 @@ def make_api_index():
     # Get the header
     api_head_path = Path("source") / "_templates" / "api_index_head.rst"
     api_head = api_head_path.read_text()
+
     # Write api_index.rst with header + doctree
     output_path = Path("source") / "api_index.rst"
     with output_path.open("w") as f:
