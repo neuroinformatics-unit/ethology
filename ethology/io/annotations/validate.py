@@ -292,18 +292,133 @@ class ValidBboxesDataset:
                 f"Missing required dimensions: {sorted(missing_dims)}"
             )
 
-    # @dataset.validator
-    # def _check_space_dimensions(self, attribute, value):
-    #     """Ensure the space dimensions are either 'x', 'y'
-    # or 'x','y', 'z'."""
-    #     if set(value.dims) - {"x", "y"}:
-    #         raise ValueError(
-    #             f"Space dimensions must be either 'x' or 'y',
-    # but got {set(value.dims)}"
-    #         )
 
+class ValidBboxesDataFrame(pa.DataFrameModel):
+    """Class for a valid bounding boxes intermediate dataframe.
 
-# class ValidBBoxes
+    We use this dataframe internally as an intermediate step in the process of
+    converting an input annotation file (VIA or COCO) to an xarray bounding
+    boxes annotations dataset.The validation checks the required columns
+    exists and their types are correct.
+
+    All the specified columns are required.
+
+    Attributes
+    ----------
+    image_filename : str
+        Name of the image file.
+    image_id : int
+        Unique identifier for each of the images.
+    image_width : int
+        Width of each of the images, in the same units as the input file
+        (usually pixels).
+    image_height : int
+        Height of each of the images, in the same units as the input file
+        (usually pixels).
+    x_min : float
+        Minimum x-coordinate of the bounding box, in the same units as
+        the input file.
+    y_min : float
+        Minimum y-coordinate of the bounding box, in the same units as
+        the input file.
+    width : float
+        Width of the bounding box, in the same units as the input file.
+    height : float
+        Height of the bounding box, in the same units as the input file.
+    category_id : int
+        Unique identifier for the category, as specified in the input file.
+        A value of 0 is usually reserved for the background class.
+    category : str
+        Category of the annotation as a string.
+    supercategory : str
+        Supercategory of the annotation as a string.
+
+    Raises
+    ------
+    pa.errors.SchemaError
+        If the dataframe does not match the schema.
+
+    See Also
+    --------
+    :class:`pandera.api.pandas.model.DataFrameModel`
+
+    """
+
+    # image columns
+    image_filename: str = pa.Field(
+        description="Name of the image file.",
+        nullable=False,
+    )
+    image_id: int = pa.Field(
+        description="Unique identifier for each of the images.",
+        nullable=False,
+    )
+    image_width: int = pa.Field(
+        description="Width of each of the images, "
+        "in the same units as the input file (usually pixels).",
+        nullable=False,  # if not defined, it should be set to 0 in the df
+    )
+    image_height: int = pa.Field(
+        description="Height of each of the images, "
+        "in the same units as the input file (usually pixels).",
+        nullable=False,  # if not defined, it should be set to 0 in the df
+    )
+
+    # bbox columns
+    x_min: float = pa.Field(
+        description=(
+            "Minimum x-coordinate of the bounding box, "
+            "in the same units as the input file."
+        ),
+        nullable=False,
+    )
+    y_min: float = pa.Field(
+        description=(
+            "Minimum y-coordinate of the bounding box, "
+            "in the same units as the input file."
+        ),
+        nullable=False,
+    )
+    width: float = pa.Field(
+        description=(
+            "Width of the bounding box, in the same units as the input file."
+        ),
+        nullable=False,
+    )
+    height: float = pa.Field(
+        description=(
+            "Height of the bounding box, in the same units as the input file."
+        ),
+        nullable=False,
+    )
+
+    # category columns
+    # - always defined in COCO files exported with VIA tool
+    # - optionally defined in VIA files exported with VIA tool
+    category_id: int = pa.Field(
+        description=(
+            "Unique identifier for the category, "
+            "as specified in the input file. A value of 0 "
+            "is usually reserved for the background class."
+        ),
+    )
+    category: str = pa.Field(
+        description="Category of the annotation as a string.",
+    )
+    supercategory: str = pa.Field(
+        description="Supercategory of the annotation as a string.",
+    )
+
+    @staticmethod
+    def get_empty_values() -> dict:
+        """Get the empty values for the dataframe columns."""
+        return {
+            "category": "",  # it can be not defined in VIA files
+            "supercategory": "",  # it can be not defined in VIA and COCO files
+            "category_id": -1,  # it can be not defined in VIA files
+            "image_width": 0,  # it can be not defined in VIA files
+            "image_height": 0,  # it can be not defined in VIA files
+        }
 
 
 class ValidBboxesDataFrameCOCO(pa.DataFrameModel):
