@@ -1,5 +1,6 @@
 import json
 from contextlib import nullcontext as does_not_raise
+from itertools import groupby
 from pathlib import Path
 from typing import Literal
 from unittest.mock import patch
@@ -14,6 +15,7 @@ from ethology.io.annotations.load_bboxes import (
     _df_from_single_file,
     _df_rows_from_valid_COCO_file,
     _df_rows_from_valid_VIA_file,
+    _df_to_xarray_ds,
     from_files,
 )
 
@@ -49,7 +51,7 @@ def count_imgs_and_annots_in_input_file(
     file_path: Path,
     format: Literal["VIA", "COCO"],
     unique_images_with_annotations: bool = False,
-) -> tuple[int, int]:
+) -> tuple[int, int, int]:
     """Compute the number of images and annotations in the input file.
 
     Note that this function does not check for duplicates, so all
@@ -59,10 +61,12 @@ def count_imgs_and_annots_in_input_file(
         data = json.load(f)
 
     if format == "VIA":
-        n_annotations = sum(
+        n_annotations_per_image = [
             len(img_dict["regions"]) if "regions" in img_dict else 0
             for img_dict in data["_via_img_metadata"].values()
-        )
+        ]
+        n_annotations = sum(n_annotations_per_image)
+        n_max_annots_per_image = max(n_annotations_per_image)
         if unique_images_with_annotations:
             unique_filenames = set(
                 [
@@ -82,6 +86,12 @@ def count_imgs_and_annots_in_input_file(
 
     elif format == "COCO":
         n_annotations = len(data["annotations"])
+        list_img_id_per_annot = [
+            annot["image_id"] for annot in data["annotations"]
+        ]
+        n_max_annots_per_image = max(
+            [len(list(g)) for _k, g in groupby(list_img_id_per_annot)]
+        )
         if unique_images_with_annotations:
             n_images = len(
                 set([annot["image_id"] for annot in data["annotations"]])
@@ -92,7 +102,7 @@ def count_imgs_and_annots_in_input_file(
     else:
         raise ValueError("Unsupported format")
 
-    return n_images, n_annotations
+    return n_images, n_annotations, n_max_annots_per_image
 
 
 def get_list_images(
@@ -228,38 +238,53 @@ def assert_dataset(
     expected_max_annots_per_image: int,
     expected_space_dim: int,
     expected_n_categories: int,
-    expected_category_str: list[str],
+    expected_category_str: list[str] | None = None,
 ):
     """Check that the dataset has the expected shape and content."""
-    # Check shape of position array
+    # Check size of position array
     assert ds.position.shape == (
         expected_n_images,
         expected_space_dim,
         expected_max_annots_per_image,
     )
 
-    # Check shape of category array
+    # Check size of shape array
+    assert ds.shape.shape == (
+        expected_n_images,
+        expected_space_dim,
+        expected_max_annots_per_image,
+    )
+
+    # Check size of category array
     assert ds.category.shape == (
         expected_n_images,
         expected_max_annots_per_image,
     )
 
-    # Check total number of no nan annotations
+    # Check size of image_shape array if present
+    if "image_shape" in ds.data_vars:
+        assert ds.image_shape.shape == (
+            expected_n_images,
+            expected_space_dim,
+        )
+
+    # Check total number of non-nan annotations
     assert (
         np.sum(np.any(~np.isnan(ds.position.values), axis=1))
         == expected_n_annotations
     )
 
-    # Check total number of non -1 categories
+    # Check total number of non-null categories
     assert (
         np.sum(np.unique(ds.category.values.flatten()) != -1)
         == expected_n_categories
     )
 
-    # Check map from category_id to category name is as expected
-    assert sorted(ds.attrs["map_category_to_str"].values()) == sorted(
-        expected_category_str
-    )
+    # Check map from category_id to category name is as expected if provided
+    if expected_category_str:
+        assert sorted(ds.attrs["map_category_to_str"].values()) == sorted(
+            expected_category_str
+        )
 
 
 @pytest.mark.parametrize(
@@ -452,7 +477,7 @@ def test_df_from_single_file(
     # Compute number of annotations and unique images with annotations
     # in input file
     input_file_path = annotations_test_data[input_file]
-    expected_n_unique_images_with_annotations, expected_n_annotations = (
+    expected_n_unique_images_with_annotations, expected_n_annotations, _ = (
         count_imgs_and_annots_in_input_file(
             file_path=input_file_path,
             format=format,
@@ -506,7 +531,7 @@ def test_df_from_single_file_duplicates(
     # In the "small_bboxes_duplicates_" files, one annotation is duplicated
     # in the first frame
     filepath = annotations_test_data[f"small_bboxes_duplicates_{format}.json"]
-    expected_n_images, n_annotations_with_duplicates = (
+    expected_n_images, n_annotations_with_duplicates, _ = (
         count_imgs_and_annots_in_input_file(filepath, format=format)
     )
     n_duplicates = 1
@@ -602,7 +627,7 @@ def test_df_rows_from_valid_file(
     rows = row_function_to_test(filepath)
 
     # Check there are as many rows as annotations
-    _, expected_n_annotations = count_imgs_and_annots_in_input_file(
+    _, expected_n_annotations, _ = count_imgs_and_annots_in_input_file(
         filepath, format=format
     )
     assert len(rows) == expected_n_annotations
@@ -679,7 +704,7 @@ def test_from_files_duplicates(
     else:
         input_files = annotations_test_data[input_file]
         n_duplicates = 1
-        n_unique_images, n_total_annotations = (
+        n_unique_images, n_total_annotations, _ = (
             count_imgs_and_annots_in_input_file(input_files, format)
         )
         n_unique_annotations = n_total_annotations - n_duplicates
@@ -701,13 +726,95 @@ def test_from_files_duplicates(
 
 
 @pytest.mark.parametrize(
+    "input_file, metadata",
+    [
+        (
+            "small_bboxes_VIA.json",
+            {"format": "VIA", "n_categories": 1},
+        ),  # VIA, no image shape data
+        (
+            "small_bboxes_VIA_subset.json",
+            {"format": "VIA", "n_categories": 1},
+        ),  # VIA, includes image shape data
+        (
+            "COCO_JSON_sample_1.json",
+            {"format": "COCO", "n_categories": 1},
+        ),  # COCO, no image shape data (width and height are 0)
+        (
+            "small_bboxes_COCO.json",
+            {"format": "COCO", "n_categories": 1},
+        ),  # COCO, includes image shape data
+        (
+            "small_bboxes_COCO_subset.json",
+            {"format": "COCO", "n_categories": 1},
+        ),  # COCO, includes image shape data
+        (
+            "ACTD_1_Terrestrial_group_data_CCT.json",
+            {"format": "COCO", "n_categories": 2},
+        ),  # COCO, includes image shape data, 2 categories
+        (
+            "SnapshotSerengetiBboxes_20190903.json",
+            {"format": "COCO", "n_categories": 3},
+        ),  # COCO, includes image shape data, 3 categories
+    ],
+)
+def test_df_to_xarray_ds(
+    input_file: str,
+    metadata: dict,
+    annotations_test_data: dict,
+):
+    """Test the conversion of a dataframe to an xarray dataset."""
+    # Get intermediate dataframe
+    input_file_path = annotations_test_data[input_file]
+    df = _df_from_single_file(
+        annotations_test_data[input_file],
+        format=metadata["format"],
+    )
+
+    # Convert dataframe to dataset
+    ds = _df_to_xarray_ds(df)
+
+    # Get expected size of dataset
+    (
+        expected_n_images,
+        expected_n_annotations,
+        expected_max_annots_per_image,
+    ) = count_imgs_and_annots_in_input_file(
+        input_file_path,
+        format=metadata["format"],
+        unique_images_with_annotations=True,
+    )
+
+    # Check image_shape array is present if it exists in the input file
+    check_image_shape = (
+        not df["image_width"].isna().all()
+        and not df["image_height"].isna().all()
+    )
+    if check_image_shape:
+        assert "image_shape" in ds.data_vars
+    else:
+        assert "image_shape" not in ds.data_vars
+
+    # Check output dataset
+    # (Note: attrs are not added so we do not check category_str)
+    assert_dataset(
+        ds,
+        expected_n_images=expected_n_images,
+        expected_n_annotations=expected_n_annotations,  # total
+        expected_max_annots_per_image=expected_max_annots_per_image,
+        expected_space_dim=2,
+        expected_n_categories=metadata["n_categories"],
+    )
+
+
+@pytest.mark.parametrize(
     "format",
     [
         "VIA",
         "COCO",
     ],
 )
-def test_image_id_assignment(
+def test_image_id_assignment_in_ds(
     format: Literal["VIA", "COCO"], annotations_test_data: dict
 ):
     """Test that the bboxes dataset "image_id" is assigned based on the
@@ -747,7 +854,7 @@ def test_image_id_assignment(
     )
 
 
-def test_dataset_from_same_annotations(annotations_test_data: dict):
+def test_equal_ds_from_equal_annotations(annotations_test_data: dict):
     """Test that the same annotations exported to VIA and COCO formats
     produce the same dataset, except for the relevant dataset attributes.
 
@@ -859,7 +966,7 @@ def test_category_id_extraction(
         ("multiple", "VIA"),
     ],
 )
-def test_annotations_sorted_by_image_filename(
+def test_annotations_sorted_by_image_filename_in_ds(
     input_file_type: str,
     format: Literal["VIA", "COCO"],
     annotations_test_data: dict,

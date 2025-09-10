@@ -548,27 +548,32 @@ def _df_to_xarray_ds(df: pd.DataFrame) -> xr.Dataset:
             indices_id_switch,  # indices along axis=0
         )  # each array: (n_annotations, N_DIM)
 
-        # pad arrays with NaN values along the annotation ID axis
-        list_arrays_padded = [
-            np.pad(
-                arr,
-                ((0, max_annotations_per_image - arr.shape[0]), (0, 0)),
-                constant_values=map_key_to_padding[key][1],  # type: ignore
-            )
-            for arr in list_arrays
-        ]  # each array: (n_max_annotations, N_DIM)
+        if key == "image_shape_array":
+            # (n_images, N_DIM)
+            array_dict[key] = np.stack(
+                [np.unique(arr, axis=0) for arr in list_arrays], axis=0
+            ).squeeze(axis=1)
+        else:
+            # pad arrays with NaN values along the annotation ID axis
+            # each array: (n_max_annotations, N_DIM)
+            list_arrays_padded = [
+                np.pad(
+                    arr,
+                    ((0, max_annotations_per_image - arr.shape[0]), (0, 0)),
+                    constant_values=map_key_to_padding[key][1],  # type: ignore
+                )
+                for arr in list_arrays
+            ]
 
-        # stack along the first axis (image_id)
-        array_dict[key] = np.stack(
-            list_arrays_padded, axis=0
-        )  # (n_images, n_max_annotations, N_DIM)
+            # stack along the first axis (image_id)
+            # (n_images, n_max_annotations, N_DIM)
+            array_dict[key] = np.stack(list_arrays_padded, axis=0)
 
-        # Reorder dimensions to have (n_images, N_DIM, n_max_annotations)
-        array_dict[key] = np.moveaxis(array_dict[key], -1, 1)
-
-        # squeeze the NDIM axis (N_DIM=1) for "category"
-        if key == "category_array":
-            array_dict[key] = array_dict[key].squeeze(axis=1)
+            # Reorder dimensions to have (n_images, N_DIM, n_max_annotations)
+            # (squeeze the N_DIM axis (N_DIM=1) for "category")
+            array_dict[key] = np.moveaxis(array_dict[key], -1, 1)
+            if key == "category_array":
+                array_dict[key] = array_dict[key].squeeze(axis=1)
 
     # Modify x_min and y_min to represent the bbox centre
     array_dict["position_array"] += array_dict["shape_array"] / 2
@@ -590,7 +595,7 @@ def _df_to_xarray_ds(df: pd.DataFrame) -> xr.Dataset:
     )
     if include_image_shape:
         data_vars["image_shape"] = (
-            ["image_id", "space", "id"],
+            ["image_id", "space"],
             array_dict["image_shape_array"],
         )
 
