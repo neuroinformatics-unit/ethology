@@ -2,13 +2,16 @@
 
 import json
 from pathlib import Path
-from typing import Literal
+from typing import Any, Literal
 
 import numpy as np
 import pandas as pd
+import pandera.pandas as pa
 import xarray as xr
+from pandera.typing.pandas import DataFrame
 
 from ethology.io.annotations.validate import (
+    ValidBboxesDataFrame,
     ValidBboxesDataset,
     ValidCOCO,
     ValidVIA,
@@ -100,18 +103,9 @@ def from_files(
     else:
         df_all = _df_from_single_file(file_paths, format=format)
 
-    # Compute dataset attributes from intermediate dataframe
-    # map from "image_id" to image_filename
-    mapping_df = df_all[["image_filename", "image_id"]].drop_duplicates()
-    map_image_id_to_filename = mapping_df.set_index("image_id").to_dict()[
-        "image_filename"
-    ]
-    # map from "category_id" to category name
-    map_category_to_str = (
-        df_all[["category_id", "category"]]
-        .drop_duplicates()
-        .set_index("category_id")
-        .to_dict()["category"]
+    # Get maps to set as dataset attributes
+    map_image_id_to_filename, map_category_to_str = (
+        _get_map_attributes_from_df(df_all)
     )
 
     # Convert dataframe to xarray dataset
@@ -129,26 +123,63 @@ def from_files(
     return ds
 
 
+def _get_map_attributes_from_df(
+    df: DataFrame[ValidBboxesDataFrame],
+) -> tuple[dict, dict]:
+    """Get the map attributes from the dataframe.
+
+    Parameters
+    ----------
+    df : DataFrame[ValidBboxesDataFrame]
+        Bounding boxes annotations dataframe.
+
+    Returns
+    -------
+    tuple[dict, dict]
+        Map from "image_id" to image_filename and
+        map from "category_id" to category name if present.
+
+    """
+    # Compute dataset attributes from a valid intermediate dataframe
+    # map from "image_id" to image_filename
+    mapping_df = df[["image_filename", "image_id"]].drop_duplicates()
+    map_image_id_to_filename = mapping_df.set_index("image_id").to_dict()[
+        "image_filename"
+    ]
+    # map from "category_id" to category name
+    map_category_to_str = {}
+    if all(col in df.columns for col in ["category_id", "category"]):
+        map_category_to_str = (
+            df[["category_id", "category"]]
+            .drop_duplicates()
+            .set_index("category_id")
+            .to_dict()["category"]
+        )
+
+    return (map_image_id_to_filename, map_category_to_str)
+
+
+@pa.check_types
 def _df_from_multiple_files(
     list_filepaths: list[Path | str], format: Literal["VIA", "COCO"]
-):
-    """Read bounding boxes annotations from multiple files as a dataframe.
+) -> DataFrame[ValidBboxesDataFrame]:
+    """Read annotations from multiple files as a valid intermediate dataframe.
 
     Parameters
     ----------
     list_filepaths : list[Path | str]
-        List of paths to the input annotation files
+        List of paths to the input annotation bounding boxes files
     format : Literal["VIA", "COCO"]
-        Format of the input annotation files.
+        Format of the input annotation bounding boxes files.
         Currently supported formats are "VIA" and "COCO".
 
     Returns
     -------
-    pd.DataFrame
-        Bounding boxes annotations dataframe. The dataframe is indexed
-        by "annotation_id" and has the following columns: "image_filename",
-        "image_id", "image_width", "image_height", "x_min", "y_min",
-        "width", "height", "supercategory", "category", "category_id".
+    DataFrame[ValidBboxesDataFrame]
+        Intermediate dataframe for bounding boxes annotations. The dataframe is
+        indexed by "annotation_id" and has the following columns:
+        "image_filename", "image_id", "image_width", "image_height", "x_min",
+        "y_min", "width", "height", "supercategory", "category", "category_id".
 
     """
     # Get list of dataframes
@@ -173,7 +204,7 @@ def _df_from_multiple_files(
     df_all = df_all.sort_values(by=["image_filename"])
 
     # Remove duplicates that may exist across files and reindex
-    # Exclude image_width and image_height from the set of columns
+    # NOTE: we exclude image_width and image_height from the set of columns
     # to identify duplicates, as these may differ across files.
     df_all = df_all.drop_duplicates(
         subset=[
@@ -191,26 +222,28 @@ def _df_from_multiple_files(
     return df_all
 
 
+@pa.check_types
 def _df_from_single_file(
     file_path: Path | str, format: Literal["VIA", "COCO"]
-) -> pd.DataFrame:
-    """Read bounding boxes annotations from a single file.
+) -> DataFrame[ValidBboxesDataFrame]:
+    """Read annotations from a single file as a valid intermediate dataframe.
 
     Parameters
     ----------
     file_path : Path | str
-        Path to the input annotation file.
+        Path to the input annotation bounding boxes file.
     format : Literal["VIA", "COCO"]
-        Format of the input annotation file.
+        Format of the input bounding boxes annotation file.
         Currently supported formats are "VIA" and "COCO".
 
     Returns
     -------
-    pd.DataFrame
-        Bounding boxes annotations dataframe. The dataframe is indexed
-        by "annotation_id" and has the following columns: 'image_filename',
-        'image_id', 'x_min', 'y_min', 'width', 'height', 'supercategory',
-        'category', 'category_id', 'image_width', 'image_height'.
+    DataFrame[ValidBboxesDataFrame]
+        Intermediate dataframe for bounding boxes annotations. The dataframe
+        is indexed by "annotation_id" and has the following columns:
+        'image_filename', 'image_id', 'image_width', 'image_height',
+        'x_min', 'y_min', 'width', 'height', 'supercategory', 'category',
+        'category_id'.
 
     """
     # Choose the appropriate validator and row-extraction function
@@ -240,29 +273,9 @@ def _df_from_single_file(
         inplace=False,
     )
 
-    # Cast category_id for VIA files from str to int if possible,
-    # otherwise factorize it
-    if format == "VIA" and not df["category_id"].isna().all():
-        df = _category_id_as_int(df)
-
-    # Reorder columns
-    # If columns dont exist they are filled with nan / na values
-    df = df.reindex(
-        columns=[
-            "annotation_id",
-            "image_filename",
-            "image_id",
-            "x_min",
-            "y_min",
-            "width",
-            "height",
-            "supercategory",
-            "category",
-            "category_id",
-            "image_width",
-            "image_height",
-        ]
-    )
+    # Cast bbox coordinates and shape as floats
+    for col in ["x_min", "y_min", "width", "height"]:
+        df[col] = df[col].astype(np.float64)
 
     # Set the index name to "annotation_id"
     df = df.set_index("annotation_id")
@@ -288,34 +301,32 @@ def _df_rows_from_valid_VIA_file(file_path: Path) -> list[dict]:
     with open(file_path) as file:
         data_dict = json.load(file)
 
-    # Prepare data
+    # Get list of sorted image filenames
     image_metadata_dict = data_dict["_via_img_metadata"]
     list_sorted_filenames = sorted(
         [img_dict["filename"] for img_dict in image_metadata_dict.values()]
     )
 
-    via_attributes = data_dict["_via_attributes"]
-
     # Get supercategories and categories
+    via_attributes = data_dict["_via_attributes"]
     supercategories_dict = {}
     if "region" in via_attributes:
         supercategories_dict = via_attributes["region"]
 
-    # Get list of rows in dataframe
+    # Compute list of rows in dataframe
     list_rows = []
     annotation_id = 0
     # loop through images
     for _, img_dict in image_metadata_dict.items():
-        # Extract width and height and cast to int if possible, otherwise
-        # set to None in the dataframe
-        image_width = img_dict["file_attributes"].get("width", None)
-        image_height = img_dict["file_attributes"].get("height", None)
-        try:
-            image_width = int(image_width)
-            image_height = int(image_height)
-        except (TypeError, ValueError):
-            image_width = None
-            image_height = None
+        # Extract img width and height,
+        # set to default if invalid or not present
+        image_width, image_height = (
+            _get_image_shape_attr_as_integer(
+                img_dict["file_attributes"],
+                file_attr,  # type: ignore
+            )
+            for file_attr in ["width", "height"]
+        )
 
         # loop thru annotations in the image
         for region in img_dict["regions"]:
@@ -323,24 +334,34 @@ def _df_rows_from_valid_VIA_file(file_path: Path) -> list[dict]:
             region_shape = region["shape_attributes"]
             region_attributes = region["region_attributes"]
 
-            # Define supercategory and category.
-            # A region (bbox) can have multiple supercategories.
-            # We only consider the first supercategory in alphabetical order.
+            # Extract category data if present
             if region_attributes and supercategories_dict:
-                # bbox data
+                # supercategory
+                # A region (bbox) can have multiple supercategories.
+                # We only consider the first supercategory in alphabetical
+                # order.
                 supercategory = sorted(list(region_attributes.keys()))[0]
+
+                # category name
+                # in VIA files, the category_id is a string
                 category_id_str = region_attributes[supercategory]
-
-                # map to category name
-                category = supercategories_dict[supercategory]["options"][
-                    category_id_str
+                categories_dict = supercategories_dict[supercategory][
+                    "options"
                 ]
-            # If not defined, set to None
-            else:
-                supercategory = None
-                category = None
-                category_id_str = None
+                category = categories_dict[category_id_str]
 
+                # category_id as int
+                category_id = _category_id_as_int(
+                    category_id_str, categories_dict
+                )
+
+            else:
+                supercategory, category, category_id = (
+                    ValidBboxesDataFrame.get_empty_values()[key]
+                    for key in ["supercategory", "category", "category_id"]
+                )
+
+            # Add to row
             row = {
                 "annotation_id": annotation_id,
                 "image_filename": img_dict["filename"],
@@ -353,8 +374,7 @@ def _df_rows_from_valid_VIA_file(file_path: Path) -> list[dict]:
                 "height": region_shape["height"],
                 "supercategory": supercategory,
                 "category": category,
-                "category_id": category_id_str,
-                # in VIA files, the category_id is a string
+                "category_id": category_id,
             }
 
             list_rows.append(row)
@@ -384,10 +404,10 @@ def _df_rows_from_valid_COCO_file(file_path: Path) -> list[dict]:
         data_dict = json.load(file)
 
     # Prepare data
-    # We define image_id_ethology as the 0-based index of the image in the
-    # "images" list of the COCO JSON file. The following assumes the number of
-    # unique image_ids in the input COCO file matches the number of elements
-    # in the "images" list.
+    # We define "image_id_ethology" as the 0-based index of the image
+    # following the alphabetically sorted list of unique image filenames.
+    # In the following we assume the list of images under "images" in the
+    # COCO JSON file is unique (i.e. it has no duplicate elements).
     map_img_id_coco_to_ethology = {
         img_dict["id"]: idx
         for idx, img_dict in enumerate(
@@ -431,13 +451,13 @@ def _df_rows_from_valid_COCO_file(file_path: Path) -> list[dict]:
             "annotation_id": annot_id,
             "image_filename": image_filename,
             "image_id": img_id_ethology,
-            "image_width": image_width if image_width != 0 else None,
-            "image_height": image_height if image_height != 0 else None,
+            "image_width": image_width,
+            "image_height": image_height,
             "x_min": x_min,
             "y_min": y_min,
             "width": width,
             "height": height,
-            "supercategory": supercategory,
+            "supercategory": supercategory,  # if not defined, set to ""
             "category": category,
             "category_id": category_id,
             # in COCO files, the category_id is always a 1-based integer
@@ -448,39 +468,49 @@ def _df_rows_from_valid_COCO_file(file_path: Path) -> list[dict]:
     return list_rows
 
 
-def _category_id_as_int(df: pd.DataFrame) -> pd.DataFrame:
+def _category_id_as_int(
+    category_id_str: str, list_categories: list[str]
+) -> int:
     """Convert category_id to int if possible, otherwise factorize it.
+
+    The category_id is a string in VIA files. If it cannot be converted to an
+    integer, it is factorized to a 1-based integer (0 is reserved for the
+    background class) based on the alphabetically sorted list of categories.
 
     Parameters
     ----------
-    df : pd.DataFrame
-        Bounding boxes annotations dataframe.
+    category_id_str : str
+        Category ID as string.
+    list_categories : list[str]
+        List of categories.
 
     Returns
     -------
-    pd.DataFrame
-        Bounding boxes annotations dataframe with "category_id" as int.
+    int
+        Category ID as int.
 
     """
+    # get category_id as int
     try:
-        df["category_id"] = df["category_id"].astype(int)
+        category_id = int(category_id_str)
     except ValueError:
-        # Factorise to 0-based integers
-        df["category_id"] = df["category"].factorize(sort=True)[0]
+        # factorize to 0-based integers
+        list_sorted_options = sorted(list_categories)
+        category_id = list_sorted_options.index(category_id_str)
         # Add 1 to the factorised values to make them 1-based
-        # (0 is reserved for the background class)
-        # (-1 is reserved for missing values in factorisation)
-        df.loc[df["category_id"] >= 0, "category_id"] += 1
-    return df
+        category_id = category_id + 1
+
+    return category_id
 
 
-def _df_to_xarray_ds(df: pd.DataFrame) -> xr.Dataset:
-    """Convert bounding boxes annotations dataframe to an xarray dataset.
+@pa.check_types
+def _df_to_xarray_ds(df: DataFrame[ValidBboxesDataFrame]) -> xr.Dataset:
+    """Convert a bounding boxes annotations dataframe to an xarray dataset.
 
     Parameters
     ----------
-    df : pd.DataFrame
-        Bounding boxes annotations dataframe.
+    df : DataFrame[ValidBboxesDataFrame]
+        A valid intermediate dataframe for bounding boxes annotations.
 
     Returns
     -------
@@ -501,6 +531,13 @@ def _df_to_xarray_ds(df: pd.DataFrame) -> xr.Dataset:
         - `category`: (`image_id`, `id`)
 
     """
+    # Drop columns if all values in that column are empty
+    default_values = ValidBboxesDataFrame.get_empty_values()
+    list_empty_cols = [
+        col for col in default_values if all(df[col] == default_values[col])
+    ]
+    df = df.drop(columns=list_empty_cols)
+
     # Compute max number of annotations per image
     max_annotations_per_image = df["image_id"].value_counts().max()
 
@@ -512,38 +549,42 @@ def _df_to_xarray_ds(df: pd.DataFrame) -> xr.Dataset:
     bool_id_diff_from_prev = df["image_id"].ne(df["image_id"].shift())
     indices_id_switch = np.argwhere(bool_id_diff_from_prev)[1:, 0]
 
-    # Determine whether to store image shape in the dataset
-    # (if columns are present and not all rows are NaN)
-    include_image_shape = all(
-        img_dim in df.columns and not df[img_dim].isna().all()
-        for img_dim in ["image_width", "image_height"]
-    )
-
-    # Prepare mappings of keys to columns, padding and dtype
-    map_key_to_columns = {
+    # Prepare mappings of arrays to columns, padding and dtype
+    map_array_to_columns: dict[str, list[str]] = {
         "position_array": ["x_min", "y_min"],
         "shape_array": ["width", "height"],
-        "category_array": ["category_id"],
     }
-    map_key_to_padding = {
+    map_array_to_padding: dict[str, tuple[type, Any]] = {
         "position_array": (np.float64, np.nan),
         "shape_array": (np.float64, np.nan),
-        "category_array": (int, -1),
     }
-    if include_image_shape:
-        map_key_to_columns["image_shape_array"] = [
+    map_array_to_dims: dict[str, tuple[str, ...]] = {
+        "position_array": ("image_id", "space", "id"),
+        "shape_array": ("image_id", "space", "id"),
+    }
+
+    # Add image shape data if present
+    if all(col in df.columns for col in ["image_width", "image_height"]):
+        map_array_to_columns["image_shape_array"] = [
             "image_width",
             "image_height",
         ]
-        map_key_to_padding["image_shape_array"] = (int, -1)
+        map_array_to_padding["image_shape_array"] = (int, -1)
+        map_array_to_dims["image_shape_array"] = ("image_id", "space")
+
+    # Add category data if present
+    if all(col in df.columns for col in ["category_id", "category"]):
+        map_array_to_columns["category_array"] = ["category_id"]
+        map_array_to_padding["category_array"] = (int, -1)
+        map_array_to_dims["category_array"] = ("image_id", "id")
 
     # Stack position, shape and confidence arrays along ID axis
     array_dict = {}
-    for key in map_key_to_columns:
-        # extract annotations per image
+    for key in map_array_to_columns:
+        # Extract annotations per image
         list_arrays = np.split(
-            df[map_key_to_columns[key]].to_numpy(
-                dtype=map_key_to_padding[key][0]  # type: ignore
+            df[map_array_to_columns[key]].to_numpy(
+                dtype=map_array_to_padding[key][0]  # type: ignore
             ),
             indices_id_switch,  # indices along axis=0
         )  # each array: (n_annotations, N_DIM)
@@ -553,19 +594,20 @@ def _df_to_xarray_ds(df: pd.DataFrame) -> xr.Dataset:
             array_dict[key] = np.stack(
                 [np.unique(arr, axis=0) for arr in list_arrays], axis=0
             ).squeeze(axis=1)
+
         else:
-            # pad arrays with NaN values along the annotation ID axis
+            # Pad arrays with NaN values along the annotation ID axis
             # each array: (n_max_annotations, N_DIM)
             list_arrays_padded = [
                 np.pad(
                     arr,
                     ((0, max_annotations_per_image - arr.shape[0]), (0, 0)),
-                    constant_values=map_key_to_padding[key][1],  # type: ignore
+                    constant_values=map_array_to_padding[key][1],  # type: ignore
                 )
                 for arr in list_arrays
             ]
 
-            # stack along the first axis (image_id)
+            # Stack along the first axis (image_id)
             # (n_images, n_max_annotations, N_DIM)
             array_dict[key] = np.stack(list_arrays_padded, axis=0)
 
@@ -579,27 +621,15 @@ def _df_to_xarray_ds(df: pd.DataFrame) -> xr.Dataset:
     array_dict["position_array"] += array_dict["shape_array"] / 2
 
     # Build data vars dictionary
-    data_vars = dict(
-        position=(
-            ["image_id", "space", "id"],
-            array_dict["position_array"],
-        ),
-        shape=(
-            ["image_id", "space", "id"],
-            array_dict["shape_array"],
-        ),
-        category=(
-            ["image_id", "id"],
-            array_dict["category_array"],
-        ),
-    )
-    if include_image_shape:
-        data_vars["image_shape"] = (
-            ["image_id", "space"],
-            array_dict["image_shape_array"],
+    data_vars = {
+        array_key.split("_array")[0]: (
+            map_array_to_dims[array_key],
+            array_dict[array_key],
         )
+        for array_key in array_dict
+    }
 
-    return xr.Dataset(
+    ds_all = xr.Dataset(
         data_vars=data_vars,
         coords=dict(
             image_id=df["image_id"].unique(),
@@ -607,3 +637,37 @@ def _df_to_xarray_ds(df: pd.DataFrame) -> xr.Dataset:
             id=range(max_annotations_per_image),
         ),
     )
+    return ds_all
+
+
+def _get_image_shape_attr_as_integer(
+    file_attrs: dict, attr_name: Literal["width", "height"]
+) -> int:
+    """Safely extract the image shape attribute as an integer.
+
+    If the attribute is not present or invalid, return the default value for
+    the image shape attribute defined in
+    ValidBboxesDataFrame.get_empty_values().
+
+    Parameters
+    ----------
+    file_attrs : dict
+        File attributes dictionary.
+    attr_name : Literal["width", "height"]
+        Name of the image shape attribute.
+
+    Returns
+    -------
+    int
+        Attribute value as int. If the attribute is not present or invalid,
+        return the default value for the image shape attribute defined in
+        ValidBboxesDataFrame.get_empty_values().
+
+    """
+    default_value = ValidBboxesDataFrame.get_empty_values()[
+        f"image_{attr_name}"
+    ]
+    try:
+        return int(file_attrs.get(attr_name, default_value))
+    except (TypeError, ValueError):
+        return default_value

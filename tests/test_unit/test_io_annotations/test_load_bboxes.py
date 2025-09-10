@@ -201,19 +201,21 @@ def assert_dataframe(
     assert len(df["image_id"].unique()) == expected_n_images
 
     # Check columns are as expected
-    assert df.columns.tolist() == [
-        "image_filename",
-        "image_id",
-        "x_min",
-        "y_min",
-        "width",
-        "height",
-        "supercategory",
-        "category",
-        "category_id",
-        "image_width",
-        "image_height",
-    ]
+    assert sorted(df.columns.tolist()) == sorted(
+        [
+            "image_filename",
+            "image_id",
+            "x_min",
+            "y_min",
+            "width",
+            "height",
+            "supercategory",
+            "category",
+            "category_id",
+            "image_width",
+            "image_height",
+        ]
+    )
 
     # Check supercategories if all annotations have the same supercategory
     if expected_supercategories:
@@ -255,11 +257,12 @@ def assert_dataset(
         expected_max_annots_per_image,
     )
 
-    # Check size of category array
-    assert ds.category.shape == (
-        expected_n_images,
-        expected_max_annots_per_image,
-    )
+    # Check size of category array if present
+    if "category" in ds.data_vars:
+        assert ds.category.shape == (
+            expected_n_images,
+            expected_max_annots_per_image,
+        )
 
     # Check size of image_shape array if present
     if "image_shape" in ds.data_vars:
@@ -275,13 +278,14 @@ def assert_dataset(
     )
 
     # Check total number of non-null categories
-    assert (
-        np.sum(np.unique(ds.category.values.flatten()) != -1)
-        == expected_n_categories
-    )
+    if "category" in ds.data_vars:
+        assert (
+            np.sum(np.unique(ds.category.values.flatten()) != -1)
+            == expected_n_categories
+        )
 
     # Check map from category_id to category name is as expected if provided
-    if expected_category_str:
+    if expected_category_str and "category" in ds.data_vars:
         assert sorted(ds.attrs["map_category_to_str"].values()) == sorted(
             expected_category_str
         )
@@ -486,11 +490,11 @@ def test_df_from_single_file(
 
     # Check image shape data is present if present in the input file
     if check_if_file_includes_image_shape_data(input_file_path, format):
-        assert not df["image_width"].isna().all()
-        assert not df["image_height"].isna().all()
+        assert all(df["image_width"] != 0)
+        assert all(df["image_height"] != 0)
     else:
-        assert df["image_width"].isna().all()
-        assert df["image_height"].isna().all()
+        assert all(df["image_width"] == 0)
+        assert all(df["image_height"] == 0)
 
 
 @pytest.mark.parametrize(
@@ -570,9 +574,9 @@ def test_from_single_file_no_category(
     # If no error expected (i.e. for VIA files), check that the dataframe
     # has empty category columns
     else:
-        assert df["category"].isna().all()
-        assert df["supercategory"].isna().all()
-        assert df["category_id"].isna().all()
+        assert all(df["category"] == "")
+        assert all(df["supercategory"] == "")
+        assert all(df["category_id"] == -1)
 
 
 @pytest.mark.parametrize(
@@ -717,6 +721,10 @@ def test_from_files_duplicates(
             {"format": "VIA", "n_categories": 1},
         ),  # VIA, includes image shape data
         (
+            "small_bboxes_no_cat_VIA.json",
+            {"format": "VIA", "n_categories": 0},
+        ),  # VIA, no category data
+        (
             "COCO_JSON_sample_1.json",
             {"format": "COCO", "n_categories": 1},
         ),  # COCO, no image shape data (width and height are 0)
@@ -765,15 +773,21 @@ def test_df_to_xarray_ds(
         unique_images_with_annotations=True,
     )
 
-    # Check image_shape array is present if it exists in the input file
+    # Check image_shape array is present if non-default in the intermediate df
     check_image_shape = (
-        not df["image_width"].isna().all()
-        and not df["image_height"].isna().all()
+        not (df["image_width"] == 0).all()
+        and not (df["image_height"] == 0).all()
     )
     if check_image_shape:
         assert "image_shape" in ds.data_vars
     else:
         assert "image_shape" not in ds.data_vars
+
+    # Check category array is present if it non-default in the intermediate df
+    if all(df["category"] != ""):
+        assert "category" in ds.data_vars
+    else:
+        assert "category" not in ds.data_vars
 
     # Check output dataset
     # (Note: attrs are not added so we do not check category_str)
