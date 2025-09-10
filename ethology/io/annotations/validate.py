@@ -303,7 +303,10 @@ class ValidBboxesDataset:
     #         )
 
 
-class ValidBBoxesDataFrameCOCO(pa.DataFrameModel):
+# class ValidBBoxes
+
+
+class ValidBboxesDataFrameCOCO(pa.DataFrameModel):
     """Class for valid bounding boxes annotations dataframes for COCO export.
 
     The validation checks the required columns exists and their types are

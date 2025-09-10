@@ -12,7 +12,7 @@ import xarray as xr
 from pandera.typing.pandas import DataFrame
 
 from ethology.io.annotations.validate import (
-    ValidBBoxesDataFrameCOCO,
+    ValidBboxesDataFrameCOCO,
     ValidBboxesDataset,
     ValidCOCO,
     _check_input,
@@ -53,7 +53,7 @@ def to_COCO_file(ds: xr.Dataset, output_filepath: str | Path):
 @pa.check_types
 def _to_COCO_exportable_df(
     ds: xr.Dataset,
-) -> DataFrame[ValidBBoxesDataFrameCOCO]:
+) -> DataFrame[ValidBboxesDataFrameCOCO]:
     """Convert dataset of bounding boxes annotations to a COCO-exportable df.
 
     The returned dataframe is validated using ValidBBoxesDataFrameCOCO.
@@ -157,7 +157,7 @@ def _get_raw_df_from_ds(ds: xr.Dataset) -> pd.DataFrame:
 @pa.check_types
 def _add_COCO_data_to_df(
     df: pd.DataFrame, ds_attrs: dict
-) -> DataFrame[ValidBBoxesDataFrameCOCO]:
+) -> DataFrame[ValidBboxesDataFrameCOCO]:
     """Add COCO-required data to preliminary dataframe.
 
     The input dataframe is obtained from a dataset of bounding boxes
@@ -259,7 +259,7 @@ def _add_COCO_data_to_df(
 
 
 @pa.check_types
-def _create_COCO_dict(df: DataFrame[ValidBBoxesDataFrameCOCO]) -> dict:
+def _create_COCO_dict(df: DataFrame[ValidBboxesDataFrameCOCO]) -> dict:
     """Extract COCO dictionary from a COCO-exportable dataframe.
 
     Parameters
@@ -275,7 +275,7 @@ def _create_COCO_dict(df: DataFrame[ValidBBoxesDataFrameCOCO]) -> dict:
     """
     COCO_dict: dict[str, Any] = {}
     map_columns_to_COCO_fields = (
-        ValidBBoxesDataFrameCOCO.map_df_columns_to_COCO_fields()
+        ValidBboxesDataFrameCOCO.map_df_columns_to_COCO_fields()
     )
     for sections in ["images", "categories", "annotations"]:
         # Extract and rename required columns for this section

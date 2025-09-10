@@ -16,7 +16,7 @@ from ethology.io.annotations.save_bboxes import (
     _get_raw_df_from_ds,
     to_COCO_file,
 )
-from ethology.io.annotations.validate import ValidBBoxesDataFrameCOCO
+from ethology.io.annotations.validate import ValidBboxesDataFrameCOCO
 
 
 def read_JSON_as_dict(file_path: str | Path) -> dict:
@@ -146,7 +146,7 @@ def sample_bboxes_df() -> Callable:
         ).set_index("annotation_id", drop=False)
 
         # Validate as COCO-exportable
-        df = ValidBBoxesDataFrameCOCO.validate(df)
+        df = ValidBboxesDataFrameCOCO.validate(df)
 
         # Drop columns if specified
         if columns_to_drop:
@@ -216,7 +216,7 @@ def test_validate_bboxes_df_COCO(
         df_factory = request.getfixturevalue(df)
         df = df_factory()
     with expected_exception as excinfo:
-        ValidBBoxesDataFrameCOCO(df)
+        ValidBboxesDataFrameCOCO(df)
     if excinfo:
         assert expected_error_message in str(excinfo.value)
 
@@ -366,7 +366,7 @@ def test_create_COCO_dict(sample_bboxes_df: Callable):
 
     # Check keys in each section
     map_df_columns_to_coco = copy.deepcopy(
-        ValidBBoxesDataFrameCOCO.map_df_columns_to_COCO_fields()
+        ValidBboxesDataFrameCOCO.map_df_columns_to_COCO_fields()
     )
     for section, section_mapping in map_df_columns_to_coco.items():
         assert all(
