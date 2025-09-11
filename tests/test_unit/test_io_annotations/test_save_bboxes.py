@@ -382,7 +382,11 @@ def test_create_COCO_dict(sample_bboxes_df: Callable):
     "filename",
     [
         "small_bboxes_COCO.json",
+        # small COCO file, image shape data as non-zero integers
         "COCO_JSON_sample_1.json",
+        # medium COCO file, no image shape data (width and height are 0)
+        "small_bboxes_no_supercat_COCO.json",
+        # small COCO file, no supercategory data
     ],
 )
 def test_to_COCO_file(
@@ -412,17 +416,18 @@ def test_to_COCO_file(
     ]
 
     # Check lists of "categories" dictionaries match
+    # We exclude supercategory because we do not retain it in the dataset
     assert_list_of_dicts_match(
         input_dict["categories"],
         output_dict["categories"],
         keys_to_exclude=["supercategory"],
-        # we do not retain supercategory in dataset
     )
 
     # Check lists of "images" dictionaries match
-    # when exporting COCO file from VIA, it tries to extract image ID
-    # from image filename. This means it will be different from the
-    # "image_id" in the dataset.
+    # We exclude id because when exporting COCO file from VIA,
+    # it tries to extract image ID from image filename.
+    # This means it will be different from the image "id"
+    # in the dataset.
     assert_list_of_dicts_match(
         input_dict["images"],
         output_dict["images"],
@@ -430,7 +435,8 @@ def test_to_COCO_file(
     )
 
     # Check lists of "annotations" dictionaries match
-    # We export a 0-based annotation ID and image ID under "id" and "image_id"
+    # We exclude the ids because we export a 0-based
+    # annotation ID and image ID under "id" and "image_id"
     # respectively.
     assert_list_of_dicts_match(
         input_dict["annotations"],
