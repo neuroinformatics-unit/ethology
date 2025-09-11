@@ -39,7 +39,10 @@ If you are looking to analyse your pose estimation tracks with a user-friendly t
 
 ```{toctree}
 :maxdepth: 2
+:caption: User Guides
 :hidden:
+
+guides/glossary
 
 installation
 community/index

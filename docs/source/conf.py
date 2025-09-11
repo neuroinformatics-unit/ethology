@@ -42,6 +42,13 @@ extensions = [
     "sphinx_design",
     "sphinx_sitemap",
     "sphinx.ext.autosectionlabel",
+    "sphinx.ext.todo",
+    "sphinx.ext.graphviz",
+    "sphinx.ext.ifconfig",
+    "sphinx.ext.mathjax",
+    "sphinx.ext.imgmath",
+    "sphinx.ext.coverage",
+    "sphinx.ext.doctest",
 ]
 
 # Configure the myst parser to enable cool markdown features
