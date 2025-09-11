@@ -9,7 +9,7 @@ import pandas as pd
 import pandera.pandas as pa
 import xarray as xr
 from attrs import define, field
-from pandera.typing import Index, Series
+from pandera.typing import Index
 
 from ethology.io.annotations.json_schemas.utils import (
     _check_file_is_json,
@@ -228,7 +228,7 @@ class ValidCOCO:
 
 @define
 class ValidBboxesDataset:
-    """Class for valid ``ethology`` datasets with bounding boxes annotations.
+    """Class for valid ``ethology`` bounding box annotations datasets.
 
     It checks that the input dataset has:
 
@@ -297,11 +297,9 @@ class ValidBboxesDataFrame(pa.DataFrameModel):
     """Class for valid bounding boxes intermediate dataframes.
 
     We use this dataframe internally as an intermediate step in the process of
-    converting an input annotation file (VIA or COCO) to an xarray bounding
-    boxes annotations dataset. The validation checks the required columns
-    exists and their types are correct.
-
-    All the specified columns are required.
+    converting an input bounding box annotations file (VIA or COCO) to
+    an ``ethology`` dataset. The validation checks all required columns
+    exist and their types are correct.
 
     Attributes
     ----------
@@ -336,7 +334,7 @@ class ValidBboxesDataFrame(pa.DataFrameModel):
     Raises
     ------
     pa.errors.SchemaError
-        If the dataframe does not match the schema.
+        If the input dataframe does not match the schema.
 
     See Also
     --------
@@ -345,23 +343,19 @@ class ValidBboxesDataFrame(pa.DataFrameModel):
     """
 
     # image columns
-    image_filename: str = pa.Field(
-        description="Name of the image file.",
-        nullable=False,
-    )
+    image_filename: str = pa.Field(description="Name of the image file.")
     image_id: int = pa.Field(
-        description="Unique identifier for each of the images.",
-        nullable=False,
+        description="Unique identifier for each of the images."
     )
     image_width: int = pa.Field(
         description="Width of each of the images, "
-        "in the same units as the input file (usually pixels).",
-        nullable=False,  # if not defined, it should be set to 0 in the df
+        "in the same units as the input file (usually pixels)."
+        # if not defined, it should be set to 0 in the df
     )
     image_height: int = pa.Field(
         description="Height of each of the images, "
-        "in the same units as the input file (usually pixels).",
-        nullable=False,  # if not defined, it should be set to 0 in the df
+        "in the same units as the input file (usually pixels)."
+        # if not defined, it should be set to 0 in the df
     )
 
     # bbox columns
@@ -369,27 +363,23 @@ class ValidBboxesDataFrame(pa.DataFrameModel):
         description=(
             "Minimum x-coordinate of the bounding box, "
             "in the same units as the input file."
-        ),
-        nullable=False,
+        )
     )
     y_min: float = pa.Field(
         description=(
             "Minimum y-coordinate of the bounding box, "
             "in the same units as the input file."
-        ),
-        nullable=False,
+        )
     )
     width: float = pa.Field(
         description=(
             "Width of the bounding box, in the same units as the input file."
-        ),
-        nullable=False,
+        )
     )
     height: float = pa.Field(
         description=(
             "Height of the bounding box, in the same units as the input file."
-        ),
-        nullable=False,
+        )
     )
 
     # category columns
@@ -400,31 +390,42 @@ class ValidBboxesDataFrame(pa.DataFrameModel):
             "Unique identifier for the category, "
             "as specified in the input file. A value of 0 "
             "is usually reserved for the background class."
-        ),
+        )
     )
     category: str = pa.Field(
-        description="Category of the annotation as a string.",
+        description="Category of the annotation as a string."
     )
     supercategory: str = pa.Field(
-        description="Supercategory of the annotation as a string.",
+        description="Supercategory of the annotation as a string."
     )
 
     @staticmethod
     def get_empty_values() -> dict:
-        """Get the empty values for the dataframe columns."""
+        """Get the default empty values for selected dataframe columns.
+
+        The columns are those that can be undefined in VIA and COCO files:
+        ``category``, ``supercategory``, ``category_id``, ``image_width`` and
+        ``image_height``.
+
+        Returns
+        -------
+        dict
+            A dictionary with the default empty values the specified columns.
+
+        """
         return {
-            "category": "",  # it can be not defined in VIA files
-            "supercategory": "",  # it can be not defined in VIA and COCO files
-            "category_id": -1,  # it can be not defined in VIA files
-            "image_width": 0,  # it can be not defined in VIA files
-            "image_height": 0,  # it can be not defined in VIA files
+            "category": "",  # it can be undefined in VIA files
+            "supercategory": "",  # it can be undefined in VIA and COCO files
+            "category_id": -1,  # it can be undefined in VIA files
+            "image_width": 0,  # it can be undefined in VIA files
+            "image_height": 0,  # it can be undefined in VIA files
         }
 
 
 class ValidBboxesDataFrameCOCO(pa.DataFrameModel):
-    """Class for valid bounding boxes annotations dataframes for COCO export.
+    """Class for COCO-exportable bounding box annotations dataframes.
 
-    The validation checks the required columns exists and their types are
+    The validation checks the required columns exist and their types are
     correct. It additionally checks that the index and the
     ``annotation_id`` column are equal.
 
@@ -523,7 +524,15 @@ class ValidBboxesDataFrameCOCO(pa.DataFrameModel):
 
     @staticmethod
     def map_df_columns_to_COCO_fields() -> dict:
-        """Map COCO-exportable dataframe columns to COCO fields."""
+        """Map COCO-exportable dataframe columns to COCO fields.
+
+        Returns
+        -------
+        dict
+            A dictionary mapping each column in the COCO-exportable dataframe
+            to the corresponding fields in the equivalent COCO file.
+
+        """
         return {
             "images": {
                 "image_id": "id",
@@ -548,8 +557,21 @@ class ValidBboxesDataFrameCOCO(pa.DataFrameModel):
         }
 
     @pa.dataframe_check
-    def check_idx_and_annotation_id(cls, df: pd.DataFrame) -> Series[bool]:
-        """Check that the index and the "annotation_id" column are equal."""
+    def check_idx_and_annotation_id(cls, df: pd.DataFrame) -> bool:
+        """Check that the index and the ``annotation_id`` column are equal.
+
+        Parameters
+        ----------
+        df : pd.DataFrame
+            The dataframe to check.
+
+        Returns
+        -------
+        bool
+            A boolean indicating whether the index and the
+            ``annotation_id`` column are equal for all rows.
+
+        """
         return all(df.index == df["annotation_id"])
 
 
@@ -557,7 +579,7 @@ def _check_output(validator: type):
     """Return a decorator that validates the output of a function."""
 
     def decorator(function: Callable) -> Callable:
-        @wraps(function)  # to preserve metadata
+        @wraps(function)  # to preserve function metadata
         def wrapper(*args, **kwargs):
             result = function(*args, **kwargs)
             validator(result)
@@ -571,7 +593,8 @@ def _check_output(validator: type):
 def _check_input(validator: type, input_index: int = 0):
     """Return a decorator that validates a specific input of a function.
 
-    By default, the first input is validated.
+    By default, the first input is validated. If the input index is
+    larger than the number of inputs, no validation is performed.
     """
 
     def decorator(function: Callable) -> Callable:

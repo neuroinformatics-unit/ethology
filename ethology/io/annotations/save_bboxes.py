@@ -1,4 +1,4 @@
-"""Module for exporting bounding boxes annotations to files."""
+"""Save ``ethology`` bounding box annotations datasets to various formats."""
 
 import json
 from datetime import datetime
@@ -23,25 +23,26 @@ from ethology.io.annotations.validate import (
 @_check_input(validator=ValidBboxesDataset)
 @_check_output(validator=ValidCOCO)  # check output is ethology importable
 def to_COCO_file(ds: xr.Dataset, output_filepath: str | Path):
-    """Write bounding boxes annotations dataset to a COCO JSON file.
+    """Save an ``ethology`` bounding box annotations dataset to a COCO file.
 
     Parameters
     ----------
     ds : xarray.Dataset
         Bounding boxes annotations xarray dataset.
     output_filepath : str or pathlib.Path
-        Path for the output COCO JSON file.
+        Path for the output COCO file.
 
     Returns
     -------
     str
-        Path for the output COCO JSON file.
+        Path for the output COCO file.
 
     Examples
     --------
-    Save annotations to a COCO JSON file:
+    Save annotations to a COCO file:
 
-    >>> to_COCO_file(ds, "path/to/output_file.json")
+    >>> from ethology.io.annotations import save_bboxes
+    >>> save_bboxes.to_COCO_file(ds, "path/to/output_file.json")
 
     """
     # Compute valid COCO dataframe from xarray dataset

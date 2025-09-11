@@ -1,4 +1,4 @@
-"""Module for loading bounding boxes annotations from files."""
+"""Load bounding boxes annotations into ``ethology``."""
 
 import json
 from pathlib import Path
@@ -25,7 +25,7 @@ def from_files(
     format: Literal["VIA", "COCO"],
     images_dirs: Path | str | list[Path | str] | None = None,
 ) -> xr.Dataset:
-    """Read input annotation files as a bboxes xarray dataset.
+    """Load an ``ethology`` bounding box annotations dataset from a file.
 
     Parameters
     ----------
@@ -42,7 +42,7 @@ def from_files(
     -------
     xarray.Dataset
 
-        A valid bounding boxes annotations dataset with dimensions
+        A valid bounding box annotations dataset with dimensions
         `image_id`, `space`, `id`, and the following arrays:
 
         - `position`, with dimensions (image_id, space, id),
@@ -82,9 +82,26 @@ def from_files(
 
     Examples
     --------
-    Load annotations from two files following VIA format:
+    Load annotations from a single COCO file:
 
-    >>> ds = from_files(
+    >>> from ethology.io.annotations import load_bboxes
+    >>> ds = load_bboxes.from_files(
+    ...     file_paths="path/to/annotation_file.json", format="COCO"
+    ... )
+
+    Load annotations from a single COCO file and specify the images directory:
+
+    >>> from ethology.io.annotations import load_bboxes
+    >>> ds = load_bboxes.from_files(
+    ...     file_paths="path/to/annotation_file.json",
+    ...     format="COCO",
+    ...     images_dirs="path/to/images_dir",
+    ... )
+
+    Load annotations from two VIA files and specify multiple image directories:
+
+    >>> from ethology.io.annotations import load_bboxes
+    >>> ds = load_bboxes.from_files(
     ...     file_paths=[
     ...         "path/to/annotation_file_1.json",
     ...         "path/to/annotation_file_2.json",
@@ -128,7 +145,7 @@ def _get_map_attributes_from_df(
     Parameters
     ----------
     df : DataFrame[ValidBboxesDataFrame]
-        Bounding boxes annotations dataframe.
+        Bounding box annotations dataframe.
 
     Returns
     -------
@@ -537,7 +554,7 @@ def _df_rows_from_valid_COCO_file(file_path: Path) -> list[dict]:
 
 @pa.check_types
 def _df_to_xarray_ds(df: DataFrame[ValidBboxesDataFrame]) -> xr.Dataset:
-    """Convert a bounding boxes annotations dataframe to an xarray dataset.
+    """Convert a bounding box annotations dataframe to an xarray dataset.
 
     Parameters
     ----------
