@@ -391,10 +391,12 @@ def _get_image_shape_attr_as_integer(
     the image shape attribute defined in
     ValidBboxesDataFrame.get_empty_values().
 
+    The file_attrs dictionary should come from a VIA input file.
+
     Parameters
     ----------
     file_attrs : dict
-        File attributes dictionary.
+        File attributes dictionary extracted from a VIA input file.
     attr_name : Literal["width", "height"]
         Name of the image shape attribute.
 

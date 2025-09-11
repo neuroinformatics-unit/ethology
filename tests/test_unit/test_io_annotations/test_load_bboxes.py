@@ -16,6 +16,7 @@ from ethology.io.annotations.load_bboxes import (
     _df_rows_from_valid_COCO_file,
     _df_rows_from_valid_VIA_file,
     _df_to_xarray_ds,
+    _get_image_shape_attr_as_integer,
     from_files,
 )
 
@@ -374,7 +375,8 @@ def test_df_from_multiple_files(
     format: Literal["VIA", "COCO"], multiple_files: dict
 ):
     """Test that the multiple files reader reads correctly multiple files
-    of the supported formats without any duplicates as a dataframe.
+    of the supported formats (without any duplicates) as a valid intermediate
+    dataframe.
     """
     # Get list of paths
     list_paths = multiple_files[format]
@@ -621,6 +623,8 @@ def test_df_rows_from_valid_file(
         "annotation_id",
         "image_filename",
         "image_id",
+        "image_width",
+        "image_height",
         "x_min",
         "y_min",
         "width",
@@ -628,8 +632,6 @@ def test_df_rows_from_valid_file(
         "supercategory",
         "category",
         "category_id",
-        "image_width",
-        "image_height",
     ]
     assert all([key in row for key in required_keys for row in rows])
 
@@ -869,13 +871,15 @@ def test_equal_ds_from_equal_annotations(annotations_test_data: dict):
     # Two datasets are equal if they have matching variables and coordinates
     assert ds_via.equals(ds_coco)
 
-    # Check attributes individually
+    # Check attributes that should be different
     assert (
         ds_via.attrs["annotation_files"] != ds_coco.attrs["annotation_files"]
     )
     assert (
         ds_via.attrs["annotation_format"] != ds_coco.attrs["annotation_format"]
     )
+
+    # Check attributes that should be the same
     assert (
         ds_via.attrs["map_category_to_str"]
         == ds_coco.attrs["map_category_to_str"]
@@ -891,31 +895,33 @@ def test_equal_ds_from_equal_annotations(annotations_test_data: dict):
 
 
 @pytest.mark.parametrize(
-    "input_file, format, case_category_id, expected_category_id",
+    "input_file, format, case_category_id, expected_category_data",
     [
+        # in all cases with category data, the category name in
+        # the input file is "crab"
         (
             "small_bboxes_no_cat_VIA.json",
             "VIA",
             "empty",
-            None,
-        ),  # no category in VIA file --> should be None in df
+            (-1, ""),
+        ),  # no category data in VIA file --> should be -1 and "" in df
         (
             "small_bboxes_VIA.json",
             "VIA",
             "string_integer",
-            1,
+            (1, "crab"),
         ),  # category ID is a string ("1") ---> should be 1 in df
         (
             "VIA_JSON_sample_1.json",
             "VIA",
             "string_category",
-            1,
+            (1, "crab"),
         ),  # category ID is a string ("crab") ---> should be 1 in df
         (
             "small_bboxes_COCO.json",
             "COCO",
             "integer",
-            1,
+            (1, "crab"),
         ),  # category ID is an integer (1) ---> should be 1 in df
     ],
 )
@@ -923,7 +929,7 @@ def test_category_id_extraction(
     input_file: str,
     format: Literal["VIA", "COCO"],
     case_category_id: str,
-    expected_category_id: int | None,
+    expected_category_data: tuple[int, str],
     annotations_test_data: dict,
 ):
     """Test that the category_id is extracted correctly from the input file.
@@ -937,18 +943,13 @@ def test_category_id_extraction(
         file_path=annotations_test_data[input_file], format=format
     )
 
-    # If no category in input file, the category_id column should be None
-    if case_category_id == "empty":
-        df["category_id"].apply(lambda x: x is expected_category_id).all()
-
-    # Category ID should be an integer
-    elif case_category_id in ["string_integer", "integer", "string_category"]:
-        assert df["category_id"].dtype == int
-        assert df["category_id"].unique() == [expected_category_id]
+    assert df["category_id"].dtype == int
+    assert (df["category_id"] == expected_category_data[0]).all()
+    assert (df["category"] == expected_category_data[1]).all()
 
     # Category ID should be factorized into 1-based integers if saved as
     # strings
-    elif case_category_id == "string_category":
+    if case_category_id == "string_category":
         assert all(df["category_id"] == df["category"].factorize()[0] + 1)
 
 
@@ -999,4 +1000,26 @@ def test_annotations_sorted_by_image_filename_in_ds(
     map_img_id_to_filename_sorted = dict(enumerate(sorted_filenames))
     assert (
         ds.attrs["map_image_id_to_filename"] == map_img_id_to_filename_sorted
+    )
+
+
+@pytest.mark.parametrize(
+    "file_attrs, attr_name, expected_value",
+    [
+        ({"width": 100}, "width", 100),  # integer attribute
+        ({"width": "100"}, "width", 100),  # str attribute castable to integer
+        ({"width": "p"}, "width", 0),  # str attribute not castable to integer
+        ({"image_width": 100}, "width", 0),  # attribute not present
+    ],
+)
+def test_get_image_shape_attr_as_integer(
+    file_attrs, attr_name, expected_value
+):
+    """Test the image shape attribute is extracted correctly as an integer.
+
+    The file attributes should come from a VIA input file.
+    """
+    assert (
+        _get_image_shape_attr_as_integer(file_attrs, attr_name)
+        == expected_value
     )
