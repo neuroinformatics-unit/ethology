@@ -1,12 +1,14 @@
 ValidVIA
 ========
 
-.. currentmodule:: ethology.annotations.validators
+.. currentmodule:: ethology.io.annotations.validate
 
 .. autoclass:: ValidVIA
    :members:
    :show-inheritance:
    :inherited-members:
+   :exclude-members: Config
+
 
    
    

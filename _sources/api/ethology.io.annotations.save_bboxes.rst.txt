@@ -1,11 +1,11 @@
-﻿ethology.annotations.io.save\_bboxes
+﻿ethology.io.annotations.save\_bboxes
 ====================================
 
 .. rubric:: Description
 
-.. automodule:: ethology.annotations.io.save_bboxes
+.. automodule:: ethology.io.annotations.save_bboxes
 
-.. currentmodule:: ethology.annotations.io.save_bboxes
+.. currentmodule:: ethology.io.annotations.save_bboxes
 
 
 

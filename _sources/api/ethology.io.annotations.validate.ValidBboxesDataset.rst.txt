@@ -1,0 +1,22 @@
+ValidBboxesDataset
+==================
+
+.. currentmodule:: ethology.io.annotations.validate
+
+.. autoclass:: ValidBboxesDataset
+   :members:
+   :show-inheritance:
+   :inherited-members:
+   :exclude-members: Config
+
+
+   
+   
+
+   
+   
+   
+   
+
+   
+   

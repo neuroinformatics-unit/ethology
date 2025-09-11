@@ -1,6 +1,0 @@
-from\_files
-===========
-
-.. currentmodule:: ethology.annotations.io.load_bboxes
-
-.. autofunction:: from_files

@@ -1,0 +1,94 @@
+ValidBboxesDataFrame
+====================
+
+.. currentmodule:: ethology.io.annotations.validate
+
+.. autoclass:: ValidBboxesDataFrame
+   :members:
+   :show-inheritance:
+   :inherited-members:
+   :exclude-members: Config
+
+
+   
+   
+
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+   
+   
+      ~ValidBboxesDataFrame.build_schema_
+   
+   
+      ~ValidBboxesDataFrame.empty
+   
+   
+      ~ValidBboxesDataFrame.example
+   
+   
+      ~ValidBboxesDataFrame.get_empty_values
+   
+   
+      ~ValidBboxesDataFrame.get_metadata
+   
+   
+      ~ValidBboxesDataFrame.pydantic_validate
+   
+   
+      ~ValidBboxesDataFrame.strategy
+   
+   
+      ~ValidBboxesDataFrame.to_json_schema
+   
+   
+      ~ValidBboxesDataFrame.to_schema
+   
+   
+      ~ValidBboxesDataFrame.to_yaml
+   
+   
+      ~ValidBboxesDataFrame.validate
+   
+   
+   

@@ -1,0 +1,768 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ethology.io.annotations.save_bboxes &#8212; ethology</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../../../_static/css/custom.css?v=9c66c473" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/sphinx-design.min.css?v=95c83b7e" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../../../../_static/documentation_options.js?v=9a28fe7c"></script>
+    <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/design-tabs.js?v=f930bc37"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/ethology/io/annotations/save_bboxes';</script>
+    <link rel="canonical" href="https://ethology.neuroinformatics.dev/_modules/ethology/io/annotations/save_bboxes.html" />
+    <link rel="icon" href="../../../../_static/light-logo-niu.png"/>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../../../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">ethology v0.0.2.dev33</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../../installation.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../../community/index.html">
+    Community
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../../api_index.html">
+    API reference
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/neuroinformatics-unit/ethology" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://neuroinformatics.zulipchat.com/#narrow/channel/483869-Ethology" title="Zulip (chat)" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-comments fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Zulip (chat)</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../../installation.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../../community/index.html">
+    Community
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../../api_index.html">
+    API reference
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/neuroinformatics-unit/ethology" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://neuroinformatics.zulipchat.com/#narrow/channel/483869-Ethology" title="Zulip (chat)" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-comments fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Zulip (chat)</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../../../index.html" class="nav-link">Module code</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">ethology.io.annotations.save_bboxes</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for ethology.io.annotations.save_bboxes</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Save ``ethology`` bounding box annotations datasets to various formats.&quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandera.pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pa</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pytz</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">xarray</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">xr</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pandera.typing.pandas</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataFrame</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">ethology.io.annotations.validate</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">ValidBboxesDataFrameCOCO</span><span class="p">,</span>
+    <span class="n">ValidBboxesDataset</span><span class="p">,</span>
+    <span class="n">ValidCOCO</span><span class="p">,</span>
+    <span class="n">_check_input</span><span class="p">,</span>
+    <span class="n">_check_output</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<div class="viewcode-block" id="to_COCO_file">
+<a class="viewcode-back" href="../../../../api/ethology.io.annotations.save_bboxes.to_COCO_file.html#ethology.io.annotations.save_bboxes.to_COCO_file">[docs]</a>
+<span class="nd">@_check_input</span><span class="p">(</span><span class="n">validator</span><span class="o">=</span><span class="n">ValidBboxesDataset</span><span class="p">)</span>
+<span class="nd">@_check_output</span><span class="p">(</span><span class="n">validator</span><span class="o">=</span><span class="n">ValidCOCO</span><span class="p">)</span>  <span class="c1"># check output is ethology importable</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">to_COCO_file</span><span class="p">(</span><span class="n">ds</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">output_filepath</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Save an ``ethology`` bounding box annotations dataset to a COCO file.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    ds : xarray.Dataset</span>
+<span class="sd">        Bounding boxes annotations xarray dataset.</span>
+<span class="sd">    output_filepath : str or pathlib.Path</span>
+<span class="sd">        Path for the output COCO file.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    str</span>
+<span class="sd">        Path for the output COCO file.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    Save annotations to a COCO file:</span>
+
+<span class="sd">    &gt;&gt;&gt; from ethology.io.annotations import save_bboxes</span>
+<span class="sd">    &gt;&gt;&gt; save_bboxes.to_COCO_file(ds, &quot;path/to/output_file.json&quot;)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Compute valid COCO dataframe from xarray dataset</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">_to_COCO_exportable_df</span><span class="p">(</span><span class="n">ds</span><span class="p">)</span>
+
+    <span class="c1"># Create COCO dictionary from dataframe and export</span>
+    <span class="n">COCO_dict</span> <span class="o">=</span> <span class="n">_create_COCO_dict</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">output_filepath</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">COCO_dict</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">sort_keys</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">output_filepath</span></div>
+
+
+
+<span class="nd">@_check_input</span><span class="p">(</span><span class="n">validator</span><span class="o">=</span><span class="n">ValidBboxesDataset</span><span class="p">)</span>
+<span class="nd">@pa</span><span class="o">.</span><span class="n">check_types</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_to_COCO_exportable_df</span><span class="p">(</span>
+    <span class="n">ds</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataFrame</span><span class="p">[</span><span class="n">ValidBboxesDataFrameCOCO</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert dataset of bounding boxes annotations to a COCO-exportable df.</span>
+
+<span class="sd">    The returned dataframe is validated using ValidBBoxesDataFrameCOCO.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    ds : xr.Dataset</span>
+<span class="sd">        A valid dataset of bounding boxes annotations.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    df : pd.DataFrame</span>
+<span class="sd">        A dataframe of bounding boxes annotations exportable to COCO.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Prepare dataframe from xarray dataset</span>
+    <span class="n">df_raw</span> <span class="o">=</span> <span class="n">_get_raw_df_from_ds</span><span class="p">(</span><span class="n">ds</span><span class="p">)</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">_add_COCO_data_to_df</span><span class="p">(</span><span class="n">df_raw</span><span class="p">,</span> <span class="n">ds</span><span class="o">.</span><span class="n">attrs</span><span class="p">)</span>
+
+    <span class="c1"># Select columns to keep</span>
+    <span class="n">cols_to_select</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s2">&quot;annotation_id&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;image_id&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;image_filename&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;image_width&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;image_height&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;bbox&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;area&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;segmentation&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;category&quot;</span><span class="p">,</span>  <span class="c1"># str</span>
+        <span class="s2">&quot;category_id&quot;</span><span class="p">,</span>  <span class="c1"># int</span>
+        <span class="s2">&quot;supercategory&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;iscrowd&quot;</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="k">return</span> <span class="n">df</span><span class="p">[</span><span class="n">cols_to_select</span><span class="p">]</span>
+
+
+<span class="nd">@_check_input</span><span class="p">(</span><span class="n">validator</span><span class="o">=</span><span class="n">ValidBboxesDataset</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_get_raw_df_from_ds</span><span class="p">(</span><span class="n">ds</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get preliminary dataframe from a dataset of bounding boxes annotations.</span>
+
+<span class="sd">    If the dataset has an &quot;image_shape&quot; array, the returned dataframe</span>
+<span class="sd">    will have &quot;image_shape_x&quot; and &quot;image_shape_y&quot; columns. The returned</span>
+<span class="sd">    dataframe will have a &quot;category&quot; column, filled with the relevant category</span>
+<span class="sd">    values, or filled with -1 if no category array was present in the</span>
+<span class="sd">    original dataset.</span>
+
+<span class="sd">    The returned dataframe is not COCO-exportable.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    ds : xr.Dataset</span>
+<span class="sd">        A valid dataset of bounding boxes annotations.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    df : pd.DataFrame</span>
+<span class="sd">        A preliminary dataframe of bounding boxes annotations.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Create dataframe from xarray dataset</span>
+    <span class="n">df_raw</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">to_dataframe</span><span class="p">(</span><span class="n">dim_order</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;image_id&quot;</span><span class="p">,</span> <span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="s2">&quot;space&quot;</span><span class="p">])</span>
+    <span class="n">df_raw</span> <span class="o">=</span> <span class="n">df_raw</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+
+    <span class="c1"># Remove rows where position or shape data is nan</span>
+    <span class="c1"># (where at least one of the specified columns contains a NaN value.)</span>
+    <span class="n">df_raw</span> <span class="o">=</span> <span class="n">df_raw</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;position&quot;</span><span class="p">,</span> <span class="s2">&quot;shape&quot;</span><span class="p">])</span>
+
+    <span class="c1"># Add &quot;category&quot; column if not present</span>
+    <span class="k">if</span> <span class="s2">&quot;category&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">df_raw</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+        <span class="n">df_raw</span><span class="p">[</span><span class="s2">&quot;category&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+
+    <span class="c1"># Pivot the dataframe to get position_x, position_y, shape_x, shape_y, etc.</span>
+    <span class="n">index_cols</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;image_id&quot;</span><span class="p">,</span> <span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="s2">&quot;category&quot;</span><span class="p">]</span>
+    <span class="n">pivot_values</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;position&quot;</span><span class="p">,</span> <span class="s2">&quot;shape&quot;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="s2">&quot;image_shape&quot;</span> <span class="ow">in</span> <span class="n">df_raw</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+        <span class="n">pivot_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;image_shape&quot;</span><span class="p">)</span>
+
+    <span class="n">df_raw</span> <span class="o">=</span> <span class="n">df_raw</span><span class="o">.</span><span class="n">pivot_table</span><span class="p">(</span>
+        <span class="n">index</span><span class="o">=</span><span class="n">index_cols</span><span class="p">,</span>
+        <span class="n">columns</span><span class="o">=</span><span class="s2">&quot;space&quot;</span><span class="p">,</span>
+        <span class="n">values</span><span class="o">=</span><span class="n">pivot_values</span><span class="p">,</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+
+    <span class="c1"># Flatten the columns</span>
+    <span class="n">df_raw</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s2">&quot;_&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">col</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">if</span> <span class="n">col</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span> <span class="k">else</span> <span class="n">col</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">df_raw</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">values</span>
+    <span class="p">]</span>
+
+    <span class="c1"># Reset type for image_shape columns if present</span>
+    <span class="k">if</span> <span class="nb">all</span><span class="p">(</span>
+        <span class="n">col</span> <span class="ow">in</span> <span class="n">df_raw</span><span class="o">.</span><span class="n">columns</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;image_shape_x&quot;</span><span class="p">,</span> <span class="s2">&quot;image_shape_y&quot;</span><span class="p">]</span>
+    <span class="p">):</span>
+        <span class="n">df_raw</span><span class="p">[</span><span class="s2">&quot;image_shape_x&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_raw</span><span class="p">[</span><span class="s2">&quot;image_shape_x&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+        <span class="n">df_raw</span><span class="p">[</span><span class="s2">&quot;image_shape_y&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_raw</span><span class="p">[</span><span class="s2">&quot;image_shape_y&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">df_raw</span>
+
+
+<span class="nd">@pa</span><span class="o">.</span><span class="n">check_types</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_add_COCO_data_to_df</span><span class="p">(</span>
+    <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">ds_attrs</span><span class="p">:</span> <span class="nb">dict</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataFrame</span><span class="p">[</span><span class="n">ValidBboxesDataFrameCOCO</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Add COCO-required data to preliminary dataframe.</span>
+
+<span class="sd">    The input dataframe is obtained from a dataset of bounding boxes</span>
+<span class="sd">    annotations using ``_get_raw_df_from_ds`` and is not COCO-exportable.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    df : pd.DataFrame</span>
+<span class="sd">        Preliminary dataframe of bounding boxes annotations derived</span>
+<span class="sd">        from a dataset of bounding boxes annotations.</span>
+<span class="sd">    ds_attrs : dict</span>
+<span class="sd">        Attributes of the dataset of bounding boxes annotations.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    df : pd.DataFrame</span>
+<span class="sd">        COCO-exportable dataframe of bounding boxes annotations.</span>
+<span class="sd">        The dataframe has the following columns:</span>
+<span class="sd">        &#39;id&#39;, &#39;annotation_id&#39;,</span>
+<span class="sd">        &#39;image_filename&#39;, &#39;image_id&#39;, &#39;image_width&#39;, &#39;image_height&#39;,</span>
+<span class="sd">        &#39;position_x&#39;, &#39;position_y&#39;, &#39;shape_x&#39;, &#39;shape_y&#39;,</span>
+<span class="sd">        &#39;x_min&#39;,  &#39;y_min&#39;, &#39;width&#39;, &#39;height&#39;,</span>
+<span class="sd">        &#39;bbox&#39;, &#39;area&#39;, &#39;segmentation&#39;,</span>
+<span class="sd">        &#39;category&#39;, &#39;supercategory&#39;, &#39;category_id&#39;, &#39;iscrowd&#39;.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    The &#39;id&#39; column holds the annotation ID per frame, whereas</span>
+<span class="sd">    the &#39;annotation_id&#39; column holds the annotation ID across the</span>
+<span class="sd">    whole dataset.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># image filename</span>
+    <span class="n">map_image_id_to_filename</span> <span class="o">=</span> <span class="n">ds_attrs</span><span class="p">[</span><span class="s2">&quot;map_image_id_to_filename&quot;</span><span class="p">]</span>
+    <span class="n">df</span><span class="p">[</span><span class="s2">&quot;image_filename&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;image_id&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">map_image_id_to_filename</span><span class="p">)</span>
+
+    <span class="c1"># image width and height</span>
+    <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">col</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;image_shape_x&quot;</span><span class="p">,</span> <span class="s2">&quot;image_shape_y&quot;</span><span class="p">]):</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span>
+            <span class="n">columns</span><span class="o">=</span><span class="p">{</span>
+                <span class="s2">&quot;image_shape_x&quot;</span><span class="p">:</span> <span class="s2">&quot;image_width&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;image_shape_y&quot;</span><span class="p">:</span> <span class="s2">&quot;image_height&quot;</span><span class="p">,</span>
+            <span class="p">},</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">df</span><span class="p">[</span><span class="s2">&quot;image_width&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ds_attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;image_width&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">df</span><span class="p">[</span><span class="s2">&quot;image_height&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ds_attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;image_height&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+    <span class="c1"># bbox</span>
+    <span class="n">df</span><span class="p">[</span><span class="s2">&quot;x_min&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;position_x&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;shape_x&quot;</span><span class="p">]</span> <span class="o">/</span> <span class="mi">2</span>
+    <span class="n">df</span><span class="p">[</span><span class="s2">&quot;y_min&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;position_y&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;shape_y&quot;</span><span class="p">]</span> <span class="o">/</span> <span class="mi">2</span>
+    <span class="n">df</span><span class="p">[</span><span class="s2">&quot;width&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;shape_x&quot;</span><span class="p">]</span>
+    <span class="n">df</span><span class="p">[</span><span class="s2">&quot;height&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;shape_y&quot;</span><span class="p">]</span>
+    <span class="n">df</span><span class="p">[</span><span class="s2">&quot;bbox&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[[</span><span class="s2">&quot;x_min&quot;</span><span class="p">,</span> <span class="s2">&quot;y_min&quot;</span><span class="p">,</span> <span class="s2">&quot;width&quot;</span><span class="p">,</span> <span class="s2">&quot;height&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+
+    <span class="n">df</span><span class="p">[</span><span class="s2">&quot;area&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;width&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;height&quot;</span><span class="p">]</span>
+
+    <span class="c1"># segmentation as list of lists of coordinates</span>
+    <span class="c1"># top-left -&gt; top-right -&gt; bottom-right -&gt; bottom-left</span>
+    <span class="n">df</span><span class="p">[</span><span class="s2">&quot;segmentation&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;bbox&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
+        <span class="k">lambda</span> <span class="n">bbox</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">[</span>
+                <span class="n">bbox</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>  <span class="c1"># top-left x</span>
+                <span class="n">bbox</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>  <span class="c1"># top-left y</span>
+                <span class="n">bbox</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">bbox</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>  <span class="c1"># top-right x</span>
+                <span class="n">bbox</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>  <span class="c1"># top-right y</span>
+                <span class="n">bbox</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">bbox</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>  <span class="c1"># bottom-right x</span>
+                <span class="n">bbox</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">bbox</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span>  <span class="c1"># bottom-right y</span>
+                <span class="n">bbox</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>  <span class="c1"># bottom-left x</span>
+                <span class="n">bbox</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">bbox</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span>  <span class="c1"># bottom-left y</span>
+            <span class="p">]</span>
+        <span class="p">]</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Rename &quot;category&quot; to &quot;category_id&quot; (in dataset it is an integer)</span>
+    <span class="c1"># and compute &quot;category&quot; as string from &quot;category_id&quot;</span>
+    <span class="n">map_category_to_str</span> <span class="o">=</span> <span class="n">ds_attrs</span><span class="p">[</span><span class="s2">&quot;map_category_to_str&quot;</span><span class="p">]</span>
+    <span class="n">df</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="s2">&quot;category_id&quot;</span><span class="p">},</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">df</span><span class="p">[</span><span class="s2">&quot;category&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;category_id&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">map_category_to_str</span><span class="p">)</span>
+
+    <span class="c1"># supercategory</span>
+    <span class="k">if</span> <span class="s2">&quot;supercategory&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+        <span class="n">df</span><span class="p">[</span><span class="s2">&quot;supercategory&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+
+    <span class="c1"># other</span>
+    <span class="n">df</span><span class="p">[</span><span class="s2">&quot;iscrowd&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="c1"># Set index name and add &quot;annotation_id&quot; as column</span>
+    <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;annotation_id&quot;</span>
+    <span class="n">df</span><span class="p">[</span><span class="s2">&quot;annotation_id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">index</span>
+
+    <span class="c1"># Sort by &quot;image_filename&quot; and remove duplicates</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;image_filename&quot;</span><span class="p">])</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">(</span><span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">index</span>
+    <span class="p">]</span>  <span class="c1"># need to serialise lists first before dropping duplicates</span>
+
+    <span class="k">return</span> <span class="n">df</span>
+
+
+<span class="nd">@pa</span><span class="o">.</span><span class="n">check_types</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_create_COCO_dict</span><span class="p">(</span><span class="n">df</span><span class="p">:</span> <span class="n">DataFrame</span><span class="p">[</span><span class="n">ValidBboxesDataFrameCOCO</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Extract COCO dictionary from a COCO-exportable dataframe.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    df : DataFrame[ValidBBoxesDataFrameCOCO]</span>
+<span class="sd">        COCO exportable dataframe.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    COCO_dict : dict</span>
+<span class="sd">        COCO dictionary.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">COCO_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">map_columns_to_COCO_fields</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">ValidBboxesDataFrameCOCO</span><span class="o">.</span><span class="n">map_df_columns_to_COCO_fields</span><span class="p">()</span>
+    <span class="p">)</span>
+    <span class="k">for</span> <span class="n">sections</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;images&quot;</span><span class="p">,</span> <span class="s2">&quot;categories&quot;</span><span class="p">,</span> <span class="s2">&quot;annotations&quot;</span><span class="p">]:</span>
+        <span class="c1"># Extract and rename required columns for this section</span>
+        <span class="n">list_required_columns</span> <span class="o">=</span> <span class="n">map_columns_to_COCO_fields</span><span class="p">[</span><span class="n">sections</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+        <span class="n">df_section</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">list_required_columns</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">df_section</span> <span class="o">=</span> <span class="n">df_section</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span>
+            <span class="n">columns</span><span class="o">=</span><span class="n">map_columns_to_COCO_fields</span><span class="p">[</span><span class="n">sections</span><span class="p">]</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Extract rows as lists of dictionaries</span>
+        <span class="k">if</span> <span class="n">sections</span> <span class="o">==</span> <span class="s2">&quot;annotations&quot;</span><span class="p">:</span>
+            <span class="n">row_dicts</span> <span class="o">=</span> <span class="n">df_section</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="s2">&quot;records&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">row_dicts</span> <span class="o">=</span> <span class="n">df_section</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">()</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="s2">&quot;records&quot;</span><span class="p">)</span>
+
+        <span class="n">COCO_dict</span><span class="p">[</span><span class="n">sections</span><span class="p">]</span> <span class="o">=</span> <span class="n">row_dicts</span>
+
+    <span class="c1"># Add info section to COCO_dict</span>
+    <span class="n">COCO_dict</span><span class="p">[</span><span class="s2">&quot;info&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;date_created&quot;</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(</span><span class="n">pytz</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span>
+            <span class="s2">&quot;</span><span class="si">%a</span><span class="s2"> %b </span><span class="si">%d</span><span class="s2"> %Y %H:%M:%S GMT%z&quot;</span>
+        <span class="p">),</span>
+        <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Bounding boxes annotations exported from ethology&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="s2">&quot;https://github.com/neuroinformatics-unit/ethology&quot;</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="k">return</span> <span class="n">COCO_dict</span>
+</pre></div>
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item"><p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    <br/>
+    </p>
+    <p class="theme-version">
+    Built with the
+    <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a>
+    0.16.1.
+    </p></div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item"><div class="things-in-a-row">
+    <a href="https://neuroinformatics.dev/">
+        <img src="../../../../_static/light-logo-niu.png" alt="Sponsors" class="only-light img-sponsor"/>
+        <img src="../../../../_static/dark-logo-niu.png" alt="Sponsors" class="only-dark img-sponsor"/>
+    </a>
+    <a href="https://www.sainsburywellcome.org/web/">
+        <img src="../../../../_static/light-logo-swc.png" alt="Sponsors" class="only-light img-sponsor"/>
+        <img src="../../../../_static/dark-logo-swc.png" alt="Sponsors" class="only-dark img-sponsor"/>
+    </a>
+    <a href="https://www.ucl.ac.uk/gatsby/gatsby-computational-neuroscience-unit">
+        <img src="../../../../_static/light-logo-gatsby.png" alt="Sponsors" class="only-light img-sponsor"/>
+        <img src="../../../../_static/dark-logo-gatsby.png" alt="Sponsors" class="only-dark img-sponsor"/>
+    </a>
+    <a href="https://www.ucl.ac.uk/">
+        <img src="../../../../_static/light-logo-ucl.png" alt="Sponsors" class="only-light img-sponsor"/>
+        <img src="../../../../_static/dark-logo-ucl.png" alt="Sponsors" class="only-dark img-sponsor"/>
+    </a>
+</div></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

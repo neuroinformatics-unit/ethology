@@ -16,6 +16,6 @@ Information on specific functions, classes, and methods.
     :recursive:
     :nosignatures:
 
-    ethology.annotations.io.load_bboxes
-    ethology.annotations.io.save_bboxes
-    ethology.annotations.validators
+    ethology.io.annotations.load_bboxes
+    ethology.io.annotations.save_bboxes
+    ethology.io.annotations.validate

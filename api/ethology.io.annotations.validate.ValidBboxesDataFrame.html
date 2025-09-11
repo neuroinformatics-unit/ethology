@@ -1,0 +1,896 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>ValidBboxesDataFrame &#8212; ethology</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=9c66c473" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../_static/documentation_options.js?v=9a28fe7c"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'api/ethology.io.annotations.validate.ValidBboxesDataFrame';</script>
+    <link rel="canonical" href="https://ethology.neuroinformatics.dev/api/ethology.io.annotations.validate.ValidBboxesDataFrame.html" />
+    <link rel="icon" href="../_static/light-logo-niu.png"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="ValidBboxesDataFrameCOCO" href="ethology.io.annotations.validate.ValidBboxesDataFrameCOCO.html" />
+    <link rel="prev" title="ethology.io.annotations.validate" href="ethology.io.annotations.validate.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">ethology v0.0.2.dev33</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../installation.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../community/index.html">
+    Community
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../api_index.html">
+    API reference
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/neuroinformatics-unit/ethology" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://neuroinformatics.zulipchat.com/#narrow/channel/483869-Ethology" title="Zulip (chat)" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-comments fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Zulip (chat)</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../installation.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../community/index.html">
+    Community
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../api_index.html">
+    API reference
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/neuroinformatics-unit/ethology" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://neuroinformatics.zulipchat.com/#narrow/channel/483869-Ethology" title="Zulip (chat)" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-comments fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Zulip (chat)</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="ethology.io.annotations.load_bboxes.html">ethology.io.annotations.load_bboxes</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="ethology.io.annotations.load_bboxes.from_files.html">from_files</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="ethology.io.annotations.save_bboxes.html">ethology.io.annotations.save_bboxes</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="ethology.io.annotations.save_bboxes.to_COCO_file.html">to_COCO_file</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="ethology.io.annotations.validate.html">ethology.io.annotations.validate</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">ValidBboxesDataFrame</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ethology.io.annotations.validate.ValidBboxesDataFrameCOCO.html">ValidBboxesDataFrameCOCO</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ethology.io.annotations.validate.ValidBboxesDataset.html">ValidBboxesDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ethology.io.annotations.validate.ValidCOCO.html">ValidCOCO</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ethology.io.annotations.validate.ValidVIA.html">ValidVIA</a></li>
+</ul>
+</details></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../api_index.html" class="nav-link">API reference</a></li>
+    
+    
+    <li class="breadcrumb-item"><a href="ethology.io.annotations.validate.html" class="nav-link">ethology.io.annotations.validate</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">ValidBboxesDataFrame</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="validbboxesdataframe">
+<h1>ValidBboxesDataFrame<a class="headerlink" href="#validbboxesdataframe" title="Link to this heading">#</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="ethology.io.annotations.validate.ValidBboxesDataFrame">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ethology.io.annotations.validate.</span></span><span class="sig-name descname"><span class="pre">ValidBboxesDataFrame</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ethology/io/annotations/validate.html#ValidBboxesDataFrame"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ethology.io.annotations.validate.ValidBboxesDataFrame" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://pandera.readthedocs.io/en/stable/reference/generated/pandera.api.pandas.model.DataFrameModel.html#pandera.api.pandas.model.DataFrameModel" title="(in pandera)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrameModel</span></code></a></p>
+<p>Class for valid bounding boxes intermediate dataframes.</p>
+<p>We use this dataframe internally as an intermediate step in the process of
+converting an input bounding box annotations file (VIA or COCO) to
+an <code class="docutils literal notranslate"><span class="pre">ethology</span></code> dataset. The validation checks all required columns
+exist and their types are correct.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ethology.io.annotations.validate.ValidBboxesDataFrame.image_filename">
+<span class="sig-name descname"><span class="pre">image_filename</span></span><a class="headerlink" href="#ethology.io.annotations.validate.ValidBboxesDataFrame.image_filename" title="Link to this definition">#</a></dt>
+<dd><p>Name of the image file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ethology.io.annotations.validate.ValidBboxesDataFrame.image_id">
+<span class="sig-name descname"><span class="pre">image_id</span></span><a class="headerlink" href="#ethology.io.annotations.validate.ValidBboxesDataFrame.image_id" title="Link to this definition">#</a></dt>
+<dd><p>Unique identifier for each of the images.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ethology.io.annotations.validate.ValidBboxesDataFrame.image_width">
+<span class="sig-name descname"><span class="pre">image_width</span></span><a class="headerlink" href="#ethology.io.annotations.validate.ValidBboxesDataFrame.image_width" title="Link to this definition">#</a></dt>
+<dd><p>Width of each of the images, in the same units as the input file
+(usually pixels).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ethology.io.annotations.validate.ValidBboxesDataFrame.image_height">
+<span class="sig-name descname"><span class="pre">image_height</span></span><a class="headerlink" href="#ethology.io.annotations.validate.ValidBboxesDataFrame.image_height" title="Link to this definition">#</a></dt>
+<dd><p>Height of each of the images, in the same units as the input file
+(usually pixels).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ethology.io.annotations.validate.ValidBboxesDataFrame.x_min">
+<span class="sig-name descname"><span class="pre">x_min</span></span><a class="headerlink" href="#ethology.io.annotations.validate.ValidBboxesDataFrame.x_min" title="Link to this definition">#</a></dt>
+<dd><p>Minimum x-coordinate of the bounding box, in the same units as
+the input file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ethology.io.annotations.validate.ValidBboxesDataFrame.y_min">
+<span class="sig-name descname"><span class="pre">y_min</span></span><a class="headerlink" href="#ethology.io.annotations.validate.ValidBboxesDataFrame.y_min" title="Link to this definition">#</a></dt>
+<dd><p>Minimum y-coordinate of the bounding box, in the same units as
+the input file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ethology.io.annotations.validate.ValidBboxesDataFrame.width">
+<span class="sig-name descname"><span class="pre">width</span></span><a class="headerlink" href="#ethology.io.annotations.validate.ValidBboxesDataFrame.width" title="Link to this definition">#</a></dt>
+<dd><p>Width of the bounding box, in the same units as the input file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ethology.io.annotations.validate.ValidBboxesDataFrame.height">
+<span class="sig-name descname"><span class="pre">height</span></span><a class="headerlink" href="#ethology.io.annotations.validate.ValidBboxesDataFrame.height" title="Link to this definition">#</a></dt>
+<dd><p>Height of the bounding box, in the same units as the input file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ethology.io.annotations.validate.ValidBboxesDataFrame.category_id">
+<span class="sig-name descname"><span class="pre">category_id</span></span><a class="headerlink" href="#ethology.io.annotations.validate.ValidBboxesDataFrame.category_id" title="Link to this definition">#</a></dt>
+<dd><p>Unique identifier for the category, as specified in the input file.
+A value of 0 is usually reserved for the background class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ethology.io.annotations.validate.ValidBboxesDataFrame.category">
+<span class="sig-name descname"><span class="pre">category</span></span><a class="headerlink" href="#ethology.io.annotations.validate.ValidBboxesDataFrame.category" title="Link to this definition">#</a></dt>
+<dd><p>Category of the annotation as a string.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ethology.io.annotations.validate.ValidBboxesDataFrame.supercategory">
+<span class="sig-name descname"><span class="pre">supercategory</span></span><a class="headerlink" href="#ethology.io.annotations.validate.ValidBboxesDataFrame.supercategory" title="Link to this definition">#</a></dt>
+<dd><p>Supercategory of the annotation as a string.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>pa.errors.SchemaError</strong> – If the input dataframe does not match the schema.</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference external" href="https://pandera.readthedocs.io/en/stable/reference/generated/pandera.api.pandas.model.DataFrameModel.html#pandera.api.pandas.model.DataFrameModel" title="(in pandera)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandera.api.pandas.model.DataFrameModel</span></code></a></p>
+</div>
+<p class="rubric">Methods</p>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">build_schema_</span></code>(**kwargs)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#ethology.io.annotations.validate.ValidBboxesDataFrame.empty" title="ethology.io.annotations.validate.ValidBboxesDataFrame.empty"><code class="xref py py-obj docutils literal notranslate"><span class="pre">empty</span></code></a>(*_args)</p></td>
+<td><p>Create an empty DataFrame with the schema of this model.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#ethology.io.annotations.validate.ValidBboxesDataFrame.example" title="ethology.io.annotations.validate.ValidBboxesDataFrame.example"><code class="xref py py-obj docutils literal notranslate"><span class="pre">example</span></code></a>(cls, **kwargs)</p></td>
+<td><p>Generate an example of a particular size.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#ethology.io.annotations.validate.ValidBboxesDataFrame.get_empty_values" title="ethology.io.annotations.validate.ValidBboxesDataFrame.get_empty_values"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_empty_values</span></code></a>()</p></td>
+<td><p>Get the default empty values for selected dataframe columns.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#ethology.io.annotations.validate.ValidBboxesDataFrame.get_metadata" title="ethology.io.annotations.validate.ValidBboxesDataFrame.get_metadata"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_metadata</span></code></a>()</p></td>
+<td><p>Provide metadata for columns and schema level</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#ethology.io.annotations.validate.ValidBboxesDataFrame.pydantic_validate" title="ethology.io.annotations.validate.ValidBboxesDataFrame.pydantic_validate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pydantic_validate</span></code></a>(schema_model)</p></td>
+<td><p>Verify that the input is a compatible dataframe model.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#ethology.io.annotations.validate.ValidBboxesDataFrame.strategy" title="ethology.io.annotations.validate.ValidBboxesDataFrame.strategy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">strategy</span></code></a>(cls, **kwargs)</p></td>
+<td><p>Create a <code class="docutils literal notranslate"><span class="pre">hypothesis</span></code> strategy for generating a DataFrame.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#ethology.io.annotations.validate.ValidBboxesDataFrame.to_json_schema" title="ethology.io.annotations.validate.ValidBboxesDataFrame.to_json_schema"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_json_schema</span></code></a>()</p></td>
+<td><p>Serialize schema metadata into json-schema format.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#ethology.io.annotations.validate.ValidBboxesDataFrame.to_schema" title="ethology.io.annotations.validate.ValidBboxesDataFrame.to_schema"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_schema</span></code></a>()</p></td>
+<td><p>Create <code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrameSchema</span></code> from the <code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrameModel</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#ethology.io.annotations.validate.ValidBboxesDataFrame.to_yaml" title="ethology.io.annotations.validate.ValidBboxesDataFrame.to_yaml"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_yaml</span></code></a>([stream])</p></td>
+<td><p>Convert <cite>Schema</cite> to yaml using <cite>io.to_yaml</cite>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#ethology.io.annotations.validate.ValidBboxesDataFrame.validate" title="ethology.io.annotations.validate.ValidBboxesDataFrame.validate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">validate</span></code></a>(check_obj[, head, tail, sample, ...])</p></td>
+<td><p>Validate a DataFrame based on the schema specification.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="ethology.io.annotations.validate.ValidBboxesDataFrame.empty">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">empty</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">_args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ethology.io.annotations.validate.ValidBboxesDataFrame.empty" title="Link to this definition">#</a></dt>
+<dd><p>Create an empty DataFrame with the schema of this model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://pandera.readthedocs.io/en/stable/reference/generated/pandera.typing.DataFrame.html#pandera.typing.DataFrame" title="(in pandera)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code></a>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Self</span></code>]</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ethology.io.annotations.validate.ValidBboxesDataFrame.example">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">example</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ethology.io.annotations.validate.ValidBboxesDataFrame.example" title="Link to this definition">#</a></dt>
+<dd><p>Generate an example of a particular size.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>size</strong> – number of elements in the generated DataFrame.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrameBase</span></code>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">TDataFrameModel</span></code>, bound= DataFrameModel)]</span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>DataFrame object.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ethology.io.annotations.validate.ValidBboxesDataFrame.get_empty_values">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_empty_values</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ethology/io/annotations/validate.html#ValidBboxesDataFrame.get_empty_values"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ethology.io.annotations.validate.ValidBboxesDataFrame.get_empty_values" title="Link to this definition">#</a></dt>
+<dd><p>Get the default empty values for selected dataframe columns.</p>
+<p>The columns are those that can be undefined in VIA and COCO files:
+<code class="docutils literal notranslate"><span class="pre">category</span></code>, <code class="docutils literal notranslate"><span class="pre">supercategory</span></code>, <code class="docutils literal notranslate"><span class="pre">category_id</span></code>, <code class="docutils literal notranslate"><span class="pre">image_width</span></code> and
+<code class="docutils literal notranslate"><span class="pre">image_height</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A dictionary with the default empty values the specified columns.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ethology.io.annotations.validate.ValidBboxesDataFrame.get_metadata">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_metadata</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ethology.io.annotations.validate.ValidBboxesDataFrame.get_metadata" title="Link to this definition">#</a></dt>
+<dd><p>Provide metadata for columns and schema level</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.13)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>]</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ethology.io.annotations.validate.ValidBboxesDataFrame.pydantic_validate">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">pydantic_validate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema_model</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ethology.io.annotations.validate.ValidBboxesDataFrame.pydantic_validate" title="Link to this definition">#</a></dt>
+<dd><p>Verify that the input is a compatible dataframe model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://pandera.readthedocs.io/en/stable/reference/generated/pandera.api.dataframe.model.DataFrameModel.html#pandera.api.dataframe.model.DataFrameModel" title="(in pandera)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrameModel</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ethology.io.annotations.validate.ValidBboxesDataFrame.strategy">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">strategy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ethology.io.annotations.validate.ValidBboxesDataFrame.strategy" title="Link to this definition">#</a></dt>
+<dd><p>Create a <code class="docutils literal notranslate"><span class="pre">hypothesis</span></code> strategy for generating a DataFrame.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>size</strong> – number of elements to generate</p></li>
+<li><p><strong>n_regex_columns</strong> – number of regex columns to generate.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>a strategy that generates DataFrame objects.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ethology.io.annotations.validate.ValidBboxesDataFrame.to_json_schema">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">to_json_schema</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ethology.io.annotations.validate.ValidBboxesDataFrame.to_json_schema" title="Link to this definition">#</a></dt>
+<dd><p>Serialize schema metadata into json-schema format.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>dataframe_schema</strong> – schema to write to json-schema format.</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This function is currently does not fully specify a pandera schema,
+and is primarily used internally to render OpenAPI docs via the
+FastAPI integration.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ethology.io.annotations.validate.ValidBboxesDataFrame.to_schema">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">to_schema</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ethology.io.annotations.validate.ValidBboxesDataFrame.to_schema" title="Link to this definition">#</a></dt>
+<dd><p>Create <code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrameSchema</span></code> from the <code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrameModel</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">TSchema</span></code>, bound= <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSchema</span></code>)</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ethology.io.annotations.validate.ValidBboxesDataFrame.to_yaml">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">to_yaml</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stream</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ethology.io.annotations.validate.ValidBboxesDataFrame.to_yaml" title="Link to this definition">#</a></dt>
+<dd><p>Convert <cite>Schema</cite> to yaml using <cite>io.to_yaml</cite>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ethology.io.annotations.validate.ValidBboxesDataFrame.validate">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">validate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">check_obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">head</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tail</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lazy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inplace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ethology.io.annotations.validate.ValidBboxesDataFrame.validate" title="Link to this definition">#</a></dt>
+<dd><p>Validate a DataFrame based on the schema specification.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>check_obj</strong> (<em>pd.DataFrame</em>) – the dataframe to be validated.</p></li>
+<li><p><strong>head</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.13)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]</span>) – validate the first n rows. Rows overlapping with <cite>tail</cite> or
+<cite>sample</cite> are de-duplicated.</p></li>
+<li><p><strong>tail</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.13)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]</span>) – validate the last n rows. Rows overlapping with <cite>head</cite> or
+<cite>sample</cite> are de-duplicated.</p></li>
+<li><p><strong>sample</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.13)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]</span>) – validate a random sample of n rows. Rows overlapping
+with <cite>head</cite> or <cite>tail</cite> are de-duplicated.</p></li>
+<li><p><strong>random_state</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.13)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]</span>) – random seed for the <code class="docutils literal notranslate"><span class="pre">sample</span></code> argument.</p></li>
+<li><p><strong>lazy</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – if True, lazily evaluates dataframe against all validation
+checks and raises a <code class="docutils literal notranslate"><span class="pre">SchemaErrors</span></code>. Otherwise, raise
+<code class="docutils literal notranslate"><span class="pre">SchemaError</span></code> as soon as one occurs.</p></li>
+<li><p><strong>inplace</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – if True, applies coercion to the object of validation,
+otherwise creates a copy of the data.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://pandera.readthedocs.io/en/stable/reference/generated/pandera.typing.DataFrame.html#pandera.typing.DataFrame" title="(in pandera)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code></a>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Self</span></code>]</span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>validated <code class="docutils literal notranslate"><span class="pre">DataFrame</span></code></p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>SchemaError</strong> – when <code class="docutils literal notranslate"><span class="pre">DataFrame</span></code> violates built-in or custom
+checks.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="ethology.io.annotations.validate.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">ethology.io.annotations.validate</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="ethology.io.annotations.validate.ValidBboxesDataFrameCOCO.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">ValidBboxesDataFrameCOCO</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#ethology.io.annotations.validate.ValidBboxesDataFrame"><code class="docutils literal notranslate"><span class="pre">ValidBboxesDataFrame</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ethology.io.annotations.validate.ValidBboxesDataFrame.image_filename"><code class="docutils literal notranslate"><span class="pre">ValidBboxesDataFrame.image_filename</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ethology.io.annotations.validate.ValidBboxesDataFrame.image_id"><code class="docutils literal notranslate"><span class="pre">ValidBboxesDataFrame.image_id</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ethology.io.annotations.validate.ValidBboxesDataFrame.image_width"><code class="docutils literal notranslate"><span class="pre">ValidBboxesDataFrame.image_width</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ethology.io.annotations.validate.ValidBboxesDataFrame.image_height"><code class="docutils literal notranslate"><span class="pre">ValidBboxesDataFrame.image_height</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ethology.io.annotations.validate.ValidBboxesDataFrame.x_min"><code class="docutils literal notranslate"><span class="pre">ValidBboxesDataFrame.x_min</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ethology.io.annotations.validate.ValidBboxesDataFrame.y_min"><code class="docutils literal notranslate"><span class="pre">ValidBboxesDataFrame.y_min</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ethology.io.annotations.validate.ValidBboxesDataFrame.width"><code class="docutils literal notranslate"><span class="pre">ValidBboxesDataFrame.width</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ethology.io.annotations.validate.ValidBboxesDataFrame.height"><code class="docutils literal notranslate"><span class="pre">ValidBboxesDataFrame.height</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ethology.io.annotations.validate.ValidBboxesDataFrame.category_id"><code class="docutils literal notranslate"><span class="pre">ValidBboxesDataFrame.category_id</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ethology.io.annotations.validate.ValidBboxesDataFrame.category"><code class="docutils literal notranslate"><span class="pre">ValidBboxesDataFrame.category</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ethology.io.annotations.validate.ValidBboxesDataFrame.supercategory"><code class="docutils literal notranslate"><span class="pre">ValidBboxesDataFrame.supercategory</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ethology.io.annotations.validate.ValidBboxesDataFrame.empty"><code class="docutils literal notranslate"><span class="pre">ValidBboxesDataFrame.empty()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ethology.io.annotations.validate.ValidBboxesDataFrame.example"><code class="docutils literal notranslate"><span class="pre">ValidBboxesDataFrame.example()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ethology.io.annotations.validate.ValidBboxesDataFrame.get_empty_values"><code class="docutils literal notranslate"><span class="pre">ValidBboxesDataFrame.get_empty_values()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ethology.io.annotations.validate.ValidBboxesDataFrame.get_metadata"><code class="docutils literal notranslate"><span class="pre">ValidBboxesDataFrame.get_metadata()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ethology.io.annotations.validate.ValidBboxesDataFrame.pydantic_validate"><code class="docutils literal notranslate"><span class="pre">ValidBboxesDataFrame.pydantic_validate()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ethology.io.annotations.validate.ValidBboxesDataFrame.strategy"><code class="docutils literal notranslate"><span class="pre">ValidBboxesDataFrame.strategy()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ethology.io.annotations.validate.ValidBboxesDataFrame.to_json_schema"><code class="docutils literal notranslate"><span class="pre">ValidBboxesDataFrame.to_json_schema()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ethology.io.annotations.validate.ValidBboxesDataFrame.to_schema"><code class="docutils literal notranslate"><span class="pre">ValidBboxesDataFrame.to_schema()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ethology.io.annotations.validate.ValidBboxesDataFrame.to_yaml"><code class="docutils literal notranslate"><span class="pre">ValidBboxesDataFrame.to_yaml()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ethology.io.annotations.validate.ValidBboxesDataFrame.validate"><code class="docutils literal notranslate"><span class="pre">ValidBboxesDataFrame.validate()</span></code></a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/api/ethology.io.annotations.validate.ValidBboxesDataFrame.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item"><p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    <br/>
+    </p>
+    <p class="theme-version">
+    Built with the
+    <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a>
+    0.16.1.
+    </p></div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item"><div class="things-in-a-row">
+    <a href="https://neuroinformatics.dev/">
+        <img src="../_static/light-logo-niu.png" alt="Sponsors" class="only-light img-sponsor"/>
+        <img src="../_static/dark-logo-niu.png" alt="Sponsors" class="only-dark img-sponsor"/>
+    </a>
+    <a href="https://www.sainsburywellcome.org/web/">
+        <img src="../_static/light-logo-swc.png" alt="Sponsors" class="only-light img-sponsor"/>
+        <img src="../_static/dark-logo-swc.png" alt="Sponsors" class="only-dark img-sponsor"/>
+    </a>
+    <a href="https://www.ucl.ac.uk/gatsby/gatsby-computational-neuroscience-unit">
+        <img src="../_static/light-logo-gatsby.png" alt="Sponsors" class="only-light img-sponsor"/>
+        <img src="../_static/dark-logo-gatsby.png" alt="Sponsors" class="only-dark img-sponsor"/>
+    </a>
+    <a href="https://www.ucl.ac.uk/">
+        <img src="../_static/light-logo-ucl.png" alt="Sponsors" class="only-light img-sponsor"/>
+        <img src="../_static/dark-logo-ucl.png" alt="Sponsors" class="only-dark img-sponsor"/>
+    </a>
+</div></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

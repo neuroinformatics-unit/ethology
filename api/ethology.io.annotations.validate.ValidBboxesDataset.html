@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>ethology.annotations.io.load_bboxes &#8212; ethology</title>
+    <title>ValidBboxesDataset &#8212; ethology</title>
   
   
   
@@ -40,18 +40,18 @@
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../_static/documentation_options.js?v=3e507a65"></script>
+    <script src="../_static/documentation_options.js?v=9a28fe7c"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/design-tabs.js?v=f930bc37"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'api/ethology.annotations.io.load_bboxes';</script>
-    <link rel="canonical" href="https://ethology.neuroinformatics.dev/api/ethology.annotations.io.load_bboxes.html" />
+    <script>DOCUMENTATION_OPTIONS.pagename = 'api/ethology.io.annotations.validate.ValidBboxesDataset';</script>
+    <link rel="canonical" href="https://ethology.neuroinformatics.dev/api/ethology.io.annotations.validate.ValidBboxesDataset.html" />
     <link rel="icon" href="../_static/light-logo-niu.png"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="from_files" href="ethology.annotations.io.load_bboxes.from_files.html" />
-    <link rel="prev" title="API reference" href="../api_index.html" />
+    <link rel="next" title="ValidCOCO" href="ethology.io.annotations.validate.ValidCOCO.html" />
+    <link rel="prev" title="ValidBboxesDataFrameCOCO" href="ethology.io.annotations.validate.ValidBboxesDataFrameCOCO.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="" />
@@ -116,7 +116,7 @@
   
   
   
-    <p class="title logo__title">ethology v0.0.2.dev32</p>
+    <p class="title logo__title">ethology v0.0.2.dev33</p>
   
 </a></div>
     
@@ -327,17 +327,20 @@
      aria-label="Section Navigation">
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
-<li class="toctree-l1 current active has-children"><a class="current reference internal" href="#">ethology.annotations.io.load_bboxes</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="ethology.annotations.io.load_bboxes.from_files.html">from_files</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="ethology.io.annotations.load_bboxes.html">ethology.io.annotations.load_bboxes</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="ethology.io.annotations.load_bboxes.from_files.html">from_files</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="ethology.annotations.io.save_bboxes.html">ethology.annotations.io.save_bboxes</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="ethology.annotations.io.save_bboxes.to_COCO_file.html">to_COCO_file</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="ethology.io.annotations.save_bboxes.html">ethology.io.annotations.save_bboxes</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="ethology.io.annotations.save_bboxes.to_COCO_file.html">to_COCO_file</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="ethology.annotations.validators.html">ethology.annotations.validators</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="ethology.annotations.validators.ValidCOCO.html">ValidCOCO</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ethology.annotations.validators.ValidVIA.html">ValidVIA</a></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="ethology.io.annotations.validate.html">ethology.io.annotations.validate</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="ethology.io.annotations.validate.ValidBboxesDataFrame.html">ValidBboxesDataFrame</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ethology.io.annotations.validate.ValidBboxesDataFrameCOCO.html">ValidBboxesDataFrameCOCO</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">ValidBboxesDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ethology.io.annotations.validate.ValidCOCO.html">ValidCOCO</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ethology.io.annotations.validate.ValidVIA.html">ValidVIA</a></li>
 </ul>
 </details></li>
 </ul>
@@ -383,7 +386,10 @@
     
     <li class="breadcrumb-item"><a href="../api_index.html" class="nav-link">API reference</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">ethology.annotations.io.load_bboxes</span></li>
+    
+    <li class="breadcrumb-item"><a href="ethology.io.annotations.validate.html" class="nav-link">ethology.io.annotations.validate</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">ValidBboxesDataset</span></li>
   </ul>
 </nav>
 </div>
@@ -400,19 +406,42 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="ethology-annotations-io-load-bboxes">
-<h1>ethology.annotations.io.load_bboxes<a class="headerlink" href="#ethology-annotations-io-load-bboxes" title="Link to this heading">#</a></h1>
-<p class="rubric">Description</p>
-<p id="module-ethology.annotations.io.load_bboxes">Module for reading and writing manually labelled annotations.</p>
-<p class="rubric">Functions</p>
-<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
-<tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="ethology.annotations.io.load_bboxes.from_files.html#ethology.annotations.io.load_bboxes.from_files" title="ethology.annotations.io.load_bboxes.from_files"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_files</span></code></a></p></td>
-<td><p>Read input annotation files as a bboxes dataframe.</p></td>
-</tr>
-</tbody>
-</table>
-</div>
+  <section id="validbboxesdataset">
+<h1>ValidBboxesDataset<a class="headerlink" href="#validbboxesdataset" title="Link to this heading">#</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="ethology.io.annotations.validate.ValidBboxesDataset">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ethology.io.annotations.validate.</span></span><span class="sig-name descname"><span class="pre">ValidBboxesDataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ethology/io/annotations/validate.html#ValidBboxesDataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ethology.io.annotations.validate.ValidBboxesDataset" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Class for valid <code class="docutils literal notranslate"><span class="pre">ethology</span></code> bounding box annotations datasets.</p>
+<p>It checks that the input dataset has:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">image_id</span></code>, <code class="docutils literal notranslate"><span class="pre">space</span></code>, <code class="docutils literal notranslate"><span class="pre">id</span></code> as dimensions</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">position</span></code> and <code class="docutils literal notranslate"><span class="pre">shape</span></code> as data variables</p></li>
+</ul>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ethology.io.annotations.validate.ValidBboxesDataset.dataset">
+<span class="sig-name descname"><span class="pre">dataset</span></span><a class="headerlink" href="#ethology.io.annotations.validate.ValidBboxesDataset.dataset" title="Link to this definition">#</a></dt>
+<dd><p>The xarray dataset to validate.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="(in xarray v2025.9.1)">xarray.Dataset</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#TypeError" title="(in Python v3.13)"><strong>TypeError</strong></a> – If the input is not an xarray Dataset.</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.13)"><strong>ValueError</strong></a> – If the dataset is missing required data variables or dimensions.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>The dataset can have other data variables and dimensions, but only the
+required ones are checked.</p>
+</dd></dl>
+
 </section>
 
 
@@ -426,20 +455,20 @@
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="../api_index.html"
+       href="ethology.io.annotations.validate.ValidBboxesDataFrameCOCO.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">API reference</p>
+        <p class="prev-next-title">ValidBboxesDataFrameCOCO</p>
       </div>
     </a>
     <a class="right-next"
-       href="ethology.annotations.io.load_bboxes.from_files.html"
+       href="ethology.io.annotations.validate.ValidCOCO.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">from_files</p>
+        <p class="prev-next-title">ValidCOCO</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -455,10 +484,25 @@
 
 
   <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#ethology.io.annotations.validate.ValidBboxesDataset"><code class="docutils literal notranslate"><span class="pre">ValidBboxesDataset</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ethology.io.annotations.validate.ValidBboxesDataset.dataset"><code class="docutils literal notranslate"><span class="pre">ValidBboxesDataset.dataset</span></code></a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="../_sources/api/ethology.annotations.io.load_bboxes.rst.txt"
+      <li><a href="../_sources/api/ethology.io.annotations.validate.ValidBboxesDataset.rst.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div></div>
