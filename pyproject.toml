@@ -20,7 +20,6 @@ classifiers = [
 ]
 dependencies = [
   "movement",
-  "loguru",
   "pandera[pandas]",
 ]
 

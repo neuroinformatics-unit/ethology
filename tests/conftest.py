@@ -99,7 +99,6 @@ def get_paths_test_data() -> Callable[[dict, str], dict]:
 
         """
         filename_to_path = {}
-
         filenames_to_exclude = [".DS_Store"]
 
         # In the pooch registry, each file is indexed by its path relative to
