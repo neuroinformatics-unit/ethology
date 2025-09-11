@@ -20,6 +20,7 @@ classifiers = [
 ]
 dependencies = [
   "movement",
+  "pandera[pandas]",
 ]
 
 [project.urls]

@@ -17,7 +17,7 @@
                         "type": "string"
                     },
                     "id": {
-                        "type": "integer"
+                        "type": ["integer", "string"]
                     },
                     "width": {
                         "type": "integer"
@@ -34,15 +34,15 @@
                 "type": "object",
                 "properties": {
                     "id": {
-                        "type": "integer"
+                        "type": ["integer", "string"]
                     },
                     "image_id": {
-                        "type": "integer"
+                        "type": ["integer", "string"]
                     },
                     "bbox": {
                         "type": "array",
                         "items": {
-                            "type": "integer"
+                            "type": "number"
                         }
                     },
                     "category_id": {

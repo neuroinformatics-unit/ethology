@@ -11,5 +11,5 @@ recursive-exclude tests *
 recursive-include docs *.md *.rst *.py
 
 # Include json schemas
-recursive-include ethology/annotations/json_schemas/schemas *.json
-recursive-include ethology/annotations/json_schemas/schemas *.md
+recursive-include ethology/io/annotations/json_schemas/schemas *.json
+recursive-include ethology/io/annotations/json_schemas/schemas *.md

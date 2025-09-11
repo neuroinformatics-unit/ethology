@@ -1,126 +1,20 @@
-import json
 from contextlib import nullcontext as does_not_raise
-from pathlib import Path
 
 import jsonschema
+import numpy as np
 import pytest
+import xarray as xr
 
-from ethology.annotations.json_schemas.utils import (
+from ethology.io.annotations.json_schemas.utils import (
     _check_required_keys_in_dict,
     _check_required_properties_keys,
     _extract_properties_keys,
 )
-from ethology.annotations.validators import ValidCOCO, ValidVIA
-
-
-@pytest.fixture()
-def json_file_decode_error(tmp_path: Path) -> Path:
-    """Return path to a JSON file with a decoding error."""
-    json_file = tmp_path / "JSON_decode_error.json"
-    with open(json_file, "w") as f:
-        f.write("just-a-string")
-    return json_file
-
-
-@pytest.fixture()
-def json_file_not_found_error(tmp_path: Path) -> Path:
-    """Return path to a JSON file that does not exist."""
-    return tmp_path / "JSON_file_not_found.json"
-
-
-@pytest.fixture()
-def VIA_file_schema_mismatch(
-    annotations_test_data: dict,
-    tmp_path: Path,
-) -> Path:
-    """Return path to a VIA JSON file that does not match its schema.
-
-    Specifically, we modify the type of the "width" of the first bounding box
-    in the first image, from "int" to "str"
-    """
-    # Read valid JSON file
-    valid_VIA_file_sample_1 = annotations_test_data["VIA_JSON_sample_1.json"]
-    with open(valid_VIA_file_sample_1) as f:
-        data = json.load(f)
-
-    # Modify file so that it doesn't match the corresponding schema
-    # (make width a string)
-    _, img_dict = list(data["_via_img_metadata"].items())[0]
-    img_dict["regions"][0]["shape_attributes"]["width"] = "49"
-
-    # Save the modified JSON to a new file
-    out_json = tmp_path / f"{valid_VIA_file_sample_1.stem}_schema_error.json"
-    with open(out_json, "w") as f:
-        json.dump(data, f)
-    return out_json
-
-
-@pytest.fixture()
-def COCO_file_schema_mismatch(
-    annotations_test_data: dict,
-    tmp_path: Path,
-) -> Path:
-    """Return path to a COCO JSON file that doesn't match its schema.
-
-    Specifically, we modify the type of the object under the "annotations"
-    key from "list of dicts" to "list"
-    """
-    # Read valid JSON file
-    valid_COCO_file_sample_1 = annotations_test_data["COCO_JSON_sample_1.json"]
-    with open(valid_COCO_file_sample_1) as f:
-        data = json.load(f)
-
-    # Modify file so that it doesn't match the corresponding schema
-    data["annotations"] = [1, 2, 3]  # [d] for d in data["annotations"]]
-
-    # save the modified json to a new file
-    out_json = tmp_path / f"{valid_COCO_file_sample_1.stem}_schema_error.json"
-    with open(out_json, "w") as f:
-        json.dump(data, f)
-    return out_json
-
-
-@pytest.fixture()
-def small_schema() -> dict:
-    """Small schema with properties keys:
-    ["a", "b", "b/b1", "c", "c/c1", "c/c2"].
-    """
-    return {
-        "type": "object",
-        "properties": {
-            "a": {
-                "type": "array",
-                "items": {"type": "string"},
-            },
-            "b": {
-                "type": "object",
-                "properties": {"b1": {"type": "string"}},
-            },
-            "c": {
-                "type": "object",
-                "properties": {
-                    "c1": {"type": "string"},
-                    "c2": {"type": "string"},
-                },
-            },
-        },
-    }
-
-
-@pytest.fixture()
-def default_VIA_schema() -> dict:
-    """Get default VIA schema."""
-    from ethology.annotations.json_schemas.utils import _get_default_schema
-
-    return _get_default_schema("VIA")
-
-
-@pytest.fixture()
-def default_COCO_schema() -> dict:
-    """Get default COCO schema."""
-    from ethology.annotations.json_schemas.utils import _get_default_schema
-
-    return _get_default_schema("COCO")
+from ethology.io.annotations.validate import (
+    ValidBboxesDataset,
+    ValidCOCO,
+    ValidVIA,
+)
 
 
 @pytest.mark.parametrize(
@@ -174,7 +68,7 @@ def test_validators_valid_input_files(
             "VIA_file_schema_mismatch",
             ValidVIA,
             pytest.raises(jsonschema.exceptions.ValidationError),
-            "'49' is not of type 'integer'",
+            "'49' is not of type 'number'",
         ),
         (
             "COCO_file_schema_mismatch",
@@ -488,6 +382,51 @@ def test_no_categories_behaviour(
         ) in str(excinfo.value)
 
 
+@pytest.mark.parametrize(
+    "validator, input_file, expected_exception",
+    [
+        (
+            ValidCOCO,
+            "small_bboxes_no_supercat_COCO.json",
+            does_not_raise(),
+        ),
+        (
+            ValidVIA,
+            "small_bboxes_no_supercat_VIA.json",
+            does_not_raise(),
+        ),
+    ],
+)
+def test_no_supercategories_behaviour(
+    validator: type[ValidVIA | ValidCOCO],
+    input_file: str,
+    expected_exception: pytest.raises,
+    annotations_test_data: dict,
+):
+    """Test the behaviour of the validators when the input file does not
+    specify any supercategories.
+
+    COCO and VIA files exported with the VIA tool will always have a
+    supercategory, but this can be set to " " (i.e., whitespace).
+
+    COCO files not exported with the VIA tool may not have a supercategory.
+
+    In this test we use a COCO file that does not have a supercategory, and
+    a VIA file that has supercategory set to " " (i.e., whitespace).
+
+    """
+    filepath = annotations_test_data[input_file]
+
+    with expected_exception as excinfo:
+        _ = validator(path=filepath)
+
+    if excinfo:
+        assert (
+            "Empty value(s) found for the required key(s) "
+            "['annotations', 'categories']"
+        ) in str(excinfo.value)
+
+
 def test_null_category_ID_behaviour(annotations_test_data: dict):
     """Test the behaviour of the validators when the input file contains
     annotations with null category IDs.
@@ -515,3 +454,124 @@ def test_COCO_non_unique_image_IDs(annotations_test_data: dict):
         "The image IDs in the input COCO file are not unique. "
         "There are 4 image entries, but only 3 unique image IDs."
     )
+
+
+@pytest.mark.parametrize(
+    "sample_dataset, expected_exception, expected_error_message",
+    [
+        (
+            "valid_bboxes_dataset",
+            does_not_raise(),
+            "",
+        ),
+        (
+            "valid_bboxes_dataset_extra_vars_and_dims",
+            does_not_raise(),
+            "",
+        ),
+        (
+            {"position": [1, 2, 3], "shape": [4, 5, 6]},
+            pytest.raises(TypeError),
+            "Expected an xarray Dataset, but got <class 'dict'>.",
+        ),
+        (
+            xr.Dataset(
+                coords={
+                    "image_id": np.arange(3),
+                    "space": ["x", "y"],
+                    "id": np.arange(2),
+                },
+                data_vars={
+                    "position": (
+                        ["image_id", "space", "id"],
+                        np.zeros((3, 2, 2)),
+                    ),
+                },
+            ),
+            pytest.raises(ValueError),
+            "Missing required data variables: ['shape']",
+        ),
+        (
+            xr.Dataset(
+                coords={
+                    "image_id": np.arange(3),
+                    "space": ["x", "y"],
+                    "id": np.arange(2),
+                },
+                data_vars={
+                    "foo": (
+                        ["image_id", "space", "id"],
+                        np.zeros((3, 2, 2)),
+                    ),
+                },
+            ),
+            pytest.raises(ValueError),
+            "Missing required data variables: ['position', 'shape']",
+        ),
+        (
+            xr.Dataset(
+                coords={"image_id": np.arange(3), "id": np.arange(2)},
+                data_vars={
+                    "position": (["image_id", "id"], np.zeros((3, 2))),
+                    "shape": (["image_id", "id"], np.zeros((3, 2))),
+                },
+            ),
+            pytest.raises(ValueError),
+            "Missing required dimensions: ['space']",
+        ),
+        (
+            xr.Dataset(
+                coords={
+                    "foo": np.arange(3),
+                    "bar": ["x", "y"],
+                    "id": np.arange(2),
+                },
+                data_vars={
+                    "position": (
+                        ["foo", "bar", "id"],
+                        np.zeros((3, 2, 2)),
+                    ),
+                    "shape": (
+                        ["foo", "bar", "id"],
+                        np.zeros((3, 2, 2)),
+                    ),
+                },
+            ),
+            pytest.raises(ValueError),
+            "Missing required dimensions: ['image_id', 'space']",
+        ),
+    ],
+    ids=[
+        "valid_bboxes_dataset",
+        "valid_bboxes_dataset_extra_vars_and_dims",
+        "invalid_bboxes_dataset_type",
+        "invalid_bboxes_dataset_missing_data_var",
+        "invalid_bboxes_dataset_missing_multiple_data_vars",
+        "invalid_bboxes_dataset_missing_dimension",
+        "invalid_bboxes_dataset_missing_multiple_dimensions",
+    ],
+)
+def test_valid_bboxes_dataset_validation(
+    sample_dataset: str | dict,
+    expected_exception: pytest.raises,
+    expected_error_message: str,
+    request: pytest.FixtureRequest,
+):
+    """Test ValidBboxesDataset validation with various input scenarios."""
+    # Get dataset to validate
+    if isinstance(sample_dataset, str):
+        dataset = request.getfixturevalue(sample_dataset)
+    else:
+        dataset = sample_dataset
+
+    # Run validation and check exception
+    with expected_exception as excinfo:
+        validator = ValidBboxesDataset(dataset=dataset)
+
+    if excinfo:
+        error_msg = str(excinfo.value)
+        assert error_msg in expected_error_message
+    else:
+        assert validator.dataset is dataset
+        assert validator.required_dims == {"image_id", "space", "id"}
+        assert validator.required_data_vars == {"position", "shape"}
