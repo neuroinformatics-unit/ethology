@@ -6,7 +6,7 @@
             "type": "object"
         },
         "licenses": {
-            "type": "array"
+            "type": ["array", "object"]
         },
         "images": {
             "type": "array",
