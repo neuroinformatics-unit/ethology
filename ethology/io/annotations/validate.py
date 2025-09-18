@@ -154,7 +154,7 @@ class ValidCOCO:
     required_keys: dict = field(
         default={
             "main": ["images", "annotations", "categories"],
-            "images": ["id", "file_name"],
+            "images": ["id", "file_name", "width", "height"],
             "annotations": ["id", "image_id", "bbox", "category_id"],
             "categories": ["id", "name"],  # exclude "supercategory"
         },
