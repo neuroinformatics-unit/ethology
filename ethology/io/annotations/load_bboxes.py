@@ -170,6 +170,9 @@ def _get_map_attributes_from_df(
             .to_dict()["category"]
         )
 
+        # sort by category_id
+        map_category_to_str = dict(sorted(map_category_to_str.items()))
+
     return (map_image_id_to_filename, map_category_to_str)
 
 
@@ -505,7 +508,8 @@ def _df_rows_from_valid_COCO_file(file_path: Path) -> list[dict]:
     map_img_id_coco_to_width_height = {
         img_dict["id"]: (img_dict["width"], img_dict["height"])
         for img_dict in data_dict["images"]
-    }  # COCO files always have image width and height (can be 0)
+    }  # COCO files from VGG annotator always have
+    # image width and height (can be 0)
     map_category_id_to_category_data = {
         cat_dict["id"]: (cat_dict["name"], cat_dict.get("supercategory", ""))
         for cat_dict in data_dict["categories"]
