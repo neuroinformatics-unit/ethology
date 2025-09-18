@@ -21,6 +21,9 @@ classifiers = [
 dependencies = [
   "movement",
   "pandera[pandas]",
+  "pycocotools",
+  "torch",
+  "torchvision",
 ]
 
 [project.urls]
