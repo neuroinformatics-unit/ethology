@@ -29,6 +29,21 @@ def from_COCO_file(
 
     Note: transforms are applied to the full dataset. If the dataset
     is later split, all splits will have the same transforms.
+
+    Parameters
+    ----------
+    annotations_file : str | Path
+        The path to the input COCO file.
+    images_directory : str | Path
+        The path to the images directory.
+    kwargs : dict[str, Any] | None, optional
+        Additional keyword arguments to pass to the torch dataset constructor.
+
+    Returns
+    -------
+    torch.utils.data.Dataset
+        The converted torch dataset.
+
     """
     dataset_coco = CocoDetection(
         root=str(images_directory),
@@ -48,7 +63,25 @@ def from_annotations_dataset(
     images_directory: Path | str | None = None,
     kwargs: dict[str, Any] | None = None,
 ) -> torch.utils.data.Dataset:
-    """Convert an bounding boxes annotations dataset to a torch dataset."""
+    """Convert an bounding boxes annotations dataset to a torch dataset.
+
+    Parameters
+    ----------
+    ds : xr.Dataset
+        The dataset to convert.
+    out_filepath : Path | str | None, optional
+        The path to the output COCO file.
+    images_directory : Path | str | None, optional
+        The path to the images directory.
+    kwargs : dict[str, Any] | None, optional
+        Additional keyword arguments to pass to the torch dataset constructor.
+
+    Returns
+    -------
+    torch.utils.data.Dataset
+        The converted torch dataset.
+
+    """
     # Export xarray dataset to COCO file
     timestamp = datetime.now().strftime("%Y%m%dT%H%M%S")
     if out_filepath is None:
@@ -99,7 +132,23 @@ def split_torch_dataset(
 ]:
     """Split a dataset into train, validation, and test sets.
 
-    Note: transforms are already applied to the input dataset.
+    Note that transforms are already applied to the input dataset.
+
+    Parameters
+    ----------
+    dataset : torch.utils.data.Dataset
+        The dataset to split.
+    train_val_test_fractions : list[float]
+        The fractions of the dataset to allocate to the train, validation,
+        and test sets.
+    seed : int | None, optional
+        The seed to use for the random number generator.
+
+    Returns
+    -------
+    tuple[torch.utils.data.Dataset]
+        The train, validation, and test sets.
+
     """
     # Check that the fractions sum to 1
     if sum(train_val_test_fractions) != 1:
