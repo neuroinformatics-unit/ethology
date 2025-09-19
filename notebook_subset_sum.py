@@ -8,7 +8,6 @@ import xarray as xr
 from matplotlib.patches import Patch
 
 from ethology.io.annotations import load_bboxes
-from ethology.torch_dataset import from_annotations_dataset
 
 # %%
 # Input data
@@ -371,8 +370,7 @@ with open("all_test_videos_idcs.pkl", "wb") as f:
 
 
 def subset_sum_dp_boolean(arr: list[int], target: int) -> bool:
-    """
-    Dynamic programming approach - returns True if ANY subset sums to target.
+    """Dynamic programming approach - returns True if ANY subset sums to target.
     Time complexity: O(n * target), Space complexity: O(target)
     """
     if target < 0:
