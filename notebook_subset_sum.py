@@ -334,7 +334,6 @@ print(f"test_n_samples: {test_n_samples}")
 print(f"total: {train_n_samples + test_n_samples}")
 print(len(ds_all.image_id))
 # %%
-
 frame_count_per_video_id = {
     int(k): len(list(g)) for k, g in itertools.groupby(ds_all["video"].values)
 }
@@ -342,11 +341,14 @@ frame_count_per_video_id = {
 # sort by key (i.e. video ID)
 frame_count_per_video_id = dict(sorted(frame_count_per_video_id.items()))
 
+# %%
+# %%time 
+
 # returns indices of the array that sum to the target
 # choose the smallest one
 all_test_videos_idcs = compute_all_idcs_sum_to_target(
     list(frame_count_per_video_id.values()), test_n_samples
-)  # 12M options!
+)  # 12M options! takes about 13min
 
 
 # train_videos_idcs = compute_all_idcs_sum_to_target(
@@ -362,7 +364,7 @@ all_test_videos_idcs = compute_all_idcs_sum_to_target(
 
 
 # %%
-# Get first combination with Aug video
+# Get first combination with an Aug video
 comb = next(
     idcs
     for idcs in all_test_videos_idcs
