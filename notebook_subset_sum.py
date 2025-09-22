@@ -26,16 +26,16 @@ aug2023_annots = (
 )
 
 # %%
-# Read annotation datasets
+# Read as a single annotation dataset
 
-ds_sept = load_bboxes.from_files(
-    sept2023_annots, format="COCO", images_dirs=sept2023_images_dir
-)
-ds_aug = load_bboxes.from_files(
-    aug2023_annots, format="COCO", images_dirs=aug2023_images_dir
-)
+# ds_sept = load_bboxes.from_files(
+#     sept2023_annots, format="COCO", images_dirs=sept2023_images_dir
+# )
+# ds_aug = load_bboxes.from_files(
+#     aug2023_annots, format="COCO", images_dirs=aug2023_images_dir
+# )
 
-# only keeps attributes from the first dataset
+# xr.concat only keeps attributes from the first dataset:
 # ds_all = xr.concat([ds_sept, ds_aug], dim="image_id")
 
 ds_all = load_bboxes.from_files(
@@ -48,23 +48,38 @@ ds_all = load_bboxes.from_files(
 # %%
 # Compute video_array and add to dataset
 
-# Get video filename per image
+def split_at_any_delimiter(text: str, delimiters: list[str]) -> list[str]:
+    """Split a string at any of the specified delimiters if present."""
+    for delimiter in delimiters:
+        if delimiter in text:
+            return text.split(delimiter)
+    return [text]
+
+
+# Get video-pair filename per image
 video_per_image_filename = np.array(
     [
-        ds_all.map_image_id_to_filename[i].split("_frame")[0]
+        split_at_any_delimiter(
+            ds_all.map_image_id_to_filename[i],
+            # ["-Left", "-Right"],
+            ["_frame"],
+        )[0]
         for i in ds_all.image_id.values
     ]
 )
 print(video_per_image_filename.shape)
 
-# Assing IDs to unique videos as sorted alphabetically
+list_video_filenames = np.sort(np.unique(video_per_image_filename)).tolist()
+
+# %%
+# Assing IDs to unique video as sorted alphabetically
 map_video_filename_to_id = {
     str(k): i
-    for i, k in enumerate(np.sort(np.unique(video_per_image_filename)))
+    for i, k in enumerate(list_video_filenames)
 }
 
 
-# Add video ID to dataset and map to filename
+# Add video-pair ID to dataset and map to filename
 # as an attribute
 ds_all["video"] = xr.DataArray(
     np.array(
