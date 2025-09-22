@@ -119,6 +119,7 @@ def split_annotations_dataset_random(
     -------
     tuple[xr.Dataset, ...]
         Subsets of the input dataset.
+
     """
     rng = np.random.default_rng(seed)
 
@@ -194,7 +195,7 @@ def approximate_subset_sum(
     castable_as_int = True
     try:
         map_ids_to_values = {int(k): v for k, v in map_ids_to_values.items()}
-    except ValueError as e:
+    except ValueError:
         castable_as_int = False
 
     if isinstance(map_ids_to_values, list) or not castable_as_int:

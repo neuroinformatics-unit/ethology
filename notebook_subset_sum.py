@@ -163,7 +163,7 @@ for id in test_idcs:
 
 print(f"Total sum: {test_total_frames}")
 print(f"Target: {test_n_samples}")
-print(f"Tolerance (samples): {test_n_samples*tolerance}")
+print(f"Tolerance (samples): {test_n_samples * tolerance}")
 print("------------------------------")
 
 assert (
