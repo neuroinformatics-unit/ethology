@@ -1,3 +1,7 @@
+"""Split an annotations dataset with an approximate subset sum algorithm."""
+
+# %%
+
 # %%
 import itertools
 from pathlib import Path
@@ -13,7 +17,7 @@ from ethology.detectors.datasets import (
 )
 from ethology.io.annotations import load_bboxes
 
-# %%
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Input data
 sept2023_data_dir = Path("/home/sminano/swc/project_crabs/data/sep2023-full/")
 aug2023_data_dir = Path("/home/sminano/swc/project_crabs/data/aug2023-full/")
@@ -28,7 +32,7 @@ aug2023_annots = (
     aug2023_data_dir / "annotations" / "VIA_JSON_combined_coco_gen.json"
 )
 
-# %%
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Read as a single annotation dataset
 
 ds_all = load_bboxes.from_files(
@@ -126,8 +130,8 @@ ax.legend(handles=legend_elements)
 train_fraction = 0.8
 test_fraction = 0.2
 
-train_n_samples = int(train_fraction * len(ds_all.image_id))
-test_n_samples = len(ds_all.image_id) - train_n_samples
+test_n_samples = int(test_fraction * len(ds_all.image_id))
+train_n_samples = len(ds_all.image_id) - test_n_samples
 
 
 print(f"train_n_samples: {train_n_samples}")
@@ -167,21 +171,24 @@ assert (
 )
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-# Create test and train dataset
+# Create test and train dataset using computed indices
 
 
 ds_test = ds_all.isel(image_id=ds_all["video"].isin(test_idcs))
 ds_train = ds_all.isel(image_id=~ds_all["video"].isin(test_idcs))
 
-assert np.unique(
-    ds_all.isel(image_id=ds_all["video"].isin(test_idcs))["video"].values
-) == sorted(test_idcs)
+assert all(
+    np.unique(
+        ds_all.isel(image_id=ds_all["video"].isin(test_idcs))["video"].values
+    )
+    == sorted(test_idcs)
+)
 
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Alternatively
 
-ds_test, ds_train = split_annotations_dataset_group_by(
+ds_test_2, ds_train_2 = split_annotations_dataset_group_by(
     ds_all,
     group_by_var="video",
     list_fractions=[train_fraction, test_fraction],
@@ -189,12 +196,42 @@ ds_test, ds_train = split_annotations_dataset_group_by(
     tolerance=tolerance,
 )
 
+assert ds_test.equals(ds_test_2)
+assert ds_train.equals(ds_train_2)
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # To split by video-pair, define that array first
 
+# Get video-pair filename per image
+video_pair_per_image_filename = np.array(
+    [
+        split_at_any_delimiter(
+            ds_all.map_image_id_to_filename[i],
+            ["-Left", "-Right"],
+        )[0]
+        for i in ds_all.image_id.values
+    ]
+)
+print(video_pair_per_image_filename.shape)
 
+# Add array to dataset
+ds_all["video_pair"] = xr.DataArray(
+    video_pair_per_image_filename,
+    dims="image_id",
+)
 
+print(len(np.unique(ds_all["video_pair"].values)))
+
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# Then split by video-pair
+
+ds_test_video_pair, ds_train_video_pair = split_annotations_dataset_group_by(
+    ds_all,
+    group_by_var="video_pair",
+    list_fractions=[train_fraction, test_fraction],
+    seed=seed,
+    tolerance=tolerance,
+)
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Convert to torch datasets

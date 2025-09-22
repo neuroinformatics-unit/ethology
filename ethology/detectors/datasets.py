@@ -57,16 +57,17 @@ def split_annotations_dataset_group_by(
 
     # Count number of samples per group
     group_count_per_group_id = {
-        int(k): len(list(g))
+        k: len(list(g))
         for k, g in itertools.groupby(dataset[group_by_var].values)
     }
 
     # Compute number of samples in smallest subset
-    target_n_samples = min(list_fractions) * len(
-        dataset.get(samples_coordinate)
+    target_n_samples = int(
+        min(list_fractions) * len(dataset.get(samples_coordinate))
     )
 
     # Get indices for smallest subset
+    # idcs are from enumerating the (sorted?) keys
     subset_idcs, _subset_n_samples = approximate_subset_sum(
         group_count_per_group_id,
         target_n_samples,
@@ -74,12 +75,16 @@ def split_annotations_dataset_group_by(
         tolerance=tolerance,
     )
 
+    list_values = [
+        list(group_count_per_group_id.keys())[x] for x in subset_idcs
+    ]
+
     # Create datasets for subset and not subset
     ds_subset = dataset.isel(
-        {samples_coordinate: dataset[group_by_var].isin(subset_idcs)}
+        {samples_coordinate: dataset[group_by_var].isin(list_values)}
     )
     ds_not_subset = dataset.isel(
-        {samples_coordinate: ~dataset[group_by_var].isin(subset_idcs)}
+        {samples_coordinate: ~dataset[group_by_var].isin(list_values)}
     )
 
     # # assert
@@ -184,9 +189,17 @@ def approximate_subset_sum(
         Sum of the elements in the subset.
 
     """
-    if isinstance(map_ids_to_values, list):
+    # Check if keys are castable to int
+    # if not, use keys from enumerate
+    castable_as_int = True
+    try:
+        map_ids_to_values = {int(k): v for k, v in map_ids_to_values.items()}
+    except ValueError as e:
+        castable_as_int = False
+
+    if isinstance(map_ids_to_values, list) or not castable_as_int:
         list_id_value_tuples = [
-            (k, v) for k, v in enumerate(map_ids_to_values)
+            (k, v) for k, v in enumerate(map_ids_to_values.values())
         ]
     else:
         list_id_value_tuples = [(k, v) for k, v in map_ids_to_values.items()]
