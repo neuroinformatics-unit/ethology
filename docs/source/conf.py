@@ -228,4 +228,7 @@ sphinx_gallery_conf = {
     # directory where function/class granular galleries are stored
     "doc_module": ("ethology",),
     # module for which to generate mini-galleries
+    "promote_jupyter_magic": True,
+    # any code block starting with Jupyter cell magics
+    # (e.g. %%bash or %%writefile) will be turned into a runnable code block.
 }

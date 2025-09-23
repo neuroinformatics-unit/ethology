@@ -57,10 +57,13 @@ local_settings.py
 instance/
 
 # Sphinx documentation
-docs/_build/
-docs/source/build/
+docs/build/
+docs/source/examples/
 docs/source/api/
 docs/source/api_index.rst
+sg_execution_times.rst
+
+
 # PyBuilder
 target/
 
