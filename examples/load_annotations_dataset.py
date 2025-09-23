@@ -1,7 +1,7 @@
-"""Load bounding box annotations as an ``ethology`` dataset
-========================================================
+"""Inspect bounding box COCO annotations as an ``ethology`` dataset
+====================================================================
 
-Load bounding box annotations as an ``ethology`` dataset and visualize it.
+Load COCO bounding box annotations as an ``ethology`` dataset and visualize it.
 """
 
 
@@ -63,7 +63,8 @@ annotations_file = (
 
 # %%
 # Load annotations as ``ethology`` dataset
-# --------------------------------------
+# -----------------------------------------
+# Explain ethology dataset and dimensions
 
 ds = load_bboxes.from_files(annotations_file, format="COCO")
 
@@ -221,7 +222,26 @@ save_bboxes.to_via_tracks_file(ds_as_movement, "waterfowl_dataset.csv")
 
 
 # %%
+# Load the data in napari
+# -----------------------
+# Follow the `movement napari guide <https://movement.neuroinformatics.dev/user_guide/gui.html>`_
+#
+# Remember to hide tracks layer since IDs are not consistent across images.
+#
+# Drag and drop the images directory into the napari plugin (it will be in
+# ``data_dir / "experts" / "images"``)
+# Note that the boxes are coloured by individual per frame.
+#
+# It should look somethinglike this:
+#
+#   .. image:: ../_static/examples/napari-annotations.jpg
+#     :alt: Bounding box annotations in napari
+
+
+# %%
 # Clean-up
 # --------
 
 os.remove("waterfowl_dataset.csv")
+
+# %%
