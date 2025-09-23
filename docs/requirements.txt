@@ -7,5 +7,6 @@ setuptools-scm
 sphinx
 sphinx-autodoc-typehints
 sphinx-design
+sphinx-gallery
 sphinx-notfound-page
 sphinx-sitemap
