@@ -183,7 +183,7 @@ ax.invert_yaxis()
 plt.tight_layout()
 
 # %%
-# Compute annotations within a region of interest
+# Count annotations within a region of interest
 # ------------------------------------------------
 # We may want to compute the number of annotations within a specific region of
 # the image. We can do this using
@@ -241,7 +241,7 @@ print(f"Fraction of annotations in region: {fraction_in_region * 100:.2f}%")
 # our annotations dataset to a ``movement``-like dataset.
 #
 # To do this, we need to rename the dataset dimensions,
-# add a confidence array, and add a time_unit attribute.
+# add a confidence array, and add a ``time_unit`` attribute.
 # We additionally rename the
 # ``individuals`` coordinate values to follow the ``movement``
 # naming convention.
@@ -282,62 +282,96 @@ print(ds_as_movement.sizes)
 # Similarly, we set the time unit to ``frames``, but actually the images do not
 # represent consecutive images in time. We do this to later be able to
 # export the dataset in a ``movement``-supported format that we can
-# visualise in the ``movement`` ``napari`` plugin.
+# visualise in the `movement napari plugin <https://movement.neuroinformatics.dev/user_guide/gui.html>`_
 
 
 # %%
-# Plot occupancy map using ``movement`` utilities
-# -----------------------------------------------
+# Plot occupancy map using ``movement``
+# --------------------------------------
+#
+# We can now use the :func:`movement.plots.plot_occupancy` function to plot
+# the occupancy map of the annotations. This is a two-dimensional histogram
+# that shows for each bin the number of annotations that fall within it.
+#
+# To determine the number of bins along each dimension, we use the aspect ratio
+# of the images to define similarly sized bins.
+# This makes the occupancy map more informative. Note that all images have the
+# same dimensions.
 
-# We use the image shape to determine the number of bins along each dimension
-# to make the occupancy map more informative.
+# Determine aspect ratio of the images
 image_width = np.unique(ds["image_shape"].sel(space="x").values).item()
 image_height = np.unique(ds["image_shape"].sel(space="y").values).item()
-
 image_AR = image_width / image_height
 
+# Set number of bins along each dimension
 n_bins_x = 75
 n_bins_y = int(n_bins_x / image_AR)
 
-# plot occupancy map
+# Plot occupancy map
 fig, ax, hist = plot_occupancy(
     ds_as_movement.position,
     bins=[n_bins_x, n_bins_y],
 )
+fig.set_size_inches(10, 5)
+ax.set_xlim(0, image_width)
+ax.set_ylim(0, image_height)
 ax.set_xlabel("x (pixels)")
 ax.set_ylabel("y (pixels)")
 ax.axis("equal")
 ax.invert_yaxis()
 
+# %%
+# The occupancy map shows that the maximum count in each bin is 5 annotations,
+# and the minimum count is 0 annotations. We can confirm this by inspecting
+# the outputs of the :func:`movement.plots.plot_occupancy` function.
+
+bin_size_x = np.diff(hist["xedges"])[0].item()
+bin_size_y = np.diff(hist["yedges"])[0].item()
+
+print(f"Bin size (pixels): ({bin_size_x}, {bin_size_y})")
+print(f"Maximum bin count: {hist['counts'].max().item()}")
+print(f"Minimum bin count: {hist['counts'].min().item()}")
 
 # %%
-# Export as movement bboxes dataset
-# ---------------------------------
-# This allows us to visualise the dataset in the ``movement`` napari plugin.
+# Visualise the dataset in the ``movement`` napari plugin
+# ---------------------------------------------------------
+# We can export the ``movement``-like dataset in a format
+# that we can visualise in the `movement napari plugin <https://movement.neuroinformatics.dev/user_guide/gui.html>`_.
+# For example, we can use the
+# :func:`movement.io.save_bboxes.to_via_tracks_file` function, that saves
+# bounding box ``movement`` datasets as VIA-tracks files.
 
 save_bboxes.to_via_tracks_file(ds_as_movement, "waterfowl_dataset.csv")
 
 
 # %%
-# Load the data in napari
-# -----------------------
-# Follow the `movement napari guide <https://movement.neuroinformatics.dev/user_guide/gui.html>`_
+# You can now follow the `movement napari guide <https://movement.neuroinformatics.dev/user_guide/gui.html>`_
+# to load the output VIA-tracks file into ``napari``.
 #
-# Remember to hide tracks layer since IDs are not consistent across images.
-#
-# Drag and drop the images directory into the napari plugin (it will be in
-# ``data_dir / "experts" / "images"``)
-# Note that the boxes are coloured by individual per frame.
-#
-# It should look somethinglike this:
-#
-#   .. image:: ../_static/examples/napari-annotations.jpg
-#     :alt: Bounding box annotations in napari
+# To visualise the annotations over the corresponding images, remember to
+# first drag and drop the images directory into the ``napari`` canvas.
+# You will find the images for the experts' annotations under the
+# ``data_dir / "experts" / "images"`` directory.
 
+print(f"Images directory: {data_dir / 'experts' / 'images'}")
+
+# %%
+# The view in ``napari`` should look something like this:
+#
+# .. image:: ../_static/examples/napari-annotations.jpg
+#   :alt: Bounding box annotations in napari
+
+# %%
+# The bounding boxes are coloured by individual ID per image.
+# Remember that the individual IDs are not consistent across images, so it
+# makes more sense to hide the tracks layer for an easier visualisation,
+# like in the example screenshot above.
 
 # %%
 # Clean-up
 # --------
+# To remove the output files we have just created, we can run the
+# following code.
 
 os.remove("waterfowl_dataset.csv")
 

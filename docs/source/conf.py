@@ -179,6 +179,7 @@ intersphinx_mapping = {
     "matplotlib": ("https://matplotlib.org/stable/", None),
     "numpy": ("https://numpy.org/doc/stable/", None),
     "pandera": ("https://pandera.readthedocs.io/en/stable/", None),
+    "movement": ("https://movement.neuroinformatics.dev/", None),
 }
 
 
