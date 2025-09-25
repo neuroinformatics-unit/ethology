@@ -1,17 +1,15 @@
-"""Inspect bounding box COCO annotations as an ``ethology`` dataset
+"""Load bounding box COCO annotations into ``ethology``
 ====================================================================
 
-Load COCO bounding box annotations as an ``ethology`` dataset and visualize it.
+Load bounding box annotations in `COCO format <https://cocodataset.org/#format-data>`_
+as an ``ethology`` dataset and inspect it using ``ethology`` and
+`movement <https://movement.neuroinformatics.dev/>`_ utilities.
 """
 
 
 # %%
 # Imports
 # -------
-
-# For interactive plots: install ipympl with `pip install ipympl` and uncomment
-# the following line in your notebook
-# %matplotlib widget
 
 import os
 from pathlib import Path
@@ -26,9 +24,31 @@ from movement.roi import PolygonOfInterest
 
 from ethology.io.annotations import load_bboxes
 
+# For interactive plots: install ipympl with `pip install ipympl` and uncomment
+# the following line in your notebook
+# %matplotlib widget
+
+
 # %%
 # Download dataset
 # ------------------
+#
+# For this example, we will use the dataset from the
+# `UAS Imagery of Migratory Waterfowl at New Mexico Wildlife Refuges <https://lila.science/datasets/uas-imagery-of-migratory-waterfowl-at-new-mexico-wildlife-refuges/>`_.
+# This dataset is part of the `Drones For Ducks project
+# <https://aspire.unm.edu/research/funded-research/ducks-and-drones.html>`_
+# that aims to develop an efficient method to count and identify species of
+# migratory waterfowl at wildlife refuges across New Mexico.
+#
+# The dataset is made up of a set of drone images and corresponding
+# bounding box annotations. Annotations are provided by both expert
+# annotators and volunteers.
+#
+# Since the dataset is not very large, we can download it as a zip file
+# directly from the URL provided in the dataset webpage.
+# We use the `pooch <https://github.com/fatiando/pooch/>`_ library
+# to download it to the ``.ethology`` cache directory.
+
 
 # Source of the dataset
 data_source = {
@@ -53,8 +73,7 @@ data_dir = ethology_cache / "uas-imagery-of-migratory-waterfowl"
 
 
 # %%
-# Get annotations file
-# -----------------------
+# For this example, we will focus on the annotations labelled by the experts.
 
 annotations_file = (
     data_dir / "experts" / "20230331_dronesforducks_expert_refined.json"
@@ -62,24 +81,78 @@ annotations_file = (
 
 
 # %%
-# Load annotations as ``ethology`` dataset
-# -----------------------------------------
-# Explain ethology dataset and dimensions
+# Load annotations as an ``ethology`` dataset
+# --------------------------------------------
+#
+# We can use the :func:`ethology.io.annotations.load_bboxes.from_files`
+# function to load the COCO file with the
+# expert annotations as an ``ethology`` dataset.
 
 ds = load_bboxes.from_files(annotations_file, format="COCO")
 
 print(ds)
 print(ds.sizes)
 
+# %%
+# We can see that the expert annotations consist of 2D bounding boxes,
+# defined for 12 images, with each image having a maximum of 722 annotations.
+# The ``position`` and ``shape`` arrays are padded with ``NaN`` for the images
+# in which there are less annotations than the maximum.
+# The ``category`` array is padded with ``-1``.
+#
+# Note that
+# in this case a single annotation ID does not represent the same
+# individual across images; it just represents an arbitrary ID assigned to
+# each bounding box per image.
 
 # %%
-# Plot all annotations and color by category
-# ------------------------------------------
+# We can also see from the dataset description that it includes
+# five attributes. These are stored under the ``attrs`` dictionary.
+# We can inspect the content of the ``attrs`` dictionary as follows:
 
-print(f"Number of categories: {len(ds.map_category_to_str)}")
+print(*ds.attrs.items(), sep="\n")
+
+# %%
+# The attributes for the loaded dataset include two maps,
+# one from category IDs to category names, and one from image IDs to image
+# filenames. To inspect their values further we can use the convenient
+# dot syntax:
+
+print("Categories:")
+print(*ds.map_category_to_str.items(), sep="\n")
+print("--------------------------------")
+print("Image filenames:")
+print(*ds.map_image_id_to_filename.items(), sep="\n")
+
+# %%
+# The category IDs are assigned to category names following the definition
+# in the input COCO file. Usually the 0 category is reserved for the
+# "background" class. The image IDs in the dataset are assigned based on the
+# alphabetically sorted list of unique image filenames in the input file.
+
+# %%
+# This dot syntax can be used to access any of the dataset attributes.
+# For example, the annotation file that was used to load the dataset can
+# be retrieved as:
+
+print(ds.annotation_files)
+
+# %%
+# Visualise annotations
+# -----------------------
+#
+# Let's inspect how the annotations are distributed across the image
+# coordinate system. We can color the centroid of each bounding box by
+# the corresponding category to get a better sense of the distribution
+# by species.
+
+# We use a colormap of 10 discrete colours
+# (we have 9 categories)
 cmap = plt.cm.tab10
 
-fig, ax = plt.subplots()
+fig, ax = plt.subplots(figsize=(8, 4))
+
+# Plot the centroids of the bounding boxes
 sc = ax.scatter(
     ds.position.sel(space="x").values,
     ds.position.sel(space="y").values,
@@ -88,38 +161,43 @@ sc = ax.scatter(
     cmap=cmap,
 )
 
-# add legend
+# Add legend
+# Note: we use ds.category.values rather than
+# ds.map_category_to_str.values() because
+# the array contains the padding value -1,
+# which is also included in the scatter plot data.
 legend_elements = [
-    plt.Line2D([0], [0], color=cmap(i))
-    for i in np.unique(ds.category.values)
-    # we use ds.category.values rather than
-    # ds.map_category_to_str.values() because
-    # the latter contains the padding value -1
+    plt.Line2D([0], [0], color=cmap(i)) for i in np.unique(ds.category.values)
 ]
 plt.legend(
     legend_elements,
     ds.map_category_to_str.values(),
     bbox_to_anchor=(1, 1),
-    loc="upper left",
+    loc="best",
 )
-
 ax.set_title("Annotations per category")
 ax.set_xlabel("x (pixels)")
 ax.set_ylabel("y (pixels)")
 ax.axis("equal")
 ax.invert_yaxis()
+plt.tight_layout()
 
 # %%
-# Compute annotations within a polygon
-# -------------------------------------
+# Compute annotations within a region of interest
+# ------------------------------------------------
+# We may want to compute the number of annotations within a specific region of
+# the image. We can do this using
+# `movement <https://movement.neuroinformatics.dev/>`_
+# to define a :class:`movement.roi.PolygonOfInterest` and then
+# count how many annotations are within the polygon.
 
-# define a polygon
+# Define a polygon
 central_region = PolygonOfInterest(
     ((1000, 500), (1000, 3000), (4500, 3000), (4500, 500)),
     name="Central region",
 )
 
-# plot all annotations
+# Plot all annotations
 fig, ax = plt.subplots()
 sc = ax.scatter(
     ds.position.sel(space="x").values,
@@ -135,14 +213,14 @@ ax.axis("equal")
 ax.invert_yaxis()
 
 
-# plot polygon on top
+# Plot ROI (region of interest) polygon on top
 central_region.plot(ax, facecolor="red", edgecolor="red", alpha=0.25)
 
-# Check number of annotations in the polygon
-# Note that if position is nan, ``.contains_point`` returns False
+# Check the number of annotations in the polygon
+# Note: if position is NaN, ``.contains_point`` returns ``False``
 ds_in_region = central_region.contains_point(
     ds.position
-)  # (n_images, n_max_annotations_per_image)
+)  # shape: (n_images, n_max_annotations_per_image)
 
 n_annotations_in_region = ds_in_region.sum()
 n_annotations_total = (~ds.position.isnull().any(axis=1)).sum()
@@ -153,17 +231,31 @@ print(f"Annotations in region: {n_annotations_in_region.item()}")
 print(f"Fraction of annotations in region: {fraction_in_region * 100:.2f}%")
 
 # %%
-# Transform to ``movement``-like dataset
-# ---------------------------------------
-# rename dimensions
+# We can see that just over 50% of the annotations are within the region of
+# interest defined by the polygon.
+
+# %%
+# Transform dataset to a ``movement``-like dataset
+# -------------------------------------------------
+# We can take further advantage of ``movement`` utilities by transforming
+# our annotations dataset to a ``movement``-like dataset.
+#
+# To do this, we need to rename the dataset dimensions,
+# add a confidence array, and add a time_unit attribute.
+# We additionally rename the
+# ``individuals`` coordinate values to follow the ``movement``
+# naming convention.
+
+
+# Rename dimensions
 ds_as_movement = ds.rename({"image_id": "time", "id": "individuals"})
 
-# rename 'individuals' coordinate values
+# Rename 'individuals' coordinate values to be
 ds_as_movement["individuals"] = [
     f"id_{i.item()}" for i in ds_as_movement.individuals.values
 ]
 
-# add confidence array
+# Add confidence array with NaN values
 ds_as_movement["confidence"] = xr.DataArray(
     np.full(
         (
@@ -175,17 +267,22 @@ ds_as_movement["confidence"] = xr.DataArray(
     dims=["time", "individuals"],
 )
 
-# add time_unit
-# TODO: add to bboxes validator?
+# Add time_unit attribute
 ds_as_movement.attrs["time_unit"] = "frames"
 
 
-# check if valid ValidBboxesDataset
-# valid_ds = _validate_dataset(ds_as_movement, ValidBboxesDataset)
-# print(valid_ds)
-
 print(ds_as_movement)
 print(ds_as_movement.sizes)
+
+# %%
+# Since this dataset represents manually labelled data, there isn't
+# really a confidence value associated with each of the annotations.
+# Therefore, we add a confidence array with NaN values.
+#
+# Similarly, we set the time unit to ``frames``, but actually the images do not
+# represent consecutive images in time. We do this to later be able to
+# export the dataset in a ``movement``-supported format that we can
+# visualise in the ``movement`` ``napari`` plugin.
 
 
 # %%
