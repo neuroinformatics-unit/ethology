@@ -179,6 +179,22 @@ Our `pre-commit` hooks include some checks (`ruff` rules) that ensure the docstr
 
 If your PR introduces new modules that should *not* be documented in the [API reference](target-api), or if there are changes to existing modules that necessitate their removal from the documentation, make sure to update the `exclude_modules` list within the `docs/make_api_index.py` script to reflect these exclusions.
 
+### Updating the examples
+We use [sphinx-gallery](sphinx-gallery:)
+to create the [examples](target-examples).
+To add new examples, you will need to create a new `.py` file in `examples/`,
+or in `examples/advanced/` if your example targets experienced users.
+The file should be structured as specified in the relevant
+[sphinx-gallery documentation](sphinx-gallery:syntax).
+
+We are using sphinx-gallery's [integration with binder](sphinx-gallery:configuration#binder-links)
+to provide interactive versions of the examples.
+If your examples rely on packages that are not among `movement`'s dependencies,
+you will need to add them to the `docs/source/environment.yml` file.
+That file is used by binder to create the conda environment in which the
+examples are run. See the relevant section of the
+[binder documentation](https://mybinder.readthedocs.io/en/latest/using/config_files.html).
+
 ### Cross-referencing Python objects
 :::{note}
 Docstrings in the `.py` files for the [API reference](target-api)  are converted into `.rst` files, so these should use reStructuredText syntax.
@@ -283,6 +299,8 @@ For example, to re-build the documentation and check the links, run:
 make clean html linkcheck
 ```
 :::
+
+
 
 ## Test data
 
