@@ -20,3 +20,6 @@ ValidVIA
 
    
    
+
+.. minigallery:: ethology.io.annotations.validate.ValidVIA
+   :add-heading: Examples using ``ValidVIA``

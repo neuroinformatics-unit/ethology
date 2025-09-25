@@ -32,6 +32,10 @@
 
     <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=9c66c473" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
   
   <!-- So that users can add custom icons -->
@@ -40,7 +44,7 @@
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../_static/documentation_options.js?v=9a28fe7c"></script>
+    <script src="../_static/documentation_options.js?v=51a16eb1"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/design-tabs.js?v=f930bc37"></script>
@@ -116,7 +120,7 @@
   
   
   
-    <p class="title logo__title">ethology v0.0.2.dev33</p>
+    <p class="title logo__title">ethology v0.0.2.dev34</p>
   
 </a></div>
     
@@ -137,9 +141,9 @@
 </li>
 
 
-<li class="nav-item current active">
-  <a class="nav-link nav-internal" href="index.html">
-    Community
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../examples/index.html">
+    Examples
   </a>
 </li>
 
@@ -147,6 +151,13 @@
 <li class="nav-item ">
   <a class="nav-link nav-internal" href="../api_index.html">
     API reference
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="index.html">
+    Community
   </a>
 </li>
 
@@ -258,9 +269,9 @@
 </li>
 
 
-<li class="nav-item current active">
-  <a class="nav-link nav-internal" href="index.html">
-    Community
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../examples/index.html">
+    Examples
   </a>
 </li>
 
@@ -268,6 +279,13 @@
 <li class="nav-item ">
   <a class="nav-link nav-internal" href="../api_index.html">
     API reference
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="index.html">
+    Community
   </a>
 </li>
 
@@ -566,6 +584,22 @@ So make sure that all your public functions/classes/methods have valid docstring
 Our <code class="docutils literal notranslate"><span class="pre">pre-commit</span></code> hooks include some checks (<code class="docutils literal notranslate"><span class="pre">ruff</span></code> rules) that ensure the docstrings are formatted consistently.</p>
 <p>If your PR introduces new modules that should <em>not</em> be documented in the <a class="reference internal" href="../api_index.html#target-api"><span class="std std-ref">API reference</span></a>, or if there are changes to existing modules that necessitate their removal from the documentation, make sure to update the <code class="docutils literal notranslate"><span class="pre">exclude_modules</span></code> list within the <code class="docutils literal notranslate"><span class="pre">docs/make_api_index.py</span></code> script to reflect these exclusions.</p>
 </section>
+<section id="updating-the-examples">
+<h3>Updating the examples<a class="headerlink" href="#updating-the-examples" title="Link to this heading">#</a></h3>
+<p>We use <a class="reference external" href="https://sphinx-gallery.github.io/stable/#">sphinx-gallery</a>
+to create the <a class="reference internal" href="../examples/index.html#target-examples"><span class="std std-ref">examples</span></a>.
+To add new examples, you will need to create a new <code class="docutils literal notranslate"><span class="pre">.py</span></code> file in <code class="docutils literal notranslate"><span class="pre">examples/</span></code>,
+or in <code class="docutils literal notranslate"><span class="pre">examples/advanced/</span></code> if your example targets experienced users.
+The file should be structured as specified in the relevant
+<a class="reference external" href="https://sphinx-gallery.github.io/stable/syntax#">sphinx-gallery documentation</a>.</p>
+<p>We are using sphinx-gallery’s <a class="reference external" href="https://sphinx-gallery.github.io/stable/configuration#binder-links">integration with binder</a>
+to provide interactive versions of the examples.
+If your examples rely on packages that are not among <code class="docutils literal notranslate"><span class="pre">movement</span></code>’s dependencies,
+you will need to add them to the <code class="docutils literal notranslate"><span class="pre">docs/source/environment.yml</span></code> file.
+That file is used by binder to create the conda environment in which the
+examples are run. See the relevant section of the
+<a class="reference external" href="https://mybinder.readthedocs.io/en/latest/using/config_files.html">binder documentation</a>.</p>
+</section>
 <section id="cross-referencing-python-objects">
 <h3>Cross-referencing Python objects<a class="headerlink" href="#cross-referencing-python-objects" title="Link to this heading">#</a></h3>
 <div class="admonition note">
@@ -817,6 +851,7 @@ The version number is automatically determined from the latest tag on the <em>ma
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adding-new-pages">Adding new pages</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#linking-to-external-urls">Linking to external URLs</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#updating-the-api-reference">Updating the API reference</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#updating-the-examples">Updating the examples</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cross-referencing-python-objects">Cross-referencing Python objects</a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#internal-references">Internal references</a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#external-references">External references</a></li>

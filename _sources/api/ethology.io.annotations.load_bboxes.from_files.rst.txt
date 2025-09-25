@@ -4,3 +4,6 @@ from\_files
 .. currentmodule:: ethology.io.annotations.load_bboxes
 
 .. autofunction:: from_files
+
+.. minigallery:: ethology.io.annotations.load_bboxes.from_files
+   :add-heading: Examples using ``from_files``

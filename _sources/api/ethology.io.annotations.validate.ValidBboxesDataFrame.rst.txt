@@ -92,3 +92,6 @@ ValidBboxesDataFrame
    
    
    
+
+.. minigallery:: ethology.io.annotations.validate.ValidBboxesDataFrame
+   :add-heading: Examples using ``ValidBboxesDataFrame``

@@ -20,3 +20,6 @@ ValidCOCO
 
    
    
+
+.. minigallery:: ethology.io.annotations.validate.ValidCOCO
+   :add-heading: Examples using ``ValidCOCO``

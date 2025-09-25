@@ -20,3 +20,6 @@ ValidBboxesDataset
 
    
    
+
+.. minigallery:: ethology.io.annotations.validate.ValidBboxesDataset
+   :add-heading: Examples using ``ValidBboxesDataset``

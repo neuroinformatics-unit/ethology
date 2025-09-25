@@ -98,3 +98,6 @@ ValidBboxesDataFrameCOCO
    
    
    
+
+.. minigallery:: ethology.io.annotations.validate.ValidBboxesDataFrameCOCO
+   :add-heading: Examples using ``ValidBboxesDataFrameCOCO``
