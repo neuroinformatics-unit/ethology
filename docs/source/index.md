@@ -43,6 +43,7 @@ If you are looking to analyse your pose estimation tracks with a user-friendly t
 :hidden:
 
 installation
-community/index
+examples/index
 api_index
+community/index
 ```

@@ -179,6 +179,7 @@ intersphinx_mapping = {
     "matplotlib": ("https://matplotlib.org/stable/", None),
     "numpy": ("https://numpy.org/doc/stable/", None),
     "pandera": ("https://pandera.readthedocs.io/en/stable/", None),
+    "movement": ("https://movement.neuroinformatics.dev/", None),
 }
 
 
@@ -228,4 +229,7 @@ sphinx_gallery_conf = {
     # directory where function/class granular galleries are stored
     "doc_module": ("ethology",),
     # module for which to generate mini-galleries
+    "promote_jupyter_magic": True,
+    # any code block starting with Jupyter cell magics
+    # (e.g. %%bash or %%writefile) will be turned into a runnable code block.
 }
