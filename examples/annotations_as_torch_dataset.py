@@ -1,4 +1,4 @@
-"""Convert bounding box annotations to a torch dataset
+"""Convert ``ethology`` annotations to a torch dataset
 ========================================================
 
 Load bounding box annotations as an ``ethology`` dataset, select a subset of
@@ -114,7 +114,6 @@ list_category_counts = [
 
 # Sort by decreasing count
 list_category_counts.sort(key=lambda x: x[2], reverse=True)
-# --- or reverse=False
 
 
 # %%
@@ -123,7 +122,8 @@ list_category_counts.sort(key=lambda x: x[2], reverse=True)
 # Make a new dataset with only the bottom/top 3 categories
 
 # Compute the categories to keep
-categories_to_keep = [x[0] for x in list_category_counts[:3]]
+n_categories = 2
+categories_to_keep = [x[0] for x in list_category_counts[:n_categories]]
 print(f"Categories to keep: {categories_to_keep}")
 
 # Compute categories mask array
@@ -131,21 +131,30 @@ print(f"Categories to keep: {categories_to_keep}")
 categories_mask = ds.category.isin(categories_to_keep)  # dim: image_id, id
 
 ds_subset = ds.where(categories_mask, drop=True)
-print(np.unique(ds_subset.category.values))
+
+# inspect
+print(f"ds_subset unique categories: {np.unique(ds_subset.category.values)}")
+print(f"ds_subset.sizes: {ds_subset.sizes}")  # note reduced dimensions
+print(f"ds_subset.image_shape shape: {ds_subset.image_shape.shape}")
 
 # %%
 # Note that due to the underlying broadcasting in the ``where`` operation,
-# the image_shape array now has image_id, space, and id dimensions and the
-# ``category`` array is now a float. For clarity we go back to the ``ethology``
+# the image_shape array now has ``image_id``, ``space``, and ``id`` dimensions
+# and the ``category`` array is now a float. For clarity we go back to the
+# ``ethology``
 # convention and make the ``category`` array and integer one, with -1 for empty
 # values, and the ``image_shape`` array an integer one with only ``image_id``
 # and ``space`` dimensions.
 
 ds_subset["category"] = ds_subset.category.fillna(-1).astype(int)
-ds_subset["image_shape"] = ds.image_shape  # for clarity
+ds_subset["image_shape"] = ds.image_shape
+# this assignment takes only the (image_id, space) coordinates from
+# ds.image_shape that are also present in ds_subset
 
 
 print(ds_subset)
+print("---------")
+print(f"ds_subset.image_shape shape: {ds_subset.image_shape.shape}")
 
 
 # %%
