@@ -1,6 +1,6 @@
 """Utilities for creating and manipulating datasets for detection."""
 
-import itertools
+from collections import Counter
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -26,7 +26,7 @@ def split_annotations_dataset_group_by(
     group_by_var: str,  # should be 1-dimensional along the samples_coordinate
     list_fractions: list[float],
     seed: int = 42,
-    tolerance: float = 0.01,
+    tolerance: int = 0,
     samples_coordinate: str = "image_id",
 ) -> tuple[
     torch.utils.data.Dataset,
@@ -53,36 +53,39 @@ def split_annotations_dataset_group_by(
             f" {samples_coordinate}."
         )
 
-    # Count number of samples per group
-    group_count_per_group_id = {
-        k: len(list(g))
-        for k, g in itertools.groupby(dataset[group_by_var].values)
-    }
+    # Count number of samples per group and sort by count
+    count_per_group_id = dict(
+        Counter(dataset[group_by_var].values).most_common()[::-1]
+    )
 
-    # Compute number of samples in smallest subset
-    target_n_samples = int(
+    # assert sum(count_per_group_id.values()) ==
+    # len(dataset.get(samples_coordinate))
+
+    # Compute number of samples in target subset
+    # We define the target subset as the smallest subset.
+    target_subset_count = int(
         min(list_fractions) * len(dataset.get(samples_coordinate))
     )
 
-    # Get indices for smallest subset
-    # idcs are from enumerating the (sorted?) keys
+    # Get indices for target subset
+    # idcs are from enumerating the keys of target_subset_count
     subset_idcs, _subset_n_samples = approximate_subset_sum(
-        group_count_per_group_id,
-        target_n_samples,
+        count_per_group_id,
+        target_subset_count,
         seed=seed,
         tolerance=tolerance,
     )
 
-    list_values = [
-        list(group_count_per_group_id.keys())[x] for x in subset_idcs
-    ]
+    # Get group ids for the subset
+    list_all_group_id = list(count_per_group_id.keys())
+    subset_group_id = [list_all_group_id[x] for x in subset_idcs]
 
     # Create datasets for subset and not subset
     ds_subset = dataset.isel(
-        {samples_coordinate: dataset[group_by_var].isin(list_values)}
+        {samples_coordinate: dataset[group_by_var].isin(subset_group_id)}
     )
     ds_not_subset = dataset.isel(
-        {samples_coordinate: ~dataset[group_by_var].isin(list_values)}
+        {samples_coordinate: ~dataset[group_by_var].isin(subset_group_id)}
     )
 
     # # assert
@@ -162,11 +165,10 @@ def split_annotations_dataset_random(
 
 
 def approximate_subset_sum(
-    map_ids_to_values: dict[int, int],
+    map_ids_to_counts: dict[int, int],
     target: int,
-    tolerance: float = 0.05,
-    seed: int = 42,
-    shuffle: bool = True,
+    tolerance: int,
+    seed: int | None,
 ) -> tuple[list[int], int]:
     """Solve subset sum problem by approximate greedy algorithm.
 
@@ -177,20 +179,17 @@ def approximate_subset_sum(
 
     Parameters
     ----------
-    map_ids_to_values : dict[int, int]
-        Mapping from ids to values. Usually the values are the frame counts
+    map_ids_to_counts : dict[int, int]
+        Mapping from ids to counts. Usually the counts are the frame counts
         for the corresponding video ids.
     target : int
-        Target value. Usually the number of frames to allocate to the test set.
-    tolerance : float, optional
-        Tolerance. The percentage of the target value that is allowed to be
-        deviated from. Default is 0.05.
-    seed : int, optional
-        Used to shuffle the order in which the elements are visited.
-        Default is 42.
-    shuffle : bool, optional
-        Whether to shuffle the order in which the elements are visited.
-        Default is True.
+        The number of samples to allocate to the target subset.
+    tolerance : int
+        How many samples are allowed to be deviated from the count in
+        the target subset. Should be positive. Same unit as the target value.
+    seed : int | None
+        Used to shuffle the order in which the elements are visited. If None,
+        the order is not shuffled.
 
     Returns
     -------
@@ -204,32 +203,33 @@ def approximate_subset_sum(
     # if not, use keys from enumerate
     castable_as_int = True
     try:
-        map_ids_to_values = {int(k): v for k, v in map_ids_to_values.items()}
+        map_ids_to_counts = {int(k): v for k, v in map_ids_to_counts.items()}
     except ValueError:
         castable_as_int = False
 
     if not castable_as_int:
-        list_id_value_tuples = [
-            (k, v) for k, v in enumerate(map_ids_to_values.values())
+        list_id_count_tuples = [
+            (k, v) for k, v in enumerate(map_ids_to_counts.values())
         ]
     else:
-        list_id_value_tuples = [(k, v) for k, v in map_ids_to_values.items()]
+        list_id_count_tuples = list(map_ids_to_counts.items())
 
-    # shuffle the order in which the elems are visited
-    if shuffle:
+    # If seed is provided, shuffle the order in which the elems are visited
+    # If not, the list_id_value_tuples are visited in order.
+    if seed:
         rng = np.random.default_rng(seed)
-        rng.shuffle(list_id_value_tuples)
+        rng.shuffle(list_id_count_tuples)
 
     # loop thru elements in dict and add to list as long as
     # sum of elements in list is below target
     current_sum = 0
     current_subset_idcs = []
-    for id, values_one_id in list_id_value_tuples:
-        if current_sum + values_one_id <= target * (1 + tolerance):
+    for id, values_one_id in list_id_count_tuples:
+        if current_sum + values_one_id <= target + tolerance:
             current_subset_idcs.append(id)
             current_sum += values_one_id
 
-        if abs(current_sum - target) <= target * tolerance:
+        if abs(current_sum - target) <= tolerance:
             break
 
     return current_subset_idcs, current_sum
