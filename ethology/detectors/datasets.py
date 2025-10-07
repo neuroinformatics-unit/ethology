@@ -25,14 +25,14 @@ def split_annotations_dataset_group_by(
     dataset: xr.Dataset,
     group_by_var: str,  # should be 1-dimensional along the samples_coordinate
     list_fractions: list[float],
-    seed: int = 42,
+    seed: int | None,
     tolerance: int = 0,
     samples_coordinate: str = "image_id",
 ) -> tuple[
     torch.utils.data.Dataset,
     torch.utils.data.Dataset,
 ]:
-    """Split an annotations dataset using an approximate subset-sum algorithm.
+    """Split an annotations dataset using an approximate subset-sum approach.
 
     The dataset is split in two. It returns the smallest split first.
     We assume the smallest split is the test set.
