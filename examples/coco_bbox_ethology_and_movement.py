@@ -1,9 +1,9 @@
-"""Load bounding box COCO annotations into ``ethology``
+"""Inspect COCO annotations using ``ethology`` and ``movement``
 ====================================================================
 
-Load bounding box annotations in `COCO format <https://cocodataset.org/#format-data>`_
-as an ``ethology`` dataset and inspect it using ``ethology`` and
-`movement <https://movement.neuroinformatics.dev/>`_ utilities.
+Load `COCO <https://cocodataset.org/#format-data>`_ bounding box annotations
+as an ``ethology`` dataset and inspect them using ``ethology`` and
+`movement <https://movement.neuroinformatics.dev/>`_.
 """
 
 
