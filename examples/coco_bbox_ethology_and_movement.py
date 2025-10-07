@@ -165,7 +165,8 @@ sc = ax.scatter(
 # Note: we use ds.category.values rather than
 # ds.map_category_to_str.values() because
 # the array contains the padding value -1,
-# which is also included in the scatter plot data.
+# which is also included in the colormap of the
+# scatter plot.
 legend_elements = [
     plt.Line2D([0], [0], color=cmap(i)) for i in np.unique(ds.category.values)
 ]
