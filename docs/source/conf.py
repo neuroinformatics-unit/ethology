@@ -7,7 +7,7 @@ from importlib.metadata import version as get_version
 
 # Used when building API docs, put the dependencies
 # of any class you are documenting here
-autodoc_mock_imports: list[str] = ["cv2", "torch"]
+autodoc_mock_imports: list[str] = ["cv2"]
 
 # Add the module path to sys.path here.
 # If the directory is relative to the documentation root,
