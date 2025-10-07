@@ -107,6 +107,7 @@ ds.attrs["map_image_id_to_filename"] = map_image_id_to_filename
 # Count annotations per category
 # -------------------------------
 
+# TODO: use Counter and .most_common()
 list_category_counts = [
     (ky, val, (ds.category == ky).sum().item())
     for ky, val in ds.map_category_to_str.items()
