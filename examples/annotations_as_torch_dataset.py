@@ -165,39 +165,32 @@ dataset_torch = annotations_dataset_to_torch_dataset(ds_subset)
 
 
 # %%
-# Helper function to show images
-# ------------------------------
-# From https://docs.pytorch.org/vision/0.21/auto_examples/others/plot_visualization_utils.html
-
-
-def show(imgs: torch.Tensor | list[torch.Tensor]):
-    """Plot input tensors as images."""
-    if not isinstance(imgs, list):
-        imgs = [imgs]
-    fig, axs = plt.subplots(ncols=len(imgs), squeeze=False)
-    for i, img in enumerate(imgs):
-        img = img.detach()
-        img = F.to_pil_image(img)
-        axs[0, i].imshow(np.asarray(img))
-        axs[0, i].set(xticklabels=[], yticklabels=[], xticks=[], yticks=[])
-
-
-# %%
-# Visualize dataset using torchvision utilities
-# ----------------------------------------------
-
+# Sample from the torch dataset and convert bbox format
+# -----------------------------------------------------
 
 # get one image and its annotations
 sample_idx = 2
 img, annot = dataset_torch[sample_idx]
 
-# convert image and annotations to torch tensors
-img_tensor = F.pil_to_tensor(img)
-bboxes_tensor = F.convert_bounding_box_format(
-    torch.as_tensor([ann["bbox"] for ann in annot]),
+# annot is a list of bboxes dictionaries
+# coords are in XYWH format
+bboxes_tensor_xywh = torch.as_tensor([ann["bbox"] for ann in annot])
+print(f"Bbox in XYWH format: {bboxes_tensor_xywh[0, :]}")
+
+# convert bbox format from XYWH to XYXY
+bboxes_tensor_xyxy = F.convert_bounding_box_format(
+    bboxes_tensor_xywh,
     old_format="XYWH",
     new_format="XYXY",
 )
+print(f"Bbox in XYXY format: {bboxes_tensor_xyxy[0, :]}")
+
+
+# %%
+# Visualize selected sample using torchvision ``draw_bounding_boxes``
+# --------------------------------------------------------------------
+# From https://docs.pytorch.org/vision/0.21/auto_examples/others/plot_visualization_utils.html
+
 
 # map category ID to color
 cmap = plt.cm.tab10
@@ -212,21 +205,24 @@ map_category_id_to_color_floats = {
     if i != -1
 }
 
-# list of colors for categories in selected image
+# list of categories per annotation in image
 list_category_ids_in_image = [ann["category_id"] for ann in annot]
-list_colors_in_image = [
-    map_category_id_to_color_ints[x] for x in list_category_ids_in_image
-]
 
-
-# plot
+# create image with boxes
 img_with_boxes = draw_bounding_boxes(
-    img_tensor,
-    bboxes_tensor,
-    colors=list_colors_in_image,
+    F.pil_to_tensor(img),
+    bboxes_tensor_xyxy,
+    colors=[
+        map_category_id_to_color_ints[x] for x in list_category_ids_in_image
+    ],
     width=15,
 )
-show(img_with_boxes)
+
+# plot
+fig, ax = plt.subplots()
+ax.imshow(img_with_boxes.permute(1, 2, 0))
+ax.set_xlabel("x (pixels)")
+ax.set_ylabel("y (pixels)")
 
 
 # add legend
@@ -246,5 +242,3 @@ plt.legend(
     loc="upper left",
 )
 plt.tight_layout()
-
-# %%
