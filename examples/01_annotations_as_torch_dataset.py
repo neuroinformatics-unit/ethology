@@ -1,4 +1,4 @@
-"""Convert ``ethology`` annotations to a torch dataset
+"""Convert ``ethology`` annotations to PyTorch dataset
 ========================================================
 
 Load bounding box annotations as an ``ethology`` dataset, select a subset of
