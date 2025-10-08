@@ -5,6 +5,8 @@ import os
 import sys
 from importlib.metadata import version as get_version
 
+from sphinx_gallery import sorting
+
 # Used when building API docs, put the dependencies
 # of any class you are documenting here
 autodoc_mock_imports: list[str] = ["cv2"]
@@ -207,6 +209,13 @@ notfound_urls_prefix = None
 
 sphinx_gallery_conf = {
     "examples_dirs": ["../../examples"],
+    "within_subsection_order": sorting.ExplicitOrder(
+        [
+            "coco_bbox_ethology_and_movement.py",
+            "annotations_as_torch_dataset.py",
+            "*",
+        ]
+    ),
     "filename_pattern": "/*.py",  # which files to execute before inclusion
     "gallery_dirs": ["examples"],  # output directory
     "run_stale_examples": True,  # re-run examples on each build
@@ -232,4 +241,11 @@ sphinx_gallery_conf = {
     "promote_jupyter_magic": True,
     # any code block starting with Jupyter cell magics
     # (e.g. %%bash or %%writefile) will be turned into a runnable code block.
+    # "minigallery_sort_order": sorting.ExplicitOrder(
+    #     [
+    #         "../../examples/coco_bbox_ethology_and_movement.py",
+    #         "../../examples/annotations_as_torch_dataset.py",
+    #         "../../examples/approximate_subset_sum_split.py",
+    #     ]
+    # ),
 }
