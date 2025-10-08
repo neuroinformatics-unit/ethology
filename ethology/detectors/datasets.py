@@ -15,10 +15,7 @@ from torchvision.datasets import CocoDetection, wrap_dataset_for_transforms_v2
 
 from ethology import ETHOLOGY_CACHE_DIR
 from ethology.io.annotations import save_bboxes
-from ethology.io.annotations.validate import (
-    ValidCOCO,
-    _check_input,
-)
+from ethology.io.annotations.validate import ValidCOCO, _check_input
 
 
 def split_annotations_dataset_group_by(
@@ -69,7 +66,7 @@ def split_annotations_dataset_group_by(
 
     # Get indices for target subset
     # idcs are from enumerating the keys of target_subset_count
-    subset_idcs, _subset_n_samples = approximate_subset_sum(
+    subset_idcs, _subset_n_samples = _approximate_subset_sum(
         count_per_group_id,
         target_subset_count,
         seed=seed,
@@ -164,7 +161,7 @@ def split_annotations_dataset_random(
     return list_ds
 
 
-def approximate_subset_sum(
+def _approximate_subset_sum(
     map_ids_to_counts: dict[int, int],
     target: int,
     tolerance: int,
