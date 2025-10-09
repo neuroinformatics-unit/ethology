@@ -233,11 +233,4 @@ sphinx_gallery_conf = {
     "promote_jupyter_magic": True,
     # any code block starting with Jupyter cell magics
     # (e.g. %%bash or %%writefile) will be turned into a runnable code block.
-    # "minigallery_sort_order": sorting.ExplicitOrder(
-    #     [
-    #         "../../examples/coco_bbox_ethology_and_movement.py",
-    #         "../../examples/annotations_as_torch_dataset.py",
-    #         "../../examples/approximate_subset_sum_split.py",
-    #     ]
-    # ),
 }

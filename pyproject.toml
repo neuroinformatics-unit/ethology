@@ -24,6 +24,7 @@ dependencies = [
   "pycocotools",
   "torch",
   "torchvision",
+  "loguru",
 ]
 
 [project.urls]
