@@ -226,9 +226,8 @@ def _approximate_subset_sum(list_id_counts, target, epsilon) -> SubsetDict:
 
     # loop thru list of (id, count) pairs
     for id, count in list_id_counts:
-        # print(f"Adding element {id} with count {count}")
         # Add current element to each existing subset in list
-        # and extend list
+        # and extend list if the resulting subset sum is below the target.
         list_subsets.extend(
             [
                 {
@@ -236,22 +235,14 @@ def _approximate_subset_sum(list_id_counts, target, epsilon) -> SubsetDict:
                     "ids": subset["ids"] + [id],
                 }
                 for subset in list_subsets
+                if subset["sum"] + count <= target
             ]
         )
 
-        # print(f"List of subsets: {list_subsets}")
-        # Remove near-duplicate subsets in terms of sum
+        # Remove near-duplicate subsets in terms of total sum
         list_subsets = _remove_near_duplicate_subsets(
             list_subsets, delta=float(epsilon) / (2 * len(list_id_counts))
         )
-        # print(f"List of subsets after trimming: {list_subsets}")
-
-        # Keep only subsets that are less than or equal to the target
-        list_subsets = [
-            subset for subset in list_subsets if subset["sum"] <= target
-        ]
-
-        # print(f"List of subsets after filtering: {list_subsets}")
 
     if len(list_subsets) == 0:
         logger.warning("No subset found with sum below the target.")
@@ -264,8 +255,11 @@ def _approximate_subset_sum(list_id_counts, target, epsilon) -> SubsetDict:
 def _remove_near_duplicate_subsets(list_subsets, delta):
     """Remove near-duplicate subsets in terms of their total sum.
 
-    Only keeps values that are at least delta% larger than the
-    previous kept value.
+    It only keeps subsets whose sum is sufficiently larger than the previous
+    subset sum, in ascending order.
+
+    This means that given two subsets whose sums are within delta% of each
+    other, it will keep the smaller one, since the values are visited in order.
     """
     # ensure list of subsets is sorted by total sum, in ascending order
     list_subsets = sorted(list_subsets, key=lambda x: x["sum"])
