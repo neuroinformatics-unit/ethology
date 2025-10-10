@@ -18,7 +18,6 @@ import pooch
 import xarray as xr
 
 from ethology.detectors.datasets import (
-    annotations_dataset_to_torch_dataset,
     split_annotations_dataset_group_by,
     split_annotations_dataset_random,
 )
@@ -164,8 +163,6 @@ annotation_file_per_image_id = np.array(
         for i in ds_all.image_id.values
     ]
 )
-print(annotation_file_per_image_id.shape)
-
 
 # Add to dataset
 ds_all["json_file"] = xr.DataArray(
@@ -191,7 +188,7 @@ ds_all["json_file"] = xr.DataArray(
 # or equal to the requested fraction.
 
 # %%
-fraction_1 = 0.8
+fraction_1 = 0.2
 fraction_2 = 1 - fraction_1
 
 ds_annotations_1, ds_annotations_2 = split_annotations_dataset_group_by(
@@ -221,29 +218,9 @@ print(f"Subset 1 files: {np.unique(ds_annotations_1.json_file.values)}")
 print(f"Subset 2 files: {np.unique(ds_annotations_2.json_file.values)}")
 
 # %%
-# In this case there are only three possible values for the source annotation
-# file, so there aren't many options for the subsets. There are three valid
-# splits of the dataset.
-
-# %%
-for fraction_1 in [0.2, 0.3, 0.4, 0.5]:
-    fraction_2 = 1 - fraction_1
-
-    ds_annotations_1, ds_annotations_2 = split_annotations_dataset_group_by(
-        ds_all,
-        group_by_var="json_file",
-        list_fractions=[fraction_1, fraction_2],
-        epsilon=0,
-    )
-
-    print(f"User specified fractions:{[fraction_1, fraction_2]}")
-
-    print("Split fractions:")
-    print(len(ds_annotations_1.image_id.values) / len(ds_all.image_id.values))
-    print(len(ds_annotations_2.image_id.values) / len(ds_all.image_id.values))
-    print("--------------------------------")
-
-# %%
+# In this case there are only three possible splits of the dataset, since
+# there are only three possible values for the source annotation file.
+#
 # In more complex cases with many inputs and many possible splits, the
 # computation may be slow. In this case, we may want to use a
 # larger ``epsilon`` value, to get faster to a solution that is close
@@ -252,7 +229,7 @@ for fraction_1 in [0.2, 0.3, 0.4, 0.5]:
 
 
 # %%
-# Compute species array
+# Split by species
 # ----------------------
 # Let's consider another case, in which we would like to split the images in
 # the dataset by species.
@@ -276,9 +253,6 @@ ds_all["specie"] = xr.DataArray(
     dims="image_id",
 )
 
-
-print(*np.unique(species_per_image_id), sep="\n")
-print("--------------------------------")
 print(f"Total species: {len(np.unique(species_per_image_id))}")
 
 
@@ -302,11 +276,9 @@ plt.tight_layout()
 
 
 # %%
-# Split by species
-# ----------------
 # We can now split the dataset by species using the
 # :func:`ethology.detectors.datasets.split_annotations_dataset_group_by`
-# function again.
+# function again. For example, for a 27/73 split, we would do:
 
 # %%
 fraction_1 = 0.27
@@ -347,13 +319,14 @@ print(f"Subset 2 species: {np.unique(ds_species_2.specie.values)}")
 # %%
 # Split using random sampling
 # ----------------------------
-# Very often we want to compute splits for an exact requested fraction, and
-# don't care if a specific grouping variable is mixed across subsets. This may
-# be the case for example for validation and training sets. In this case,
-# we can use random sampling with the function
-# :func:`ethology.detectors.datasets.split_annotations_dataset_random`. By
-# setting a different value for the random ``seed``, we can
-# get different splits with the same requested fractions.
+# Very often we want to compute splits for a specific fraction, and
+# don't care if a grouping variables (e.g. species or source video) are mixed
+# across subsets. This may be the case for example when splitting for
+# validation and training sets. In this case, we can use random sampling with
+# the function
+# :func:`ethology.detectors.datasets.split_annotations_dataset_random`.
+# By setting a different value for the random ``seed``, we can get
+# different splits with the same requested fractions.
 
 # %%
 fraction_1 = 0.27
@@ -371,34 +344,3 @@ print(f"User specified fractions:{[fraction_1, fraction_2]}")
 print("Split fractions:")
 print(len(ds_species_1.image_id.values) / len(ds_all.image_id.values))
 print(len(ds_species_2.image_id.values) / len(ds_all.image_id.values))
-
-
-# %%
-# Split along another coordinate
-# ------------------------------
-
-# For example, split based on bounding box area.
-# First compute bounding box area as 1-dimensional array,
-# for each annotation id. Then split by annotation id.
-#
-# bbox_width_in_pixels =
-#   ds_all.shape.sel(space="x")*ds_all.image_shape.sel(space="x")
-# bbox_height_in_pixels =
-#   ds_all.shape.sel(space="y")*ds_all.image_shape.sel(space="y")
-#
-# ds_all["box_area"] = xr.DataArray(
-#     # data=(bbox_width_in_pixels*bbox_height_in_pixels),
-#     data=ds_all.shape.sel(space="x")*ds_all.shape.sel(space="y"),
-#     # dims=('image_id', 'id'),
-# )
-
-
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-# Convert to torch datasets to train detectors on different subsets
-
-torch_dataset_1 = annotations_dataset_to_torch_dataset(
-    ds_species_1, images_directory=extracted_files
-)
-torch_dataset_2 = annotations_dataset_to_torch_dataset(
-    ds_species_2, images_directory=extracted_files
-)
