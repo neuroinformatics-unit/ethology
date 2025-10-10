@@ -102,7 +102,7 @@ def split_annotations_dataset_group_by(
     )
 
     # throw warning if a subset is empty
-    if len(ds_subset) == 0 or len(ds_not_subset) == 0:
+    if any(len(ds.image_id) == 0 for ds in [ds_subset, ds_not_subset]):
         logger.warning("One of the subset datasets is empty.")
 
     # # assert
@@ -112,7 +112,13 @@ def split_annotations_dataset_group_by(
     #     )[group_by_var].values
     # ) == sorted(subset_idcs)
 
-    return ds_subset, ds_not_subset
+    # Return result in the same order as the input list of fractions
+    # argsort twice gives the inverse permutation
+    idcs_sorted = np.argsort(list_fractions)  # idcs to map input -> sorted
+    idcs_original = np.argsort(idcs_sorted)  # idcs to map sorted -> input
+
+    list_ds_sorted = [ds_subset, ds_not_subset]
+    return tuple(list_ds_sorted[i] for i in idcs_original)
 
 
 def split_annotations_dataset_random(
