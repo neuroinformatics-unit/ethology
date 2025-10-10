@@ -18,16 +18,6 @@ from ethology.io.annotations import save_bboxes
 from ethology.io.annotations.validate import ValidCOCO, _check_input
 
 
-class SubsetDict(TypedDict):
-    """Type definition for subset dictionary.
-
-    Used in approximate subset sum algorithm.
-    """
-
-    sum: int
-    ids: list[int]
-
-
 def split_annotations_dataset_group_by(
     dataset: xr.Dataset,
     group_by_var: str,  # should be 1-dimensional along the samples_coordinate
@@ -185,6 +175,16 @@ def split_annotations_dataset_random(
         list_ds.append(ds.isel({samples_coordinate: idcs}))
 
     return list_ds
+
+
+class SubsetDict(TypedDict):
+    """Type definition for subset dictionary.
+
+    Used in approximate subset sum algorithm.
+    """
+
+    sum: int
+    ids: list[int]
 
 
 def _approximate_subset_sum(list_id_counts, target, epsilon) -> SubsetDict:
