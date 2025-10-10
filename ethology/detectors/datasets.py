@@ -3,7 +3,7 @@
 from collections import Counter
 from datetime import datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, TypedDict
 
 import numpy as np
 import torch
@@ -18,12 +18,21 @@ from ethology.io.annotations import save_bboxes
 from ethology.io.annotations.validate import ValidCOCO, _check_input
 
 
+class SubsetDict(TypedDict):
+    """Type definition for subset dictionary.
+
+    Used in approximate subset sum algorithm.
+    """
+
+    sum: int
+    ids: list[int]
+
+
 def split_annotations_dataset_group_by(
     dataset: xr.Dataset,
     group_by_var: str,  # should be 1-dimensional along the samples_coordinate
     list_fractions: list[float],
-    seed: int | None,
-    tolerance: int = 0,
+    epsilon: float = 0.01,
     samples_coordinate: str = "image_id",
 ) -> tuple[
     torch.utils.data.Dataset,
@@ -50,40 +59,51 @@ def split_annotations_dataset_group_by(
             f" {samples_coordinate}."
         )
 
-    # Count number of samples per group and sort by count
-    count_per_group_id = dict(
-        Counter(dataset[group_by_var].values).most_common()[::-1]
-    )
-
-    # assert sum(count_per_group_id.values()) ==
-    # len(dataset.get(samples_coordinate))
-
     # Compute number of samples in target subset
     # We define the target subset as the smallest subset.
     target_subset_count = int(
         min(list_fractions) * len(dataset.get(samples_coordinate))
     )
 
+    # Get list of (id, count) tuples
+    # Count number of samples per group and sort by count
+    count_per_group_id = Counter(dataset[group_by_var].values).most_common()[
+        ::-1
+    ]
+
+    # Cast ids to integer
+    try:
+        list_id_count_tuples = [(int(id), c) for id, c in count_per_group_id]
+    except ValueError:
+        list_id_count_tuples = list(
+            enumerate(c for _id, c in count_per_group_id)
+        )
+
+    # # # If seed is provided, shuffle? -- make a tuple?
+    # if seed:
+    #     rng = np.random.default_rng(seed)
+    #     rng.shuffle(list_id_count_tuples)
+
     # Get indices for target subset
     # idcs are from enumerating the keys of target_subset_count
-    subset_idcs, _subset_n_samples = _approximate_subset_sum(
-        count_per_group_id,
+    subset_dict = _approximate_subset_sum(
+        list_id_count_tuples,
         target_subset_count,
-        seed=seed,
-        tolerance=tolerance,
+        epsilon=epsilon,
     )
-
-    # Get group ids for the subset
-    list_all_group_id = list(count_per_group_id.keys())
-    subset_group_id = [list_all_group_id[x] for x in subset_idcs]
 
     # Create datasets for subset and not subset
+    subset_group_ids = [count_per_group_id[x][0] for x in subset_dict["ids"]]
     ds_subset = dataset.isel(
-        {samples_coordinate: dataset[group_by_var].isin(subset_group_id)}
+        {samples_coordinate: dataset[group_by_var].isin(subset_group_ids)}
     )
     ds_not_subset = dataset.isel(
-        {samples_coordinate: ~dataset[group_by_var].isin(subset_group_id)}
+        {samples_coordinate: ~dataset[group_by_var].isin(subset_group_ids)}
     )
+
+    # throw warning if a subset is empty
+    if len(ds_subset) == 0 or len(ds_not_subset) == 0:
+        logger.warning("One of the subset datasets is empty.")
 
     # # assert
     # assert np.unique(
@@ -161,82 +181,117 @@ def split_annotations_dataset_random(
     return list_ds
 
 
-def _approximate_subset_sum(
-    map_ids_to_counts: dict[int, int],
-    target: int,
-    tolerance: int,
-    seed: int | None,
-) -> tuple[list[int], int]:
-    """Solve subset sum problem by approximate greedy algorithm.
+def _approximate_subset_sum(list_id_counts, target, epsilon) -> SubsetDict:
+    """Approximate subset sum problem.
 
-    We iterate through the elements in the list and add the element
-    to the subset if the sum of the subset is less than the target value.
-    We stop adding new elements when the sum of the subset is
-    within the tolerance of the target value.
+    At each iteration of the loop, trimming introduces a small error.
+    The algorithm runs n iterations (one per item), so errors can compound.
+    The formula delta = epsilon / (2n) ensures that when errors compound over
+    n iterations, the total error stays within epsilon.
 
-    Parameters
-    ----------
-    map_ids_to_counts : dict[int, int]
-        Mapping from ids to counts. Usually the counts are the frame counts
-        for the corresponding video ids.
-    target : int
-        The number of samples to allocate to the target subset.
-    tolerance : int
-        How many samples are allowed to be deviated from the count in
-        the target subset. Should be positive. Same unit as the target value.
-    seed : int | None
-        Used to shuffle the order in which the elements are visited. If None,
-        the order is not shuffled.
+    epsilon is a percentage of the optimal solution, not the target.
+    If OPT is the best possible subset sum ≤ target, the algorithm guarantees:
+    result ≥ (1 - epsilon) * OPT
+    So with epsilon = 0.2:
+    You're guaranteed to get a result within 20% of the optimal
+    NOT necessarily within 20% of the target
 
-    Returns
-    -------
-    subset_idcs : list[int]
-        Indices of the elements in the subset.
-    subset_sum : int
-        Sum of the elements in the subset.
+    Example:
+    target = 3450
+    epsilon = 0.2
+
+    Suppose the optimal subset sum is OPT = 3400 (best you can do without
+    exceeding 3450).
+    The algorithm guarantees your result will be somewhere between
+    (3400 * 0.8) = 2720 and 3450.
+
+    Ref:
+    - https://en.wikipedia.org/wiki/Subset_sum_problem#Fully-polynomial_time_approximation_scheme
+    - https://nerderati.com/bartering-for-beers-with-approximate-subset-sums/
 
     """
-    # Check if keys are castable to int
-    # if not, use keys from enumerate
-    castable_as_int = True
-    try:
-        map_ids_to_counts = {int(k): v for k, v in map_ids_to_counts.items()}
-    except ValueError:
-        castable_as_int = False
+    # Checks
+    if np.min([x[1] for x in list_id_counts]) > target:
+        logger.warning("All counts are greater than the target.")
+        return {"sum": 0, "ids": []}
 
-    if not castable_as_int:
-        list_id_count_tuples = [
-            (k, v) for k, v in enumerate(map_ids_to_counts.values())
+    # Early exit if the minimum count is equal to the target
+    elif np.min([x[1] for x in list_id_counts]) == target:
+        idx_min = np.argmin([x[1] for x in list_id_counts])
+        id, count = list_id_counts[idx_min]
+        return {"sum": count, "ids": [id]}
+
+    # initialize list of all subsets whose sum is below the target
+    list_subsets: list[SubsetDict] = [{"sum": 0, "ids": []}]
+
+    # loop thru list of (id, count) pairs
+    for id, count in list_id_counts:
+        # print(f"Adding element {id} with count {count}")
+        # Add current element to each existing subset in list
+        # and extend list
+        list_subsets.extend(
+            [
+                {
+                    "sum": subset["sum"] + count,
+                    "ids": subset["ids"] + [id],
+                }
+                for subset in list_subsets
+            ]
+        )
+
+        # print(f"List of subsets: {list_subsets}")
+        # Remove near-duplicate subsets in terms of sum
+        list_subsets = _remove_near_duplicate_subsets(
+            list_subsets, delta=float(epsilon) / (2 * len(list_id_counts))
+        )
+        # print(f"List of subsets after trimming: {list_subsets}")
+
+        # Keep only subsets that are less than or equal to the target
+        list_subsets = [
+            subset for subset in list_subsets if subset["sum"] <= target
         ]
-    else:
-        list_id_count_tuples = list(map_ids_to_counts.items())
 
-    # If seed is provided, shuffle the order in which the elems are visited
-    # If not, the list_id_value_tuples are visited in order.
-    if seed:
-        rng = np.random.default_rng(seed)
-        rng.shuffle(list_id_count_tuples)
+        # print(f"List of subsets after filtering: {list_subsets}")
 
-    # loop thru elements in dict and add to list as long as
-    # sum of elements in list is below target
-    current_sum = 0
-    current_subset_idcs = []
-    for id, values_one_id in list_id_count_tuples:
-        if current_sum + values_one_id <= target + tolerance:
-            current_subset_idcs.append(id)
-            current_sum += values_one_id
+    if len(list_subsets) == 0:
+        logger.warning("No subset found with sum below the target.")
+        return {"sum": 0, "ids": []}
 
-        if abs(current_sum - target) <= tolerance:
-            break
+    # Return the subset with highest sum but below the target
+    return list_subsets[-1]
 
-    return current_subset_idcs, current_sum
+
+def _remove_near_duplicate_subsets(list_subsets, delta):
+    """Remove near-duplicate subsets in terms of their total sum.
+
+    Only keeps values that are at least delta% larger than the
+    previous kept value.
+    """
+    # ensure list of subsets is sorted by total sum, in ascending order
+    list_subsets = sorted(list_subsets, key=lambda x: x["sum"])
+
+    # loop thru list of subsets
+    # keep only those whose sum is delta% larger than the previous subset sum
+    list_subsets_trimmed = [
+        list_subsets[0]
+    ]  # never trim zero subset; [{"sum": 0, "ids": []}]
+    previous_subset_sum = 0
+    for subset in list_subsets[1:]:  # do not trim zero subset?
+        if subset["sum"] > previous_subset_sum * (1 + delta):
+            list_subsets_trimmed.append(subset)
+            previous_subset_sum = subset["sum"]
+
+    return list_subsets_trimmed
+
+
+# -----------------------------------------------------------------------------
 
 
 def annotations_dataset_to_torch_dataset(
     ds: xr.Dataset,
-    out_filepath: Path | str | None = None,
     images_directory: Path | str | None = None,
     transforms: transforms.Compose | None = None,
+    out_filepath: Path | str | None = None,
     kwargs: dict[str, Any] | None = None,
 ) -> CocoDetection:
     """Convert an bounding boxes annotations dataset to a torch dataset.
@@ -245,12 +300,12 @@ def annotations_dataset_to_torch_dataset(
     ----------
     ds : xr.Dataset
         The dataset to convert.
-    out_filepath : Path | str | None, optional
-        The path to the output COCO file.
     images_directory : Path | str | None, optional
         The path to the images directory.
     transforms : torchvision.transforms.v2.Compose | None, optional
         The transforms to apply to the dataset.
+    out_filepath : Path | str | None, optional
+        The path to the output COCO file.
     kwargs : dict[str, Any] | None, optional
         Additional keyword arguments to pass to the torch dataset constructor.
 
@@ -275,21 +330,18 @@ def annotations_dataset_to_torch_dataset(
     # Get images directory
     # if not provided, check the dataset attributes
     if images_directory is None:
-        try:
-            images_directory = ds.attrs["images_directories"]
-            if (
-                isinstance(images_directory, list)
-                and len(images_directory) > 0
-            ):
-                images_directory = images_directory[0]
-                logger.warning(
-                    f"Using first images directory only: {images_directory}"
-                )  # TODO: loop thru them
-        except KeyError as e:
+        images_directory = ds.attrs.get("images_directories", None)
+        if isinstance(images_directory, list) and len(images_directory) > 0:
+            images_directory = images_directory[0]
+            logger.warning(
+                f"Using first images directory only: {images_directory}"
+            )  # TODO: loop thru them?
+        elif images_directory is None:
             raise KeyError(
-                "`images_directories` is not a dataset attribute. "
-                "Please provide `images_directory` as an input."
-            ) from e
+                "`images_directories` is not set. "
+                "Please provide `images_directory` as an input or "
+                "add it to the dataset attributes."
+            )
 
     # Create torch dataset
     return CocoDetection(
