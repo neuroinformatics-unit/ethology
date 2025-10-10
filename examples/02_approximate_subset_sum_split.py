@@ -1,9 +1,9 @@
 """Split ``ethology`` annotations using approximate subset sum
 ================================================================
 
-Split a ``ethology`` bounding box annotations dataset into train and test
-sets using an approximate subset sum algorithm.
-
+Splits an annotations dataset based on a grouping variable
+(e.g. video) such that no value of the grouping variable appears in both
+subsets.
 """
 
 # %%
@@ -18,6 +18,7 @@ import pooch
 import xarray as xr
 
 from ethology.detectors.datasets import (
+    annotations_dataset_to_torch_dataset,
     split_annotations_dataset_group_by,
     split_annotations_dataset_random,
 )
@@ -26,6 +27,27 @@ from ethology.io.annotations import load_bboxes
 # For interactive plots: install ipympl with `pip install ipympl` and uncomment
 # the following line in your notebook
 # %matplotlib widget
+
+
+# %%
+# This notebook demonstrates how to split an annotation dataset into two
+# subsets (e.g., train/test) while ensuring that specific categories
+# (like videos or species) are kept entirely separate between the subsets.
+
+# The function to do this uses an approximate subset sum approach to find
+# which groups (e.g., which videos) to assign to each subset to approximate
+# your desired split ratio (like 80/20 or 70/30), while respecting the
+# constraint that groups can't be divided.
+
+# This is useful when you want to define a held-out test dataset based on a
+# user-specified percentage (e.g., "hold out 20% of samples"). For example,
+# you may want to ensure that frames from the same video are not split between
+# the training and held-out sets. Using this function ensures complete
+# separation of the grouping variable (e.g. video) between the training and
+# held-out sets.
+
+# This is in contrast to random splitting, which gives precise proportions,
+# but can mix values of the grouping variable across the subsets.
 
 # %%
 # Download dataset
@@ -125,6 +147,7 @@ ds_all["json_file"] = xr.DataArray(
 # With ``split_annotations_dataset_group_by`` the dataset is split in two.
 # It returns the smallest split first.
 
+
 fraction_1 = 0.2  # to match output _1, it should be the smaller fraction
 fraction_2 = 1 - fraction_1
 
@@ -132,8 +155,7 @@ ds_annotations_1, ds_annotations_2 = split_annotations_dataset_group_by(
     ds_all,
     group_by_var="json_file",
     list_fractions=[fraction_1, fraction_2],
-    seed=42,
-    tolerance=0,  # in number of samples
+    epsilon=0.01,
 )
 
 print(len(ds_annotations_1.image_id.values) / len(ds_all.image_id.values))
@@ -147,6 +169,18 @@ print(np.unique(ds_annotations_2.json_file.values))
 # Another split is 40-60, but there is not that many options with three
 # possible json files. Changing the seed doesn't change the split.
 
+fraction_1 = 0.4  # to match output _1, it should be the smaller fraction
+fraction_2 = 1 - fraction_1
+
+ds_annotations_1, ds_annotations_2 = split_annotations_dataset_group_by(
+    ds_all,
+    group_by_var="json_file",
+    list_fractions=[fraction_1, fraction_2],
+    epsilon=0,
+)
+
+print(len(ds_annotations_1.image_id.values) / len(ds_all.image_id.values))
+print(len(ds_annotations_2.image_id.values) / len(ds_all.image_id.values))
 
 # %%
 # Compute species array
@@ -193,17 +227,16 @@ ax.set_title("Image count per specie")
 # %%
 # Split by species
 # ----------------
-# Compute an approximate split by species, without shuffling
-# if you dont shuffle, the species groups are visited in increasing count order
+# Compute an approximate split by species, best of 10
 
-fraction_1 = 0.05
+fraction_1 = 0.27
 fraction_2 = 1 - fraction_1
 
 ds_species_1, ds_species_2 = split_annotations_dataset_group_by(
     ds_all,
     group_by_var="specie",
     list_fractions=[fraction_1, fraction_2],
-    seed=None,
+    epsilon=0.0,
 )
 
 print(len(ds_species_1.image_id.values) / len(ds_all.image_id.values))
@@ -228,25 +261,26 @@ print(np.unique(ds_species_2.specie.values))
 # %%
 # Compute an approximate split by species, with shuffling
 
-for seed in [42, 43, 44]:
-    fraction_1 = 0.25
-    fraction_2 = 1 - fraction_1
+# for seed in [42, 43, 44]:
+#     fraction_1 = 0.25
+#     fraction_2 = 1 - fraction_1
 
-    ds_species_1, ds_species_2 = split_annotations_dataset_group_by(
-        ds_all,
-        group_by_var="specie",
-        list_fractions=[fraction_1, fraction_2],
-        seed=seed,
-    )
+#     ds_species_1, ds_species_2 = split_annotations_dataset_group_by(
+#         ds_all,
+#         group_by_var="specie",
+#         list_fractions=[fraction_1, fraction_2],
+#         epsilon=0.0,
+#         seed=seed,
+#     )
 
-    print(f"Seed: {seed}")
-    print(len(ds_species_1.image_id.values) / len(ds_all.image_id.values))
-    print(len(ds_species_2.image_id.values) / len(ds_all.image_id.values))
+#     print(f"Seed: {seed}")
+#     print(len(ds_species_1.image_id.values) / len(ds_all.image_id.values))
+#     print(len(ds_species_2.image_id.values) / len(ds_all.image_id.values))
 
-    print(np.unique(ds_species_1.specie.values))
-    print(np.unique(ds_species_2.specie.values))
+#     print(np.unique(ds_species_1.specie.values))
+#     print(np.unique(ds_species_2.specie.values))
 
-    print("--------------------------------")
+#     print("--------------------------------")
 
 
 # %%
@@ -256,13 +290,13 @@ for seed in [42, 43, 44]:
 # But then we do not have guarantees on the distribution of the splits.
 # In this case the default seed is 42.
 
-fraction_1 = 0.38
+fraction_1 = 0.27
 fraction_2 = 1 - fraction_1
 
 ds_species_1, ds_species_2 = split_annotations_dataset_random(
     ds_all,
     list_fractions=[fraction_1, fraction_2],
-    seed=seed,
+    seed=42,
 )
 
 print(len(ds_species_1.image_id.values) / len(ds_all.image_id.values))
@@ -276,6 +310,13 @@ print(
     fraction_2
     - len(ds_species_2.image_id.values) / len(ds_all.image_id.values)
 )
+
+# %%
+# Unlike random splitting, the approximate subset sum split ensures that
+# no value of the grouping category appears in both subsets. For example:
+# When grouping by video: each video appears in only the training set or the
+# test set, never both
+# When grouping by species: each species appears exclusively in one subset
 
 # %%
 # Split along another coordinate
@@ -300,6 +341,12 @@ print(
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Convert to torch datasets to train detectors on different subsets
 
+torch_dataset_1 = annotations_dataset_to_torch_dataset(
+    ds_species_1, images_directory=extracted_files
+)
+torch_dataset_2 = annotations_dataset_to_torch_dataset(
+    ds_species_2, images_directory=extracted_files
+)
 
 # %%
 # %%
