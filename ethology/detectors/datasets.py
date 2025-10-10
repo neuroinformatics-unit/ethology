@@ -10,7 +10,7 @@ from loguru import logger
 
 def split_annotations_dataset_group_by(
     dataset: xr.Dataset,
-    group_by_var: str,  # should be 1-dimensional along the samples_coordinate
+    group_by_var: str,
     list_fractions: list[float],
     epsilon: float = 0.01,
     samples_coordinate: str = "image_id",
@@ -19,6 +19,8 @@ def split_annotations_dataset_group_by(
 
     The dataset is split in two. It returns the smallest split first.
     We assume the smallest split is the test set.
+
+    group_by_var should be 1-dimensional along the samples_coordinate
     """
     # Checks
     if sum(list_fractions) != 1:
