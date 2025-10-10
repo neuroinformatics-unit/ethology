@@ -14,10 +14,7 @@ def split_annotations_dataset_group_by(
     list_fractions: list[float],
     epsilon: float = 0.01,
     samples_coordinate: str = "image_id",
-) -> tuple[
-    xr.Dataset,
-    xr.Dataset,
-]:
+) -> tuple[xr.Dataset, xr.Dataset]:
     """Split an annotations dataset using an approximate subset-sum approach.
 
     The dataset is split in two. It returns the smallest split first.
@@ -59,11 +56,6 @@ def split_annotations_dataset_group_by(
             enumerate(c for _id, c in count_per_group_id)
         )
 
-    # # # If seed is provided, shuffle? -- make a tuple?
-    # if seed:
-    #     rng = np.random.default_rng(seed)
-    #     rng.shuffle(list_id_count_tuples)
-
     # Get indices for target subset
     # idcs are from enumerating the keys of target_subset_count
     subset_dict = _approximate_subset_sum(
@@ -84,13 +76,6 @@ def split_annotations_dataset_group_by(
     # throw warning if a subset is empty
     if any(len(ds.image_id) == 0 for ds in [ds_subset, ds_not_subset]):
         logger.warning("One of the subset datasets is empty.")
-
-    # # assert
-    # assert np.unique(
-    #     ds_subset.isel(
-    #       {samples_coordinate: ds_subset[group_by_var].isin(subset_idcs)}
-    #     )[group_by_var].values
-    # ) == sorted(subset_idcs)
 
     # Return result in the same order as the input list of fractions
     # argsort twice gives the inverse permutation
@@ -211,12 +196,6 @@ def _approximate_subset_sum(list_id_counts, target, epsilon) -> SubsetDict:
         logger.warning("All counts are greater than the target.")
         return {"sum": 0, "ids": []}
 
-    # Early exit if the minimum count is equal to the target
-    elif np.min([x[1] for x in list_id_counts]) == target:
-        idx_min = np.argmin([x[1] for x in list_id_counts])
-        id, count = list_id_counts[idx_min]
-        return {"sum": count, "ids": [id]}
-
     # initialize list of all subsets whose sum is below the target
     list_subsets: list[SubsetDict] = [{"sum": 0, "ids": []}]
 
@@ -239,10 +218,6 @@ def _approximate_subset_sum(list_id_counts, target, epsilon) -> SubsetDict:
         list_subsets = _remove_near_duplicate_subsets(
             list_subsets, delta=float(epsilon) / (2 * len(list_id_counts))
         )
-
-    if len(list_subsets) == 0:
-        logger.warning("No subset found with sum below the target.")
-        return {"sum": 0, "ids": []}
 
     # Return the subset with highest sum but below the target
     return list_subsets[-1]
