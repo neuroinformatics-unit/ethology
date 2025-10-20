@@ -111,23 +111,18 @@ def split_annotations_dataset_group_by(
         ::-1
     ]
 
-    # Cast group ids to integers
-    try:
-        count_per_group_id_as_int = [
-            (int(id), c) for id, c in count_per_group_id
-        ]
-    except ValueError:
-        count_per_group_id_as_int = list(
-            enumerate(c for _id, c in count_per_group_id)
-        )
-
-    # Map group IDs to integers
-    map_group_id_int_to_original = {
-        id_int_count[0]: id_count[0]
-        for id_int_count, id_count in zip(
-            count_per_group_id_as_int, count_per_group_id, strict=True
-        )
-    }
+    # Cast group ids to integers and create mapping
+    map_group_id_int_to_original = {}
+    count_per_group_id_as_int = []
+    for idx, (group_id, count) in enumerate(count_per_group_id):
+        # try casting group ID as integer
+        try:
+            int_id = int(group_id)
+        # if not castable: use ID from enumerate
+        except (ValueError, TypeError):
+            int_id = idx
+        count_per_group_id_as_int.append((int_id, count))
+        map_group_id_int_to_original[int_id] = group_id
 
     # Get group ids (as integers) for target subset
     subset_dict = _approximate_subset_sum(
