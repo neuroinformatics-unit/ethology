@@ -67,8 +67,8 @@ def split_annotations_dataset_group_by(
     >>> import xarray as xr
     >>> ds = xr.Dataset(
     >>>     data_vars=dict(
-    >>>         foo=("image_id", [0, 1, 0, 0, 0, 0, 2, 0, 2, 2, 0, 1]),
-    >>>     ),  # 0: 7 counts, 2: 3 counts, 1: 2 counts
+    >>>         foo=("image_id", [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]),
+    >>>     ),  # 0: 10 counts, 1: 2 counts
     >>>     coords=dict(
     >>>         image_id=range(12),
     >>>     ),
@@ -264,7 +264,10 @@ def _approximate_subset_sum(list_id_counts, target, epsilon) -> SubsetDict:
     """
     # Checks
     if np.min([x[1] for x in list_id_counts]) > target:
-        logger.warning("All counts are greater than the target.")
+        logger.warning(
+            "All groups have more samples than the target value. "
+            "Returning empty subset."
+        )
         return {"sum": 0, "ids": []}
 
     # initialize list of all subsets whose sum is below the target
