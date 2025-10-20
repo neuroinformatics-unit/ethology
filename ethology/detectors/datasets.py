@@ -12,15 +12,76 @@ def split_annotations_dataset_group_by(
     dataset: xr.Dataset,
     group_by_var: str,
     list_fractions: list[float],
-    epsilon: float = 0.01,
+    epsilon: float = 0.0,
     samples_coordinate: str = "image_id",
 ) -> tuple[xr.Dataset, xr.Dataset]:
     """Split an annotations dataset using an approximate subset-sum approach.
 
-    The dataset is split in two. It returns the smallest split first.
-    We assume the smallest split is the test set.
+    Split an ``ethology`` bounding box annotations dataset into two subsets
+    ensuring that the subsets are disjoint in the grouping variable.
 
-    group_by_var should be 1-dimensional along the samples_coordinate
+    Parameters
+    ----------
+    dataset : xr.Dataset
+        The bounding box annotations dataset to split.
+    group_by_var : str
+        The grouping variable to use for splitting the dataset. Must be
+        1-dimensional along the ``samples_coordinate``.
+    list_fractions : list[float]
+        The fractions of the input annotations dataset to allocate to
+        each subset. Must contain only two elements and sum to 1.
+    epsilon : float, optional
+        The approximation tolerance for the subset sum as a fraction of 1.
+        The sum of samples in the smallest subset is guaranteed to be at
+        least ``(1 - epsilon)`` times the optimal sum for the requested
+        fractions and grouping variable. When ``epsilon`` is 0, the algorithm
+        finds the exact optimal sum. Larger values result in faster
+        computation but may yield subsets with a total number of samples
+        further from optimal. Default is 0.0.
+    samples_coordinate : str, optional
+        The coordinate along which to split the dataset. Default is
+        ``image_id``.
+
+    Returns
+    -------
+    tuple[xr.Dataset, xr.Dataset]
+        The two subsets of the input dataset. The subsets are returned in the
+        same order as the input list of fractions.
+
+    Raises
+    ------
+    ValueError
+        If the elements of ``list_fractions`` are not exactly two, are not
+        between 0 and 1, or do not sum to 1. If ``group_by_var`` is not
+        1-dimensional along the ``samples_coordinate``.
+
+    Examples
+    --------
+    Split a dataset with a single data variable ``foo`` defined along the
+    ``image_id`` dimension into an approximate 80/20 split, ensuring that the
+    subsets are disjoint in the grouping variable ``foo``.
+
+    >>> from ethology.detectors.datasets import (
+    ...     split_annotations_dataset_group_by,
+    ... )
+    >>> import xarray as xr
+    >>> ds = xr.Dataset(
+    >>>     data_vars=dict(
+    >>>         foo=("image_id", [0, 1, 0, 0, 0, 0, 2, 0, 2, 2, 0, 1]),
+    >>>     ),  # 0: 7 counts, 2: 3 counts, 1: 2 counts
+    >>>     coords=dict(
+    >>>         image_id=range(12),
+    >>>     ),
+    >>> )
+    >>> ds_subset_1, ds_subset_2 = split_annotations_dataset_group_by(
+    >>>     ds,
+    >>>     group_by_var="foo",
+    >>>     list_fractions=[0.2, 0.8],
+    >>>     epsilon=0,
+    >>> )
+    >>> print(len(ds_subset_1.image_id) / len(ds.image_id))  # 0.166
+    >>> print(len(ds_subset_2.image_id) / len(ds.image_id))  # 0.833
+
     """
     # Checks
     if sum(list_fractions) != 1:
@@ -39,35 +100,48 @@ def split_annotations_dataset_group_by(
         )
 
     # Compute number of samples in target subset
-    # We define the target subset as the smallest subset.
+    # the target subset is the subset with the smallest fraction.
     target_subset_count = int(
         min(list_fractions) * len(dataset.get(samples_coordinate))
     )
 
     # Get list of (id, count) tuples
-    # Count number of samples per group and sort by count
+    # Count number of samples per group and sort by count in ascending order
     count_per_group_id = Counter(dataset[group_by_var].values).most_common()[
         ::-1
     ]
 
-    # Cast ids to integer
+    # Cast group ids to integers
     try:
-        list_id_count_tuples = [(int(id), c) for id, c in count_per_group_id]
+        count_per_group_id_as_int = [
+            (int(id), c) for id, c in count_per_group_id
+        ]
     except ValueError:
-        list_id_count_tuples = list(
+        count_per_group_id_as_int = list(
             enumerate(c for _id, c in count_per_group_id)
         )
 
-    # Get indices for target subset
-    # idcs are from enumerating the keys of target_subset_count
+    # Map group IDs to integers
+    map_group_id_int_to_original = {
+        id_int_count[0]: id_count[0]
+        for id_int_count, id_count in zip(
+            count_per_group_id_as_int, count_per_group_id, strict=True
+        )
+    }
+
+    # Get group ids (as integers) for target subset
     subset_dict = _approximate_subset_sum(
-        list_id_count_tuples,
+        count_per_group_id_as_int,
         target_subset_count,
         epsilon=epsilon,
     )
 
-    # Create datasets for subset and not subset
-    subset_group_ids = [count_per_group_id[x][0] for x in subset_dict["ids"]]
+    # Get original group IDs (they are not necessarily integers)
+    subset_group_ids = [
+        map_group_id_int_to_original[x] for x in subset_dict["ids"]
+    ]
+
+    # Extract datasets for target subset and not target subset
     ds_subset = dataset.isel(
         {samples_coordinate: dataset[group_by_var].isin(subset_group_ids)}
     )
@@ -75,12 +149,12 @@ def split_annotations_dataset_group_by(
         {samples_coordinate: ~dataset[group_by_var].isin(subset_group_ids)}
     )
 
-    # throw warning if a subset is empty
+    # Throw warning if a subset is empty
     if any(len(ds.image_id) == 0 for ds in [ds_subset, ds_not_subset]):
         logger.warning("One of the subset datasets is empty.")
 
-    # Return result in the same order as the input list of fractions
-    # argsort twice gives the inverse permutation
+    # Return datasets in the same order as the input list of fractions
+    # (argsort twice gives the inverse permutation)
     idcs_sorted = np.argsort(list_fractions)  # idcs to map input -> sorted
     idcs_original = np.argsort(idcs_sorted)  # idcs to map sorted -> input
 
