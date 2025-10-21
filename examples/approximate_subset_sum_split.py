@@ -17,9 +17,9 @@ import numpy as np
 import pooch
 import xarray as xr
 
-from ethology.detectors.datasets import (
-    split_annotations_dataset_group_by,
-    split_annotations_dataset_random,
+from ethology.datasets.split import (
+    split_dataset_group_by,
+    split_dataset_random,
 )
 from ethology.io.annotations import load_bboxes
 
@@ -191,7 +191,7 @@ ds_all["json_file"] = xr.DataArray(
 fraction_1 = 0.2
 fraction_2 = 1 - fraction_1
 
-ds_annotations_1, ds_annotations_2 = split_annotations_dataset_group_by(
+ds_annotations_1, ds_annotations_2 = split_dataset_group_by(
     ds_all,
     group_by_var="json_file",
     list_fractions=[fraction_1, fraction_2],
@@ -284,7 +284,7 @@ plt.tight_layout()
 fraction_1 = 0.27
 fraction_2 = 1 - fraction_1
 
-ds_species_1, ds_species_2 = split_annotations_dataset_group_by(
+ds_species_1, ds_species_2 = split_dataset_group_by(
     ds_all,
     group_by_var="specie",
     list_fractions=[fraction_1, fraction_2],
@@ -332,7 +332,7 @@ print(f"Subset 2 species: {np.unique(ds_species_2.specie.values)}")
 fraction_1 = 0.27
 fraction_2 = 1 - fraction_1
 
-ds_species_1, ds_species_2 = split_annotations_dataset_random(
+ds_species_1, ds_species_2 = split_dataset_random(
     ds_all,
     list_fractions=[fraction_1, fraction_2],
     seed=42,

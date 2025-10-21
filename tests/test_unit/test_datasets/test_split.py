@@ -2,12 +2,13 @@ import numpy as np
 import pytest
 import xarray as xr
 
-from ethology.detectors.datasets import (
+from ethology.datasets.split import (
     _approximate_subset_sum,
-    split_annotations_dataset_group_by,
+    split_dataset_group_by,
 )
 
 
+# Helper function
 def split_at_any_delimiter(text: str, delimiters: list[str]) -> list[str]:
     """Split a string at any of the specified delimiters if present."""
     for delimiter in delimiters:
@@ -138,7 +139,7 @@ def test_split_annotations_dataset_group_by(inputs, request):
     group_by_var = "foo"
 
     # split dataset
-    ds_subset_1, ds_subset_2 = split_annotations_dataset_group_by(
+    ds_subset_1, ds_subset_2 = split_dataset_group_by(
         **inputs,
         group_by_var=group_by_var,
         epsilon=0,
@@ -222,7 +223,7 @@ def test_split_annotations_dataset_group_by_error(
     inputs, expected_error_message
 ):
     with pytest.raises(ValueError) as e:
-        _ds_subset_1, _ds_subset_2 = split_annotations_dataset_group_by(
+        _ds_subset_1, _ds_subset_2 = split_dataset_group_by(
             **inputs,
             group_by_var="foo",
             epsilon=0,
