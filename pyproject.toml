@@ -39,6 +39,7 @@ dependencies = [
 dev = [
   "pytest",
   "pytest-cov",
+  "pytest-loguru",
   "coverage",
   "tox",
   "mypy",
