@@ -159,7 +159,7 @@ def split_dataset_group_by(
 
 
 def split_dataset_random(
-    ds: xr.Dataset,
+    dataset: xr.Dataset,
     list_fractions: list[float],
     seed: int = 42,
     samples_coordinate: str = "image_id",
@@ -173,7 +173,7 @@ def split_dataset_random(
 
     Parameters
     ----------
-    ds : xarray.Dataset
+    dataset : xarray.Dataset
         The annotations dataset to split.
     list_fractions : list[float, ...]
         The fractions of the input annotations dataset to allocate to
@@ -238,20 +238,20 @@ def split_dataset_random(
 
     """
     # Checks
-    if sum(list_fractions) != 1:
-        raise ValueError("The split fractions must sum to 1.")
-
-    if any(fraction < 0 or fraction > 1 for fraction in list_fractions):
-        raise ValueError("The split fractions must be between 0 and 1.")
-
     if len(list_fractions) < 2:
         raise ValueError(
             "The list of fractions must have at least two elements."
         )
 
+    if any(fraction < 0 or fraction > 1 for fraction in list_fractions):
+        raise ValueError("The split fractions must be between 0 and 1.")
+
+    if sum(list_fractions) != 1:
+        raise ValueError("The split fractions must sum to 1.")
+
     # Compute number of samples for each split
     list_n_samples: list[int] = []
-    n_total_samples = len(ds.get(samples_coordinate))
+    n_total_samples = len(dataset.get(samples_coordinate))
     for fraction in list_fractions[:-1]:
         list_n_samples.append(int(fraction * n_total_samples))
     # append the remaining samples to the last split
@@ -267,11 +267,21 @@ def split_dataset_random(
     for n_samples in list_n_samples:
         end_idx = start_idx + n_samples
         list_ds.append(
-            ds.isel({samples_coordinate: shuffled_idcs[start_idx:end_idx]})
+            dataset.isel(
+                {samples_coordinate: shuffled_idcs[start_idx:end_idx]}
+            )
         )
         start_idx = end_idx
 
-    return tuple(list_ds)
+    # Throw warning if a subset is empty
+    if any(len(ds.image_id) == 0 for ds in list_ds):
+        logger.warning("One of the subset datasets is empty.")
+
+    # Return subsets in the same order as the input list of fractions
+    # (argsort twice gives the inverse permutation)
+    idcs_sorted = np.argsort(list_fractions)  # idcs to map input -> sorted
+    idcs_original = np.argsort(idcs_sorted)  # idcs to map sorted -> input
+    return tuple(list_ds[i] for i in idcs_original)
 
 
 class _SubsetDict(TypedDict):
