@@ -5,16 +5,30 @@ import xarray as xr
 from ethology.datasets.split import (
     _approximate_subset_sum,
     split_dataset_group_by,
+    split_dataset_random,
 )
 
 
-# Helper function
 def split_at_any_delimiter(text: str, delimiters: list[str]) -> list[str]:
     """Split a string at any of the specified delimiters if present."""
     for delimiter in delimiters:
         if delimiter in text:
             return text.split(delimiter)
     return [text]
+
+
+@pytest.fixture
+def valid_bboxes_dataset_to_split(valid_bboxes_dataset):
+    # We add a `foo` variable to the dataset that is
+    # one-dimensional along the `image_id` dimension to
+    # use for grouping by.
+    # Note: len(valid_bboxes_dataset.image_id) = 3
+    ds = valid_bboxes_dataset.copy(deep=True)
+    ds["foo"] = (
+        ["image_id"],
+        np.array([0, 1, 1]),
+    )
+    return ds
 
 
 @pytest.fixture
@@ -38,17 +52,6 @@ def ACTD_dataset_to_split(annotations_test_data):
 
     # Add to dataset as "foo" variable
     ds["foo"] = xr.DataArray(species_per_image_id, dims="image_id")
-    return ds
-
-
-@pytest.fixture
-def valid_bboxes_dataset_to_split(valid_bboxes_dataset):
-    # Note: len(valid_bboxes_dataset.image_id) = 3
-    ds = valid_bboxes_dataset.copy(deep=True)
-    ds["foo"] = (
-        ["image_id"],
-        np.array([0, 1, 1]),
-    )
     return ds
 
 
@@ -87,7 +90,18 @@ def valid_bboxes_dataset_to_split(valid_bboxes_dataset):
                 "ids": [1, 2],
                 "sum": 8,
             },
-        ),  # epsilon 0
+        ),  # epsilon 0, integer group IDs
+        (
+            {
+                "list_id_counts": [("a", 10), ("b", 3), ("c", 5)],
+                "target": 8,
+                "epsilon": 0,
+            },
+            {
+                "ids": ["b", "c"],
+                "sum": 8,
+            },
+        ),  # epsilon 0, non-integer group IDs
         (
             {
                 "list_id_counts": [(0, 10), (1, 3), (2, 5)],
@@ -114,16 +128,16 @@ def test_approximate_subset_sum(inputs, expected_subset_dict):
 @pytest.mark.parametrize(
     "inputs",
     [
-        # {
-        #     "dataset": "valid_bboxes_dataset_to_split",
-        #     "list_fractions": [1/3, 2/3],
-        #     "samples_coordinate": "image_id",
-        # },  # fractions in increasing order
-        # {
-        #     "dataset": "valid_bboxes_dataset_to_split",
-        #     "list_fractions": [0.8, 0.2],
-        #     "samples_coordinate": "image_id",
-        # },  # fractions in decreasing order
+        {
+            "dataset": "valid_bboxes_dataset_to_split",
+            "list_fractions": [0.334, 0.666],
+            "samples_coordinate": "image_id",
+        },  # fractions in increasing order
+        {
+            "dataset": "valid_bboxes_dataset_to_split",
+            "list_fractions": [0.666, 0.334],
+            "samples_coordinate": "image_id",
+        },  # fractions in decreasing order
         {
             "dataset": "ACTD_dataset_to_split",
             "list_fractions": [0.13, 0.87],
@@ -131,11 +145,12 @@ def test_approximate_subset_sum(inputs, expected_subset_dict):
         },  # realistic dataset
     ],
 )
-def test_split_annotations_dataset_group_by(inputs, request):
+def test_split_dataset_group_by(inputs, request):
     # prepare inputs
-    # override dataset in inputs
     dataset = request.getfixturevalue(inputs["dataset"])
     inputs["dataset"] = dataset
+
+    # we split datasets grouping by the `foo` variable
     group_by_var = "foo"
 
     # split dataset
@@ -146,12 +161,16 @@ def test_split_annotations_dataset_group_by(inputs, request):
     )
 
     # assert dataset sizes
-    list_fractions = inputs["list_fractions"]
+    list_input_fractions = inputs["list_fractions"]
     total_n_images = len(inputs["dataset"].image_id)
     fraction_subset_1 = len(ds_subset_1.image_id) / total_n_images
     fraction_subset_2 = len(ds_subset_2.image_id) / total_n_images
-    assert fraction_subset_1 == pytest.approx(list_fractions[0], abs=0.005)
-    assert fraction_subset_2 == pytest.approx(list_fractions[1], abs=0.005)
+    assert fraction_subset_1 == pytest.approx(
+        list_input_fractions[0], abs=0.005
+    )
+    assert fraction_subset_2 == pytest.approx(
+        list_input_fractions[1], abs=0.005
+    )
 
     # assert that the subsets are disjoint in the grouping variable
     assert (
@@ -219,9 +238,7 @@ def test_split_annotations_dataset_group_by(inputs, request):
         ),
     ],
 )
-def test_split_annotations_dataset_group_by_error(
-    inputs, expected_error_message
-):
+def test_split_dataset_group_by_error(inputs, expected_error_message):
     with pytest.raises(ValueError) as e:
         _ds_subset_1, _ds_subset_2 = split_dataset_group_by(
             **inputs,
@@ -231,12 +248,99 @@ def test_split_annotations_dataset_group_by_error(
     assert str(e.value) in expected_error_message
 
 
-def test_split_annotations_dataset_random():
-    pass
-    # # Indices per split should be exclusive
-    # assert (
-    #     set.intersection(
-    #         *[set(list_idcs) for list_idcs in list_idcs_per_split]
-    #     )
-    #     == set()
-    # )
+@pytest.mark.parametrize(
+    "inputs",
+    [
+        {
+            "dataset": "valid_bboxes_dataset_to_split",
+            "list_fractions": [0.334, 0.666],
+            "samples_coordinate": "image_id",
+        },  # fractions in increasing order
+        {
+            "dataset": "valid_bboxes_dataset_to_split",
+            "list_fractions": [0.666, 0.334],
+            "samples_coordinate": "image_id",
+        },  # fractions in decreasing order
+        {
+            "dataset": "valid_bboxes_dataset_to_split",
+            "list_fractions": [1 / 3, 1 / 3, 1 / 3],
+            "samples_coordinate": "image_id",
+        },  # more than two fractions
+        {
+            "dataset": "ACTD_dataset_to_split",
+            "list_fractions": [0.13, 0.87],
+            "samples_coordinate": "image_id",
+        },  # realistic dataset
+    ],
+)
+def test_split_dataset_random(inputs, request):
+    # prepare inputs
+    # override dataset in inputs
+    dataset = request.getfixturevalue(inputs["dataset"])
+    inputs["dataset"] = dataset
+
+    # split dataset
+    ds_subsets = split_dataset_random(
+        **inputs,
+    )
+
+    # assert dataset sizes
+    list_expected_fractions = inputs["list_fractions"]
+    total_n_images = len(inputs["dataset"].image_id)
+    list_output_fractions = [
+        len(ds.image_id) / total_n_images for ds in ds_subsets
+    ]
+    assert all(
+        fraction == pytest.approx(list_expected_fractions[i], abs=0.005)
+        for i, fraction in enumerate(list_output_fractions)
+    )
+
+    # Indices per split should be exclusive
+    list_output_idcs_per_split = [
+        ds.image_id.values.tolist() for ds in ds_subsets
+    ]
+    assert (
+        set.intersection(
+            *[
+                set(idcs_in_split)
+                for idcs_in_split in list_output_idcs_per_split
+            ]
+        )
+        == set()
+    )
+
+
+@pytest.mark.parametrize(
+    "inputs, expected_error_message",
+    [
+        (
+            {
+                "dataset": xr.Dataset(),
+                "list_fractions": [0.2, 0.2],
+                "samples_coordinate": "image_id",
+            },
+            "The split fractions must sum to 1.",
+        ),
+        (
+            {
+                "dataset": xr.Dataset(),
+                "list_fractions": [1.2, -0.2],
+                "samples_coordinate": "image_id",
+            },
+            "The split fractions must be between 0 and 1.",
+        ),
+        (
+            {
+                "dataset": xr.Dataset(),
+                "list_fractions": [0.1],
+                "samples_coordinate": "image_id",
+            },
+            "The list of fractions must have at least two elements.",
+        ),
+    ],
+)
+def test_split_dataset_random_error(inputs, expected_error_message):
+    with pytest.raises(ValueError) as e:
+        _ds_subsets = split_dataset_random(**inputs)
+
+    assert str(e.value) in expected_error_message
