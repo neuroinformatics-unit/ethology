@@ -44,7 +44,7 @@
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../_static/documentation_options.js?v=8c5712d9"></script>
+    <script src="../_static/documentation_options.js?v=c1304e97"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/design-tabs.js?v=f930bc37"></script>
@@ -120,7 +120,7 @@
   
   
   
-    <p class="title logo__title">ethology v0.0.4</p>
+    <p class="title logo__title">ethology v0.0.5.dev1</p>
   
 </a></div>
     
@@ -429,7 +429,7 @@
 <dl class="py class">
 <dt class="sig sig-object py" id="ethology.io.annotations.validate.ValidCOCO">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ethology.io.annotations.validate.</span></span><span class="sig-name descname"><span class="pre">ValidCOCO</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ethology/io/annotations/validate.html#ValidCOCO"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ethology.io.annotations.validate.ValidCOCO" title="Link to this definition">#</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Class for valid COCO JSON annotation files.</p>
 <p>It checks the input file is a valid JSON file, matches
 the COCO schema and contains the required keys.</p>
@@ -439,7 +439,7 @@ the COCO schema and contains the required keys.</p>
 <dd><p>Path to the COCO JSON file, passed as an input.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Path | <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a></p>
+<dd class="field-odd"><p>Path | <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -450,7 +450,7 @@ the COCO schema and contains the required keys.</p>
 <dd><p>The JSON schema is set to the default COCO schema.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)">dict</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)">dict</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -461,7 +461,7 @@ the COCO schema and contains the required keys.</p>
 <dd><p>The required keys for the COCO JSON file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)">dict</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)">dict</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -469,11 +469,11 @@ the COCO schema and contains the required keys.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.13)"><strong>ValueError</strong></a> – If the JSON file cannot be decoded.</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If the JSON file cannot be decoded.</p></li>
 <li><p><strong>jsonschema.exceptions.ValidationError</strong> – If the type of any of the keys in the JSON file
     does not match the type specified in the schema.</p></li>
 <li><p><strong>jsonschema.exceptions.SchemaError</strong> – If the schema is invalid.</p></li>
-<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.13)"><strong>ValueError</strong></a> – If the COCO JSON file is missing any of the required keys.</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If the COCO JSON file is missing any of the required keys.</p></li>
 </ul>
 </dd>
 </dl>
