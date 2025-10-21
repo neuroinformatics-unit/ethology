@@ -147,7 +147,7 @@ def split_dataset_group_by(
 
     # Throw warning if a subset is empty
     if any(len(ds.image_id) == 0 for ds in [ds_subset, ds_not_subset]):
-        logger.warning("One of the subset datasets is empty.")
+        logger.warning("At least one of the subset datasets is empty.")
 
     # Return datasets in the same order as the input list of fractions
     # (argsort twice gives the inverse permutation)
@@ -275,7 +275,7 @@ def split_dataset_random(
 
     # Throw warning if a subset is empty
     if any(len(ds.image_id) == 0 for ds in list_ds):
-        logger.warning("One of the subset datasets is empty.")
+        logger.warning("At least one of the subset datasets is empty.")
 
     # Return subsets in the same order as the input list of fractions
     # (argsort twice gives the inverse permutation)

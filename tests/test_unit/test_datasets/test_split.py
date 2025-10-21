@@ -1,3 +1,5 @@
+import logging
+
 import numpy as np
 import pytest
 import xarray as xr
@@ -344,3 +346,43 @@ def test_split_dataset_random_error(inputs, expected_error_message):
         _ds_subsets = split_dataset_random(**inputs)
 
     assert str(e.value) in expected_error_message
+
+
+@pytest.mark.parametrize(
+    "split_function, inputs",
+    [
+        (
+            split_dataset_random,
+            {
+                "list_fractions": [0.9, 0.05, 0.05],
+                "samples_coordinate": "image_id",
+            },
+        ),
+        (
+            split_dataset_group_by,
+            {
+                "list_fractions": [0.9, 0.1],
+                "samples_coordinate": "image_id",
+                "group_by_var": "foo",
+                "epsilon": 0,
+            },
+        ),
+    ],
+)
+def test_split_dataset_empty_subset_warning(
+    caplog, request, split_function, inputs
+):
+    """Test that a warning is thrown when at least one subset is empty."""
+    # Get dataset to split
+    ds = request.getfixturevalue("valid_bboxes_dataset_to_split")
+    inputs["dataset"] = ds
+
+    # We use fractions that will cause an empty subset
+    with caplog.at_level(logging.WARNING):
+        ds_subsets = split_function(**inputs)
+
+    # Verify at least one subset is empty
+    assert any(len(subset.image_id) == 0 for subset in ds_subsets)
+
+    # Check that the warning was logged
+    assert "At least one of the subset datasets is empty." in caplog.text
