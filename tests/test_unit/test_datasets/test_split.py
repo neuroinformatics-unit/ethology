@@ -6,8 +6,8 @@ import xarray as xr
 
 from ethology.datasets.split import (
     _approximate_subset_sum,
-    split_dataset_group_by,
-    split_dataset_group_by_sklearn,
+    _split_dataset_group_by_apss,
+    _split_dataset_group_by_kfold,
     split_dataset_random,
 )
 
@@ -164,7 +164,7 @@ def test_approximate_subset_sum(inputs, expected_subset_dict):
         },  # realistic dataset
     ],
 )
-def test_split_dataset_group_by(inputs, request):
+def test_split_dataset_group_by_apss(inputs, request):
     # prepare inputs
     dataset = request.getfixturevalue(inputs["dataset"])
     inputs["dataset"] = dataset
@@ -173,7 +173,7 @@ def test_split_dataset_group_by(inputs, request):
     group_by_var = "foo"
 
     # split dataset
-    ds_subset_1, ds_subset_2 = split_dataset_group_by(
+    ds_subset_1, ds_subset_2 = _split_dataset_group_by_apss(
         **inputs,
         group_by_var=group_by_var,
         epsilon=0,
@@ -202,72 +202,6 @@ def test_split_dataset_group_by(inputs, request):
 
 
 @pytest.mark.parametrize(
-    "inputs, expected_error_message",
-    [
-        (
-            {
-                "dataset": xr.Dataset(),
-                "list_fractions": [0.2, 0.2],
-                "samples_coordinate": "image_id",
-            },
-            "The split fractions must sum to 1.",
-        ),
-        (
-            {
-                "dataset": xr.Dataset(),
-                "list_fractions": [0.2, 0.4, 0.4],
-                "samples_coordinate": "image_id",
-            },
-            "The list of fractions must have only two elements.",
-        ),  # more than two fractions
-        (
-            {
-                "dataset": xr.Dataset(),
-                "list_fractions": [1],
-                "samples_coordinate": "image_id",
-            },
-            "The list of fractions must have only two elements.",
-        ),  # less than two fractions
-        (
-            {
-                "dataset": xr.Dataset(),
-                "list_fractions": [1.2, -0.2],
-                "samples_coordinate": "image_id",
-            },
-            "The split fractions must be between 0 and 1.",
-        ),
-        (
-            {
-                "dataset": xr.Dataset(
-                    data_vars=dict(
-                        foo=(
-                            ["image_id", "space"],
-                            np.zeros((100, 2)),
-                        )
-                    ),
-                    coords=dict(
-                        image_id=range(100),
-                        space=["x", "y"],
-                    ),
-                ),
-                "list_fractions": [0.2, 0.8],
-                "samples_coordinate": "image_id",
-            },
-            "The grouping variable foo must be 1-dimensional along image_id.",
-        ),
-    ],
-)
-def test_split_dataset_group_by_error(inputs, expected_error_message):
-    with pytest.raises(ValueError) as e:
-        _ds_subset_1, _ds_subset_2 = split_dataset_group_by(
-            **inputs,
-            group_by_var="foo",
-            epsilon=0,
-        )
-    assert str(e.value) in expected_error_message
-
-
-@pytest.mark.parametrize(
     "inputs",
     [
         {
@@ -287,7 +221,7 @@ def test_split_dataset_group_by_error(inputs, expected_error_message):
         },  # realistic dataset
     ],
 )
-def test_split_dataset_group_by_sklearn(inputs, request):
+def test_split_dataset_group_by_kfold(inputs, request):
     # prepare inputs
     dataset = request.getfixturevalue(inputs["dataset"])
     inputs["dataset"] = dataset
@@ -296,7 +230,7 @@ def test_split_dataset_group_by_sklearn(inputs, request):
     group_by_var = "foo"
 
     # split dataset
-    ds_subset_1, ds_subset_2 = split_dataset_group_by_sklearn(
+    ds_subset_1, ds_subset_2 = _split_dataset_group_by_kfold(
         **inputs, group_by_var=group_by_var
     )
 
@@ -322,69 +256,44 @@ def test_split_dataset_group_by_sklearn(inputs, request):
     )
 
 
-@pytest.mark.parametrize(
-    "inputs, expected_error_message",
-    [
-        (
-            {
-                "dataset": xr.Dataset(),
-                "list_fractions": [0.2, 0.2],
-                "samples_coordinate": "image_id",
-            },
-            "The split fractions must sum to 1.",
-        ),
-        (
-            {
-                "dataset": xr.Dataset(),
-                "list_fractions": [0.2, 0.4, 0.4],
-                "samples_coordinate": "image_id",
-            },
-            "The list of fractions must have only two elements.",
-        ),  # more than two fractions
-        (
-            {
-                "dataset": xr.Dataset(),
-                "list_fractions": [1],
-                "samples_coordinate": "image_id",
-            },
-            "The list of fractions must have only two elements.",
-        ),  # less than two fractions
-        (
-            {
-                "dataset": xr.Dataset(),
-                "list_fractions": [1.2, -0.2],
-                "samples_coordinate": "image_id",
-            },
-            "The split fractions must be between 0 and 1.",
-        ),
-        (
-            {
-                "dataset": xr.Dataset(
-                    data_vars=dict(
-                        foo=(
-                            ["image_id", "space"],
-                            np.zeros((100, 2)),
-                        )
-                    ),
-                    coords=dict(
-                        image_id=range(100),
-                        space=["x", "y"],
-                    ),
-                ),
-                "list_fractions": [0.2, 0.8],
-                "samples_coordinate": "image_id",
-            },
-            "The grouping variable foo must be 1-dimensional along image_id.",
-        ),
-    ],
-)
-def test_split_dataset_group_by_sklearn_error(inputs, expected_error_message):
-    with pytest.raises(ValueError) as e:
-        _ds_subset_1, _ds_subset_2 = split_dataset_group_by_sklearn(
-            **inputs,
-            group_by_var="foo",
-        )
-    assert str(e.value) in expected_error_message
+def test_split_dataset_group_by_kfold_seed(valid_bboxes_dataset_to_split_2):
+    # prepare inputs
+    dataset = valid_bboxes_dataset_to_split_2
+    list_fractions = [0.334, 0.666]
+    samples_coordinate = "image_id"
+    group_by_var = "foo"
+    seed = 42
+
+    # split dataset using seed 42
+    ds_subset_1, ds_subset_2 = _split_dataset_group_by_kfold(
+        dataset=dataset,
+        list_fractions=list_fractions,
+        samples_coordinate=samples_coordinate,
+        seed=seed,
+        group_by_var=group_by_var,
+    )
+
+    # assert same seed gives the same subsets
+    ds_subset_1_2, ds_subset_2_2 = _split_dataset_group_by_kfold(
+        dataset=dataset,
+        list_fractions=list_fractions,
+        samples_coordinate=samples_coordinate,
+        seed=seed,
+        group_by_var=group_by_var,
+    )
+    assert ds_subset_1.equals(ds_subset_1_2)
+    assert ds_subset_2.equals(ds_subset_2_2)
+
+    # assert different seeds gives different subsets
+    ds_subset_1_3, ds_subset_2_3 = _split_dataset_group_by_kfold(
+        dataset=dataset,
+        list_fractions=list_fractions,
+        samples_coordinate=samples_coordinate,
+        seed=seed + 1,
+        group_by_var=group_by_var,
+    )
+    assert not ds_subset_1.equals(ds_subset_1_3)
+    assert not ds_subset_2.equals(ds_subset_2_3)
 
 
 @pytest.mark.parametrize(
@@ -463,6 +372,79 @@ def test_split_dataset_random(inputs, request):
         (
             {
                 "dataset": xr.Dataset(),
+                "list_fractions": [0.2, 0.4, 0.4],
+                "samples_coordinate": "image_id",
+            },
+            "The list of fractions must have only two elements.",
+        ),  # more than two fractions
+        (
+            {
+                "dataset": xr.Dataset(),
+                "list_fractions": [1],
+                "samples_coordinate": "image_id",
+            },
+            "The list of fractions must have only two elements.",
+        ),  # less than two fractions
+        (
+            {
+                "dataset": xr.Dataset(),
+                "list_fractions": [1.2, -0.2],
+                "samples_coordinate": "image_id",
+            },
+            "The split fractions must be between 0 and 1.",
+        ),
+        (
+            {
+                "dataset": xr.Dataset(
+                    data_vars=dict(
+                        foo=(
+                            ["image_id", "space"],
+                            np.zeros((100, 2)),
+                        )
+                    ),
+                    coords=dict(
+                        image_id=range(100),
+                        space=["x", "y"],
+                    ),
+                ),
+                "list_fractions": [0.2, 0.8],
+                "samples_coordinate": "image_id",
+            },
+            "The grouping variable foo must be 1-dimensional along image_id.",
+        ),
+    ],
+)
+@pytest.mark.parametrize(
+    "split_function, extra_kwargs",
+    [
+        (_split_dataset_group_by_apss, {"epsilon": 0}),
+        (_split_dataset_group_by_kfold, {}),
+    ],
+)
+def test_split_dataset_group_by_error(
+    split_function, extra_kwargs, inputs, expected_error_message
+):
+    with pytest.raises(ValueError) as e:
+        _ds_subset_1, _ds_subset_2 = split_function(
+            **inputs, group_by_var="foo", **extra_kwargs
+        )
+    assert str(e.value) in expected_error_message
+
+
+@pytest.mark.parametrize(
+    "inputs, expected_error_message",
+    [
+        (
+            {
+                "dataset": xr.Dataset(),
+                "list_fractions": [0.2, 0.2],
+                "samples_coordinate": "image_id",
+            },
+            "The split fractions must sum to 1.",
+        ),
+        (
+            {
+                "dataset": xr.Dataset(),
                 "list_fractions": [1.2, -0.2],
                 "samples_coordinate": "image_id",
             },
@@ -496,7 +478,7 @@ def test_split_dataset_random_error(inputs, expected_error_message):
             },
         ),
         (
-            split_dataset_group_by,
+            _split_dataset_group_by_apss,
             {
                 "list_fractions": [0.9, 0.1],
                 "samples_coordinate": "image_id",

@@ -9,7 +9,7 @@ from loguru import logger
 from sklearn.model_selection import GroupKFold
 
 
-def split_dataset_group_by_sklearn(
+def _split_dataset_group_by_kfold(
     dataset: xr.Dataset,
     group_by_var: str,
     list_fractions: list[float],
@@ -66,7 +66,7 @@ def split_dataset_group_by_sklearn(
     return tuple(list_ds_sorted[i] for i in idcs_original)
 
 
-def split_dataset_group_by(
+def _split_dataset_group_by_apss(
     dataset: xr.Dataset,
     group_by_var: str,
     list_fractions: list[float],

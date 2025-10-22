@@ -47,7 +47,7 @@ import pooch
 import xarray as xr
 
 from ethology.datasets.split import (
-    split_dataset_group_by,
+    _split_dataset_group_by_apss,
     split_dataset_random,
 )
 from ethology.io.annotations import load_bboxes
@@ -203,7 +203,7 @@ ds_all["json_file"] = xr.DataArray(
 fraction_1 = 0.2
 fraction_2 = 1 - fraction_1
 
-ds_annotations_1, ds_annotations_2 = split_dataset_group_by(
+ds_annotations_1, ds_annotations_2 = _split_dataset_group_by_apss(
     ds_all,
     group_by_var="json_file",
     list_fractions=[fraction_1, fraction_2],
@@ -296,7 +296,7 @@ plt.tight_layout()
 fraction_1 = 0.27
 fraction_2 = 1 - fraction_1
 
-ds_species_1, ds_species_2 = split_dataset_group_by(
+ds_species_1, ds_species_2 = _split_dataset_group_by_apss(
     ds_all,
     group_by_var="specie",
     list_fractions=[fraction_1, fraction_2],
