@@ -84,7 +84,7 @@ annotations_file = (
 # Load annotations as an ``ethology`` dataset
 # --------------------------------------------
 #
-# We can use the :func:`ethology.io.annotations.load_bboxes.from_files`
+# We can use the :func:`~ethology.io.annotations.load_bboxes.from_files`
 # function to load the COCO file with the
 # expert annotations as an ``ethology`` dataset.
 
@@ -242,8 +242,8 @@ print(f"Fraction of annotations in region: {fraction_in_region * 100:.2f}%")
 # our annotations dataset to a ``movement``-like dataset.
 #
 # To do this, we need to rename the dataset dimensions,
-# add a confidence array, and add a ``time_unit`` attribute.
-# We additionally rename the
+# add a ``confidence`` array, and add a ``time_unit`` attribute.
+# Although it is not required, we also rename the
 # ``individuals`` coordinate values to follow the ``movement``
 # naming convention.
 
@@ -251,12 +251,12 @@ print(f"Fraction of annotations in region: {fraction_in_region * 100:.2f}%")
 # Rename dimensions
 ds_as_movement = ds.rename({"image_id": "time", "id": "individuals"})
 
-# Rename 'individuals' coordinate values to be
+# Rename 'individuals' values to follow ``movement`` convention
 ds_as_movement["individuals"] = [
     f"id_{i.item()}" for i in ds_as_movement.individuals.values
 ]
 
-# Add confidence array with NaN values
+# Add confidence array with NaNs
 ds_as_movement["confidence"] = xr.DataArray(
     np.full(
         (
@@ -278,11 +278,11 @@ print(ds_as_movement.sizes)
 # %%
 # Since this dataset represents manually labelled data, there isn't
 # really a confidence value associated with each of the annotations.
-# Therefore, we add a confidence array with NaN values.
+# Therefore, we add a ``confidence`` array with NaN values.
 #
 # Similarly, we set the time unit to ``frames``, but actually the images do not
 # represent consecutive images in time. We do this to later be able to
-# export the dataset in a ``movement``-supported format that we can
+# export the dataset in a format that we can
 # visualise in the `movement napari plugin <https://movement.neuroinformatics.dev/user_guide/gui.html>`_
 
 
@@ -290,14 +290,14 @@ print(ds_as_movement.sizes)
 # Plot occupancy map using ``movement``
 # --------------------------------------
 #
-# We can now use the :func:`movement.plots.plot_occupancy` function to plot
+# With our dataset in a ``movement``-like format, we can now use the
+# :func:`movement.plots.plot_occupancy` function to plot
 # the occupancy map of the annotations. This is a two-dimensional histogram
-# that shows for each bin the number of annotations that fall within it.
+# that shows for each 2D bin the number of annotations that fall within it.
 #
-# To determine the number of bins along each dimension, we use the aspect ratio
-# of the images to define similarly sized bins.
-# This makes the occupancy map more informative. Note that all images have the
-# same dimensions.
+# To define similar-sized bins along each dimension, we use the aspect ratio
+# of the images. This makes the occupancy map more informative. Note that all
+# images have the same dimensions.
 
 # Determine aspect ratio of the images
 image_width = np.unique(ds["image_shape"].sel(space="x").values).item()
@@ -322,8 +322,8 @@ ax.axis("equal")
 ax.invert_yaxis()
 
 # %%
-# The occupancy map shows that the maximum count in each bin is 5 annotations,
-# and the minimum count is 0 annotations. We can confirm this by inspecting
+# The occupancy map shows that the maximum bin count is 5 annotations,
+# and the minimum count is 0. We can confirm this by inspecting
 # the outputs of the :func:`movement.plots.plot_occupancy` function.
 
 bin_size_x = np.diff(hist["xedges"])[0].item()
@@ -332,6 +332,9 @@ bin_size_y = np.diff(hist["yedges"])[0].item()
 print(f"Bin size (pixels): ({bin_size_x}, {bin_size_y})")
 print(f"Maximum bin count: {hist['counts'].max().item()}")
 print(f"Minimum bin count: {hist['counts'].min().item()}")
+
+# %%
+# We can also confirm that the bins are approximately square as intended.
 
 # %%
 # Visualise the dataset in the ``movement`` napari plugin
@@ -363,10 +366,11 @@ print(f"Images directory: {data_dir / 'experts' / 'images'}")
 #   :alt: Bounding box annotations in napari
 
 # %%
-# The bounding boxes are coloured by individual ID per image.
-# Remember that the individual IDs are not consistent across images, so it
-# makes more sense to hide the tracks layer for an easier visualisation,
-# like in the example screenshot above.
+# The bounding boxes are coloured by individual ID per image and the tracks
+# connect the same individual IDs across images.
+# Remember that for this annotations dataset the individual IDs are not
+# consistent across images, so it makes more sense to hide the tracks layer
+# for an easier visualisation, like in the example screenshot above.
 
 # %%
 # Clean-up
