@@ -112,8 +112,8 @@ def split_dataset_group_by(
     >>> from ethology.datasets.split import split_dataset_group_by
     >>> ds_large = xr.Dataset(
     ...     data_vars=dict(
-    ...         video_id=("image_id", list(range(100))),
-    ...     ),
+    ...         video_id=("image_id", np.tile(np.arange(10), 10)),
+    ...     ),  # 10 different video IDs across 100 images
     ...     coords=dict(image_id=range(100)),
     ... )
     >>> ds_subset_1, ds_subset_2 = split_dataset_group_by(
