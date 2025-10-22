@@ -1,4 +1,5 @@
 import logging
+from unittest.mock import patch
 
 import numpy as np
 import pytest
@@ -296,6 +297,40 @@ def test_split_dataset_group_by_kfold_seed(valid_bboxes_dataset_to_split_2):
     )
     assert not ds_subset_1.equals(ds_subset_1_3)
     assert not ds_subset_2.equals(ds_subset_2_3)
+
+
+@pytest.mark.parametrize(
+    "method, function_to_mock",
+    [
+        (
+            "kfold",
+            "ethology.datasets.split._split_dataset_group_by_kfold",
+        ),
+        (
+            "apss",
+            "ethology.datasets.split._split_dataset_group_by_apss",
+        ),
+    ],
+)
+def test_split_dataset_group_by(
+    method, function_to_mock, valid_bboxes_dataset_to_split_1
+):
+    """Test the wrapper function dispatches to the appropriate method."""
+    # Create mock return datasets
+    mock_return_value = (xr.Dataset(), xr.Dataset())
+
+    # Patch the internal function and call the wrapper
+    with patch(function_to_mock, return_value=mock_return_value) as mock:
+        _ds_subset_1, _ds_subset_2 = split_dataset_group_by(
+            dataset=valid_bboxes_dataset_to_split_1,
+            group_by_var="foo",
+            list_fractions=[0.334, 0.666],
+            samples_coordinate="image_id",
+            method=method,
+        )
+
+        # Verify the correct internal function was called once
+        mock.assert_called_once()
 
 
 @pytest.mark.parametrize(
