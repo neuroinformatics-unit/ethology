@@ -9,6 +9,208 @@ from loguru import logger
 from sklearn.model_selection import GroupKFold
 
 
+def split_dataset_group_by(
+    dataset: xr.Dataset,
+    group_by_var: str,
+    list_fractions: list[float],
+    samples_coordinate: str = "image_id",
+    method: str = "auto",
+    seed: int = 42,
+    epsilon: float = 0,
+) -> tuple[xr.Dataset, xr.Dataset]:
+    """Split an annotations dataset by grouping variable.
+
+    Split an ``ethology`` annotations dataset into two subsets ensuring that
+    the subsets are disjoint in the grouping variable (i.e., no group appears
+    in both subsets). Automatically chooses between a group k-fold approach
+    and an approximate subset-sum approach based on the number of unique
+    groups and requested split fractions.
+
+    Parameters
+    ----------
+    dataset : xarray.Dataset
+        The annotations dataset to split.
+    group_by_var : str
+        The grouping variable to use for splitting the dataset. Must be
+        1-dimensional along the ``samples_coordinate``.
+    list_fractions : list[float, float]
+        The fractions of the input annotations dataset to allocate to
+        each subset. Must contain only two elements and sum to 1.
+    samples_coordinate : str, optional
+        The coordinate along which to split the dataset. Default is
+        ``image_id``.
+    method : str, optional
+        Method to use: "auto", "kfold", or "apss". When "auto", automatically
+        selects between the two methods based on the number of unique groups.
+        Default is "auto".
+    seed : int, optional
+        Random seed for reproducibility used in the group k-fold approach.
+        Controls both the shuffling of the indices and the random selection of
+        the output split from all possible ones. Only used when ``method`` is
+        "kfold" or when "auto" selects "kfold". Default is 42.
+    epsilon : float, optional
+        The approximation tolerance for the subset-sum method as a fraction
+        of 1. The sum of samples in the smallest subset is guaranteed to be
+        at least ``(1 - epsilon)`` times the optimal sum for the requested
+        fractions and grouping variable. When ``epsilon`` is 0, the algorithm
+        finds the exact optimal sum. Larger values result in faster
+        computation but may yield subsets with a total number of samples
+        further from optimal. Only used when ``method`` is "apss" or when
+        "auto" selects "apss". Default is 0.
+
+    Returns
+    -------
+    tuple[xarray.Dataset, xarray.Dataset]
+        The two subsets of the input dataset. The subsets are returned in the
+        same order as the input list of fractions.
+
+    Raises
+    ------
+    ValueError
+        If the elements of ``list_fractions`` are not exactly two, are not
+        between 0 and 1, or do not sum to 1. If ``group_by_var`` is not
+        1-dimensional along the ``samples_coordinate``. If ``method`` is
+        "kfold" but there are insufficient groups for the requested split
+        fractions.
+
+    Notes
+    -----
+    When ``method`` is "auto", the function automatically selects between two
+    approaches:
+
+    - **Group k-fold method** (default when sufficient groups): used when the
+      number of unique groups is greater than or equal to the number of
+      required folds (calculated as ``1 / min(list_fractions)``). This method
+      computes all possible partitions of groups into folds and randomly
+      selects one of them as the output split. The selection is controlled by
+      the ``seed`` parameter for reproducibility.
+
+    - **Approximate subset-sum method** (fallback): used when there are too few
+      unique groups for group k-fold splitting. This method deterministically
+      finds a subset of groups whose combined sample count best matches the
+      requested fractions. The ``epsilon`` parameter controls the
+      speed-accuracy tradeoff. When ``epsilon`` is 0, the algorithm finds the
+      exact optimal sum. Larger values of ``epsilon`` result in faster
+      computation but may yield subsets with a total number of samples further
+      from the optimal. In cases where no valid split exists (e.g., all groups
+      have more samples than the target), one subset may be empty and a
+      warning is logged.
+
+    See Also
+    --------
+    :class:`sklearn.model_selection.GroupKFold` : Group k-fold cross-validator.
+
+    Examples
+    --------
+    Split a dataset with a single data variable ``video_id`` defined along the
+    ``image_id`` dimension into an 80/20 split, ensuring that the
+    subsets are disjoint in the grouping variable ``video_id``. Since there are
+    many groups (unique video IDs), the function automatically selects the
+    group k-fold method.
+
+    >>> import xarray as xr
+    >>> from ethology.datasets.split import split_dataset_group_by
+    >>> ds_large = xr.Dataset(
+    ...     data_vars=dict(
+    ...         video_id=("image_id", list(range(100))),
+    ...     ),
+    ...     coords=dict(image_id=range(100)),
+    ... )
+    >>> ds_subset_1, ds_subset_2 = split_dataset_group_by(
+    ...     ds_large, "video_id", [0.8, 0.2], seed=42
+    ... )
+    >>> print(len(ds_subset_1.image_id) / len(ds_large.image_id))  # 0.8
+    >>> print(len(ds_subset_2.image_id) / len(ds_large.image_id))  # 0.2
+
+
+    Using different seeds produces different splits when "kfold" is used:
+
+    >>> ds_subset_1_diff, ds_subset_2_diff = split_dataset_group_by(
+    ...     ds_large, "video_id", [0.8, 0.2], seed=123
+    ... )
+    >>> assert not ds_subset_1.equals(ds_subset_1_diff)
+    >>> assert not ds_subset_2.equals(ds_subset_2_diff)
+    >>> print(len(ds_subset_1_diff.image_id) / len(ds_large.image_id))  # 0.8
+    >>> print(len(ds_subset_2_diff.image_id) / len(ds_large.image_id))  # 0.2
+
+    The function automatically selects the appropriate method. In the example
+    below, a dataset with 3 unique video IDs is used. With a 0.2 minimum
+    fraction (requiring 5 folds), the "kfold" method cannot be used, since
+    there would be more folds than groups. Therefore, the "apss" method is
+    selected automatically and an approximate split is returned. Note that
+    when using the "apss" method, the seed value is ignored.
+
+    >>> ds_small = xr.Dataset(
+    ...     data_vars=dict(
+    ...         video_id=("image_id", [1, 0, 0, 2, 2, 2, 0, 0, 0, 0, 0, 1]),
+    ...     ),
+    ...     coords=dict(image_id=range(12)),
+    ... )
+    >>> ds_subset_1, ds_subset_2 = split_dataset_group_by(
+    ...     ds_small,
+    ...     group_by_var="video_id",
+    ...     list_fractions=[0.8, 0.2],
+    ... )
+    >>> print(len(ds_subset_1.image_id) / len(ds_small.image_id))  # 0.833
+    >>> print(len(ds_subset_2.image_id) / len(ds_small.image_id))  # 0.166
+
+    The ``epsilon`` parameter controls the approximation for the subset-sum
+    method when auto-selected or explicitly specified:
+
+    >>> ds_subset_1, ds_subset_2 = split_dataset_group_by(
+    ...     ds_small,
+    ...     group_by_var="video_id",
+    ...     list_fractions=[0.8, 0.2],
+    ...     epsilon=0.1,  # accept a solution >= 90% of the optimal
+    ...     method="apss",
+    ... )
+    >>> print(len(ds_subset_1.image_id) / len(ds_small.image_id))  # 0.833
+    >>> print(len(ds_subset_2.image_id) / len(ds_small.image_id))  # 0.166
+
+    """
+    # Checks
+    if sum(list_fractions) != 1:
+        raise ValueError("The split fractions must sum to 1.")
+    if len(list_fractions) != 2:
+        raise ValueError("The list of fractions must have only two elements.")
+    if any(fraction < 0 or fraction > 1 for fraction in list_fractions):
+        raise ValueError("The split fractions must be between 0 and 1.")
+    if len(dataset[group_by_var].shape) != 1:
+        raise ValueError(
+            f"The grouping variable {group_by_var} must be 1-dimensional along"
+            f" {samples_coordinate}."
+        )
+
+    # Count unique groups
+    n_unique_groups = len(np.unique(dataset[group_by_var].values))
+    n_required_folds = int(np.rint(1 / min(list_fractions)))
+
+    # Auto-select method
+    if method == "auto":
+        if n_unique_groups >= n_required_folds:
+            method = "kfold"
+        else:
+            method = "apss"
+            logger.info(
+                f"Using approximate subset-sum method with epsilon={epsilon}: "
+                f"only {n_unique_groups} groups available but "
+                f"{n_required_folds} are required for k-fold method. "
+                f"Seed setting is ignored."
+            )
+
+    # Dispatch to appropriate method
+    if method == "kfold":
+        return _split_dataset_group_by_kfold(
+            dataset, group_by_var, list_fractions, samples_coordinate, seed
+        )
+    elif method == "apss":
+        return _split_dataset_group_by_apss(
+            dataset, group_by_var, list_fractions, epsilon, samples_coordinate
+        )
+    else:
+        raise ValueError(f"Unknown method: {method}")
+
+
 def _split_dataset_group_by_kfold(
     dataset: xr.Dataset,
     group_by_var: str,
@@ -62,9 +264,7 @@ def _split_dataset_group_by_kfold(
     ``image_id`` dimension into an 80/20 split, ensuring that the
     subsets are disjoint in the grouping variable ``foo``.
 
-    >>> from ethology.datasets.split import (
-    ...     split_dataset_group_by_kfold,
-    ... )
+    >>> from ethology.datasets.split import _split_dataset_group_by_kfold
     >>> import xarray as xr
     >>> ds = xr.Dataset(
     >>>     data_vars=dict(
@@ -74,7 +274,7 @@ def _split_dataset_group_by_kfold(
     >>>         image_id=range(12),
     >>>     ),
     >>> )
-    >>> ds_subset_1, ds_subset_2 = split_dataset_group_by_kfold(
+    >>> ds_subset_1, ds_subset_2 = _split_dataset_group_by_kfold(
     >>>     ds,
     >>>     group_by_var="foo",
     >>>     list_fractions=[0.2, 0.8],
@@ -85,7 +285,7 @@ def _split_dataset_group_by_kfold(
     on the same dataset will always produce the same split. Using a different
     seed will produce a different split.
 
-    >>> ds_subset_1_diff, ds_subset_2_diff = split_dataset_group_by_kfold(
+    >>> ds_subset_1_diff, ds_subset_2_diff = _split_dataset_group_by_kfold(
     >>>     ds,
     >>>     group_by_var="foo",
     >>>     list_fractions=[0.2, 0.8],
@@ -95,22 +295,6 @@ def _split_dataset_group_by_kfold(
     >>> assert not ds_subset_2.equals(ds_subset_2_diff)
 
     """
-    # Checks
-    if sum(list_fractions) != 1:
-        raise ValueError("The split fractions must sum to 1.")
-
-    if len(list_fractions) != 2:
-        raise ValueError("The list of fractions must have only two elements.")
-
-    if any(fraction < 0 or fraction > 1 for fraction in list_fractions):
-        raise ValueError("The split fractions must be between 0 and 1.")
-
-    if len(dataset[group_by_var].shape) != 1:
-        raise ValueError(
-            f"The grouping variable {group_by_var} must be 1-dimensional along"
-            f" {samples_coordinate}."
-        )
-
     # Initialise k-fold iterator
     n_folds_per_shuffle = int(np.rint(1 / min(list_fractions)))
     gkf = GroupKFold(
@@ -198,9 +382,7 @@ def _split_dataset_group_by_apss(
     ``image_id`` dimension into an approximate 80/20 split, ensuring that the
     subsets are disjoint in the grouping variable ``foo``.
 
-    >>> from ethology.datasets.split import (
-    ...     split_dataset_group_by,
-    ... )
+    >>> from ethology.datasets.split import _split_dataset_group_by_apss
     >>> import xarray as xr
     >>> ds = xr.Dataset(
     >>>     data_vars=dict(
@@ -210,7 +392,7 @@ def _split_dataset_group_by_apss(
     >>>         image_id=range(12),
     >>>     ),
     >>> )
-    >>> ds_subset_1, ds_subset_2 = split_dataset_group_by(
+    >>> ds_subset_1, ds_subset_2 = _split_dataset_group_by_apss(
     >>>     ds,
     >>>     group_by_var="foo",
     >>>     list_fractions=[0.2, 0.8],
@@ -220,22 +402,6 @@ def _split_dataset_group_by_apss(
     >>> print(len(ds_subset_2.image_id) / len(ds.image_id))  # 0.833
 
     """
-    # Checks
-    if sum(list_fractions) != 1:
-        raise ValueError("The split fractions must sum to 1.")
-
-    if len(list_fractions) != 2:
-        raise ValueError("The list of fractions must have only two elements.")
-
-    if any(fraction < 0 or fraction > 1 for fraction in list_fractions):
-        raise ValueError("The split fractions must be between 0 and 1.")
-
-    if len(dataset[group_by_var].shape) != 1:
-        raise ValueError(
-            f"The grouping variable {group_by_var} must be 1-dimensional along"
-            f" {samples_coordinate}."
-        )
-
     # Compute number of samples in target subset
     # the target subset is the subset with the smallest fraction.
     target_subset_count = int(

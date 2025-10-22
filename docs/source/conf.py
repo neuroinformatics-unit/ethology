@@ -182,6 +182,7 @@ intersphinx_mapping = {
     "numpy": ("https://numpy.org/doc/stable/", None),
     "pandera": ("https://pandera.readthedocs.io/en/stable/", None),
     "movement": ("https://movement.neuroinformatics.dev/", None),
+    "sklearn": ("https://scikit-learn.org/stable/", None),
 }
 
 
