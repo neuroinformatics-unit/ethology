@@ -8,6 +8,7 @@ from ethology.datasets.split import (
     _approximate_subset_sum,
     _split_dataset_group_by_apss,
     _split_dataset_group_by_kfold,
+    split_dataset_group_by,
     split_dataset_random,
 )
 
@@ -257,6 +258,7 @@ def test_split_dataset_group_by_kfold(inputs, request):
 
 
 def test_split_dataset_group_by_kfold_seed(valid_bboxes_dataset_to_split_2):
+    """Test the behaviour of the seed when using the `kfold` method."""
     # prepare inputs
     dataset = valid_bboxes_dataset_to_split_2
     list_fractions = [0.334, 0.666]
@@ -415,17 +417,17 @@ def test_split_dataset_random(inputs, request):
     ],
 )
 @pytest.mark.parametrize(
-    "split_function, extra_kwargs",
+    "extra_kwargs",
     [
-        (_split_dataset_group_by_apss, {"epsilon": 0}),
-        (_split_dataset_group_by_kfold, {}),
+        {"epsilon": 0},
+        {},
     ],
 )
 def test_split_dataset_group_by_error(
-    split_function, extra_kwargs, inputs, expected_error_message
+    inputs, extra_kwargs, expected_error_message
 ):
     with pytest.raises(ValueError) as e:
-        _ds_subset_1, _ds_subset_2 = split_function(
+        _ds_subset_1, _ds_subset_2 = split_dataset_group_by(
             **inputs, group_by_var="foo", **extra_kwargs
         )
     assert str(e.value) in expected_error_message
@@ -478,17 +480,18 @@ def test_split_dataset_random_error(inputs, expected_error_message):
             },
         ),
         (
-            _split_dataset_group_by_apss,
+            split_dataset_group_by,
             {
                 "list_fractions": [0.9, 0.1],
                 "samples_coordinate": "image_id",
                 "group_by_var": "foo",
                 "epsilon": 0,
             },
+            # should defer to the `apss` method
         ),
     ],
 )
-def test_split_dataset_empty_subset_warning(
+def test_split_dataset_warning_empty_subset(
     caplog, request, split_function, inputs
 ):
     """Test that a warning is thrown when at least one subset is empty."""
