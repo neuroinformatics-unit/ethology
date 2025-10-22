@@ -22,6 +22,7 @@ dependencies = [
   "movement",
   "pandera[pandas]",
   "pycocotools",
+  "scikit-learn",
   "torch",
   "torchvision",
   "loguru",

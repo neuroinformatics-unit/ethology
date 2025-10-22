@@ -6,6 +6,64 @@ from typing import TypedDict
 import numpy as np
 import xarray as xr
 from loguru import logger
+from sklearn.model_selection import GroupKFold
+
+
+def split_dataset_group_by_sklearn(
+    dataset: xr.Dataset,
+    group_by_var: str,
+    list_fractions: list[float],
+    samples_coordinate: str = "image_id",
+    seed: int = 42,
+) -> tuple[xr.Dataset, xr.Dataset]:
+    """Split an annotations dataset using scikit-learn's GroupKFold."""
+    # Checks
+    if sum(list_fractions) != 1:
+        raise ValueError("The split fractions must sum to 1.")
+
+    if len(list_fractions) != 2:
+        raise ValueError("The list of fractions must have only two elements.")
+
+    if any(fraction < 0 or fraction > 1 for fraction in list_fractions):
+        raise ValueError("The split fractions must be between 0 and 1.")
+
+    if len(dataset[group_by_var].shape) != 1:
+        raise ValueError(
+            f"The grouping variable {group_by_var} must be 1-dimensional along"
+            f" {samples_coordinate}."
+        )
+
+    # Initialise k-fold iterator
+    n_folds_per_shuffle = int(np.rint(1 / min(list_fractions)))
+    gkf = GroupKFold(
+        n_splits=n_folds_per_shuffle, shuffle=True, random_state=seed
+    )
+
+    # Compute all possible shuffles
+    # In each shuffle, one fold is the test set,
+    # the rest of folds make up the train set
+    train_test_idcs_per_shuffle = list(
+        gkf.split(
+            dataset[samples_coordinate].values,
+            groups=dataset[group_by_var].values,
+        )
+    )
+
+    # Randomly pick one of the shuffles
+    rng = np.random.default_rng(seed)
+    shuffle_idx = rng.choice(len(train_test_idcs_per_shuffle))
+    train_idcs, test_idcs = train_test_idcs_per_shuffle[shuffle_idx]
+
+    # Split the datasets
+    ds_train = dataset.isel({samples_coordinate: train_idcs})
+    ds_test = dataset.isel({samples_coordinate: test_idcs})
+    list_ds_sorted = [ds_test, ds_train]  # sorted in increasing size
+
+    # Return datasets in the same order as the input list of fractions
+    idcs_sorted = np.argsort(list_fractions)  # idcs to map input -> sorted
+    idcs_original = np.argsort(idcs_sorted)  # idcs to map sorted -> input
+
+    return tuple(list_ds_sorted[i] for i in idcs_original)
 
 
 def split_dataset_group_by(

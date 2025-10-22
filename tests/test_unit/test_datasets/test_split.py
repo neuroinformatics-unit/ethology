@@ -7,6 +7,7 @@ import xarray as xr
 from ethology.datasets.split import (
     _approximate_subset_sum,
     split_dataset_group_by,
+    split_dataset_group_by_sklearn,
     split_dataset_random,
 )
 
@@ -20,7 +21,7 @@ def split_at_any_delimiter(text: str, delimiters: list[str]) -> list[str]:
 
 
 @pytest.fixture
-def valid_bboxes_dataset_to_split(valid_bboxes_dataset):
+def valid_bboxes_dataset_to_split_1(valid_bboxes_dataset):
     # We add a `foo` variable to the dataset that is
     # one-dimensional along the `image_id` dimension to
     # use for grouping by.
@@ -29,6 +30,22 @@ def valid_bboxes_dataset_to_split(valid_bboxes_dataset):
     ds["foo"] = (
         ["image_id"],
         np.array([0, 1, 1]),
+    )
+    return ds
+
+
+@pytest.fixture
+def valid_bboxes_dataset_to_split_2(valid_bboxes_dataset):
+    # We add a `foo` variable to the dataset that is
+    # one-dimensional along the `image_id` dimension to
+    # use for grouping by. In this case we ensure we have
+    # 3 groups to be able to split using 3 folds (with
+    # GroupKFold we cannot have more folds than groups).
+    # Note: len(valid_bboxes_dataset.image_id) = 3
+    ds = valid_bboxes_dataset.copy(deep=True)
+    ds["foo"] = (
+        ["image_id"],
+        np.array([0, 1, 2]),
     )
     return ds
 
@@ -131,12 +148,12 @@ def test_approximate_subset_sum(inputs, expected_subset_dict):
     "inputs",
     [
         {
-            "dataset": "valid_bboxes_dataset_to_split",
+            "dataset": "valid_bboxes_dataset_to_split_1",
             "list_fractions": [0.334, 0.666],
             "samples_coordinate": "image_id",
         },  # fractions in increasing order
         {
-            "dataset": "valid_bboxes_dataset_to_split",
+            "dataset": "valid_bboxes_dataset_to_split_1",
             "list_fractions": [0.666, 0.334],
             "samples_coordinate": "image_id",
         },  # fractions in decreasing order
@@ -254,17 +271,137 @@ def test_split_dataset_group_by_error(inputs, expected_error_message):
     "inputs",
     [
         {
-            "dataset": "valid_bboxes_dataset_to_split",
+            "dataset": "valid_bboxes_dataset_to_split_2",
             "list_fractions": [0.334, 0.666],
             "samples_coordinate": "image_id",
         },  # fractions in increasing order
         {
-            "dataset": "valid_bboxes_dataset_to_split",
+            "dataset": "valid_bboxes_dataset_to_split_2",
             "list_fractions": [0.666, 0.334],
             "samples_coordinate": "image_id",
         },  # fractions in decreasing order
         {
-            "dataset": "valid_bboxes_dataset_to_split",
+            "dataset": "ACTD_dataset_to_split",
+            "list_fractions": [0.13, 0.87],
+            "samples_coordinate": "image_id",
+        },  # realistic dataset
+    ],
+)
+def test_split_dataset_group_by_sklearn(inputs, request):
+    # prepare inputs
+    dataset = request.getfixturevalue(inputs["dataset"])
+    inputs["dataset"] = dataset
+
+    # we split datasets grouping by the `foo` variable
+    group_by_var = "foo"
+
+    # split dataset
+    ds_subset_1, ds_subset_2 = split_dataset_group_by_sklearn(
+        **inputs, group_by_var=group_by_var
+    )
+
+    # assert dataset sizes
+    list_input_fractions = inputs["list_fractions"]
+    total_n_images = len(inputs["dataset"].image_id)
+    fraction_subset_1 = len(ds_subset_1.image_id) / total_n_images
+    fraction_subset_2 = len(ds_subset_2.image_id) / total_n_images
+    assert fraction_subset_1 == pytest.approx(
+        list_input_fractions[0], abs=0.01
+    )
+    assert fraction_subset_2 == pytest.approx(
+        list_input_fractions[1], abs=0.01
+    )
+
+    # assert that the subsets are disjoint in the grouping variable
+    assert (
+        set.intersection(
+            set(ds_subset_1[group_by_var].values),
+            set(ds_subset_2[group_by_var].values),
+        )
+        == set()
+    )
+
+
+@pytest.mark.parametrize(
+    "inputs, expected_error_message",
+    [
+        (
+            {
+                "dataset": xr.Dataset(),
+                "list_fractions": [0.2, 0.2],
+                "samples_coordinate": "image_id",
+            },
+            "The split fractions must sum to 1.",
+        ),
+        (
+            {
+                "dataset": xr.Dataset(),
+                "list_fractions": [0.2, 0.4, 0.4],
+                "samples_coordinate": "image_id",
+            },
+            "The list of fractions must have only two elements.",
+        ),  # more than two fractions
+        (
+            {
+                "dataset": xr.Dataset(),
+                "list_fractions": [1],
+                "samples_coordinate": "image_id",
+            },
+            "The list of fractions must have only two elements.",
+        ),  # less than two fractions
+        (
+            {
+                "dataset": xr.Dataset(),
+                "list_fractions": [1.2, -0.2],
+                "samples_coordinate": "image_id",
+            },
+            "The split fractions must be between 0 and 1.",
+        ),
+        (
+            {
+                "dataset": xr.Dataset(
+                    data_vars=dict(
+                        foo=(
+                            ["image_id", "space"],
+                            np.zeros((100, 2)),
+                        )
+                    ),
+                    coords=dict(
+                        image_id=range(100),
+                        space=["x", "y"],
+                    ),
+                ),
+                "list_fractions": [0.2, 0.8],
+                "samples_coordinate": "image_id",
+            },
+            "The grouping variable foo must be 1-dimensional along image_id.",
+        ),
+    ],
+)
+def test_split_dataset_group_by_sklearn_error(inputs, expected_error_message):
+    with pytest.raises(ValueError) as e:
+        _ds_subset_1, _ds_subset_2 = split_dataset_group_by_sklearn(
+            **inputs,
+            group_by_var="foo",
+        )
+    assert str(e.value) in expected_error_message
+
+
+@pytest.mark.parametrize(
+    "inputs",
+    [
+        {
+            "dataset": "valid_bboxes_dataset_to_split_1",
+            "list_fractions": [0.334, 0.666],
+            "samples_coordinate": "image_id",
+        },  # fractions in increasing order
+        {
+            "dataset": "valid_bboxes_dataset_to_split_1",
+            "list_fractions": [0.666, 0.334],
+            "samples_coordinate": "image_id",
+        },  # fractions in decreasing order
+        {
+            "dataset": "valid_bboxes_dataset_to_split_1",
             "list_fractions": [1 / 3, 1 / 3, 1 / 3],
             "samples_coordinate": "image_id",
         },  # more than two fractions
@@ -374,7 +511,7 @@ def test_split_dataset_empty_subset_warning(
 ):
     """Test that a warning is thrown when at least one subset is empty."""
     # Get dataset to split
-    ds = request.getfixturevalue("valid_bboxes_dataset_to_split")
+    ds = request.getfixturevalue("valid_bboxes_dataset_to_split_1")
     inputs["dataset"] = ds
 
     # We use fractions that will cause an empty subset
