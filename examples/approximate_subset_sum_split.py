@@ -1,10 +1,39 @@
-"""Split an annotations dataset by category
-==============================================
+"""Split an annotations dataset by grouping variable
+=====================================================
 
-Splits an annotations dataset based on a grouping variable
-(e.g. video) such that no value of the grouping variable appears in both
-subsets.
+Split an annotations dataset by grouping variable, and compare to random
+splitting.
 """
+# %%
+# This example demonstrates two dataset splitting strategies:
+#
+# - **Grouping-based split**: splits the input dataset into two subsets with
+#   approximately the requested fractions, while keeping the values of a
+#   user-defined grouping variable (such as "videos" or "species") entirely
+#   separate between subsets.
+#
+# - **Random split**: splits the input dataset randomly into subsets with
+#   the requested fractions. It achieves precise split fractions but may mix
+#   values of variables across subsets (e.g., frames from the same video
+#   may be present in multiple subsets).
+#
+# A grouping-based split is useful when defining a held-out test dataset
+# with a specified percentage. For example, you may want to hold out ~10%
+# of the annotated frames while ensuring that frames from the same video are
+# not present in both the training and test sets.
+#
+# In contrast, a random splitting strategy divides the dataset into precise
+# proportions but does not prevent data leakage across subsets. By changing
+# the random seed, we can obtain different splits for the same requested
+# fraction. This is useful, for example, to generate multiple train/validation
+# splits for `cross-validation <https://en.wikipedia.org/wiki/Cross-validation_(statistics)>`_.
+#
+# Both approaches may be useful in different situations, and this example
+# demonstrates how to apply them using ``ethology``.
+#
+# For more complex dataset splits, we recommend using `scikit-learn's
+# cross-validation functionalities <https://scikit-learn.org/stable/modules/cross_validation.html#cross-validation-evaluating-estimator-performance>`_,
+# in particular the section on `grouped data <https://scikit-learn.org/stable/modules/cross_validation.html#cross-validation-iterators-for-grouped-data>`_.
 
 # %%
 # Imports
@@ -27,23 +56,6 @@ from ethology.io.annotations import load_bboxes
 # the following line in your notebook
 # %matplotlib widget
 
-
-# %%
-# This notebook demonstrates how to split an annotation dataset into two
-# subsets (e.g., train/test) while ensuring that specific categories
-# (like videos or species) are kept entirely separate between the subsets.
-#
-# This is useful when you want to define a held-out test dataset based on a
-# user-specified percentage (e.g., "hold out 20% of samples"). For example,
-# you may want to ensure that frames from the same video are not split between
-# the training and held-out sets. Using this function ensures complete
-# separation of the grouping variable (e.g. video) between the training and
-# held-out sets.
-#
-# This is in contrast to random splitting, which gives precise proportions,
-# but can mix values of the grouping variable across the subsets. Both
-# approaches are useful in different situations, and this notebook shows how
-# to apply them using ``ethology`` utilities.
 
 # %%
 # Download dataset
