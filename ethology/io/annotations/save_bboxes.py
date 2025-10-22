@@ -22,12 +22,12 @@ from ethology.io.annotations.validate import (
 
 @_check_input(validator=ValidBboxesDataset)
 @_check_output(validator=ValidCOCO)  # check output is ethology importable
-def to_COCO_file(ds: xr.Dataset, output_filepath: str | Path):
+def to_COCO_file(dataset: xr.Dataset, output_filepath: str | Path):
     """Save an ``ethology`` bounding box annotations dataset to a COCO file.
 
     Parameters
     ----------
-    ds : xarray.Dataset
+    dataset : xarray.Dataset
         Bounding boxes annotations xarray dataset.
     output_filepath : str or pathlib.Path
         Path for the output COCO file.
@@ -46,7 +46,7 @@ def to_COCO_file(ds: xr.Dataset, output_filepath: str | Path):
 
     """
     # Compute valid COCO dataframe from xarray dataset
-    df = _to_COCO_exportable_df(ds)
+    df = _to_COCO_exportable_df(dataset)
 
     # Create COCO dictionary from dataframe and export
     COCO_dict = _create_COCO_dict(df)
