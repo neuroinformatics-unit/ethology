@@ -364,6 +364,19 @@ def test_split_dataset_group_by_auto(dataset, expected_method, request):
         mock.assert_called_once()
 
 
+def test_split_dataset_group_by_unknown_method(
+    valid_bboxes_dataset_to_split_1,
+):
+    """Test that an unknown method raises a ValueError."""
+    with pytest.raises(ValueError, match="Unknown method"):
+        split_dataset_group_by(
+            dataset=valid_bboxes_dataset_to_split_1,
+            group_by_var="foo",
+            list_fractions=[0.5, 0.5],
+            method="unknown_method",
+        )
+
+
 @pytest.mark.parametrize(
     "inputs",
     [
