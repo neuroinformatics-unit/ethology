@@ -16,7 +16,85 @@ def _split_dataset_group_by_kfold(
     samples_coordinate: str = "image_id",
     seed: int = 42,
 ) -> tuple[xr.Dataset, xr.Dataset]:
-    """Split an annotations dataset using scikit-learn's GroupKFold."""
+    """Split an annotations dataset using scikit-learn's GroupKFold.
+
+    Split an ``ethology`` annotations dataset into two subsets
+    ensuring that the subsets are disjoint in the grouping variable.
+    This method uses scikit-learn's GroupKFold cross-validator to
+    randomly partition groups into folds and then selects one fold
+    as the smaller subset and the remaining folds as the larger subset.
+
+    Parameters
+    ----------
+    dataset : xarray.Dataset
+        The annotations dataset to split.
+    group_by_var : str
+        The grouping variable to use for splitting the dataset. Must be
+        1-dimensional along the ``samples_coordinate``.
+    list_fractions : list[float, float]
+        The fractions of the input annotations dataset to allocate to
+        each subset. Must contain only two elements and sum to 1.
+    samples_coordinate : str, optional
+        The coordinate along which to split the dataset. Default is
+        ``image_id``.
+    seed : int, optional
+        Random seed for reproducibility. Controls both the GroupKFold
+        indices shuffling and the random selection of the output split from
+        all the possible ones. Default is 42.
+
+    Returns
+    -------
+    tuple[xarray.Dataset, xarray.Dataset]
+        The two subsets of the input dataset. The subsets are returned in the
+        same order as the input list of fractions.
+
+    Raises
+    ------
+    ValueError
+
+        If the elements of ``list_fractions`` are not exactly two, are not
+        between 0 and 1, or do not sum to 1. If ``group_by_var`` is not
+        1-dimensional along the ``samples_coordinate``.
+
+    Examples
+    --------
+    Split a dataset with a single data variable ``foo`` defined along the
+    ``image_id`` dimension into an 80/20 split, ensuring that the
+    subsets are disjoint in the grouping variable ``foo``.
+
+    >>> from ethology.datasets.split import (
+    ...     split_dataset_group_by_kfold,
+    ... )
+    >>> import xarray as xr
+    >>> ds = xr.Dataset(
+    >>>     data_vars=dict(
+    >>>         foo=("image_id", [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]),
+    >>>     ),  # 0: 10 counts, 1: 2 counts
+    >>>     coords=dict(
+    >>>         image_id=range(12),
+    >>>     ),
+    >>> )
+    >>> ds_subset_1, ds_subset_2 = split_dataset_group_by_kfold(
+    >>>     ds,
+    >>>     group_by_var="foo",
+    >>>     list_fractions=[0.2, 0.8],
+    >>>     seed=42,
+    >>> )
+
+    The ``seed`` parameter ensures reproducibility. Using the same seed
+    on the same dataset will always produce the same split. Using a different
+    seed will produce a different split.
+
+    >>> ds_subset_1_diff, ds_subset_2_diff = split_dataset_group_by_kfold(
+    >>>     ds,
+    >>>     group_by_var="foo",
+    >>>     list_fractions=[0.2, 0.8],
+    >>>     seed=123,
+    >>> )
+    >>> assert not ds_subset_1.equals(ds_subset_1_diff)
+    >>> assert not ds_subset_2.equals(ds_subset_2_diff)
+
+    """
     # Checks
     if sum(list_fractions) != 1:
         raise ValueError("The split fractions must sum to 1.")
