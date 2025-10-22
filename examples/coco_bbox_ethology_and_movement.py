@@ -2,7 +2,7 @@
 ====================================================================
 
 Load `COCO <https://cocodataset.org/#format-data>`_ bounding box annotations
-as an ``ethology`` dataset and inspect them using ``ethology`` and
+and inspect them using ``ethology`` and
 `movement <https://movement.neuroinformatics.dev/>`_.
 """
 
