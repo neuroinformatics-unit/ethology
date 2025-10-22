@@ -334,6 +334,37 @@ def test_split_dataset_group_by(
 
 
 @pytest.mark.parametrize(
+    "dataset, expected_method",
+    [
+        ("valid_bboxes_dataset_to_split_1", "apss"),
+        ("valid_bboxes_dataset_to_split_2", "kfold"),
+    ],
+)
+def test_split_dataset_group_by_auto(dataset, expected_method, request):
+    """Test the automatic selection of the method."""
+    dataset = request.getfixturevalue(dataset)
+
+    # mock the internal function for the expected method
+    function_to_mock = (
+        f"ethology.datasets.split._split_dataset_group_by_{expected_method}"
+    )
+    mock_return_value = (xr.Dataset(), xr.Dataset())
+
+    # split dataset
+    with patch(function_to_mock, return_value=mock_return_value) as mock:
+        _ds_subset_1, _ds_subset_2 = split_dataset_group_by(
+            dataset=dataset,
+            list_fractions=[0.334, 0.666],
+            samples_coordinate="image_id",
+            group_by_var="foo",
+            method="auto",
+        )
+
+        # Verify the correct internal function was called once
+        mock.assert_called_once()
+
+
+@pytest.mark.parametrize(
     "inputs",
     [
         {
