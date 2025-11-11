@@ -89,7 +89,7 @@ exclude = ["__init__.py", "build", ".eggs"]
 fix = true
 
 [tool.ruff.lint]
-# See https:/`/docs.astral.sh/ruff/rules/
+# See https://docs.astral.sh/ruff/rules/
 ignore = [
   "D203", # one blank line before class
   "D213", # multi-line-summary second line
