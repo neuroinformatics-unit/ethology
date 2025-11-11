@@ -440,6 +440,70 @@ def test_split_dataset_random(inputs, request):
 
 
 @pytest.mark.parametrize(
+    "method, dataset,expected_log_fragment",
+    [
+        (
+            "auto",
+            "valid_bboxes_dataset_to_split_1",
+            # dataset that will trigger auto-selection of apss
+            # with the requested fractions 0.334 and 0.666
+            "Auto-selected approximate subset-sum method",
+        ),
+        (
+            "auto",
+            "valid_bboxes_dataset_to_split_2",
+            # dataset with 3 groups so kfold method can be used
+            "Using group k-fold method with",
+        ),
+        (
+            "kfold",
+            "valid_bboxes_dataset_to_split_2",
+            # dataset with 3 groups so kfold method can be used
+            "Using group k-fold method with",
+        ),
+        (
+            "apss",
+            "valid_bboxes_dataset_to_split_2",
+            # dataset with 3 groups so apss method can be used
+            "Using approximate subset-sum method with",
+        ),
+    ],
+    ids=["auto-apss", "auto-kfold", "kfold", "apss"],
+)
+def test_split_dataset_group_by_logger_info(
+    caplog, method, dataset, expected_log_fragment, request
+):
+    """Test that info messages are emitted for the used methods."""
+    # Use dataset with 3 groups so kfold method can be used
+    ds = request.getfixturevalue(dataset)
+    seed_value = 42
+    epsilon_value = 0.1
+
+    with caplog.at_level(logging.INFO):
+        split_dataset_group_by(
+            dataset=ds,
+            group_by_var="foo",
+            list_fractions=[0.334, 0.666],
+            samples_coordinate="image_id",
+            method=method,
+            seed=seed_value,
+            epsilon=epsilon_value,
+        )
+
+    # Check that the expected log message was logged
+    assert expected_log_fragment in caplog.text
+
+    # Check that the seed value appears in the log if required
+    test_id = request.node.callspec.id
+    if "kfold" in test_id:
+        assert f"seed={seed_value}" in caplog.text
+
+    # Check that the epsilon value appears in the log if required
+    if "apss" in test_id:
+        assert f"epsilon={epsilon_value}" in caplog.text
+
+
+@pytest.mark.parametrize(
     "inputs, expected_error_message",
     [
         (

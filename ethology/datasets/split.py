@@ -200,18 +200,25 @@ def split_dataset_group_by(
         else:
             method = "apss"
             logger.info(
-                f"Using approximate subset-sum method with epsilon={epsilon}: "
-                f"only {n_unique_groups} groups available but "
+                f"Only {n_unique_groups} unique groups exist but "
                 f"{n_required_folds} are required for k-fold method. "
-                f"Seed setting is ignored."
+                "Auto-selected approximate subset-sum method "
+                f"with epsilon={epsilon}. Seed setting is ignored."
             )
 
     # Dispatch to appropriate method
     if method == "kfold":
+        logger.info(
+            f"Using group k-fold method with {n_required_folds} folds "
+            f"and seed={seed}."
+        )
         return _split_dataset_group_by_kfold(
             dataset, group_by_var, list_fractions, samples_coordinate, seed
         )
     elif method == "apss":
+        logger.info(
+            f"Using approximate subset-sum method with epsilon={epsilon}."
+        )
         return _split_dataset_group_by_apss(
             dataset, group_by_var, list_fractions, epsilon, samples_coordinate
         )
