@@ -283,7 +283,7 @@ print(ds_as_movement.sizes)
 # Similarly, we set the time unit to ``frames``, but actually the images do not
 # represent consecutive images in time. We do this to later be able to
 # export the dataset in a format that we can
-# visualise in the `movement napari plugin <https://movement.neuroinformatics.dev/user_guide/gui.html>`_
+# visualise in the `movement napari plugin <https://movement.neuroinformatics.dev/latest/user_guide/gui.html>`_
 
 
 # %%
@@ -340,7 +340,7 @@ print(f"Minimum bin count: {hist['counts'].min().item()}")
 # Visualise the dataset in the ``movement`` napari plugin
 # ---------------------------------------------------------
 # We can export the ``movement``-like dataset in a format
-# that we can visualise in the `movement napari plugin <https://movement.neuroinformatics.dev/user_guide/gui.html>`_.
+# that we can visualise in the `movement napari plugin <https://movement.neuroinformatics.dev/latest/user_guide/gui.html>`_.
 # For example, we can use the
 # :func:`movement.io.save_bboxes.to_via_tracks_file` function, that saves
 # bounding box ``movement`` datasets as VIA-tracks files.
@@ -349,7 +349,7 @@ save_bboxes.to_via_tracks_file(ds_as_movement, "waterfowl_dataset.csv")
 
 
 # %%
-# You can now follow the `movement napari guide <https://movement.neuroinformatics.dev/user_guide/gui.html>`_
+# You can now follow the `movement napari guide <https://movement.neuroinformatics.dev/latest/user_guide/gui.html>`_
 # to load the output VIA-tracks file into ``napari``.
 #
 # To visualise the annotations over the corresponding images, remember to
