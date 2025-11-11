@@ -1,5 +1,5 @@
-"""Split an annotations dataset by grouping variable
-=====================================================
+"""Split an annotations dataset
+=================================
 
 Split an annotations dataset by grouping variable, and compare to random
 splitting.
@@ -10,7 +10,8 @@ splitting.
 # - **Grouping-based split**: splits the input dataset into two subsets with
 #   approximately the requested fractions, while keeping the values of a
 #   user-defined grouping variable (such as "videos" or "species") entirely
-#   separate between subsets.
+#   separate between subsets. We will explore two approaches: a group k-fold
+#   approach and an approximate subset-sum approach.
 #
 # - **Random split**: splits the input dataset randomly into subsets with
 #   the requested fractions. It achieves precise split fractions but may mix
@@ -23,21 +24,22 @@ splitting.
 # not present in both the training and test sets.
 #
 # In contrast, a random splitting strategy divides the dataset into precise
-# proportions but does not prevent data leakage across subsets. By changing
-# the random seed, we can obtain different splits for the same requested
-# fraction. This is useful, for example, to generate multiple train/validation
-# splits for `cross-validation <https://en.wikipedia.org/wiki/Cross-validation_(statistics)>`_.
+# proportions but does not prevent data leakage across subsets. This may be
+# useful, for example, to generate multiple train/validation
+# splits with very similar content for
+# `cross-validation <https://en.wikipedia.org/wiki/Cross-validation_(statistics)>`_.
 #
-# Both approaches may be useful in different situations, and this example
+# Both approaches can be useful in different situations, and this example
 # demonstrates how to apply them using ``ethology``.
 #
-# For more complex dataset splits, we recommend using `scikit-learn's
+# For more complex dataset splits, we recommend going through `scikit-learn's
 # cross-validation functionalities <https://scikit-learn.org/stable/modules/cross_validation.html#cross-validation-evaluating-estimator-performance>`_,
 # in particular the section on `grouped data <https://scikit-learn.org/stable/modules/cross_validation.html#cross-validation-iterators-for-grouped-data>`_.
 
 # %%
 # Imports
 # -------
+import sys
 from collections import Counter
 from pathlib import Path
 
@@ -45,9 +47,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pooch
 import xarray as xr
+from loguru import logger
 
 from ethology.datasets.split import (
-    _split_dataset_group_by_apss,
+    split_dataset_group_by,
     split_dataset_random,
 )
 from ethology.io.annotations import load_bboxes
@@ -56,6 +59,14 @@ from ethology.io.annotations import load_bboxes
 # the following line in your notebook
 # %matplotlib widget
 
+# %%
+# Configure logging for this example
+# ------------------------------------------------------------
+# By default, ``ethology`` outputs log messages to ``stderr``. Here,
+# we configure the logger to output logs to ``stdout`` as well, so that
+# we can display the log messages produced in this example.
+
+_ = logger.add(sys.stdout, level="INFO")
 
 # %%
 # Download dataset
@@ -136,21 +147,27 @@ print(list(ds_all.map_image_id_to_filename.values())[-1])
 # %%
 # The image filenames encode a bit more of extra information, such
 # as the original annotation file or the species class. We can use
-# this to define possible grouping variables for the images in the dataset.
+# this to define possible grouping variables to split the images in
+# the dataset.
 
 
 # %%
-# Split by input annotation file
-# -------------------------------
+# Split by species: group k-fold approach
+# ---------------------------------------
 # Let's assume we want to split the dataset into two sets,
-# such that each set has distinct annotation files. This may be useful for
-# example, if we want to split the dataset into train and test sets, while
-# ensuring that the test set contains only annotations from one file.
+# such that each set has distinct species. This may be useful for
+# example, if we want to evaluate the
+# `zero-shot <https://en.wikipedia.org/wiki/Zero-shot_learning>`_ performance
+# of a species classifier, that is, its performance on species not seen during
+# training. In this case we may want to split the dataset into train and test
+# sets, while ensuring that no species are present in both train and test sets.
 #
-# To do this, we first need to compute the annotation file per image.
-# Then we can split the images in the dataset based on the annotation file.
+# To do this, we first need to compute a variable that holds the species
+# per image. Then we can split the images in the dataset based on
+# the species they contain. Note that only one specie is defined per
+# image.
 #
-# We will use a helper function to extract the information of interest
+# We use a helper function to extract the information of interest
 # from the image filenames.
 
 # %%
@@ -164,92 +181,6 @@ def split_at_any_delimiter(text: str, delimiters: list[str]) -> list[str]:
             return text.split(delimiter)
     return [text]
 
-
-# Get annotation file per image
-annotation_file_per_image_id = np.array(
-    [
-        split_at_any_delimiter(
-            ds_all.map_image_id_to_filename[i],
-            ["\\"],
-        )[0]
-        for i in ds_all.image_id.values
-    ]
-)
-
-# Add to dataset
-ds_all["json_file"] = xr.DataArray(
-    annotation_file_per_image_id, dims="image_id"
-)
-
-
-# %%
-# Now that we have the 1-dimensional array with the annotation file per image
-# along the ``image_id`` dimension, we can split the dataset using the
-# :func:`ethology.detectors.datasets.split_annotations_dataset_group_by`
-# function, which implements an
-# `approximate subset sum algorithm
-# <https://en.wikipedia.org/wiki/Subset_sum_problem#Fully-polynomial_time_approximation_scheme>`_.
-#
-# The function accepts an optional ``epsilon`` parameter. This is the
-# percentage of the optimal solution that the solution is guaranteed to be
-# within. If ``epsilon`` is 0, the solution will be the best solution
-# (optimal) within the constraints.
-#
-# The subsets are returned in the same order as the input list of
-# fractions. The algorithm computes the smallest subset to be less than
-# or equal to the requested fraction.
-
-# %%
-fraction_1 = 0.2
-fraction_2 = 1 - fraction_1
-
-ds_annotations_1, ds_annotations_2 = _split_dataset_group_by_apss(
-    ds_all,
-    group_by_var="json_file",
-    list_fractions=[fraction_1, fraction_2],
-    epsilon=0,
-)
-
-# %%
-# We can verify that the size of the subsets obtainedis close to the requested
-# fractions. Since we used the default ``epsilon=0``, this split is
-# the best solution we can get within the specified constraints.
-
-# %%
-print(f"User specified fractions:{[fraction_1, fraction_2]}")
-
-print("Split fractions:")
-print(len(ds_annotations_1.image_id.values) / len(ds_all.image_id.values))
-print(len(ds_annotations_2.image_id.values) / len(ds_all.image_id.values))
-
-# %%
-# We can also verify that the subsets contain distinct annotation files.
-
-# %%
-print(f"Subset 1 files: {np.unique(ds_annotations_1.json_file.values)}")
-print(f"Subset 2 files: {np.unique(ds_annotations_2.json_file.values)}")
-
-# %%
-# In this case there are only three possible splits of the dataset, since
-# there are only three possible values for the source annotation file.
-#
-# In more complex cases with many inputs and many possible splits, the
-# computation may be slow. In this case, we may want to use a
-# larger ``epsilon`` value, to get faster to a solution that is close
-# enough to the optimal one. The choice of epsilon involves a trade-off
-# between accuracy and speed.
-
-
-# %%
-# Split by species
-# ----------------------
-# Let's consider another case, in which we would like to split the images in
-# the dataset by species.
-#
-# As before, we first compute the species array for each image, which we
-# derive from the image filename. Then we add the species array to the dataset.
-
-# %%
 
 # Get species name per image
 species_per_image_id = np.array(
@@ -289,38 +220,39 @@ plt.tight_layout()
 
 # %%
 # We can now split the dataset by species using the
-# :func:`ethology.detectors.datasets.split_annotations_dataset_group_by`
-# function again. For example, for a 27/73 split, we would do:
+# :func:`ethology.datasets.split.split_dataset_group_by`
+# function. For example, for a very specific 30/70 split,
+# we would do:
 
 # %%
-fraction_1 = 0.27
+fraction_1 = 0.3
 fraction_2 = 1 - fraction_1
 
-ds_species_1, ds_species_2 = _split_dataset_group_by_apss(
+ds_species_1, ds_species_2 = split_dataset_group_by(
     ds_all,
     group_by_var="specie",
     list_fractions=[fraction_1, fraction_2],
-    epsilon=0,
 )
 
 # %%
-# We can check how close is the resulting split to the requested fractions,
-# and verify that the subsets contain distinct species.
+# By default, the ``method`` parameter of the function is set to ``auto``,
+# which automatically selects the appropriate splitting method based on the
+# number of unique groups and the requested split fractions. From the info
+# messages logged to the terminal we can see that the automatically selected
+# method was the "group k-fold" method. To force the use of this method, we
+# can explicitly set the ``method`` parameter of the function to ``kfold``.
+
+# %%
+# We can check how close is the resulting split to the
+# requested fractions, and verify that the subsets contain distinct species.
 
 # %%
 print(f"User specified fractions:{[fraction_1, fraction_2]}")
 
-print("Split fractions:")
-print(len(ds_species_1.image_id.values) / len(ds_all.image_id.values))
-print(len(ds_species_2.image_id.values) / len(ds_all.image_id.values))
-
-
-print("Difference in fraction_1:")
 print(
-    abs(
-        fraction_1
-        - len(ds_species_1.image_id.values) / len(ds_all.image_id.values)
-    )
+    "Output split fractions: ["
+    f"{len(ds_species_1.image_id.values) / len(ds_all.image_id.values):.3f}, "
+    f"{len(ds_species_2.image_id.values) / len(ds_all.image_id.values):.3f}]"
 )
 
 print("--------------------------------")
@@ -329,21 +261,176 @@ print(f"Subset 2 species: {np.unique(ds_species_2.specie.values)}")
 
 
 # %%
+# When using the "group k-fold" method, we can also generate different splits
+# by setting a different value for the ``seed`` parameter. In the example
+# below, we set the ``method`` parameter to ``kfold`` and use two different
+# seed values, to generate two different splits.
+
+# %%
+
+# Split A with seed 42
+ds_species_1a, ds_species_2a = split_dataset_group_by(
+    ds_all,
+    group_by_var="specie",
+    list_fractions=[fraction_1, fraction_2],
+    method="kfold",
+    seed=42,
+)
+
+# Split B with seed 43
+ds_species_1b, ds_species_2b = split_dataset_group_by(
+    ds_all,
+    group_by_var="specie",
+    list_fractions=[fraction_1, fraction_2],
+    method="kfold",
+    seed=43,
+)
+
+# %%
+# We can verify that the split using the default value of the ``seed``
+# parameter (42) is the same as the first split computed above, but different
+# from the split obtained with a different seed value (43). The output
+# fractions in both cases are approximately the requested fractions.
+
+# %%
+print(
+    "Output split fractions for seed 42: ["
+    f"{len(ds_species_1a.image_id.values) / len(ds_all.image_id.values):.3f}, "
+    f"{len(ds_species_2a.image_id.values) / len(ds_all.image_id.values):.3f}]"
+)
+
+print(
+    "Output split fractions for seed 43: ["
+    f"{len(ds_species_1b.image_id.values) / len(ds_all.image_id.values):.3f}, "
+    f"{len(ds_species_2b.image_id.values) / len(ds_all.image_id.values):.3f}]"
+)
+
+
+assert ds_species_1a.equals(ds_species_1)
+assert ds_species_2a.equals(ds_species_2)
+assert not ds_species_1a.equals(ds_species_1b)
+assert not ds_species_2a.equals(ds_species_2b)
+
+
+# %%
+# We have mentioned that by default, the ``method`` in the
+# :func:`ethology.datasets.split.split_dataset_group_by` function is set to
+# ``auto``, which automatically selects
+# the appropriate method based on the number of unique groups and
+# the requested number of folds. The number of required folds is calculated as
+# the closest integer to ``1 / min(list_fractions)``.
+
+# %%
+# In this case, we have 15 unique species, and 1/0.3 ~ 3 folds. Since
+# there are more unique groups than folds, the the ``auto`` setting defers to
+# the preferred  "group k-fold" method. The "group k-fold" method is preferred
+# because it allows us to compute different disjoint splits for the same
+# requested fractions via the ``seed`` parameter.
+
+# %%
+# If the number of unique groups is less than the requested
+# number of folds, the ``auto`` setting defers to
+# `approximate subset sum algorithm
+# <https://en.wikipedia.org/wiki/Subset_sum_problem#Fully-polynomial_time_approximation_scheme>`_.
+# to compute a solution. We explore this case in the next section.
+
+
+# %%
+# Split by input annotation file: approximate subset-sum approach
+# ----------------------------------------------------------------
+# Let's consider another case, in which we would like to split the images in
+# the dataset by the annotation file they come from.
+#
+# As before, we first compute the annotation file per image, which we
+# derive from the image filename. Then we add the annotation file array to
+# the dataset.
+
+# %%
+
+# Get annotation file per image
+annotation_file_per_image_id = np.array(
+    [
+        split_at_any_delimiter(
+            ds_all.map_image_id_to_filename[i],
+            ["\\"],
+        )[0]
+        for i in ds_all.image_id.values
+    ]
+)
+
+# Add to dataset
+ds_all["json_file"] = xr.DataArray(
+    annotation_file_per_image_id, dims="image_id"
+)
+
+
+# %%
+# We can now split the dataset by annotation file using the
+# :func:`ethology.datasets.split.split_dataset_group_by`
+# function with the ``method`` parameter set to ``apss``
+# (approximate subset-sum).
+
+# %%
+ds_annotations_1, ds_annotations_2 = split_dataset_group_by(
+    ds_all,
+    group_by_var="json_file",
+    list_fractions=[fraction_1, fraction_2],
+    method="apss",
+)
+
+# %%
+# The log message confirms we have used the "approximate subset-sum" method.
+# It also mentions an ``epsilon`` parameter, which is optional. This is the
+# percentage of the optimal solution that the solution is guaranteed to be
+# within. If ``epsilon`` is 0 (default), the solution will be the best solution
+# (optimal) for the requested fraction and grouping variable.
+#
+# The algorithm computes the smallest subset to be less than
+# or equal to the smallest requested fraction.
+
+# %%
+print(f"User specified fractions:{[fraction_1, fraction_2]}")
+
+output_fractions = [
+    len(ds_annotations_1.image_id.values) / len(ds_all.image_id.values),
+    len(ds_annotations_2.image_id.values) / len(ds_all.image_id.values),
+]
+print(f"Output split fractions for epsilon 0: {output_fractions}")
+
+print(f"Subset 1 files: {np.unique(ds_annotations_1.json_file.values)}")
+print(f"Subset 2 files: {np.unique(ds_annotations_2.json_file.values)}")
+
+
+# %%
+# We can verify that the subsets contain distinct annotation files.
+# Since we used the default ``epsilon=0``, this split is
+# the best solution we can get within the specified constraints.
+# In this case there are only three possible splits of the dataset, since
+# there are only three possible values for the source annotation file.
+#
+#
+# The choice of ``epsilon`` involves a trade-off
+# between accuracy and speed. In more cases with many possible splits,
+# we may want to use a larger ``epsilon`` value, to get faster to a
+# solution that is close enough to the optimal one.
+
+
+# %%
 # Split using random sampling
 # ----------------------------
 # Very often we want to compute splits for a specific fraction, and
-# don't care if a grouping variables (e.g. species or source video) are mixed
-# across subsets. This may be the case for example when splitting for
-# validation and training sets. In this case, we can use random sampling with
+# don't care if a grouping variable (such as "species" or
+# "source annotation file") is mixed across subsets.
+#
+# In this case, we can use random sampling with
 # the function
-# :func:`ethology.detectors.datasets.split_annotations_dataset_random`.
-# By setting a different value for the random ``seed``, we can get
-# different splits with the same requested fractions.
+# :func:`ethology.datasets.split.split_dataset_random`.
+# This function shuffles the dataset and then partitions it
+# according to the specified fractions. By setting a different value for the
+# ``seed``, we can again get different splits for the same requested
+# fractions.
 
 # %%
-fraction_1 = 0.27
-fraction_2 = 1 - fraction_1
-
 ds_species_1, ds_species_2 = split_dataset_random(
     ds_all,
     list_fractions=[fraction_1, fraction_2],
@@ -356,3 +443,5 @@ print(f"User specified fractions:{[fraction_1, fraction_2]}")
 print("Split fractions:")
 print(len(ds_species_1.image_id.values) / len(ds_all.image_id.values))
 print(len(ds_species_2.image_id.values) / len(ds_all.image_id.values))
+
+# %%
