@@ -21,6 +21,11 @@ classifiers = [
 dependencies = [
   "movement",
   "pandera[pandas]",
+  "pycocotools",
+  "scikit-learn",
+  "torch",
+  "torchvision",
+  "loguru",
 ]
 
 [project.urls]
@@ -35,6 +40,7 @@ dependencies = [
 dev = [
   "pytest",
   "pytest-cov",
+  "pytest-loguru",
   "coverage",
   "tox",
   "mypy",

@@ -1,13 +1,14 @@
-# Configuration file for the Sphinx documentation builder.
 """Sphinx configuration for ethology documentation."""
 
 import os
 import sys
 from importlib.metadata import version as get_version
 
+from sphinx_gallery import sorting
+
 # Used when building API docs, put the dependencies
 # of any class you are documenting here
-autodoc_mock_imports: list[str] = ["cv2", "torch"]
+autodoc_mock_imports: list[str] = ["cv2"]
 
 # Add the module path to sys.path here.
 # If the directory is relative to the documentation root,
@@ -179,7 +180,8 @@ intersphinx_mapping = {
     "matplotlib": ("https://matplotlib.org/stable/", None),
     "numpy": ("https://numpy.org/doc/stable/", None),
     "pandera": ("https://pandera.readthedocs.io/en/stable/", None),
-    "movement": ("https://movement.neuroinformatics.dev/", None),
+    "movement": ("https://movement.neuroinformatics.dev/latest/", None),
+    "sklearn": ("https://scikit-learn.org/stable/", None),
 }
 
 
@@ -207,6 +209,13 @@ notfound_urls_prefix = None
 
 sphinx_gallery_conf = {
     "examples_dirs": ["../../examples"],
+    "within_subsection_order": sorting.ExplicitOrder(
+        [
+            "coco_bbox_ethology_and_movement.py",
+            "approximate_subset_sum_split.py",
+            "*",
+        ]
+    ),
     "filename_pattern": "/*.py",  # which files to execute before inclusion
     "gallery_dirs": ["examples"],  # output directory
     "run_stale_examples": True,  # re-run examples on each build
