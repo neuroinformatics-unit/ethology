@@ -283,7 +283,7 @@ print(ds_as_movement.sizes)
 # Similarly, we set the time unit to ``frames``, but actually the images do not
 # represent consecutive images in time. We do this to later be able to
 # export the dataset in a format that we can
-# visualise in the `movement napari plugin <https://movement.neuroinformatics.dev/user_guide/gui.html>`_
+# visualise in the `movement napari plugin <https://movement.neuroinformatics.dev/latest/user_guide/gui.html>`_
 
 
 # %%
