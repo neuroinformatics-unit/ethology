@@ -19,7 +19,7 @@ classifiers = [
   "License :: OSI Approved :: BSD License",
 ]
 dependencies = [
-  "movement",
+  "movement>=0.10.0",  # save_bboxes.to_via_tracks_file added in 0.10.0
   "pandera[pandas]",
   "pycocotools",
   "scikit-learn",
@@ -89,7 +89,7 @@ exclude = ["__init__.py", "build", ".eggs"]
 fix = true
 
 [tool.ruff.lint]
-# See https://docs.astral.sh/ruff/rules/
+# See https:/`/docs.astral.sh/ruff/rules/
 ignore = [
   "D203", # one blank line before class
   "D213", # multi-line-summary second line
