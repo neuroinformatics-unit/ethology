@@ -26,6 +26,8 @@ except LookupError:
     # with a dummy version
     release = "0.0.0"
 
+doc_version = "dev" if "dev" in release else f"v{release}"
+
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
@@ -117,6 +119,11 @@ html_theme_options = {
             "type": "fontawesome",
         },
     ],
+    "switcher": {
+        "json_url": "https://ethology.neuroinformatics.dev/latest/_static/switcher.json",
+        "version_match": doc_version,
+    },
+    "navbar_end": ["version-switcher", "theme-switcher", "navbar-icon-links"],
     "logo": {
         "text": f"{project} v{release}",
     },
