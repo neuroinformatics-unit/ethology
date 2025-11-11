@@ -1,4 +1,4 @@
-"""Utilities for creating and manipulating datasets for detection."""
+"""Utilities for splitting annotations datasets."""
 
 from collections import Counter
 from typing import TypedDict
@@ -22,9 +22,9 @@ def split_dataset_group_by(
 
     Split an ``ethology`` annotations dataset into two subsets ensuring that
     the subsets are disjoint in the grouping variable (i.e., no group appears
-    in both subsets). Automatically chooses between a group k-fold approach
-    and an approximate subset-sum approach based on the number of unique
-    groups and requested split fractions.
+    in both subsets). The function automatically chooses between a
+    "group k-fold" approach and an "approximate subset-sum" approach based on
+    the number of unique groups and requested split fractions.
 
     Parameters
     ----------
@@ -40,29 +40,31 @@ def split_dataset_group_by(
         The coordinate along which to split the dataset. Default is
         ``image_id``.
     method : str, optional
-        Method to use: "auto", "kfold", or "apss". When "auto", automatically
-        selects between the two methods based on the number of unique groups.
-        Default is "auto".
+        Method to use: ``auto``, ``kfold``, or ``apss``. When ``auto``,
+        it automatically selects between ``kfold`` or ``apss`` based on
+        the number of unique groups. See Notes for further details.
+        Default is ``auto``.
     seed : int, optional
-        Random seed for reproducibility used in the group k-fold approach.
-        Controls both the shuffling of the indices and the random selection of
-        the output split from all possible ones. Only used when ``method`` is
-        "kfold" or when "auto" selects "kfold". Default is 42.
+        Random seed for reproducibility used in the "group k-fold" approach.
+        Controls both the shuffling of the sample indices and the random
+        selection of the output split from all possible ones. Only used when
+        ``method`` is ``kfold`` or when ``auto`` selects ``kfold``.
+        Default is 42.
     epsilon : float, optional
-        The approximation tolerance for the subset-sum method as a fraction
-        of 1. The sum of samples in the smallest subset is guaranteed to be
-        at least ``(1 - epsilon)`` times the optimal sum for the requested
-        fractions and grouping variable. When ``epsilon`` is 0, the algorithm
-        finds the exact optimal sum. Larger values result in faster
-        computation but may yield subsets with a total number of samples
-        further from optimal. Only used when ``method`` is "apss" or when
-        "auto" selects "apss". Default is 0.
+        The approximation tolerance for the "approximate subset-sum" approach,
+        expressed as a fraction of 1. The sum of samples in the smallest subset
+        is guaranteed to be at least ``(1 - epsilon)`` times the optimal sum
+        for the requested fractions and grouping variable. When ``epsilon``
+        is 0, the algorithm finds the exact optimal sum. Larger values result
+        in faster computation but may yield subsets with a total number of
+        samples further from the optimal. Only used when ``method`` is
+        ``apss`` or when ``auto`` selects ``apss``. Default is 0.
 
     Returns
     -------
     tuple[xarray.Dataset, xarray.Dataset]
         The two subsets of the input dataset. The subsets are returned in the
-        same order as the input list of fractions.
+        same order as the input list of fractions ``list_fractions``.
 
     Raises
     ------
@@ -70,20 +72,22 @@ def split_dataset_group_by(
         If the elements of ``list_fractions`` are not exactly two, are not
         between 0 and 1, or do not sum to 1. If ``group_by_var`` is not
         1-dimensional along the ``samples_coordinate``. If ``method`` is
-        "kfold" but there are insufficient groups for the requested split
+        ``kfold`` but there are insufficient groups for the requested split
         fractions.
 
     Notes
     -----
-    When ``method`` is "auto", the function automatically selects between two
+    When ``method`` is ``auto``, the function automatically selects between two
     approaches:
 
-    - **Group k-fold method** (default when sufficient groups): used when the
-      number of unique groups is greater than or equal to the number of
-      required folds (calculated as ``1 / min(list_fractions)``). This method
-      computes all possible partitions of groups into folds and randomly
+    - **Group k-fold method** (default when sufficient groups exist): used
+      when the number of unique groups is greater than or equal to the number
+      of required folds (calculated as ``1 / min(list_fractions)``). This
+      method computes all possible partitions of groups into folds and randomly
       selects one of them as the output split. The selection is controlled by
-      the ``seed`` parameter for reproducibility.
+      the ``seed`` parameter for reproducibility. We use
+      :class:`sklearn.model_selection.GroupKFold` cross-validator to compute
+      all possible partitions of groups into folds.
 
     - **Approximate subset-sum method** (fallback): used when there are too few
       unique groups for group k-fold splitting. This method deterministically
@@ -102,11 +106,13 @@ def split_dataset_group_by(
 
     Examples
     --------
-    Split a dataset with a single data variable ``video_id`` defined along the
-    ``image_id`` dimension into an 80/20 split, ensuring that the
-    subsets are disjoint in the grouping variable ``video_id``. Since there are
-    many groups (unique video IDs), the function automatically selects the
-    group k-fold method.
+    Split a dataset of 100 images extracted from 10 different videos.
+    The xarray dataset has a single data variable ``video_id`` defined along
+    the ``image_id`` dimension. We would like to compute an 80/20 split,
+    ensuring the subsets of the dataset are disjoint in the grouping
+    variable ``video_id``. Since there are many unique groups
+    (i.e., unique video IDs), the function automatically selects
+    the "group k-fold" method.
 
     >>> import xarray as xr
     >>> from ethology.datasets.split import split_dataset_group_by
@@ -123,22 +129,24 @@ def split_dataset_group_by(
     >>> print(len(ds_subset_2.image_id) / len(ds_large.image_id))  # 0.2
 
 
-    Using different seeds produces different splits when "kfold" is used:
+    Using different seeds produces different splits when the "group k-fold"
+    method is used:
 
-    >>> ds_subset_1_diff, ds_subset_2_diff = split_dataset_group_by(
+    >>> ds_subset_1b, ds_subset_2b = split_dataset_group_by(
     ...     ds_large, "video_id", [0.8, 0.2], seed=123
     ... )
-    >>> assert not ds_subset_1.equals(ds_subset_1_diff)
-    >>> assert not ds_subset_2.equals(ds_subset_2_diff)
-    >>> print(len(ds_subset_1_diff.image_id) / len(ds_large.image_id))  # 0.8
-    >>> print(len(ds_subset_2_diff.image_id) / len(ds_large.image_id))  # 0.2
+    >>> assert not ds_subset_1.equals(ds_subset_1b)
+    >>> assert not ds_subset_2.equals(ds_subset_2b)
+    >>> print(len(ds_subset_1b.image_id) / len(ds_large.image_id))  # 0.8
+    >>> print(len(ds_subset_2b.image_id) / len(ds_large.image_id))  # 0.2
 
     The function automatically selects the appropriate method. In the example
-    below, a dataset with 3 unique video IDs is used. With a 0.2 minimum
-    fraction (requiring 5 folds), the "kfold" method cannot be used, since
-    there would be more folds than groups. Therefore, the "apss" method is
-    selected automatically and an approximate split is returned. Note that
-    when using the "apss" method, the seed value is ignored.
+    below, a smaller dataset with 3 unique video IDs is used. With a 0.2
+    minimum fraction (requiring 5 folds), the "group k-fold" method cannot be
+    used, since there would be more folds than groups. Therefore, the
+    "approximate subset-sum" method is selected automatically and an
+    approximate split is returned. Note that when using the ``apss`` method,
+    the seed value is ignored.
 
     >>> ds_small = xr.Dataset(
     ...     data_vars=dict(
@@ -285,14 +293,14 @@ def _split_dataset_group_by_kfold(
     on the same dataset will always produce the same split. Using a different
     seed will produce a different split.
 
-    >>> ds_subset_1_diff, ds_subset_2_diff = _split_dataset_group_by_kfold(
+    >>> ds_subset_1b, ds_subset_2b = _split_dataset_group_by_kfold(
     >>>     ds,
     >>>     group_by_var="foo",
     >>>     list_fractions=[0.2, 0.8],
     >>>     seed=123,
     >>> )
-    >>> assert not ds_subset_1.equals(ds_subset_1_diff)
-    >>> assert not ds_subset_2.equals(ds_subset_2_diff)
+    >>> assert not ds_subset_1.equals(ds_subset_1b)
+    >>> assert not ds_subset_2.equals(ds_subset_2b)
 
     """
     # Initialise k-fold iterator
