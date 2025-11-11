@@ -1,0 +1,1242 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ethology.datasets.split &#8212; ethology</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=9c66c473" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../../../_static/documentation_options.js?v=52b040e4"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/ethology/datasets/split';</script>
+    <link rel="canonical" href="https://ethology.neuroinformatics.dev/_modules/ethology/datasets/split.html" />
+    <link rel="icon" href="../../../_static/light-logo-niu.png"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">ethology v0.0.5.dev3</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../installation.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api_index.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../community/index.html">
+    Community
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/neuroinformatics-unit/ethology" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://neuroinformatics.zulipchat.com/#narrow/channel/483869-Ethology" title="Zulip (chat)" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-comments fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Zulip (chat)</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../installation.html">
+    Installation
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../examples/index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api_index.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../community/index.html">
+    Community
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/neuroinformatics-unit/ethology" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://neuroinformatics.zulipchat.com/#narrow/channel/483869-Ethology" title="Zulip (chat)" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-comments fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Zulip (chat)</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../../index.html" class="nav-link">Module code</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">ethology.datasets.split</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for ethology.datasets.split</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Utilities for splitting annotations datasets.&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">Counter</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TypedDict</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">xarray</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">xr</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">loguru</span><span class="w"> </span><span class="kn">import</span> <span class="n">logger</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.model_selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">GroupKFold</span>
+
+
+<div class="viewcode-block" id="split_dataset_group_by">
+<a class="viewcode-back" href="../../../api/ethology.datasets.split.split_dataset_group_by.html#ethology.datasets.split.split_dataset_group_by">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">split_dataset_group_by</span><span class="p">(</span>
+    <span class="n">dataset</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span>
+    <span class="n">group_by_var</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">list_fractions</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span>
+    <span class="n">samples_coordinate</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;image_id&quot;</span><span class="p">,</span>
+    <span class="n">method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;auto&quot;</span><span class="p">,</span>
+    <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">42</span><span class="p">,</span>
+    <span class="n">epsilon</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Split an annotations dataset by grouping variable.</span>
+
+<span class="sd">    Split an ``ethology`` annotations dataset into two subsets ensuring that</span>
+<span class="sd">    the subsets are disjoint in the grouping variable (i.e., no group appears</span>
+<span class="sd">    in both subsets). The function automatically chooses between a</span>
+<span class="sd">    &quot;group k-fold&quot; approach and an &quot;approximate subset-sum&quot; approach based on</span>
+<span class="sd">    the number of unique groups and requested split fractions.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    dataset : xarray.Dataset</span>
+<span class="sd">        The annotations dataset to split.</span>
+<span class="sd">    group_by_var : str</span>
+<span class="sd">        The grouping variable to use for splitting the dataset. Must be</span>
+<span class="sd">        1-dimensional along the ``samples_coordinate``.</span>
+<span class="sd">    list_fractions : list[float, float]</span>
+<span class="sd">        The fractions of the input annotations dataset to allocate to</span>
+<span class="sd">        each subset. Must contain only two elements and sum to 1.</span>
+<span class="sd">    samples_coordinate : str, optional</span>
+<span class="sd">        The coordinate along which to split the dataset. Default is</span>
+<span class="sd">        ``image_id``.</span>
+<span class="sd">    method : str, optional</span>
+<span class="sd">        Method to use: ``auto``, ``kfold``, or ``apss``. When ``auto``,</span>
+<span class="sd">        it automatically selects between ``kfold`` or ``apss`` based on</span>
+<span class="sd">        the number of unique groups. See Notes for further details.</span>
+<span class="sd">        Default is ``auto``.</span>
+<span class="sd">    seed : int, optional</span>
+<span class="sd">        Random seed for reproducibility used in the &quot;group k-fold&quot; approach.</span>
+<span class="sd">        Controls both the shuffling of the sample indices and the random</span>
+<span class="sd">        selection of the output split from all possible ones. Only used when</span>
+<span class="sd">        ``method`` is ``kfold`` or when ``auto`` selects ``kfold``.</span>
+<span class="sd">        Default is 42.</span>
+<span class="sd">    epsilon : float, optional</span>
+<span class="sd">        The approximation tolerance for the &quot;approximate subset-sum&quot; approach,</span>
+<span class="sd">        expressed as a fraction of 1. The sum of samples in the smallest subset</span>
+<span class="sd">        is guaranteed to be at least ``(1 - epsilon)`` times the optimal sum</span>
+<span class="sd">        for the requested fractions and grouping variable. When ``epsilon``</span>
+<span class="sd">        is 0, the algorithm finds the exact optimal sum. Larger values result</span>
+<span class="sd">        in faster computation but may yield subsets with a total number of</span>
+<span class="sd">        samples further from the optimal. Only used when ``method`` is</span>
+<span class="sd">        ``apss`` or when ``auto`` selects ``apss``. Default is 0.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    tuple[xarray.Dataset, xarray.Dataset]</span>
+<span class="sd">        The two subsets of the input dataset. The subsets are returned in the</span>
+<span class="sd">        same order as the input list of fractions ``list_fractions``.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        If the elements of ``list_fractions`` are not exactly two, are not</span>
+<span class="sd">        between 0 and 1, or do not sum to 1. If ``group_by_var`` is not</span>
+<span class="sd">        1-dimensional along the ``samples_coordinate``. If ``method`` is</span>
+<span class="sd">        ``kfold`` but there are insufficient groups for the requested split</span>
+<span class="sd">        fractions.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    When ``method`` is ``auto``, the function automatically selects between two</span>
+<span class="sd">    approaches:</span>
+
+<span class="sd">    - **Group k-fold method** (default when sufficient groups exist): used</span>
+<span class="sd">      when the number of unique groups is greater than or equal to the number</span>
+<span class="sd">      of required folds (calculated as ``1 / min(list_fractions)``). This</span>
+<span class="sd">      method computes all possible partitions of groups into folds and randomly</span>
+<span class="sd">      selects one of them as the output split. The selection is controlled by</span>
+<span class="sd">      the ``seed`` parameter for reproducibility. We use</span>
+<span class="sd">      :class:`sklearn.model_selection.GroupKFold` cross-validator to compute</span>
+<span class="sd">      all possible partitions of groups into folds.</span>
+
+<span class="sd">    - **Approximate subset-sum method** (fallback): used when there are too few</span>
+<span class="sd">      unique groups for group k-fold splitting. This method deterministically</span>
+<span class="sd">      finds a subset of groups whose combined sample count best matches the</span>
+<span class="sd">      requested fractions. The ``epsilon`` parameter controls the</span>
+<span class="sd">      speed-accuracy tradeoff. When ``epsilon`` is 0, the algorithm finds the</span>
+<span class="sd">      exact optimal sum. Larger values of ``epsilon`` result in faster</span>
+<span class="sd">      computation but may yield subsets with a total number of samples further</span>
+<span class="sd">      from the optimal. In cases where no valid split exists (e.g., all groups</span>
+<span class="sd">      have more samples than the target), one subset may be empty and a</span>
+<span class="sd">      warning is logged.</span>
+
+<span class="sd">    See Also</span>
+<span class="sd">    --------</span>
+<span class="sd">    :class:`sklearn.model_selection.GroupKFold` : Group k-fold cross-validator.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    Split a dataset of 100 images extracted from 10 different videos.</span>
+<span class="sd">    The xarray dataset has a single data variable ``video_id`` defined along</span>
+<span class="sd">    the ``image_id`` dimension. We would like to compute an 80/20 split,</span>
+<span class="sd">    ensuring the subsets of the dataset are disjoint in the grouping</span>
+<span class="sd">    variable ``video_id``. Since there are many unique groups</span>
+<span class="sd">    (i.e., unique video IDs), the function automatically selects</span>
+<span class="sd">    the &quot;group k-fold&quot; method.</span>
+
+<span class="sd">    &gt;&gt;&gt; import xarray as xr</span>
+<span class="sd">    &gt;&gt;&gt; from ethology.datasets.split import split_dataset_group_by</span>
+<span class="sd">    &gt;&gt;&gt; ds_large = xr.Dataset(</span>
+<span class="sd">    ...     data_vars=dict(</span>
+<span class="sd">    ...         video_id=(&quot;image_id&quot;, np.tile(np.arange(10), 10)),</span>
+<span class="sd">    ...     ),  # 10 different video IDs across 100 images</span>
+<span class="sd">    ...     coords=dict(image_id=range(100)),</span>
+<span class="sd">    ... )</span>
+<span class="sd">    &gt;&gt;&gt; ds_subset_1, ds_subset_2 = split_dataset_group_by(</span>
+<span class="sd">    ...     ds_large, &quot;video_id&quot;, [0.8, 0.2], seed=42</span>
+<span class="sd">    ... )</span>
+<span class="sd">    &gt;&gt;&gt; print(len(ds_subset_1.image_id) / len(ds_large.image_id))  # 0.8</span>
+<span class="sd">    &gt;&gt;&gt; print(len(ds_subset_2.image_id) / len(ds_large.image_id))  # 0.2</span>
+
+
+<span class="sd">    Using different seeds produces different splits when the &quot;group k-fold&quot;</span>
+<span class="sd">    method is used:</span>
+
+<span class="sd">    &gt;&gt;&gt; ds_subset_1b, ds_subset_2b = split_dataset_group_by(</span>
+<span class="sd">    ...     ds_large, &quot;video_id&quot;, [0.8, 0.2], seed=123</span>
+<span class="sd">    ... )</span>
+<span class="sd">    &gt;&gt;&gt; assert not ds_subset_1.equals(ds_subset_1b)</span>
+<span class="sd">    &gt;&gt;&gt; assert not ds_subset_2.equals(ds_subset_2b)</span>
+<span class="sd">    &gt;&gt;&gt; print(len(ds_subset_1b.image_id) / len(ds_large.image_id))  # 0.8</span>
+<span class="sd">    &gt;&gt;&gt; print(len(ds_subset_2b.image_id) / len(ds_large.image_id))  # 0.2</span>
+
+<span class="sd">    The function automatically selects the appropriate method. In the example</span>
+<span class="sd">    below, a smaller dataset with 3 unique video IDs is used. With a 0.2</span>
+<span class="sd">    minimum fraction (requiring 5 folds), the &quot;group k-fold&quot; method cannot be</span>
+<span class="sd">    used, since there would be more folds than groups. Therefore, the</span>
+<span class="sd">    &quot;approximate subset-sum&quot; method is selected automatically and an</span>
+<span class="sd">    approximate split is returned. Note that when using the ``apss`` method,</span>
+<span class="sd">    the seed value is ignored.</span>
+
+<span class="sd">    &gt;&gt;&gt; ds_small = xr.Dataset(</span>
+<span class="sd">    ...     data_vars=dict(</span>
+<span class="sd">    ...         video_id=(&quot;image_id&quot;, [1, 0, 0, 2, 2, 2, 0, 0, 0, 0, 0, 1]),</span>
+<span class="sd">    ...     ),</span>
+<span class="sd">    ...     coords=dict(image_id=range(12)),</span>
+<span class="sd">    ... )</span>
+<span class="sd">    &gt;&gt;&gt; ds_subset_1, ds_subset_2 = split_dataset_group_by(</span>
+<span class="sd">    ...     ds_small,</span>
+<span class="sd">    ...     group_by_var=&quot;video_id&quot;,</span>
+<span class="sd">    ...     list_fractions=[0.8, 0.2],</span>
+<span class="sd">    ... )</span>
+<span class="sd">    &gt;&gt;&gt; print(len(ds_subset_1.image_id) / len(ds_small.image_id))  # 0.833</span>
+<span class="sd">    &gt;&gt;&gt; print(len(ds_subset_2.image_id) / len(ds_small.image_id))  # 0.166</span>
+
+<span class="sd">    The ``epsilon`` parameter controls the approximation for the subset-sum</span>
+<span class="sd">    method when auto-selected or explicitly specified:</span>
+
+<span class="sd">    &gt;&gt;&gt; ds_subset_1, ds_subset_2 = split_dataset_group_by(</span>
+<span class="sd">    ...     ds_small,</span>
+<span class="sd">    ...     group_by_var=&quot;video_id&quot;,</span>
+<span class="sd">    ...     list_fractions=[0.8, 0.2],</span>
+<span class="sd">    ...     epsilon=0.1,  # accept a solution &gt;= 90% of the optimal</span>
+<span class="sd">    ...     method=&quot;apss&quot;,</span>
+<span class="sd">    ... )</span>
+<span class="sd">    &gt;&gt;&gt; print(len(ds_subset_1.image_id) / len(ds_small.image_id))  # 0.833</span>
+<span class="sd">    &gt;&gt;&gt; print(len(ds_subset_2.image_id) / len(ds_small.image_id))  # 0.166</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Checks</span>
+    <span class="k">if</span> <span class="nb">sum</span><span class="p">(</span><span class="n">list_fractions</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The split fractions must sum to 1.&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">list_fractions</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The list of fractions must have only two elements.&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">fraction</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">fraction</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">for</span> <span class="n">fraction</span> <span class="ow">in</span> <span class="n">list_fractions</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The split fractions must be between 0 and 1.&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">dataset</span><span class="p">[</span><span class="n">group_by_var</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;The grouping variable </span><span class="si">{</span><span class="n">group_by_var</span><span class="si">}</span><span class="s2"> must be 1-dimensional along&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="n">samples_coordinate</span><span class="si">}</span><span class="s2">.&quot;</span>
+        <span class="p">)</span>
+
+    <span class="c1"># Count unique groups</span>
+    <span class="n">n_unique_groups</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">dataset</span><span class="p">[</span><span class="n">group_by_var</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">))</span>
+    <span class="n">n_required_folds</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">rint</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="nb">min</span><span class="p">(</span><span class="n">list_fractions</span><span class="p">)))</span>
+
+    <span class="c1"># Auto-select method</span>
+    <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;auto&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">n_unique_groups</span> <span class="o">&gt;=</span> <span class="n">n_required_folds</span><span class="p">:</span>
+            <span class="n">method</span> <span class="o">=</span> <span class="s2">&quot;kfold&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">method</span> <span class="o">=</span> <span class="s2">&quot;apss&quot;</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Only </span><span class="si">{</span><span class="n">n_unique_groups</span><span class="si">}</span><span class="s2"> unique groups exist but &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">n_required_folds</span><span class="si">}</span><span class="s2"> are required for k-fold method. &quot;</span>
+                <span class="s2">&quot;Auto-selected approximate subset-sum method &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;with epsilon=</span><span class="si">{</span><span class="n">epsilon</span><span class="si">}</span><span class="s2">. Seed setting is ignored.&quot;</span>
+            <span class="p">)</span>
+
+    <span class="c1"># Dispatch to appropriate method</span>
+    <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;kfold&quot;</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Using group k-fold method with </span><span class="si">{</span><span class="n">n_required_folds</span><span class="si">}</span><span class="s2"> folds &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;and seed=</span><span class="si">{</span><span class="n">seed</span><span class="si">}</span><span class="s2">.&quot;</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">_split_dataset_group_by_kfold</span><span class="p">(</span>
+            <span class="n">dataset</span><span class="p">,</span> <span class="n">group_by_var</span><span class="p">,</span> <span class="n">list_fractions</span><span class="p">,</span> <span class="n">samples_coordinate</span><span class="p">,</span> <span class="n">seed</span>
+        <span class="p">)</span>
+    <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;apss&quot;</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Using approximate subset-sum method with epsilon=</span><span class="si">{</span><span class="n">epsilon</span><span class="si">}</span><span class="s2">.&quot;</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">_split_dataset_group_by_apss</span><span class="p">(</span>
+            <span class="n">dataset</span><span class="p">,</span> <span class="n">group_by_var</span><span class="p">,</span> <span class="n">list_fractions</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">,</span> <span class="n">samples_coordinate</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown method: </span><span class="si">{</span><span class="n">method</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_split_dataset_group_by_kfold</span><span class="p">(</span>
+    <span class="n">dataset</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span>
+    <span class="n">group_by_var</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">list_fractions</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span>
+    <span class="n">samples_coordinate</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;image_id&quot;</span><span class="p">,</span>
+    <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">42</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Split an annotations dataset using scikit-learn&#39;s GroupKFold.</span>
+
+<span class="sd">    Split an ``ethology`` annotations dataset into two subsets</span>
+<span class="sd">    ensuring that the subsets are disjoint in the grouping variable.</span>
+<span class="sd">    This method uses scikit-learn&#39;s GroupKFold cross-validator to</span>
+<span class="sd">    randomly partition groups into folds and then selects one fold</span>
+<span class="sd">    as the smaller subset and the remaining folds as the larger subset.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    dataset : xarray.Dataset</span>
+<span class="sd">        The annotations dataset to split.</span>
+<span class="sd">    group_by_var : str</span>
+<span class="sd">        The grouping variable to use for splitting the dataset. Must be</span>
+<span class="sd">        1-dimensional along the ``samples_coordinate``.</span>
+<span class="sd">    list_fractions : list[float, float]</span>
+<span class="sd">        The fractions of the input annotations dataset to allocate to</span>
+<span class="sd">        each subset. Must contain only two elements and sum to 1.</span>
+<span class="sd">    samples_coordinate : str, optional</span>
+<span class="sd">        The coordinate along which to split the dataset. Default is</span>
+<span class="sd">        ``image_id``.</span>
+<span class="sd">    seed : int, optional</span>
+<span class="sd">        Random seed for reproducibility. Controls both the GroupKFold</span>
+<span class="sd">        indices shuffling and the random selection of the output split from</span>
+<span class="sd">        all the possible ones. Default is 42.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    tuple[xarray.Dataset, xarray.Dataset]</span>
+<span class="sd">        The two subsets of the input dataset. The subsets are returned in the</span>
+<span class="sd">        same order as the input list of fractions.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    ValueError</span>
+
+<span class="sd">        If the elements of ``list_fractions`` are not exactly two, are not</span>
+<span class="sd">        between 0 and 1, or do not sum to 1. If ``group_by_var`` is not</span>
+<span class="sd">        1-dimensional along the ``samples_coordinate``.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    Split a dataset with a single data variable ``foo`` defined along the</span>
+<span class="sd">    ``image_id`` dimension into an 80/20 split, ensuring that the</span>
+<span class="sd">    subsets are disjoint in the grouping variable ``foo``.</span>
+
+<span class="sd">    &gt;&gt;&gt; from ethology.datasets.split import _split_dataset_group_by_kfold</span>
+<span class="sd">    &gt;&gt;&gt; import xarray as xr</span>
+<span class="sd">    &gt;&gt;&gt; ds = xr.Dataset(</span>
+<span class="sd">    &gt;&gt;&gt;     data_vars=dict(</span>
+<span class="sd">    &gt;&gt;&gt;         foo=(&quot;image_id&quot;, [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]),</span>
+<span class="sd">    &gt;&gt;&gt;     ),  # 0: 10 counts, 1: 2 counts</span>
+<span class="sd">    &gt;&gt;&gt;     coords=dict(</span>
+<span class="sd">    &gt;&gt;&gt;         image_id=range(12),</span>
+<span class="sd">    &gt;&gt;&gt;     ),</span>
+<span class="sd">    &gt;&gt;&gt; )</span>
+<span class="sd">    &gt;&gt;&gt; ds_subset_1, ds_subset_2 = _split_dataset_group_by_kfold(</span>
+<span class="sd">    &gt;&gt;&gt;     ds,</span>
+<span class="sd">    &gt;&gt;&gt;     group_by_var=&quot;foo&quot;,</span>
+<span class="sd">    &gt;&gt;&gt;     list_fractions=[0.2, 0.8],</span>
+<span class="sd">    &gt;&gt;&gt;     seed=42,</span>
+<span class="sd">    &gt;&gt;&gt; )</span>
+
+<span class="sd">    The ``seed`` parameter ensures reproducibility. Using the same seed</span>
+<span class="sd">    on the same dataset will always produce the same split. Using a different</span>
+<span class="sd">    seed will produce a different split.</span>
+
+<span class="sd">    &gt;&gt;&gt; ds_subset_1b, ds_subset_2b = _split_dataset_group_by_kfold(</span>
+<span class="sd">    &gt;&gt;&gt;     ds,</span>
+<span class="sd">    &gt;&gt;&gt;     group_by_var=&quot;foo&quot;,</span>
+<span class="sd">    &gt;&gt;&gt;     list_fractions=[0.2, 0.8],</span>
+<span class="sd">    &gt;&gt;&gt;     seed=123,</span>
+<span class="sd">    &gt;&gt;&gt; )</span>
+<span class="sd">    &gt;&gt;&gt; assert not ds_subset_1.equals(ds_subset_1b)</span>
+<span class="sd">    &gt;&gt;&gt; assert not ds_subset_2.equals(ds_subset_2b)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Initialise k-fold iterator</span>
+    <span class="n">n_folds_per_shuffle</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">rint</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="nb">min</span><span class="p">(</span><span class="n">list_fractions</span><span class="p">)))</span>
+    <span class="n">gkf</span> <span class="o">=</span> <span class="n">GroupKFold</span><span class="p">(</span>
+        <span class="n">n_splits</span><span class="o">=</span><span class="n">n_folds_per_shuffle</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="n">seed</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Compute all possible shuffles</span>
+    <span class="c1"># In each shuffle, one fold is the test set,</span>
+    <span class="c1"># the rest of folds make up the train set</span>
+    <span class="n">train_test_idcs_per_shuffle</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
+        <span class="n">gkf</span><span class="o">.</span><span class="n">split</span><span class="p">(</span>
+            <span class="n">dataset</span><span class="p">[</span><span class="n">samples_coordinate</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
+            <span class="n">groups</span><span class="o">=</span><span class="n">dataset</span><span class="p">[</span><span class="n">group_by_var</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Randomly pick one of the shuffles</span>
+    <span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+    <span class="n">shuffle_idx</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">train_test_idcs_per_shuffle</span><span class="p">))</span>
+    <span class="n">train_idcs</span><span class="p">,</span> <span class="n">test_idcs</span> <span class="o">=</span> <span class="n">train_test_idcs_per_shuffle</span><span class="p">[</span><span class="n">shuffle_idx</span><span class="p">]</span>
+
+    <span class="c1"># Split the datasets</span>
+    <span class="n">ds_train</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">isel</span><span class="p">({</span><span class="n">samples_coordinate</span><span class="p">:</span> <span class="n">train_idcs</span><span class="p">})</span>
+    <span class="n">ds_test</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">isel</span><span class="p">({</span><span class="n">samples_coordinate</span><span class="p">:</span> <span class="n">test_idcs</span><span class="p">})</span>
+    <span class="n">list_ds_sorted</span> <span class="o">=</span> <span class="p">[</span><span class="n">ds_test</span><span class="p">,</span> <span class="n">ds_train</span><span class="p">]</span>  <span class="c1"># sorted in increasing size</span>
+
+    <span class="c1"># Return datasets in the same order as the input list of fractions</span>
+    <span class="n">idcs_sorted</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">list_fractions</span><span class="p">)</span>  <span class="c1"># idcs to map input -&gt; sorted</span>
+    <span class="n">idcs_original</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">idcs_sorted</span><span class="p">)</span>  <span class="c1"># idcs to map sorted -&gt; input</span>
+
+    <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">list_ds_sorted</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">idcs_original</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_split_dataset_group_by_apss</span><span class="p">(</span>
+    <span class="n">dataset</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span>
+    <span class="n">group_by_var</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">list_fractions</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span>
+    <span class="n">epsilon</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="n">samples_coordinate</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;image_id&quot;</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Split an annotations dataset using an approximate subset-sum approach.</span>
+
+<span class="sd">    Split an ``ethology`` annotations dataset into two subsets</span>
+<span class="sd">    ensuring that the subsets are disjoint in the grouping variable.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    dataset : xarray.Dataset</span>
+<span class="sd">        The annotations dataset to split.</span>
+<span class="sd">    group_by_var : str</span>
+<span class="sd">        The grouping variable to use for splitting the dataset. Must be</span>
+<span class="sd">        1-dimensional along the ``samples_coordinate``.</span>
+<span class="sd">    list_fractions : list[float, float]</span>
+<span class="sd">        The fractions of the input annotations dataset to allocate to</span>
+<span class="sd">        each subset. Must contain only two elements and sum to 1.</span>
+<span class="sd">    epsilon : float, optional</span>
+<span class="sd">        The approximation tolerance for the subset sum as a fraction of 1.</span>
+<span class="sd">        The sum of samples in the smallest subset is guaranteed to be at</span>
+<span class="sd">        least ``(1 - epsilon)`` times the optimal sum for the requested</span>
+<span class="sd">        fractions and grouping variable. When ``epsilon`` is 0, the algorithm</span>
+<span class="sd">        finds the exact optimal sum. Larger values result in faster</span>
+<span class="sd">        computation but may yield subsets with a total number of samples</span>
+<span class="sd">        further from optimal. Default is 0.</span>
+<span class="sd">    samples_coordinate : str, optional</span>
+<span class="sd">        The coordinate along which to split the dataset. Default is</span>
+<span class="sd">        ``image_id``.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    tuple[xarray.Dataset, xarray.Dataset]</span>
+<span class="sd">        The two subsets of the input dataset. The subsets are returned in the</span>
+<span class="sd">        same order as the input list of fractions.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    ValueError</span>
+
+<span class="sd">        If the elements of ``list_fractions`` are not exactly two, are not</span>
+<span class="sd">        between 0 and 1, or do not sum to 1. If ``group_by_var`` is not</span>
+<span class="sd">        1-dimensional along the ``samples_coordinate``.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    Split a dataset with a single data variable ``foo`` defined along the</span>
+<span class="sd">    ``image_id`` dimension into an approximate 80/20 split, ensuring that the</span>
+<span class="sd">    subsets are disjoint in the grouping variable ``foo``.</span>
+
+<span class="sd">    &gt;&gt;&gt; from ethology.datasets.split import _split_dataset_group_by_apss</span>
+<span class="sd">    &gt;&gt;&gt; import xarray as xr</span>
+<span class="sd">    &gt;&gt;&gt; ds = xr.Dataset(</span>
+<span class="sd">    &gt;&gt;&gt;     data_vars=dict(</span>
+<span class="sd">    &gt;&gt;&gt;         foo=(&quot;image_id&quot;, [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]),</span>
+<span class="sd">    &gt;&gt;&gt;     ),  # 0: 10 counts, 1: 2 counts</span>
+<span class="sd">    &gt;&gt;&gt;     coords=dict(</span>
+<span class="sd">    &gt;&gt;&gt;         image_id=range(12),</span>
+<span class="sd">    &gt;&gt;&gt;     ),</span>
+<span class="sd">    &gt;&gt;&gt; )</span>
+<span class="sd">    &gt;&gt;&gt; ds_subset_1, ds_subset_2 = _split_dataset_group_by_apss(</span>
+<span class="sd">    &gt;&gt;&gt;     ds,</span>
+<span class="sd">    &gt;&gt;&gt;     group_by_var=&quot;foo&quot;,</span>
+<span class="sd">    &gt;&gt;&gt;     list_fractions=[0.2, 0.8],</span>
+<span class="sd">    &gt;&gt;&gt;     epsilon=0,</span>
+<span class="sd">    &gt;&gt;&gt; )</span>
+<span class="sd">    &gt;&gt;&gt; print(len(ds_subset_1.image_id) / len(ds.image_id))  # 0.166</span>
+<span class="sd">    &gt;&gt;&gt; print(len(ds_subset_2.image_id) / len(ds.image_id))  # 0.833</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Compute number of samples in target subset</span>
+    <span class="c1"># the target subset is the subset with the smallest fraction.</span>
+    <span class="n">target_subset_count</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span>
+        <span class="nb">min</span><span class="p">(</span><span class="n">list_fractions</span><span class="p">)</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">samples_coordinate</span><span class="p">))</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Get list of (id, count) tuples</span>
+    <span class="c1"># Count number of samples per group and sort by count in ascending order</span>
+    <span class="n">count_per_group_id</span> <span class="o">=</span> <span class="n">Counter</span><span class="p">(</span><span class="n">dataset</span><span class="p">[</span><span class="n">group_by_var</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">)</span><span class="o">.</span><span class="n">most_common</span><span class="p">()[</span>
+        <span class="p">::</span><span class="o">-</span><span class="mi">1</span>
+    <span class="p">]</span>
+
+    <span class="c1"># Cast group ids to integers and create mapping</span>
+    <span class="n">map_group_id_int_to_original</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">count_per_group_id_as_int</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="p">(</span><span class="n">group_id</span><span class="p">,</span> <span class="n">count</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">count_per_group_id</span><span class="p">):</span>
+        <span class="c1"># try casting group ID as integer</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">int_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">group_id</span><span class="p">)</span>
+        <span class="c1"># if not castable: use ID from enumerate</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">):</span>
+            <span class="n">int_id</span> <span class="o">=</span> <span class="n">idx</span>
+        <span class="n">count_per_group_id_as_int</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">int_id</span><span class="p">,</span> <span class="n">count</span><span class="p">))</span>
+        <span class="n">map_group_id_int_to_original</span><span class="p">[</span><span class="n">int_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">group_id</span>
+
+    <span class="c1"># Get group ids (as integers) for target subset</span>
+    <span class="n">subset_dict</span> <span class="o">=</span> <span class="n">_approximate_subset_sum</span><span class="p">(</span>
+        <span class="n">count_per_group_id_as_int</span><span class="p">,</span>
+        <span class="n">target_subset_count</span><span class="p">,</span>
+        <span class="n">epsilon</span><span class="o">=</span><span class="n">epsilon</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Get original group IDs (they are not necessarily integers)</span>
+    <span class="n">subset_group_ids</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">map_group_id_int_to_original</span><span class="p">[</span><span class="n">x</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">subset_dict</span><span class="p">[</span><span class="s2">&quot;ids&quot;</span><span class="p">]</span>
+    <span class="p">]</span>
+
+    <span class="c1"># Extract datasets for target subset and not target subset</span>
+    <span class="n">ds_subset</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">isel</span><span class="p">(</span>
+        <span class="p">{</span><span class="n">samples_coordinate</span><span class="p">:</span> <span class="n">dataset</span><span class="p">[</span><span class="n">group_by_var</span><span class="p">]</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">subset_group_ids</span><span class="p">)}</span>
+    <span class="p">)</span>
+    <span class="n">ds_not_subset</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">isel</span><span class="p">(</span>
+        <span class="p">{</span><span class="n">samples_coordinate</span><span class="p">:</span> <span class="o">~</span><span class="n">dataset</span><span class="p">[</span><span class="n">group_by_var</span><span class="p">]</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">subset_group_ids</span><span class="p">)}</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Throw warning if a subset is empty</span>
+    <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">image_id</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">ds</span> <span class="ow">in</span> <span class="p">[</span><span class="n">ds_subset</span><span class="p">,</span> <span class="n">ds_not_subset</span><span class="p">]):</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;At least one of the subset datasets is empty.&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Return datasets in the same order as the input list of fractions</span>
+    <span class="c1"># (argsort twice gives the inverse permutation)</span>
+    <span class="n">idcs_sorted</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">list_fractions</span><span class="p">)</span>  <span class="c1"># idcs to map input -&gt; sorted</span>
+    <span class="n">idcs_original</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">idcs_sorted</span><span class="p">)</span>  <span class="c1"># idcs to map sorted -&gt; input</span>
+
+    <span class="n">list_ds_sorted</span> <span class="o">=</span> <span class="p">[</span><span class="n">ds_subset</span><span class="p">,</span> <span class="n">ds_not_subset</span><span class="p">]</span>
+    <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">list_ds_sorted</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">idcs_original</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="split_dataset_random">
+<a class="viewcode-back" href="../../../api/ethology.datasets.split.split_dataset_random.html#ethology.datasets.split.split_dataset_random">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">split_dataset_random</span><span class="p">(</span>
+    <span class="n">dataset</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span>
+    <span class="n">list_fractions</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span>
+    <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">42</span><span class="p">,</span>
+    <span class="n">samples_coordinate</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;image_id&quot;</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Split an annotations dataset using random sampling.</span>
+
+<span class="sd">    Split an ``ethology`` annotations dataset into multiple subsets by randomly</span>
+<span class="sd">    shuffling all samples and then partitioning them sequentially according to</span>
+<span class="sd">    the specified fractions.</span>
+
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    dataset : xarray.Dataset</span>
+<span class="sd">        The annotations dataset to split.</span>
+<span class="sd">    list_fractions : list[float, ...]</span>
+<span class="sd">        The fractions of the input annotations dataset to allocate to</span>
+<span class="sd">        each subset. The list must contain at least two elements, all elements</span>
+<span class="sd">        must be between 0 and 1, and add up to 1.</span>
+<span class="sd">    seed : int, optional</span>
+<span class="sd">        Seed to use for the random number generator. Default is 42.</span>
+<span class="sd">    samples_coordinate : str, optional</span>
+<span class="sd">        The coordinate along which to split the dataset. Default is</span>
+<span class="sd">        ``image_id``.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    tuple[xarray.Dataset, ...]</span>
+<span class="sd">        The subsets of the input dataset. The subsets are returned in the</span>
+<span class="sd">        same order as the input list of fractions.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        If the elements of ``list_fractions`` are less than two, are not</span>
+<span class="sd">        between 0 and 1, or do not sum to 1.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    Split a dataset with a single data variable ``foo``, with 100 values</span>
+<span class="sd">    defined along the ``image_id`` dimension into 70/20/10 splits.</span>
+
+<span class="sd">    &gt;&gt;&gt; from ethology.datasets.split import split_dataset_random</span>
+<span class="sd">    &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">    &gt;&gt;&gt; import xarray as xr</span>
+<span class="sd">    &gt;&gt;&gt; ds = xr.Dataset(</span>
+<span class="sd">    ...     data_vars=dict(</span>
+<span class="sd">    ...         foo=(&quot;image_id&quot;, np.random.randint(0, 100, size=100)),</span>
+<span class="sd">    ...     ),</span>
+<span class="sd">    ...     coords=dict(</span>
+<span class="sd">    ...         image_id=range(100),</span>
+<span class="sd">    ...     ),</span>
+<span class="sd">    ... )</span>
+<span class="sd">    &gt;&gt;&gt; ds_train, ds_val, ds_test = split_dataset_random(</span>
+<span class="sd">    ...     ds,</span>
+<span class="sd">    ...     list_fractions=[0.7, 0.2, 0.1],</span>
+<span class="sd">    ...     seed=42,</span>
+<span class="sd">    ... )</span>
+<span class="sd">    &gt;&gt;&gt; print(len(ds_train.image_id))  # 70</span>
+<span class="sd">    &gt;&gt;&gt; print(len(ds_val.image_id))  # 20</span>
+<span class="sd">    &gt;&gt;&gt; print(len(ds_test.image_id))  # 10</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    The function operates in two steps: first, it shuffles all sample indices</span>
+<span class="sd">    along the ``samples_coordinate`` dimension using the provided random seed;</span>
+<span class="sd">    then, it partitions the shuffled indices into contiguous blocks, one for</span>
+<span class="sd">    each subset.</span>
+
+<span class="sd">    The size of each block is determined by rounding down (floor) the product</span>
+<span class="sd">    of the subset&#39;s fraction and the total number of samples. To ensure all</span>
+<span class="sd">    samples are included, the last subset receives any remaining samples after</span>
+<span class="sd">    the earlier subsets have been allocated. Due to this rounding behavior,</span>
+<span class="sd">    the actual fraction for the last subset may differ slightly from the</span>
+<span class="sd">    requested fraction.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Checks</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">list_fractions</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">&quot;The list of fractions must have at least two elements.&quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">fraction</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">fraction</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">for</span> <span class="n">fraction</span> <span class="ow">in</span> <span class="n">list_fractions</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The split fractions must be between 0 and 1.&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">sum</span><span class="p">(</span><span class="n">list_fractions</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The split fractions must sum to 1.&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Compute number of samples for each split</span>
+    <span class="n">list_n_samples</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">n_total_samples</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">samples_coordinate</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">fraction</span> <span class="ow">in</span> <span class="n">list_fractions</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+        <span class="n">list_n_samples</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">fraction</span> <span class="o">*</span> <span class="n">n_total_samples</span><span class="p">))</span>
+    <span class="c1"># append the remaining samples to the last split</span>
+    <span class="n">list_n_samples</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">n_total_samples</span> <span class="o">-</span> <span class="nb">sum</span><span class="p">(</span><span class="n">list_n_samples</span><span class="p">))</span>
+
+    <span class="c1"># Shuffle all indices</span>
+    <span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+    <span class="n">shuffled_idcs</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">permutation</span><span class="p">(</span><span class="n">n_total_samples</span><span class="p">)</span>
+
+    <span class="c1"># Extract datasets for each split</span>
+    <span class="n">list_ds</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">start_idx</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">n_samples</span> <span class="ow">in</span> <span class="n">list_n_samples</span><span class="p">:</span>
+        <span class="n">end_idx</span> <span class="o">=</span> <span class="n">start_idx</span> <span class="o">+</span> <span class="n">n_samples</span>
+        <span class="n">list_ds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">dataset</span><span class="o">.</span><span class="n">isel</span><span class="p">(</span>
+                <span class="p">{</span><span class="n">samples_coordinate</span><span class="p">:</span> <span class="n">shuffled_idcs</span><span class="p">[</span><span class="n">start_idx</span><span class="p">:</span><span class="n">end_idx</span><span class="p">]}</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">start_idx</span> <span class="o">=</span> <span class="n">end_idx</span>
+
+    <span class="c1"># Throw warning if a subset is empty</span>
+    <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">image_id</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">ds</span> <span class="ow">in</span> <span class="n">list_ds</span><span class="p">):</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;At least one of the subset datasets is empty.&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Return subsets in the same order as the input list of fractions</span>
+    <span class="c1"># (argsort twice gives the inverse permutation)</span>
+    <span class="n">idcs_sorted</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">list_fractions</span><span class="p">)</span>  <span class="c1"># idcs to map input -&gt; sorted</span>
+    <span class="n">idcs_original</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">idcs_sorted</span><span class="p">)</span>  <span class="c1"># idcs to map sorted -&gt; input</span>
+    <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">list_ds</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">idcs_original</span><span class="p">)</span></div>
+
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">_SubsetDict</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Subset dictionary.</span>
+
+<span class="sd">    Each subset dictionary is made up of a list of ``group IDs`` (&quot;ids&quot;) and</span>
+<span class="sd">    their total ``group count`` (&quot;sum&quot;). Used as a type definition for the</span>
+<span class="sd">    approximate subset sum algorithm.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    sum : int</span>
+<span class="sd">        The total ``group count`` of the subset.</span>
+<span class="sd">    ids : list[int]</span>
+<span class="sd">        The list of ``group IDs`` in the subset.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nb">sum</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">ids</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_approximate_subset_sum</span><span class="p">(</span>
+    <span class="n">list_id_counts</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]],</span> <span class="n">target</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">:</span> <span class="nb">float</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_SubsetDict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Find a subset of the input list whose sum is maximum but below target.</span>
+
+<span class="sd">    The input is a list of pairs (``group IDs``, ``group count``). We want</span>
+<span class="sd">    to extract a subset of elements from this list such that their total</span>
+<span class="sd">    ``group count`` is as close as possible but does not exceed the</span>
+<span class="sd">    ``target`` value.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    list_id_counts : list[tuple[int, int]]</span>
+<span class="sd">        The list of pairs (``group IDs``, ``group count``).</span>
+<span class="sd">    target : int</span>
+<span class="sd">        The target value for the total ``group count`` of the subset.</span>
+<span class="sd">    epsilon : float</span>
+<span class="sd">        The approximation tolerance for the subset sum as a fraction of 1.</span>
+<span class="sd">        When ``epsilon`` is 0, the algorithm finds the optimal subset for the</span>
+<span class="sd">        requested target value and input list. Larger values of ``epsilon``</span>
+<span class="sd">        result in faster computation but may yield subsets with a total</span>
+<span class="sd">        ``group count`` further from the optimal.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    _SubsetDict</span>
+<span class="sd">        The subset dictionary.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    Warning</span>
+<span class="sd">        If all groups in the input list have more samples than the target</span>
+<span class="sd">        value. In this case, the function returns an empty subset.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    The function uses a fully polynomial-time approximation scheme (FPTAS) to</span>
+<span class="sd">    approximately solve this subset sum problem. When ``epsilon`` is 0, it</span>
+<span class="sd">    finds the exact optimal subset. When ``epsilon`` &gt; 0, it returns an</span>
+<span class="sd">    approximate solution guaranteed to be within ``epsilon`` times the optimal</span>
+<span class="sd">    sum from below. Using an ``epsilon`` value larger than 0 may be convenient</span>
+<span class="sd">    in cases with a large number of subsets for faster runtime.</span>
+
+<span class="sd">    The algorithm iteratively processes each element in the input list,</span>
+<span class="sd">    maintaining a list of candidate subsets whose total ``group counts`` falls</span>
+<span class="sd">    below the target. At each iteration, it removes near duplicate subsets</span>
+<span class="sd">    from the list of candidates (&quot;trimming&quot;) to prevent exponential growth,</span>
+<span class="sd">    while ensuring the total approximation error stays within ``epsilon``.</span>
+<span class="sd">    Two subsets are near duplicates if their total ``group count`` is</span>
+<span class="sd">    sufficiently close.</span>
+
+<span class="sd">    Note that ``epsilon`` bounds the error from below relative to the optimal</span>
+<span class="sd">    subset sum, not the ``target``. If ``OPT`` is the best possible subset sum</span>
+<span class="sd">    below or equal to ``target``, the result is guaranteed to be</span>
+<span class="sd">    at least ``(1 - epsilon)*OPT``. E.g. for ``epsilon = 0.2``,</span>
+<span class="sd">    the result is guaranteed to be at least ``0.8*OPT``.</span>
+
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+<span class="sd">    .. [1] https://en.wikipedia.org/wiki/Subset_sum_problem#Fully-polynomial_time_approximation_scheme</span>
+<span class="sd">    .. [2] https://nerderati.com/bartering-for-beers-with-approximate-subset-sums/</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Checks</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">list_id_counts</span><span class="p">])</span> <span class="o">&gt;</span> <span class="n">target</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+            <span class="s2">&quot;All groups have more samples than the target value. &quot;</span>
+            <span class="s2">&quot;Returning empty subset.&quot;</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;sum&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;ids&quot;</span><span class="p">:</span> <span class="p">[]}</span>
+
+    <span class="c1"># Initialize list of candidate subsets</span>
+    <span class="n">list_subsets</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">_SubsetDict</span><span class="p">]</span> <span class="o">=</span> <span class="p">[{</span><span class="s2">&quot;sum&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;ids&quot;</span><span class="p">:</span> <span class="p">[]}]</span>
+
+    <span class="c1"># Loop thru list of (id, count) pairs</span>
+    <span class="k">for</span> <span class="nb">id</span><span class="p">,</span> <span class="n">count</span> <span class="ow">in</span> <span class="n">list_id_counts</span><span class="p">:</span>
+        <span class="c1"># Add current (id, count) pair to each candidate subset in the list</span>
+        <span class="c1"># if the resulting subset sum is below the target.</span>
+        <span class="n">list_subsets</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;sum&quot;</span><span class="p">:</span> <span class="n">subset</span><span class="p">[</span><span class="s2">&quot;sum&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">count</span><span class="p">,</span>
+                    <span class="s2">&quot;ids&quot;</span><span class="p">:</span> <span class="n">subset</span><span class="p">[</span><span class="s2">&quot;ids&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="nb">id</span><span class="p">],</span>
+                <span class="p">}</span>
+                <span class="k">for</span> <span class="n">subset</span> <span class="ow">in</span> <span class="n">list_subsets</span>
+                <span class="k">if</span> <span class="n">subset</span><span class="p">[</span><span class="s2">&quot;sum&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">count</span> <span class="o">&lt;=</span> <span class="n">target</span>
+            <span class="p">]</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Remove near-duplicate subsets in terms of total group count (&quot;sum&quot;)</span>
+        <span class="c1"># At each iteration of the loop, trimming introduces a small error.</span>
+        <span class="c1"># The algorithm runs n iterations (one per item), so errors can</span>
+        <span class="c1"># compound. Using ``delta = epsilon / (2n)`` ensures that when errors</span>
+        <span class="c1"># compound over iterations, the total error stays within ``epsilon``.</span>
+        <span class="n">list_subsets</span> <span class="o">=</span> <span class="n">_remove_near_duplicate_subsets</span><span class="p">(</span>
+            <span class="n">list_subsets</span><span class="p">,</span>
+            <span class="n">delta</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">epsilon</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">list_id_counts</span><span class="p">)),</span>
+        <span class="p">)</span>
+
+    <span class="c1"># Return the subset with highest sum but below the target</span>
+    <span class="k">return</span> <span class="n">list_subsets</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_remove_near_duplicate_subsets</span><span class="p">(</span>
+    <span class="n">list_subsets</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">_SubsetDict</span><span class="p">],</span> <span class="n">delta</span><span class="p">:</span> <span class="nb">float</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">_SubsetDict</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Remove near-duplicate subsets from the list in terms of their total sum.</span>
+
+<span class="sd">    Keeps only subsets whose sum is sufficiently larger than the previous</span>
+<span class="sd">    subset sum in ascending order. When two subsets have sums within</span>
+<span class="sd">    ``delta``% of each other, retains the smaller one (which is visited first</span>
+<span class="sd">    after sorting).</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    list_subsets : list[_SubsetDict]</span>
+<span class="sd">        The list of candidate subsets. Each subset is a dictionary with a list</span>
+<span class="sd">        of ``group IDs`` (&quot;ids&quot;) and their total ``group count`` (&quot;sum&quot;).</span>
+<span class="sd">    delta : float</span>
+<span class="sd">        If two subsets are within ``delta``% of each other, they are considered</span>
+<span class="sd">        near duplicates and the smaller one is removed.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    list[_SubsetDict]</span>
+<span class="sd">        The list of subsets after trimming.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Ensure list of subsets is sorted by total sum, in ascending order</span>
+    <span class="n">list_subsets</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">list_subsets</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="s2">&quot;sum&quot;</span><span class="p">])</span>
+
+    <span class="c1"># Keep only subsets whose sum is delta% larger than the previous one</span>
+    <span class="n">list_subsets_trimmed</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">list_subsets</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="p">]</span>  <span class="c1"># always retain the zero subset; [{&quot;sum&quot;: 0, &quot;ids&quot;: []}]</span>
+    <span class="n">previous_subset_sum</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">subset</span> <span class="ow">in</span> <span class="n">list_subsets</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>  <span class="c1"># do not trim zero subset</span>
+        <span class="k">if</span> <span class="n">subset</span><span class="p">[</span><span class="s2">&quot;sum&quot;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">previous_subset_sum</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">delta</span><span class="p">):</span>
+            <span class="n">list_subsets_trimmed</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">subset</span><span class="p">)</span>
+            <span class="n">previous_subset_sum</span> <span class="o">=</span> <span class="n">subset</span><span class="p">[</span><span class="s2">&quot;sum&quot;</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">list_subsets_trimmed</span>
+</pre></div>
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item"><p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    <br/>
+    </p>
+    <p class="theme-version">
+    Built with the
+    <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a>
+    0.16.1.
+    </p></div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item"><div class="things-in-a-row">
+    <a href="https://neuroinformatics.dev/">
+        <img src="../../../_static/light-logo-niu.png" alt="Sponsors" class="only-light img-sponsor"/>
+        <img src="../../../_static/dark-logo-niu.png" alt="Sponsors" class="only-dark img-sponsor"/>
+    </a>
+    <a href="https://www.sainsburywellcome.org/web/">
+        <img src="../../../_static/light-logo-swc.png" alt="Sponsors" class="only-light img-sponsor"/>
+        <img src="../../../_static/dark-logo-swc.png" alt="Sponsors" class="only-dark img-sponsor"/>
+    </a>
+    <a href="https://www.ucl.ac.uk/gatsby/gatsby-computational-neuroscience-unit">
+        <img src="../../../_static/light-logo-gatsby.png" alt="Sponsors" class="only-light img-sponsor"/>
+        <img src="../../../_static/dark-logo-gatsby.png" alt="Sponsors" class="only-dark img-sponsor"/>
+    </a>
+    <a href="https://www.ucl.ac.uk/">
+        <img src="../../../_static/light-logo-ucl.png" alt="Sponsors" class="only-light img-sponsor"/>
+        <img src="../../../_static/dark-logo-ucl.png" alt="Sponsors" class="only-dark img-sponsor"/>
+    </a>
+</div></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

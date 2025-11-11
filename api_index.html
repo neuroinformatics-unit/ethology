@@ -44,7 +44,7 @@
   <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="_static/documentation_options.js?v=f6c8c4fd"></script>
+    <script src="_static/documentation_options.js?v=52b040e4"></script>
     <script src="_static/doctools.js?v=9bcbadda"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/design-tabs.js?v=f930bc37"></script>
@@ -54,8 +54,8 @@
     <link rel="icon" href="_static/light-logo-niu.png"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="ethology.io.annotations.load_bboxes" href="api/ethology.io.annotations.load_bboxes.html" />
-    <link rel="prev" title="Load bounding box COCO annotations into ethology" href="examples/load_annotations_dataset.html" />
+    <link rel="next" title="ethology.datasets.split" href="api/ethology.datasets.split.html" />
+    <link rel="prev" title="Split an annotations dataset" href="examples/approximate_subset_sum_split.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="" />
@@ -120,7 +120,7 @@
   
   
   
-    <p class="title logo__title">ethology v0.0.5.dev2</p>
+    <p class="title logo__title">ethology v0.0.5.dev3</p>
   
 </a></div>
     
@@ -345,6 +345,11 @@
      aria-label="Section Navigation">
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="api/ethology.datasets.split.html">ethology.datasets.split</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/ethology.datasets.split.split_dataset_group_by.html">split_dataset_group_by</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/ethology.datasets.split.split_dataset_random.html">split_dataset_random</a></li>
+</ul>
+</details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="api/ethology.io.annotations.load_bboxes.html">ethology.io.annotations.load_bboxes</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="api/ethology.io.annotations.load_bboxes.from_files.html">from_files</a></li>
 </ul>
@@ -424,13 +429,16 @@
 <p class="rubric">Modules</p>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="api/ethology.io.annotations.load_bboxes.html#module-ethology.io.annotations.load_bboxes" title="ethology.io.annotations.load_bboxes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ethology.io.annotations.load_bboxes</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="api/ethology.datasets.split.html#module-ethology.datasets.split" title="ethology.datasets.split"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ethology.datasets.split</span></code></a></p></td>
+<td><p>Utilities for splitting annotations datasets.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="api/ethology.io.annotations.load_bboxes.html#module-ethology.io.annotations.load_bboxes" title="ethology.io.annotations.load_bboxes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ethology.io.annotations.load_bboxes</span></code></a></p></td>
 <td><p>Load bounding boxes annotations into <code class="docutils literal notranslate"><span class="pre">ethology</span></code>.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="api/ethology.io.annotations.save_bboxes.html#module-ethology.io.annotations.save_bboxes" title="ethology.io.annotations.save_bboxes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ethology.io.annotations.save_bboxes</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="api/ethology.io.annotations.save_bboxes.html#module-ethology.io.annotations.save_bboxes" title="ethology.io.annotations.save_bboxes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ethology.io.annotations.save_bboxes</span></code></a></p></td>
 <td><p>Save <code class="docutils literal notranslate"><span class="pre">ethology</span></code> bounding box annotations datasets to various formats.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="api/ethology.io.annotations.validate.html#module-ethology.io.annotations.validate" title="ethology.io.annotations.validate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ethology.io.annotations.validate</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="api/ethology.io.annotations.validate.html#module-ethology.io.annotations.validate" title="ethology.io.annotations.validate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ethology.io.annotations.validate</span></code></a></p></td>
 <td><p>Validators for annotation files and datasets.</p></td>
 </tr>
 </tbody>
@@ -449,20 +457,20 @@
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="examples/load_annotations_dataset.html"
+       href="examples/approximate_subset_sum_split.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Load bounding box COCO annotations into <code class="docutils literal notranslate"><span class="pre">ethology</span></code></p>
+        <p class="prev-next-title">Split an annotations dataset</p>
       </div>
     </a>
     <a class="right-next"
-       href="api/ethology.io.annotations.load_bboxes.html"
+       href="api/ethology.datasets.split.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">ethology.io.annotations.load_bboxes</p>
+        <p class="prev-next-title">ethology.datasets.split</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>

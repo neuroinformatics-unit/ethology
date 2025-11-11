@@ -43,7 +43,7 @@
   <link rel="preload" as="script" href="../../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../../_static/documentation_options.js?v=f6c8c4fd"></script>
+    <script src="../../../../_static/documentation_options.js?v=52b040e4"></script>
     <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/design-tabs.js?v=f930bc37"></script>
@@ -117,7 +117,7 @@
   
   
   
-    <p class="title logo__title">ethology v0.0.5.dev2</p>
+    <p class="title logo__title">ethology v0.0.5.dev3</p>
   
 </a></div>
     
@@ -416,12 +416,12 @@
 <a class="viewcode-back" href="../../../../api/ethology.io.annotations.save_bboxes.to_COCO_file.html#ethology.io.annotations.save_bboxes.to_COCO_file">[docs]</a>
 <span class="nd">@_check_input</span><span class="p">(</span><span class="n">validator</span><span class="o">=</span><span class="n">ValidBboxesDataset</span><span class="p">)</span>
 <span class="nd">@_check_output</span><span class="p">(</span><span class="n">validator</span><span class="o">=</span><span class="n">ValidCOCO</span><span class="p">)</span>  <span class="c1"># check output is ethology importable</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">to_COCO_file</span><span class="p">(</span><span class="n">ds</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">output_filepath</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">to_COCO_file</span><span class="p">(</span><span class="n">dataset</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">output_filepath</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Save an ``ethology`` bounding box annotations dataset to a COCO file.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    ds : xarray.Dataset</span>
+<span class="sd">    dataset : xarray.Dataset</span>
 <span class="sd">        Bounding boxes annotations xarray dataset.</span>
 <span class="sd">    output_filepath : str or pathlib.Path</span>
 <span class="sd">        Path for the output COCO file.</span>
@@ -440,7 +440,7 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Compute valid COCO dataframe from xarray dataset</span>
-    <span class="n">df</span> <span class="o">=</span> <span class="n">_to_COCO_exportable_df</span><span class="p">(</span><span class="n">ds</span><span class="p">)</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">_to_COCO_exportable_df</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
 
     <span class="c1"># Create COCO dictionary from dataframe and export</span>
     <span class="n">COCO_dict</span> <span class="o">=</span> <span class="n">_create_COCO_dict</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>

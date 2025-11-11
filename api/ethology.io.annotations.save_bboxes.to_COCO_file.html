@@ -44,7 +44,7 @@
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../_static/documentation_options.js?v=f6c8c4fd"></script>
+    <script src="../_static/documentation_options.js?v=52b040e4"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/design-tabs.js?v=f930bc37"></script>
@@ -120,7 +120,7 @@
   
   
   
-    <p class="title logo__title">ethology v0.0.5.dev2</p>
+    <p class="title logo__title">ethology v0.0.5.dev3</p>
   
 </a></div>
     
@@ -345,6 +345,11 @@
      aria-label="Section Navigation">
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="ethology.datasets.split.html">ethology.datasets.split</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="ethology.datasets.split.split_dataset_group_by.html">split_dataset_group_by</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ethology.datasets.split.split_dataset_random.html">split_dataset_random</a></li>
+</ul>
+</details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="ethology.io.annotations.load_bboxes.html">ethology.io.annotations.load_bboxes</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="ethology.io.annotations.load_bboxes.from_files.html">from_files</a></li>
 </ul>
@@ -428,12 +433,12 @@
 <h1>to_COCO_file<a class="headerlink" href="#to-coco-file" title="Link to this heading">#</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="ethology.io.annotations.save_bboxes.to_COCO_file">
-<span class="sig-prename descclassname"><span class="pre">ethology.io.annotations.save_bboxes.</span></span><span class="sig-name descname"><span class="pre">to_COCO_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_filepath</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ethology/io/annotations/save_bboxes.html#to_COCO_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ethology.io.annotations.save_bboxes.to_COCO_file" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">ethology.io.annotations.save_bboxes.</span></span><span class="sig-name descname"><span class="pre">to_COCO_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_filepath</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ethology/io/annotations/save_bboxes.html#to_COCO_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ethology.io.annotations.save_bboxes.to_COCO_file" title="Link to this definition">#</a></dt>
 <dd><p>Save an <code class="docutils literal notranslate"><span class="pre">ethology</span></code> bounding box annotations dataset to a COCO file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>ds</strong> (<a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="(in xarray v2025.10.1)"><em>xarray.Dataset</em></a>) – Bounding boxes annotations xarray dataset.</p></li>
+<li><p><strong>dataset</strong> (<a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="(in xarray v2025.10.1)"><em>xarray.Dataset</em></a>) – Bounding boxes annotations xarray dataset.</p></li>
 <li><p><strong>output_filepath</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><em>pathlib.Path</em></a>) – Path for the output COCO file.</p></li>
 </ul>
 </dd>

@@ -6,7 +6,7 @@
 
 Computation times
 =================
-**00:05.382** total execution time for 1 file **from examples**:
+**00:27.098** total execution time for 2 files **from examples**:
 
 .. container::
 
@@ -32,6 +32,9 @@ Computation times
    * - Example
      - Time
      - Mem (MB)
-   * - :ref:`sphx_glr_examples_load_annotations_dataset.py` (``load_annotations_dataset.py``)
-     - 00:05.382
+   * - :ref:`sphx_glr_examples_approximate_subset_sum_split.py` (``approximate_subset_sum_split.py``)
+     - 00:21.660
+     - 0.0
+   * - :ref:`sphx_glr_examples_coco_bbox_ethology_and_movement.py` (``coco_bbox_ethology_and_movement.py``)
+     - 00:05.438
      - 0.0

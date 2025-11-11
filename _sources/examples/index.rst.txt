@@ -18,18 +18,35 @@ other computer vision tools.
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="Load bounding box annotations in COCO format as an ethology dataset and inspect it using ethology and movement utilities.">
+    <div class="sphx-glr-thumbcontainer" tooltip="Load COCO bounding box annotations and inspect them using ethology and movement.">
 
 .. only:: html
 
-  .. image:: /examples/images/thumb/sphx_glr_load_annotations_dataset_thumb.png
+  .. image:: /examples/images/thumb/sphx_glr_coco_bbox_ethology_and_movement_thumb.png
     :alt:
 
-  :ref:`sphx_glr_examples_load_annotations_dataset.py`
+  :ref:`sphx_glr_examples_coco_bbox_ethology_and_movement.py`
 
 .. raw:: html
 
-      <div class="sphx-glr-thumbnail-title">Load bounding box COCO annotations into ethology</div>
+      <div class="sphx-glr-thumbnail-title">Inspect COCO annotations using ethology and movement</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Split an annotations dataset by grouping variable, and compare to random splitting.">
+
+.. only:: html
+
+  .. image:: /examples/images/thumb/sphx_glr_approximate_subset_sum_split_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_approximate_subset_sum_split.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Split an annotations dataset</div>
     </div>
 
 
@@ -43,7 +60,8 @@ other computer vision tools.
 .. toctree::
    :hidden:
 
-   /examples/load_annotations_dataset
+   /examples/coco_bbox_ethology_and_movement
+   /examples/approximate_subset_sum_split
 
 
 .. only:: html

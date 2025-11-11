@@ -16,6 +16,7 @@ Information on specific functions, classes, and methods.
     :recursive:
     :nosignatures:
 
+    ethology.datasets.split
     ethology.io.annotations.load_bboxes
     ethology.io.annotations.save_bboxes
     ethology.io.annotations.validate

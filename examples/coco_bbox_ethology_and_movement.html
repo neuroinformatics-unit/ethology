@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Load bounding box COCO annotations into ethology &#8212; ethology</title>
+    <title>Inspect COCO annotations using ethology and movement &#8212; ethology</title>
   
   
   
@@ -44,17 +44,17 @@
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../_static/documentation_options.js?v=f6c8c4fd"></script>
+    <script src="../_static/documentation_options.js?v=52b040e4"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/design-tabs.js?v=f930bc37"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'examples/load_annotations_dataset';</script>
-    <link rel="canonical" href="https://ethology.neuroinformatics.dev/examples/load_annotations_dataset.html" />
+    <script>DOCUMENTATION_OPTIONS.pagename = 'examples/coco_bbox_ethology_and_movement';</script>
+    <link rel="canonical" href="https://ethology.neuroinformatics.dev/examples/coco_bbox_ethology_and_movement.html" />
     <link rel="icon" href="../_static/light-logo-niu.png"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="API reference" href="../api_index.html" />
+    <link rel="next" title="Split an annotations dataset" href="approximate_subset_sum_split.html" />
     <link rel="prev" title="Examples" href="index.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
@@ -120,7 +120,7 @@
   
   
   
-    <p class="title logo__title">ethology v0.0.5.dev2</p>
+    <p class="title logo__title">ethology v0.0.5.dev3</p>
   
 </a></div>
     
@@ -345,7 +345,8 @@
      aria-label="Section Navigation">
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">Load bounding box COCO annotations into <code class="docutils literal notranslate"><span class="pre">ethology</span></code></a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Inspect COCO annotations using <code class="docutils literal notranslate"><span class="pre">ethology</span></code> and <code class="docutils literal notranslate"><span class="pre">movement</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="approximate_subset_sum_split.html">Split an annotations dataset</a></li>
 </ul>
 </div>
 </nav></div>
@@ -389,7 +390,7 @@
     
     <li class="breadcrumb-item"><a href="index.html" class="nav-link">Examples</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Load bounding box COCO annotations into <code class="docutils literal notranslate"><span class="pre">ethology</span></code></span></li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Inspect COCO annotations using <code class="docutils literal notranslate"><span class="pre">ethology</span></code> and <code class="docutils literal notranslate"><span class="pre">movement</span></code></span></li>
   </ul>
 </nav>
 </div>
@@ -408,14 +409,14 @@
                   
   <div class="sphx-glr-download-link-note admonition note">
 <p class="admonition-title">Note</p>
-<p><a class="reference internal" href="#sphx-glr-download-examples-load-annotations-dataset-py"><span class="std std-ref">Go to the end</span></a>
+<p><a class="reference internal" href="#sphx-glr-download-examples-coco-bbox-ethology-and-movement-py"><span class="std std-ref">Go to the end</span></a>
 to download the full example code. or to run this example in your browser via Binder</p>
 </div>
-<section class="sphx-glr-example-title" id="load-bounding-box-coco-annotations-into-ethology">
-<span id="sphx-glr-examples-load-annotations-dataset-py"></span><h1>Load bounding box COCO annotations into <code class="docutils literal notranslate"><span class="pre">ethology</span></code><a class="headerlink" href="#load-bounding-box-coco-annotations-into-ethology" title="Link to this heading">#</a></h1>
-<p>Load bounding box annotations in <a class="reference external" href="https://cocodataset.org/#format-data">COCO format</a>
-as an <code class="docutils literal notranslate"><span class="pre">ethology</span></code> dataset and inspect it using <code class="docutils literal notranslate"><span class="pre">ethology</span></code> and
-<a class="reference external" href="https://movement.neuroinformatics.dev/">movement</a> utilities.</p>
+<section class="sphx-glr-example-title" id="inspect-coco-annotations-using-ethology-and-movement">
+<span id="sphx-glr-examples-coco-bbox-ethology-and-movement-py"></span><h1>Inspect COCO annotations using <code class="docutils literal notranslate"><span class="pre">ethology</span></code> and <code class="docutils literal notranslate"><span class="pre">movement</span></code><a class="headerlink" href="#inspect-coco-annotations-using-ethology-and-movement" title="Link to this heading">#</a></h1>
+<p>Load <a class="reference external" href="https://cocodataset.org/#format-data">COCO</a> bounding box annotations
+and inspect them using <code class="docutils literal notranslate"><span class="pre">ethology</span></code> and
+<a class="reference external" href="https://movement.neuroinformatics.dev/">movement</a>.</p>
 <section id="imports">
 <h2>Imports<a class="headerlink" href="#imports" title="Link to this heading">#</a></h2>
 <div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
@@ -426,8 +427,8 @@ as an <code class="docutils literal notranslate"><span class="pre">ethology</spa
 <span class="kn">import</span><span class="w"> </span><span class="nn">pooch</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">xarray</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">xr</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">movement.io</span><span class="w"> </span><span class="kn">import</span> <span class="n">save_bboxes</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">movement.plots</span><span class="w"> </span><span class="kn">import</span> <a href="https://movement.neuroinformatics.dev/api/movement.plots.plot_occupancy.html#movement.plots.plot_occupancy" title="movement.plots.plot_occupancy" class="sphx-glr-backref-module-movement-plots sphx-glr-backref-type-py-function"><span class="n">plot_occupancy</span></a>
-<span class="kn">from</span><span class="w"> </span><span class="nn">movement.roi</span><span class="w"> </span><span class="kn">import</span> <a href="https://movement.neuroinformatics.dev/api/movement.roi.PolygonOfInterest.html#movement.roi.PolygonOfInterest" title="movement.roi.PolygonOfInterest" class="sphx-glr-backref-module-movement-roi sphx-glr-backref-type-py-class"><span class="n">PolygonOfInterest</span></a>
+<span class="kn">from</span><span class="w"> </span><span class="nn">movement.plots</span><span class="w"> </span><span class="kn">import</span> <a href="https://movement.neuroinformatics.dev/latest/api/movement.plots.plot_occupancy.html#movement.plots.plot_occupancy" title="movement.plots.plot_occupancy" class="sphx-glr-backref-module-movement-plots sphx-glr-backref-type-py-function"><span class="n">plot_occupancy</span></a>
+<span class="kn">from</span><span class="w"> </span><span class="nn">movement.roi</span><span class="w"> </span><span class="kn">import</span> <a href="https://movement.neuroinformatics.dev/latest/api/movement.roi.PolygonOfInterest.html#movement.roi.PolygonOfInterest" title="movement.roi.PolygonOfInterest" class="sphx-glr-backref-module-movement-roi sphx-glr-backref-type-py-class"><span class="n">PolygonOfInterest</span></a>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">ethology.io.annotations</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_bboxes</span>
 
@@ -482,7 +483,7 @@ to download it to the <code class="docutils literal notranslate"><span class="pr
 </section>
 <section id="load-annotations-as-an-ethology-dataset">
 <h2>Load annotations as an <code class="docutils literal notranslate"><span class="pre">ethology</span></code> dataset<a class="headerlink" href="#load-annotations-as-an-ethology-dataset" title="Link to this heading">#</a></h2>
-<p>We can use the <a class="reference internal" href="../api/ethology.io.annotations.load_bboxes.from_files.html#ethology.io.annotations.load_bboxes.from_files" title="ethology.io.annotations.load_bboxes.from_files"><code class="xref py py-func docutils literal notranslate"><span class="pre">ethology.io.annotations.load_bboxes.from_files()</span></code></a>
+<p>We can use the <a class="reference internal" href="../api/ethology.io.annotations.load_bboxes.from_files.html#ethology.io.annotations.load_bboxes.from_files" title="ethology.io.annotations.load_bboxes.from_files"><code class="xref py py-func docutils literal notranslate"><span class="pre">from_files()</span></code></a>
 function to load the COCO file with the
 expert annotations as an <code class="docutils literal notranslate"><span class="pre">ethology</span></code> dataset.</p>
 <div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><a href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="xarray.core.dataset.Dataset" class="sphx-glr-backref-module-xarray-core-dataset sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ds</span></a> <span class="o">=</span> <a href="../api/ethology.io.annotations.load_bboxes.from_files.html#ethology.io.annotations.load_bboxes.from_files" title="ethology.io.annotations.load_bboxes.from_files" class="sphx-glr-backref-module-ethology-io-annotations-load_bboxes sphx-glr-backref-type-py-function"><span class="n">load_bboxes</span><span class="o">.</span><span class="n">from_files</span></a><span class="p">(</span><a href="https://docs.python.org/3/library/pathlib.html#pathlib.PosixPath" title="pathlib.PosixPath" class="sphx-glr-backref-module-pathlib sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">annotations_file</span></a><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;COCO&quot;</span><span class="p">)</span>
@@ -604,7 +605,8 @@ by species.</p>
 <span class="c1"># Note: we use ds.category.values rather than</span>
 <span class="c1"># ds.map_category_to_str.values() because</span>
 <span class="c1"># the array contains the padding value -1,</span>
-<span class="c1"># which is also included in the scatter plot data.</span>
+<span class="c1"># which is also included in the colormap of the</span>
+<span class="c1"># scatter plot.</span>
 <a href="https://docs.python.org/3/library/stdtypes.html#list" title="builtins.list" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">legend_elements</span></a> <span class="o">=</span> <span class="p">[</span>
     <a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.lines.Line2D.html#matplotlib.lines.Line2D" title="matplotlib.lines.Line2D" class="sphx-glr-backref-module-matplotlib-lines sphx-glr-backref-type-py-class"><span class="n">plt</span><span class="o">.</span><span class="n">Line2D</span></a><span class="p">([</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.colors.ListedColormap.html#matplotlib.colors.ListedColormap" title="matplotlib.colors.ListedColormap" class="sphx-glr-backref-module-matplotlib-colors sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">cmap</span></a><span class="p">(</span><span class="n">i</span><span class="p">))</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.unique.html#numpy.unique" title="numpy.unique" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">unique</span></a><span class="p">(</span><a href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.values.html#xarray.DataArray.values" title="xarray.DataArray.values" class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-property"><span class="n">ds</span><span class="o">.</span><span class="n">category</span><span class="o">.</span><span class="n">values</span></a><span class="p">)</span>
 <span class="p">]</span>
@@ -622,16 +624,16 @@ by species.</p>
 <a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.tight_layout.html#matplotlib.pyplot.tight_layout" title="matplotlib.pyplot.tight_layout" class="sphx-glr-backref-module-matplotlib-pyplot sphx-glr-backref-type-py-function"><span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span></a><span class="p">()</span>
 </pre></div>
 </div>
-<img src="../_images/sphx_glr_load_annotations_dataset_001.png" srcset="../_images/sphx_glr_load_annotations_dataset_001.png" alt="Annotations per category" class = "sphx-glr-single-img"/></section>
+<img src="../_images/sphx_glr_coco_bbox_ethology_and_movement_001.png" srcset="../_images/sphx_glr_coco_bbox_ethology_and_movement_001.png" alt="Annotations per category" class = "sphx-glr-single-img"/></section>
 <section id="count-annotations-within-a-region-of-interest">
 <h2>Count annotations within a region of interest<a class="headerlink" href="#count-annotations-within-a-region-of-interest" title="Link to this heading">#</a></h2>
 <p>We may want to compute the number of annotations within a specific region of
 the image. We can do this using
 <a class="reference external" href="https://movement.neuroinformatics.dev/">movement</a>
-to define a <a class="reference external" href="https://movement.neuroinformatics.dev/api/movement.roi.PolygonOfInterest.html#movement.roi.PolygonOfInterest" title="(in movement)"><code class="xref py py-class docutils literal notranslate"><span class="pre">movement.roi.PolygonOfInterest</span></code></a> and then
+to define a <a class="reference external" href="https://movement.neuroinformatics.dev/latest/api/movement.roi.PolygonOfInterest.html#movement.roi.PolygonOfInterest" title="(in movement)"><code class="xref py py-class docutils literal notranslate"><span class="pre">movement.roi.PolygonOfInterest</span></code></a> and then
 count how many annotations are within the polygon.</p>
 <div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Define a polygon</span>
-<a href="https://movement.neuroinformatics.dev/api/movement.roi.PolygonOfInterest.html#movement.roi.PolygonOfInterest" title="movement.roi.PolygonOfInterest" class="sphx-glr-backref-module-movement-roi sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">central_region</span></a> <span class="o">=</span> <a href="https://movement.neuroinformatics.dev/api/movement.roi.PolygonOfInterest.html#movement.roi.PolygonOfInterest" title="movement.roi.PolygonOfInterest" class="sphx-glr-backref-module-movement-roi sphx-glr-backref-type-py-class"><span class="n">PolygonOfInterest</span></a><span class="p">(</span>
+<a href="https://movement.neuroinformatics.dev/latest/api/movement.roi.PolygonOfInterest.html#movement.roi.PolygonOfInterest" title="movement.roi.PolygonOfInterest" class="sphx-glr-backref-module-movement-roi sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">central_region</span></a> <span class="o">=</span> <a href="https://movement.neuroinformatics.dev/latest/api/movement.roi.PolygonOfInterest.html#movement.roi.PolygonOfInterest" title="movement.roi.PolygonOfInterest" class="sphx-glr-backref-module-movement-roi sphx-glr-backref-type-py-class"><span class="n">PolygonOfInterest</span></a><span class="p">(</span>
     <span class="p">((</span><span class="mi">1000</span><span class="p">,</span> <span class="mi">500</span><span class="p">),</span> <span class="p">(</span><span class="mi">1000</span><span class="p">,</span> <span class="mi">3000</span><span class="p">),</span> <span class="p">(</span><span class="mi">4500</span><span class="p">,</span> <span class="mi">3000</span><span class="p">),</span> <span class="p">(</span><span class="mi">4500</span><span class="p">,</span> <span class="mi">500</span><span class="p">)),</span>
     <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Central region&quot;</span><span class="p">,</span>
 <span class="p">)</span>
@@ -653,11 +655,11 @@ count how many annotations are within the polygon.</p>
 
 
 <span class="c1"># Plot ROI (region of interest) polygon on top</span>
-<a href="https://movement.neuroinformatics.dev/api/movement.roi.PolygonOfInterest.html#movement.roi.PolygonOfInterest.plot" title="movement.roi.PolygonOfInterest.plot" class="sphx-glr-backref-module-movement-roi sphx-glr-backref-type-py-method"><span class="n">central_region</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span><a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes" title="matplotlib.axes.Axes" class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ax</span></a><span class="p">,</span> <span class="n">facecolor</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.25</span><span class="p">)</span>
+<a href="https://movement.neuroinformatics.dev/latest/api/movement.roi.PolygonOfInterest.html#movement.roi.PolygonOfInterest.plot" title="movement.roi.PolygonOfInterest.plot" class="sphx-glr-backref-module-movement-roi sphx-glr-backref-type-py-method"><span class="n">central_region</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span><a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes" title="matplotlib.axes.Axes" class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ax</span></a><span class="p">,</span> <span class="n">facecolor</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.25</span><span class="p">)</span>
 
 <span class="c1"># Check the number of annotations in the polygon</span>
 <span class="c1"># Note: if position is NaN, ``.contains_point`` returns ``False``</span>
-<a href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.html#xarray.DataArray" title="xarray.core.dataarray.DataArray" class="sphx-glr-backref-module-xarray-core-dataarray sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ds_in_region</span></a> <span class="o">=</span> <a href="https://movement.neuroinformatics.dev/api/movement.roi.PolygonOfInterest.html#movement.roi.PolygonOfInterest.contains_point" title="movement.roi.PolygonOfInterest.contains_point" class="sphx-glr-backref-module-movement-roi sphx-glr-backref-type-py-method"><span class="n">central_region</span><span class="o">.</span><span class="n">contains_point</span></a><span class="p">(</span>
+<a href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.html#xarray.DataArray" title="xarray.core.dataarray.DataArray" class="sphx-glr-backref-module-xarray-core-dataarray sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ds_in_region</span></a> <span class="o">=</span> <a href="https://movement.neuroinformatics.dev/latest/api/movement.roi.PolygonOfInterest.html#movement.roi.PolygonOfInterest.contains_point" title="movement.roi.PolygonOfInterest.contains_point" class="sphx-glr-backref-module-movement-roi sphx-glr-backref-type-py-method"><span class="n">central_region</span><span class="o">.</span><span class="n">contains_point</span></a><span class="p">(</span>
     <a href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.html#xarray.DataArray" title="xarray.core.dataarray.DataArray" class="sphx-glr-backref-module-xarray-core-dataarray sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ds</span><span class="o">.</span><span class="n">position</span></a>
 <span class="p">)</span>  <span class="c1"># shape: (n_images, n_max_annotations_per_image)</span>
 
@@ -670,7 +672,7 @@ count how many annotations are within the polygon.</p>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Fraction of annotations in region: </span><span class="si">{</span><a href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.html#xarray.DataArray" title="xarray.core.dataarray.DataArray" class="sphx-glr-backref-module-xarray-core-dataarray sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">fraction_in_region</span></a><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">100</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">%&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<img src="../_images/sphx_glr_load_annotations_dataset_002.png" srcset="../_images/sphx_glr_load_annotations_dataset_002.png" alt="Annotations in polygon" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Total annotations: 2243
+<img src="../_images/sphx_glr_coco_bbox_ethology_and_movement_002.png" srcset="../_images/sphx_glr_coco_bbox_ethology_and_movement_002.png" alt="Annotations in polygon" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Total annotations: 2243
 Annotations in region: 1155
 Fraction of annotations in region: 51.49%
 </pre></div>
@@ -683,19 +685,19 @@ interest defined by the polygon.</p>
 <p>We can take further advantage of <code class="docutils literal notranslate"><span class="pre">movement</span></code> utilities by transforming
 our annotations dataset to a <code class="docutils literal notranslate"><span class="pre">movement</span></code>-like dataset.</p>
 <p>To do this, we need to rename the dataset dimensions,
-add a confidence array, and add a <code class="docutils literal notranslate"><span class="pre">time_unit</span></code> attribute.
-We additionally rename the
+add a <code class="docutils literal notranslate"><span class="pre">confidence</span></code> array, and add a <code class="docutils literal notranslate"><span class="pre">time_unit</span></code> attribute.
+Although it is not required, we also rename the
 <code class="docutils literal notranslate"><span class="pre">individuals</span></code> coordinate values to follow the <code class="docutils literal notranslate"><span class="pre">movement</span></code>
 naming convention.</p>
 <div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Rename dimensions</span>
 <a href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="xarray.core.dataset.Dataset" class="sphx-glr-backref-module-xarray-core-dataset sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ds_as_movement</span></a> <span class="o">=</span> <a href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.rename.html#xarray.Dataset.rename" title="xarray.Dataset.rename" class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-method"><span class="n">ds</span><span class="o">.</span><span class="n">rename</span></a><span class="p">({</span><span class="s2">&quot;image_id&quot;</span><span class="p">:</span> <span class="s2">&quot;time&quot;</span><span class="p">,</span> <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;individuals&quot;</span><span class="p">})</span>
 
-<span class="c1"># Rename &#39;individuals&#39; coordinate values to be</span>
+<span class="c1"># Rename &#39;individuals&#39; values to follow ``movement`` convention</span>
 <a href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="xarray.core.dataset.Dataset" class="sphx-glr-backref-module-xarray-core-dataset sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ds_as_movement</span></a><span class="p">[</span><span class="s2">&quot;individuals&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
     <span class="sa">f</span><span class="s2">&quot;id_</span><span class="si">{</span><span class="n">i</span><span class="o">.</span><span class="n">item</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <a href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.values.html#xarray.DataArray.values" title="xarray.DataArray.values" class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-property"><span class="n">ds_as_movement</span><span class="o">.</span><span class="n">individuals</span><span class="o">.</span><span class="n">values</span></a>
 <span class="p">]</span>
 
-<span class="c1"># Add confidence array with NaN values</span>
+<span class="c1"># Add confidence array with NaNs</span>
 <a href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="xarray.core.dataset.Dataset" class="sphx-glr-backref-module-xarray-core-dataset sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ds_as_movement</span></a><span class="p">[</span><span class="s2">&quot;confidence&quot;</span><span class="p">]</span> <span class="o">=</span> <a href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.html#xarray.DataArray" title="xarray.core.dataarray.DataArray" class="sphx-glr-backref-module-xarray-core-dataarray sphx-glr-backref-type-py-class"><span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span></a><span class="p">(</span>
     <a href="https://numpy.org/doc/stable/reference/generated/numpy.full.html#numpy.full" title="numpy.full" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">full</span></a><span class="p">(</span>
         <span class="p">(</span>
@@ -733,21 +735,21 @@ Frozen({&#39;time&#39;: 12, &#39;space&#39;: 2, &#39;individuals&#39;: 722})
 </div>
 <p>Since this dataset represents manually labelled data, there isn’t
 really a confidence value associated with each of the annotations.
-Therefore, we add a confidence array with NaN values.</p>
+Therefore, we add a <code class="docutils literal notranslate"><span class="pre">confidence</span></code> array with NaN values.</p>
 <p>Similarly, we set the time unit to <code class="docutils literal notranslate"><span class="pre">frames</span></code>, but actually the images do not
 represent consecutive images in time. We do this to later be able to
-export the dataset in a <code class="docutils literal notranslate"><span class="pre">movement</span></code>-supported format that we can
-visualise in the <a class="reference external" href="https://movement.neuroinformatics.dev/user_guide/gui.html">movement napari plugin</a></p>
+export the dataset in a format that we can
+visualise in the <a class="reference external" href="https://movement.neuroinformatics.dev/latest/user_guide/gui.html">movement napari plugin</a></p>
 </section>
 <section id="plot-occupancy-map-using-movement">
 <h2>Plot occupancy map using <code class="docutils literal notranslate"><span class="pre">movement</span></code><a class="headerlink" href="#plot-occupancy-map-using-movement" title="Link to this heading">#</a></h2>
-<p>We can now use the <a class="reference external" href="https://movement.neuroinformatics.dev/api/movement.plots.plot_occupancy.html#movement.plots.plot_occupancy" title="(in movement)"><code class="xref py py-func docutils literal notranslate"><span class="pre">movement.plots.plot_occupancy()</span></code></a> function to plot
+<p>With our dataset in a <code class="docutils literal notranslate"><span class="pre">movement</span></code>-like format, we can now use the
+<a class="reference external" href="https://movement.neuroinformatics.dev/latest/api/movement.plots.plot_occupancy.html#movement.plots.plot_occupancy" title="(in movement)"><code class="xref py py-func docutils literal notranslate"><span class="pre">movement.plots.plot_occupancy()</span></code></a> function to plot
 the occupancy map of the annotations. This is a two-dimensional histogram
-that shows for each bin the number of annotations that fall within it.</p>
-<p>To determine the number of bins along each dimension, we use the aspect ratio
-of the images to define similarly sized bins.
-This makes the occupancy map more informative. Note that all images have the
-same dimensions.</p>
+that shows for each 2D bin the number of annotations that fall within it.</p>
+<p>To define similar-sized bins along each dimension, we use the aspect ratio
+of the images. This makes the occupancy map more informative. Note that all
+images have the same dimensions.</p>
 <div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Determine aspect ratio of the images</span>
 <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">image_width</span></a> <span class="o">=</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.unique.html#numpy.unique" title="numpy.unique" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">unique</span></a><span class="p">(</span><a href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="xarray.core.dataset.Dataset" class="sphx-glr-backref-module-xarray-core-dataset sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ds</span></a><span class="p">[</span><span class="s2">&quot;image_shape&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">sel</span><span class="p">(</span><span class="n">space</span><span class="o">=</span><span class="s2">&quot;x&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">)</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
 <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">image_height</span></a> <span class="o">=</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.unique.html#numpy.unique" title="numpy.unique" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">unique</span></a><span class="p">(</span><a href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="xarray.core.dataset.Dataset" class="sphx-glr-backref-module-xarray-core-dataset sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ds</span></a><span class="p">[</span><span class="s2">&quot;image_shape&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">sel</span><span class="p">(</span><span class="n">space</span><span class="o">=</span><span class="s2">&quot;y&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">)</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
@@ -758,7 +760,7 @@ same dimensions.</p>
 <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">n_bins_y</span></a> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">n_bins_x</span></a> <span class="o">/</span> <a href="https://docs.python.org/3/library/functions.html#float" title="builtins.float" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">image_AR</span></a><span class="p">)</span>
 
 <span class="c1"># Plot occupancy map</span>
-<a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.figure.Figure.html#matplotlib.figure.Figure" title="matplotlib.figure.Figure" class="sphx-glr-backref-module-matplotlib-figure sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">fig</span></a><span class="p">,</span> <a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes" title="matplotlib.axes.Axes" class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ax</span></a><span class="p">,</span> <a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">hist</span></a> <span class="o">=</span> <a href="https://movement.neuroinformatics.dev/api/movement.plots.plot_occupancy.html#movement.plots.plot_occupancy" title="movement.plots.plot_occupancy" class="sphx-glr-backref-module-movement-plots sphx-glr-backref-type-py-function"><span class="n">plot_occupancy</span></a><span class="p">(</span>
+<a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.figure.Figure.html#matplotlib.figure.Figure" title="matplotlib.figure.Figure" class="sphx-glr-backref-module-matplotlib-figure sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">fig</span></a><span class="p">,</span> <a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes" title="matplotlib.axes.Axes" class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ax</span></a><span class="p">,</span> <a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">hist</span></a> <span class="o">=</span> <a href="https://movement.neuroinformatics.dev/latest/api/movement.plots.plot_occupancy.html#movement.plots.plot_occupancy" title="movement.plots.plot_occupancy" class="sphx-glr-backref-module-movement-plots sphx-glr-backref-type-py-function"><span class="n">plot_occupancy</span></a><span class="p">(</span>
     <a href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.html#xarray.DataArray" title="xarray.core.dataarray.DataArray" class="sphx-glr-backref-module-xarray-core-dataarray sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ds_as_movement</span><span class="o">.</span><span class="n">position</span></a><span class="p">,</span>
     <span class="n">bins</span><span class="o">=</span><span class="p">[</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">n_bins_x</span></a><span class="p">,</span> <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">n_bins_y</span></a><span class="p">],</span>
 <span class="p">)</span>
@@ -771,9 +773,9 @@ same dimensions.</p>
 <a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.invert_yaxis.html#matplotlib.axes.Axes.invert_yaxis" title="matplotlib.axes.Axes.invert_yaxis" class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-method"><span class="n">ax</span><span class="o">.</span><span class="n">invert_yaxis</span></a><span class="p">()</span>
 </pre></div>
 </div>
-<img src="../_images/sphx_glr_load_annotations_dataset_003.png" srcset="../_images/sphx_glr_load_annotations_dataset_003.png" alt="load annotations dataset" class = "sphx-glr-single-img"/><p>The occupancy map shows that the maximum count in each bin is 5 annotations,
-and the minimum count is 0 annotations. We can confirm this by inspecting
-the outputs of the <a class="reference external" href="https://movement.neuroinformatics.dev/api/movement.plots.plot_occupancy.html#movement.plots.plot_occupancy" title="(in movement)"><code class="xref py py-func docutils literal notranslate"><span class="pre">movement.plots.plot_occupancy()</span></code></a> function.</p>
+<img src="../_images/sphx_glr_coco_bbox_ethology_and_movement_003.png" srcset="../_images/sphx_glr_coco_bbox_ethology_and_movement_003.png" alt="coco bbox ethology and movement" class = "sphx-glr-single-img"/><p>The occupancy map shows that the maximum bin count is 5 annotations,
+and the minimum count is 0. We can confirm this by inspecting
+the outputs of the <a class="reference external" href="https://movement.neuroinformatics.dev/latest/api/movement.plots.plot_occupancy.html#movement.plots.plot_occupancy" title="(in movement)"><code class="xref py py-func docutils literal notranslate"><span class="pre">movement.plots.plot_occupancy()</span></code></a> function.</p>
 <div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><a href="https://docs.python.org/3/library/functions.html#float" title="builtins.float" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">bin_size_x</span></a> <span class="o">=</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.diff.html#numpy.diff" title="numpy.diff" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">diff</span></a><span class="p">(</span><a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">hist</span></a><span class="p">[</span><span class="s2">&quot;xedges&quot;</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
 <a href="https://docs.python.org/3/library/functions.html#float" title="builtins.float" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">bin_size_y</span></a> <span class="o">=</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.diff.html#numpy.diff" title="numpy.diff" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">diff</span></a><span class="p">(</span><a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">hist</span></a><span class="p">[</span><span class="s2">&quot;yedges&quot;</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
 
@@ -787,21 +789,22 @@ Maximum bin count: 5.0
 Minimum bin count: 0.0
 </pre></div>
 </div>
+<p>We can also confirm that the bins are approximately square as intended.</p>
 </section>
 <section id="visualise-the-dataset-in-the-movement-napari-plugin">
 <h2>Visualise the dataset in the <code class="docutils literal notranslate"><span class="pre">movement</span></code> napari plugin<a class="headerlink" href="#visualise-the-dataset-in-the-movement-napari-plugin" title="Link to this heading">#</a></h2>
 <p>We can export the <code class="docutils literal notranslate"><span class="pre">movement</span></code>-like dataset in a format
-that we can visualise in the <a class="reference external" href="https://movement.neuroinformatics.dev/user_guide/gui.html">movement napari plugin</a>.
+that we can visualise in the <a class="reference external" href="https://movement.neuroinformatics.dev/latest/user_guide/gui.html">movement napari plugin</a>.
 For example, we can use the
-<a class="reference external" href="https://movement.neuroinformatics.dev/api/movement.io.save_bboxes.to_via_tracks_file.html#movement.io.save_bboxes.to_via_tracks_file" title="(in movement)"><code class="xref py py-func docutils literal notranslate"><span class="pre">movement.io.save_bboxes.to_via_tracks_file()</span></code></a> function, that saves
+<a class="reference external" href="https://movement.neuroinformatics.dev/latest/api/movement.io.save_bboxes.to_via_tracks_file.html#movement.io.save_bboxes.to_via_tracks_file" title="(in movement)"><code class="xref py py-func docutils literal notranslate"><span class="pre">movement.io.save_bboxes.to_via_tracks_file()</span></code></a> function, that saves
 bounding box <code class="docutils literal notranslate"><span class="pre">movement</span></code> datasets as VIA-tracks files.</p>
-<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><a href="https://movement.neuroinformatics.dev/api/movement.io.save_bboxes.to_via_tracks_file.html#movement.io.save_bboxes.to_via_tracks_file" title="movement.io.save_bboxes.to_via_tracks_file" class="sphx-glr-backref-module-movement-io-save_bboxes sphx-glr-backref-type-py-function"><span class="n">save_bboxes</span><span class="o">.</span><span class="n">to_via_tracks_file</span></a><span class="p">(</span><a href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="xarray.core.dataset.Dataset" class="sphx-glr-backref-module-xarray-core-dataset sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ds_as_movement</span></a><span class="p">,</span> <span class="s2">&quot;waterfowl_dataset.csv&quot;</span><span class="p">)</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><a href="https://movement.neuroinformatics.dev/latest/api/movement.io.save_bboxes.to_via_tracks_file.html#movement.io.save_bboxes.to_via_tracks_file" title="movement.io.save_bboxes.to_via_tracks_file" class="sphx-glr-backref-module-movement-io-save_bboxes sphx-glr-backref-type-py-function"><span class="n">save_bboxes</span><span class="o">.</span><span class="n">to_via_tracks_file</span></a><span class="p">(</span><a href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="xarray.core.dataset.Dataset" class="sphx-glr-backref-module-xarray-core-dataset sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ds_as_movement</span></a><span class="p">,</span> <span class="s2">&quot;waterfowl_dataset.csv&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>PosixPath(&#39;waterfowl_dataset.csv&#39;)
 </pre></div>
 </div>
-<p>You can now follow the <a class="reference external" href="https://movement.neuroinformatics.dev/user_guide/gui.html">movement napari guide</a>
+<p>You can now follow the <a class="reference external" href="https://movement.neuroinformatics.dev/latest/user_guide/gui.html">movement napari guide</a>
 to load the output VIA-tracks file into <code class="docutils literal notranslate"><span class="pre">napari</span></code>.</p>
 <p>To visualise the annotations over the corresponding images, remember to
 first drag and drop the images directory into the <code class="docutils literal notranslate"><span class="pre">napari</span></code> canvas.
@@ -815,10 +818,11 @@ You will find the images for the experts’ annotations under the
 </div>
 <p>The view in <code class="docutils literal notranslate"><span class="pre">napari</span></code> should look something like this:</p>
 <img alt="Bounding box annotations in napari" src="../_images/napari-annotations.jpg" />
-<p>The bounding boxes are coloured by individual ID per image.
-Remember that the individual IDs are not consistent across images, so it
-makes more sense to hide the tracks layer for an easier visualisation,
-like in the example screenshot above.</p>
+<p>The bounding boxes are coloured by individual ID per image and the tracks
+connect the same individual IDs across images.
+Remember that for this annotations dataset the individual IDs are not
+consistent across images, so it makes more sense to hide the tracks layer
+for an easier visualisation, like in the example screenshot above.</p>
 </section>
 <section id="clean-up">
 <h2>Clean-up<a class="headerlink" href="#clean-up" title="Link to this heading">#</a></h2>
@@ -827,20 +831,20 @@ following code.</p>
 <div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><a href="https://docs.python.org/3/library/os.html#os.remove" title="os.remove" class="sphx-glr-backref-module-os sphx-glr-backref-type-py-function"><span class="n">os</span><span class="o">.</span><span class="n">remove</span></a><span class="p">(</span><span class="s2">&quot;waterfowl_dataset.csv&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 5.382 seconds)</p>
-<div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-load-annotations-dataset-py">
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 5.438 seconds)</p>
+<div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-coco-bbox-ethology-and-movement-py">
 <div class="binder-badge docutils container">
-<a class="reference external image-reference" href="https://mybinder.org/v2/gh/neuroinformatics-unit/ethology/gh-pages?filepath=notebooks/examples/load_annotations_dataset.ipynb"><img alt="Launch binder" src="../_images/binder_badge_logo.svg" style="width: 150px;" />
+<a class="reference external image-reference" href="https://mybinder.org/v2/gh/neuroinformatics-unit/ethology/gh-pages?filepath=notebooks/examples/coco_bbox_ethology_and_movement.ipynb"><img alt="Launch binder" src="../_images/binder_badge_logo.svg" style="width: 150px;" />
 </a>
 </div>
 <div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
-<p><a class="reference download internal" download="" href="../_downloads/2ccc1ec3f24ceb56863fc1bb0df43079/load_annotations_dataset.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">load_annotations_dataset.ipynb</span></code></a></p>
+<p><a class="reference download internal" download="" href="../_downloads/14045b4ddd29bfb3fe0e3df45c0c298d/coco_bbox_ethology_and_movement.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">coco_bbox_ethology_and_movement.ipynb</span></code></a></p>
 </div>
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
-<p><a class="reference download internal" download="" href="../_downloads/eb826a15bf71871c7a4d4cb45aca81b0/load_annotations_dataset.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">load_annotations_dataset.py</span></code></a></p>
+<p><a class="reference download internal" download="" href="../_downloads/f67f9e58df48b8f42cf21cbe7b24e918/coco_bbox_ethology_and_movement.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">coco_bbox_ethology_and_movement.py</span></code></a></p>
 </div>
 <div class="sphx-glr-download sphx-glr-download-zip docutils container">
-<p><a class="reference download internal" download="" href="../_downloads/8f365252c51e6457b96b84e80c10364c/load_annotations_dataset.zip"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">zipped:</span> <span class="pre">load_annotations_dataset.zip</span></code></a></p>
+<p><a class="reference download internal" download="" href="../_downloads/abf10556097035047531e613cd8381ba/coco_bbox_ethology_and_movement.zip"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">zipped:</span> <span class="pre">coco_bbox_ethology_and_movement.zip</span></code></a></p>
 </div>
 </div>
 <p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
@@ -867,11 +871,11 @@ following code.</p>
       </div>
     </a>
     <a class="right-next"
-       href="../api_index.html"
+       href="approximate_subset_sum_split.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">API reference</p>
+        <p class="prev-next-title">Split an annotations dataset</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -910,7 +914,7 @@ following code.</p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="../_sources/examples/load_annotations_dataset.rst.txt"
+      <li><a href="../_sources/examples/coco_bbox_ethology_and_movement.rst.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div></div>

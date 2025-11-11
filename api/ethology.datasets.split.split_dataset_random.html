@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Examples &#8212; ethology</title>
+    <title>split_dataset_random &#8212; ethology</title>
   
   
   
@@ -49,13 +49,13 @@
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/design-tabs.js?v=f930bc37"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'examples/index';</script>
-    <link rel="canonical" href="https://ethology.neuroinformatics.dev/examples/index.html" />
+    <script>DOCUMENTATION_OPTIONS.pagename = 'api/ethology.datasets.split.split_dataset_random';</script>
+    <link rel="canonical" href="https://ethology.neuroinformatics.dev/api/ethology.datasets.split.split_dataset_random.html" />
     <link rel="icon" href="../_static/light-logo-niu.png"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Inspect COCO annotations using ethology and movement" href="coco_bbox_ethology_and_movement.html" />
-    <link rel="prev" title="Installation" href="../installation.html" />
+    <link rel="next" title="ethology.io.annotations.load_bboxes" href="ethology.io.annotations.load_bboxes.html" />
+    <link rel="prev" title="split_dataset_group_by" href="ethology.datasets.split.split_dataset_group_by.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="" />
@@ -141,14 +141,14 @@
 </li>
 
 
-<li class="nav-item current active">
-  <a class="nav-link nav-internal" href="#">
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../examples/index.html">
     Examples
   </a>
 </li>
 
 
-<li class="nav-item ">
+<li class="nav-item current active">
   <a class="nav-link nav-internal" href="../api_index.html">
     API reference
   </a>
@@ -269,14 +269,14 @@
 </li>
 
 
-<li class="nav-item current active">
-  <a class="nav-link nav-internal" href="#">
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../examples/index.html">
     Examples
   </a>
 </li>
 
 
-<li class="nav-item ">
+<li class="nav-item current active">
   <a class="nav-link nav-internal" href="../api_index.html">
     API reference
   </a>
@@ -344,9 +344,28 @@
 <nav class="bd-docs-nav bd-links"
      aria-label="Section Navigation">
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
-  <div class="bd-toc-item navbar-nav"><ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="coco_bbox_ethology_and_movement.html">Inspect COCO annotations using <code class="docutils literal notranslate"><span class="pre">ethology</span></code> and <code class="docutils literal notranslate"><span class="pre">movement</span></code></a></li>
-<li class="toctree-l1"><a class="reference internal" href="approximate_subset_sum_split.html">Split an annotations dataset</a></li>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="ethology.datasets.split.html">ethology.datasets.split</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="ethology.datasets.split.split_dataset_group_by.html">split_dataset_group_by</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">split_dataset_random</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="ethology.io.annotations.load_bboxes.html">ethology.io.annotations.load_bboxes</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="ethology.io.annotations.load_bboxes.from_files.html">from_files</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="ethology.io.annotations.save_bboxes.html">ethology.io.annotations.save_bboxes</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="ethology.io.annotations.save_bboxes.to_COCO_file.html">to_COCO_file</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="ethology.io.annotations.validate.html">ethology.io.annotations.validate</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="ethology.io.annotations.validate.ValidBboxesDataFrame.html">ValidBboxesDataFrame</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ethology.io.annotations.validate.ValidBboxesDataFrameCOCO.html">ValidBboxesDataFrameCOCO</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ethology.io.annotations.validate.ValidBboxesDataset.html">ValidBboxesDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ethology.io.annotations.validate.ValidCOCO.html">ValidCOCO</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ethology.io.annotations.validate.ValidVIA.html">ValidVIA</a></li>
+</ul>
+</details></li>
 </ul>
 </div>
 </nav></div>
@@ -387,7 +406,13 @@
         <i class="fa-solid fa-home"></i>
       </a>
     </li>
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Examples</span></li>
+    
+    <li class="breadcrumb-item"><a href="../api_index.html" class="nav-link">API reference</a></li>
+    
+    
+    <li class="breadcrumb-item"><a href="ethology.datasets.split.html" class="nav-link">ethology.datasets.split</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">split_dataset_random</span></li>
   </ul>
 </nav>
 </div>
@@ -404,27 +429,82 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="examples">
-<span id="target-examples"></span><h1>Examples<a class="headerlink" href="#examples" title="Link to this heading">#</a></h1>
-<p>A gallery of examples that showcase <code class="docutils literal notranslate"><span class="pre">ethology</span></code> functionalities and how they can be used together with
-other computer vision tools.</p>
-<div class="sphx-glr-thumbnails"><div class="sphx-glr-thumbcontainer" tooltip="Load COCO bounding box annotations and inspect them using ethology and movement."><img alt="" src="../_images/sphx_glr_coco_bbox_ethology_and_movement_thumb.png" />
-<p><a class="reference internal" href="coco_bbox_ethology_and_movement.html#sphx-glr-examples-coco-bbox-ethology-and-movement-py"><span class="std std-ref">Inspect COCO annotations using ethology and movement</span></a></p>
-  <div class="sphx-glr-thumbnail-title">Inspect COCO annotations using ethology and movement</div>
-</div><div class="sphx-glr-thumbcontainer" tooltip="Split an annotations dataset by grouping variable, and compare to random splitting."><img alt="" src="../_images/sphx_glr_approximate_subset_sum_split_thumb.png" />
-<p><a class="reference internal" href="approximate_subset_sum_split.html#sphx-glr-examples-approximate-subset-sum-split-py"><span class="std std-ref">Split an annotations dataset</span></a></p>
+  <section id="split-dataset-random">
+<h1>split_dataset_random<a class="headerlink" href="#split-dataset-random" title="Link to this heading">#</a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="ethology.datasets.split.split_dataset_random">
+<span class="sig-prename descclassname"><span class="pre">ethology.datasets.split.</span></span><span class="sig-name descname"><span class="pre">split_dataset_random</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">list_fractions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">42</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">samples_coordinate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'image_id'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ethology/datasets/split.html#split_dataset_random"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ethology.datasets.split.split_dataset_random" title="Link to this definition">#</a></dt>
+<dd><p>Split an annotations dataset using random sampling.</p>
+<p>Split an <code class="docutils literal notranslate"><span class="pre">ethology</span></code> annotations dataset into multiple subsets by randomly
+shuffling all samples and then partitioning them sequentially according to
+the specified fractions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dataset</strong> (<a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="(in xarray v2025.10.1)"><em>xarray.Dataset</em></a>) – The annotations dataset to split.</p></li>
+<li><p><strong>list_fractions</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>...</em><em>]</em>) – The fractions of the input annotations dataset to allocate to
+each subset. The list must contain at least two elements, all elements
+must be between 0 and 1, and add up to 1.</p></li>
+<li><p><strong>seed</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>optional</em>) – Seed to use for the random number generator. Default is 42.</p></li>
+<li><p><strong>samples_coordinate</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – The coordinate along which to split the dataset. Default is
+<code class="docutils literal notranslate"><span class="pre">image_id</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The subsets of the input dataset. The subsets are returned in the
+same order as the input list of fractions.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)">tuple</a>[<a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="(in xarray v2025.10.1)">xarray.Dataset</a>, …]</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If the elements of <code class="docutils literal notranslate"><span class="pre">list_fractions</span></code> are less than two, are not
+    between 0 and 1, or do not sum to 1.</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<p>Split a dataset with a single data variable <code class="docutils literal notranslate"><span class="pre">foo</span></code>, with 100 values
+defined along the <code class="docutils literal notranslate"><span class="pre">image_id</span></code> dimension into 70/20/10 splits.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">ethology.datasets.split</span><span class="w"> </span><span class="kn">import</span> <span class="n">split_dataset_random</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">xarray</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">xr</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">data_vars</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+<span class="gp">... </span>        <span class="n">foo</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;image_id&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">100</span><span class="p">)),</span>
+<span class="gp">... </span>    <span class="p">),</span>
+<span class="gp">... </span>    <span class="n">coords</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+<span class="gp">... </span>        <span class="n">image_id</span><span class="o">=</span><span class="nb">range</span><span class="p">(</span><span class="mi">100</span><span class="p">),</span>
+<span class="gp">... </span>    <span class="p">),</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ds_train</span><span class="p">,</span> <span class="n">ds_val</span><span class="p">,</span> <span class="n">ds_test</span> <span class="o">=</span> <span class="n">split_dataset_random</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">ds</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">list_fractions</span><span class="o">=</span><span class="p">[</span><span class="mf">0.7</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">],</span>
+<span class="gp">... </span>    <span class="n">seed</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ds_train</span><span class="o">.</span><span class="n">image_id</span><span class="p">))</span>  <span class="c1"># 70</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ds_val</span><span class="o">.</span><span class="n">image_id</span><span class="p">))</span>  <span class="c1"># 20</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ds_test</span><span class="o">.</span><span class="n">image_id</span><span class="p">))</span>  <span class="c1"># 10</span>
+</pre></div>
+</div>
+<p class="rubric">Notes</p>
+<p>The function operates in two steps: first, it shuffles all sample indices
+along the <code class="docutils literal notranslate"><span class="pre">samples_coordinate</span></code> dimension using the provided random seed;
+then, it partitions the shuffled indices into contiguous blocks, one for
+each subset.</p>
+<p>The size of each block is determined by rounding down (floor) the product
+of the subset’s fraction and the total number of samples. To ensure all
+samples are included, the last subset receives any remaining samples after
+the earlier subsets have been allocated. Due to this rounding behavior,
+the actual fraction for the last subset may differ slightly from the
+requested fraction.</p>
+</dd></dl>
+
+<section id="examples-using-split-dataset-random">
+<h2>Examples using <code class="docutils literal notranslate"><span class="pre">split_dataset_random</span></code><a class="headerlink" href="#examples-using-split-dataset-random" title="Link to this heading">#</a></h2>
+<div class="sphx-glr-thumbnails"><div class="sphx-glr-thumbcontainer" tooltip="Split an annotations dataset by grouping variable, and compare to random splitting."><img alt="" src="../_images/sphx_glr_approximate_subset_sum_split_thumb.png" />
+<p><a class="reference internal" href="../examples/approximate_subset_sum_split.html#sphx-glr-examples-approximate-subset-sum-split-py"><span class="std std-ref">Split an annotations dataset</span></a></p>
   <div class="sphx-glr-thumbnail-title">Split an annotations dataset</div>
-</div></div><div class="toctree-wrapper compound">
-</div>
-<div class="sphx-glr-footer sphx-glr-footer-gallery docutils container">
-<div class="sphx-glr-download sphx-glr-download-python docutils container">
-<p><a class="reference download internal" download="" href="../_downloads/bc82bea3a5dd7bdba60b65220891d9e5/examples_python.zip"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">all</span> <span class="pre">examples</span> <span class="pre">in</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">examples_python.zip</span></code></a></p>
-</div>
-<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
-<p><a class="reference download internal" download="" href="../_downloads/fb625db3c50d423b1b7881136ffdeec8/examples_jupyter.zip"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">all</span> <span class="pre">examples</span> <span class="pre">in</span> <span class="pre">Jupyter</span> <span class="pre">notebooks:</span> <span class="pre">examples_jupyter.zip</span></code></a></p>
-</div>
-</div>
-<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</div></div></section>
 </section>
 
 
@@ -438,20 +518,20 @@ other computer vision tools.</p>
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="../installation.html"
+       href="ethology.datasets.split.split_dataset_group_by.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Installation</p>
+        <p class="prev-next-title">split_dataset_group_by</p>
       </div>
     </a>
     <a class="right-next"
-       href="coco_bbox_ethology_and_movement.html"
+       href="ethology.io.annotations.load_bboxes.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Inspect COCO annotations using <code class="docutils literal notranslate"><span class="pre">ethology</span></code> and <code class="docutils literal notranslate"><span class="pre">movement</span></code></p>
+        <p class="prev-next-title">ethology.io.annotations.load_bboxes</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -467,10 +547,23 @@ other computer vision tools.</p>
 
 
   <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#ethology.datasets.split.split_dataset_random"><code class="docutils literal notranslate"><span class="pre">split_dataset_random()</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#examples-using-split-dataset-random">Examples using <code class="docutils literal notranslate"><span class="pre">split_dataset_random</span></code></a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="../_sources/examples/index.rst.txt"
+      <li><a href="../_sources/api/ethology.datasets.split.split_dataset_random.rst.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div></div>
