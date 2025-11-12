@@ -9,22 +9,17 @@
 
 # ethology
 
+Mix-and-match computer vision tools for your animal behaviour analysis.
 
 ## Quick install
 
-First clone the repository at the desired location:
-```bash
-git clone https://github.com/neuroinformatics-unit/ethology.git
-```
-
-Then create a conda environment and install the package from source
+Create a conda environment and install the package
 ```sh
 conda create -n ethology-env python=3.12 -y
 conda activate ethology-env
-cd ethology
-pip install .
+pip install ethology
 ```
 
 For more information please check our [documentation](https://ethology.neuroinformatics.dev).
 
-Contributions and feature requests are more than welcome! Have a look at our [Contributing guidelines](community/contributing.rst) and feel to [open an issue](https://github.com/neuroinformatics-unit/ethology/issues) to report a bug or request a new feature.
+Contributions and feature requests are more than welcome! Have a look at our [Contributing guidelines](https://ethology.neuroinformatics.dev/community/contributing.html) and feel to [open an issue](https://github.com/neuroinformatics-unit/ethology/issues) to report a bug or request a new feature.
