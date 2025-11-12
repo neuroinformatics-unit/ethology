@@ -173,7 +173,7 @@ expert annotations as an ``ethology`` dataset.
         position     (image_id, space, id) float64 139kB 4.493e+03 3.49e+03 ... nan
         shape        (image_id, space, id) float64 139kB 95.0 43.0 49.0 ... nan nan
         image_shape  (image_id, space) int64 192B 5472 3648 5472 ... 3648 5472 3648
-        category     (image_id, id) int64 69kB 1 4 3 2 3 3 1 ... -1 -1 -1 -1 -1 -1
+        category     (image_id, id) int64 69kB 1 4 3 4 3 1 3 ... -1 -1 -1 -1 -1 -1
     Attributes: (5)
     Frozen({'image_id': 12, 'space': 2, 'id': 722})
 
@@ -517,7 +517,7 @@ naming convention.
         position     (time, space, individuals) float64 139kB 4.493e+03 ... nan
         shape        (time, space, individuals) float64 139kB 95.0 43.0 ... nan nan
         image_shape  (time, space) int64 192B 5472 3648 5472 3648 ... 3648 5472 3648
-        category     (time, individuals) int64 69kB 1 4 3 2 3 3 ... -1 -1 -1 -1 -1
+        category     (time, individuals) int64 69kB 1 4 3 4 3 1 ... -1 -1 -1 -1 -1
         confidence   (time, individuals) float64 69kB nan nan nan ... nan nan nan
     Attributes: (6)
     Frozen({'time': 12, 'space': 2, 'individuals': 722})
@@ -726,7 +726,7 @@ following code.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 5.438 seconds)
+   **Total running time of the script:** (0 minutes 4.720 seconds)
 
 
 .. _sphx_glr_download_examples_coco_bbox_ethology_and_movement.py:
