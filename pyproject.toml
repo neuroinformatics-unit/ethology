@@ -19,13 +19,19 @@ classifiers = [
   "License :: OSI Approved :: BSD License",
 ]
 dependencies = [
-  "movement",
+  "xarray",
+  "pooch",
+  "pyyaml",
   "pandera[pandas]",
   "pycocotools",
+  "movement",
   "scikit-learn",
   "torch",
   "torchvision",
+  "ensemble-boxes",
+  "lightning",
   "loguru",
+  "joblib",
 ]
 
 [project.urls]
