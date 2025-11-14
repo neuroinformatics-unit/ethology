@@ -1,8 +1,10 @@
 # %%
 # imports
 
+from itertools import chain
 from pathlib import Path
 
+import numpy as np
 import torch
 import torchvision.transforms.v2 as transforms
 import yaml
@@ -10,6 +12,7 @@ from lightning import Trainer
 from torch.utils.data import DataLoader
 from torchvision.datasets import CocoDetection, wrap_dataset_for_transforms_v2
 
+from ethology.detectors.ensembles.fusion import WBF_across_models
 from ethology.detectors.ensembles.models import EnsembleDetector
 from ethology.detectors.evaluate import compute_precision_recall_ds
 from ethology.io.annotations import load_bboxes
@@ -176,11 +179,26 @@ print(f"Ensemble detector is on device: {ensemble_detector.device}")
 # Run the ensemble of detectors on a dataset
 # Use Trainer for inference (this sets the device flexibly)
 trainer = Trainer(accelerator="gpu", devices=1, logger=False)
-raw_predictions = trainer.predict(ensemble_detector, dataloader)
+_ = trainer.predict(ensemble_detector, dataloader)
+# [batch][sample][model]- dict
 
-# format predictions as ethology detections dataset
-fused_detections_ds = ensemble_detector.format_predictions(raw_predictions)
+# Format predictions as ethology detections dataset
+# TODO: think about syntax of format_predictions (should it be instance or 
+# static method instead?)
+ensemble_detections_ds = ensemble_detector.format_predictions()
 
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# Fuse detections across models
+# TODO: think whether joblib approach is more readable?
+image_width_height = np.array(dataloader.dataset[0][0].shape[-2:])[::-1] 
+
+fused_detections_ds = WBF_across_models(
+    ensemble_detections_ds,
+    image_width_height=image_width_height,
+    iou_thr_ensemble=0.5,
+    skip_box_thr=0.0001,
+    max_n_detections=300,
+)
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Remove low confidence detections
@@ -197,7 +215,7 @@ fused_detections_ds_ = fused_detections_ds.where(
 gt_bboxes_ds = load_bboxes.from_files(annotations_file_path, format="COCO")
 
 iou_threshold_tp = 0.25
-fused_detections_ds, gt_bboxes_ds = compute_precision_recall_ds(
+fused_detections_ds_, gt_bboxes_ds = compute_precision_recall_ds(
     pred_bboxes_ds=fused_detections_ds_,
     gt_bboxes_ds=gt_bboxes_ds,
     iou_threshold=iou_threshold_tp,
@@ -221,8 +239,28 @@ print(
     "Ensemble model with confidence threshold post fusion: "
     f"{confidence_threshold_post_fusion:.2f}"
 )
-print(f"Precision: {fused_detections_ds.precision.mean().values:.4f}")
-print(f"Recall: {fused_detections_ds.recall.mean().values:.4f}")
+print(f"Precision: {fused_detections_ds_.precision.mean().values:.4f}")
+print(f"Recall: {fused_detections_ds_.recall.mean().values:.4f}")
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Plot calibration curve
+
+
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# Evaluate single models
+list_detections_ds_eval = []
+for k in range(ensemble_detections_ds.sizes["model"]):   
+    detections_ds, _ = compute_precision_recall_ds(
+        pred_bboxes_ds=ensemble_detections_ds.sel(model=k),
+        gt_bboxes_ds=gt_bboxes_ds,
+        iou_threshold=iou_threshold_tp
+    )
+    list_detections_ds_eval.append(detections_ds)
+
+    print(f"Model: {k}")
+    print(f"Precision: {detections_ds.precision.mean().values:.4f}")
+    print(f"Recall: {detections_ds.recall.mean().values:.4f}")
+    print("--------------------------------")
+
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# Visualise detections
