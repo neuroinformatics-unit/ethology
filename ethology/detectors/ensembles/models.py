@@ -9,14 +9,9 @@ import torch.nn as nn
 import torchvision.models.detection as detection_models
 import xarray as xr
 import yaml
-from joblib import Parallel, delayed
 from lightning import LightningModule
 
-from ethology.detectors.ensembles.fusion import weighted_boxes_fusion_in_pixels
-from ethology.detectors.ensembles.utils import (
-    arrays_to_ds_variables,
-    pad_to_max_first_dimension,
-)
+from ethology.detectors.ensembles.utils import pad_to_max_first_dimension
 
 
 class EnsembleDetector(LightningModule):
@@ -26,6 +21,7 @@ class EnsembleDetector(LightningModule):
     ----------
     config_file: str
         Path to the YAML config file.
+
     """
 
     def __init__(self, config_file: str | Path):
@@ -69,45 +65,6 @@ class EnsembleDetector(LightningModule):
             list_models.append(model)
         return nn.ModuleList(list_models)
 
-    def fuse_bboxes(self, images_batch, predictions_per_model: list[dict]):
-        """Fuse bboxes per sample in CPU in parallel."""
-        # Fuse bboxes per sample in CPU in parallel
-        # Dispatch fusion tasks to executor (non-blocking)
-        # if self.config["fusion"]["method"] == "wbf"
-
-        # n_jobs = -1 means Use ALL available CPU cores
-        # n_jobs = -2 means Use ALL available CPU cores except one
-        n_jobs = self.config["fusion"].get("n_jobs", -1)
-
-        # Parallel WBF fusion
-        batch_size = len(images_batch)
-        results_batch = Parallel(n_jobs=n_jobs)(
-            delayed(weighted_boxes_fusion_in_pixels)(
-                images_batch[i].shape[-2:],  # image height and width
-                [
-                    preds[i]["boxes"].cpu().numpy()
-                    for preds in predictions_per_model
-                ],  # same image across all models
-                [
-                    preds[i]["scores"].cpu().numpy()
-                    for preds in predictions_per_model
-                ],
-                [
-                    preds[i]["labels"].cpu().numpy()
-                    for preds in predictions_per_model
-                ],
-                self.config["fusion"]["iou_th_ensemble"],
-                self.config["fusion"]["skip_box_th"],
-            )
-            for i in range(batch_size)
-        )  # list [(bboxes, scores, labels) * batch_size]
-
-        fused_boxes_batch, fused_scores_batch, fused_labels_batch = (
-            zip(*results_batch, strict=True) if results_batch else ([], [], [])
-        )
-
-        return fused_boxes_batch, fused_scores_batch, fused_labels_batch
-
     def predict_step(self, batch, batch_idx):
         """Predict step for a single batch."""
         # ------------------------------
@@ -115,50 +72,88 @@ class EnsembleDetector(LightningModule):
         # TODO: can I vectorize this?
         # https://docs.pytorch.org/tutorials/intermediate/ensembling.html
         images_batch, _annotations_batch = batch
-        predictions_per_model = [
+        raw_prediction_dicts_per_model = [
             model(images_batch) for model in self.list_models
         ]  # [num_models][batch_size]
 
-        # ------------------------------
-        # Fuse bboxes per sample in CPU in parallel
-        fused_boxes_batch, fused_scores_batch, fused_labels_batch = (
-            self.fuse_bboxes(images_batch, predictions_per_model)
-        )
+        # Transpose to [batch_size][num_models] for easier downstream
+        # processing
+        raw_prediction_dicts_per_sample = [
+            list(one_sample_all_models)
+            for one_sample_all_models in zip(
+                *raw_prediction_dicts_per_model, strict=True
+            )
+        ]  # [batch_size][num_models]
 
-        return fused_boxes_batch, fused_scores_batch, fused_labels_batch
+        return raw_prediction_dicts_per_sample
 
-    @staticmethod
-    def format_predictions(raw_predictions):
-        """Format as ethology detections dataset."""
-        # Unzip data per batch
-        (
-            fused_boxes_per_batch,
-            fused_scores_per_batch,
-            fused_labels_per_batch,
-        ) = zip(*raw_predictions, strict=True)  # [n_batches][batch_size]
+    def format_predictions(self) -> xr.Dataset:
+        """Format as ethology detections dataset with model axis."""
+        # Get results from trainer
+        raw_predictions_per_model = self.trainer.predict_loop.predictions
 
-        # Flatten across all batches
-        fused_boxes = list(chain.from_iterable(fused_boxes_per_batch))
-        fused_scores = list(chain.from_iterable(fused_scores_per_batch))
-        fused_labels = list(chain.from_iterable(fused_labels_per_batch))
+        # Flatten batches
+        raw_prediction_dicts_per_sample = list(
+            chain.from_iterable(raw_predictions_per_model)
+        )  # [sample][model]
 
-        # Pad arrays to max n of detections per image
-        fused_boxes_padded = pad_to_max_first_dimension(fused_boxes)
-        fused_scores_padded = pad_to_max_first_dimension(fused_scores)
-        fused_labels_padded = pad_to_max_first_dimension(fused_labels)
+        # Parse output from dicts
+        output_per_sample = {"boxes": [], "scores": [], "labels": []}
+        for ky in output_per_sample:
+            output_per_sample[ky] = [
+                [sample[m][ky] for m in range(len(self.list_models))]
+                for sample in raw_prediction_dicts_per_sample
+            ]  # [sample][model]
 
-        # Stack into arrays
+        # Pad across models and across image_ids
+        fill_value = {"boxes": np.nan, "scores": np.nan, "labels": -1}
+        output_per_sample_padded = {ky: [] for ky in output_per_sample}
+        for ky in output_per_sample_padded:
+            output_per_sample_padded[ky] = pad_to_max_first_dimension(
+                [
+                    # pad across models
+                    np.stack(
+                        pad_to_max_first_dimension(
+                            output_one_sample, fill_value[ky]
+                        ),
+                        axis=-1,
+                    )
+                    for output_one_sample in output_per_sample[ky]
+                ],
+                fill_value[ky],
+            )
+
+        # Stack and reorder dimensions
         bboxes_array = np.transpose(
-            np.stack(fused_boxes_padded), (0, -1, 1)
-        )  # image_id, space-4, id
-        scores_array = np.stack(fused_scores_padded)
-        labels_array = np.stack(fused_labels_padded)
-
-        # ------------------------------
-        # Return as ethology detections dataset
-        ds_variables = arrays_to_ds_variables(
-            bboxes_array, scores_array, labels_array
+            np.stack(output_per_sample_padded["boxes"]),
+            (0, -2, 1, -1),
         )
-        detections_ds = xr.Dataset(data_vars=ds_variables)
+        scores_array = np.stack(output_per_sample_padded["scores"])
+        labels_array = np.stack(output_per_sample_padded["labels"])
+        # arrays of shape (image_id, 4/1, n_max_detections, n_models)
 
-        return detections_ds
+        # Compute centroid and shape arrays
+        centroid_array = 0.5 * (bboxes_array[:, 0:2] + bboxes_array[:, 2:4])
+        shape_array = bboxes_array[:, 2:4] - bboxes_array[:, 0:2]
+
+        # Return as ethology detections dataset
+        max_n_detections = bboxes_array.shape[-2]
+        n_images = bboxes_array.shape[0]
+
+        return xr.Dataset(
+            data_vars={
+                "position": (
+                    ["image_id", "space", "id", "model"],
+                    centroid_array,
+                ),
+                "shape": (["image_id", "space", "id", "model"], shape_array),
+                "confidence": (["image_id", "id", "model"], scores_array),
+                "label": (["image_id", "id", "model"], labels_array),
+            },
+            coords={
+                "image_id": np.arange(n_images),
+                "space": ["x", "y"],
+                "id": np.arange(max_n_detections),
+                "model": np.arange(len(self.list_models)),
+            },
+        )
