@@ -1,22 +1,29 @@
 # %%
 # imports
 
-from itertools import chain
 from pathlib import Path
 
 import numpy as np
 import torch
 import torchvision.transforms.v2 as transforms
+import xarray as xr
 import yaml
 from lightning import Trainer
+from matplotlib import pyplot as plt
+from PIL import Image
 from torch.utils.data import DataLoader
 from torchvision.datasets import CocoDetection, wrap_dataset_for_transforms_v2
 
-from ethology.detectors.ensembles.fusion import fuse_ensemble_detections_WBF
+from ethology.detectors.ensembles.fusion import (
+    fuse_ensemble_detections_NMS,
+    fuse_ensemble_detections_WBF,
+)
 from ethology.detectors.ensembles.models import EnsembleDetector
 from ethology.detectors.evaluate import compute_precision_recall_ds
 from ethology.io.annotations import load_bboxes
 
+# %%
+# %matplotlib widget
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
@@ -71,6 +78,7 @@ def collate_fn_varying_n_bboxes(batch: tuple) -> tuple:
 # Input data
 
 dataset_dir = Path("/home/sminano/swc/project_crabs/data/aug2023-full")
+images_dir = dataset_dir / "frames"
 annotations_dir = dataset_dir / "annotations"
 annotations_file_path = annotations_dir / "VIA_JSON_combined_coco_gen.json"
 
@@ -87,6 +95,7 @@ inference_transforms = transforms.Compose(
 
 # Create COCO dataset
 # TODO: convert from ethology detections dataset to COCO dataset
+# gt_bboxes_ds = load_bboxes.from_files(annotations_file_path, format="COCO")
 dataset_coco = create_coco_dataset(
     images_dir=Path(dataset_dir) / "frames",
     annotations_file=annotations_file_path,
@@ -159,11 +168,13 @@ config = {
     },
     "fusion": {
         "method": "wbf",
-        "iou_th_ensemble": 0.5,
-        "skip_box_th": 0.0001,
-        "n_jobs": -1,  # workers for joblib.Parallel, n_workers should be <= number of CPU cores
+        "method_kwargs": {  # arguments as in ensemble_boxes.weighted_boxes_fusion
+            "iou_thr": 0.5,  # iou threshold for the ensemble
+            "skip_box_thr": 0.0001,
+        },
+        # "n_jobs": -1,  # workers for joblib.Parallel, n_workers should be <= number of CPU cores
         # "confidence_threshold_post_fusion": 0.0,
-        # "max_n_detections": 300
+        "max_n_detections": 300,
     },
 }
 config_file = "ensemble_of_detectors.yaml"
@@ -183,25 +194,90 @@ _ = trainer.predict(ensemble_detector, dataloader)
 # [batch][sample][model]- dict
 
 
-# Format predictions as ethology detections dataset
+#
+# Format predictions as ethology detections dataset and add attrs
 # TODO: think about syntax of format_predictions (should it be instance or
 # static method instead?)
-# Can it just be output from .predict?
-ensemble_detections_ds = ensemble_detector.format_predictions()
+# Q: Can it just be output from .predict?
+# TODO: dataloader to ethology detections dataset
+gt_bboxes_ds = load_bboxes.from_files(
+    annotations_file_path, format="COCO", images_dirs=images_dir
+)
+ensemble_detections_ds = ensemble_detector.format_predictions(
+    attrs=gt_bboxes_ds.attrs
+)
+
+
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# Some nice plots:
+# ensemble_detections_ds.confidence.sel(image_id=0).plot()
+# ensemble_detections_ds.confidence.sel(model=0).plot()
+for m in range(5):
+    plt.figure()
+    ensemble_detections_ds.confidence.sel(model=m).plot()
+
+
+# %%%%%%%%
+# All models predict less boxes and have less avg confidence per image in
+# image_ids from 350 to 450. Let's inspect video names and images for these
+# samples.
+
+# Add video name array
+video_name = [
+    ensemble_detections_ds.map_image_id_to_filename[img_id].split("_frame")[0]
+    for img_id in ensemble_detections_ds.image_id.values
+]
+ensemble_detections_ds["video"] = xr.DataArray(video_name, dims="image_id")
+
+# which videos?
+np.unique(ensemble_detections_ds.video.sel(image_id=range(350, 450)).values)
+
+# %%%%%%
+# Visualise image
+for image_id in range(350, 450, 10):
+    image_filename = ensemble_detections_ds.map_image_id_to_filename[image_id]
+    image_path = ensemble_detections_ds.images_directories / image_filename
+
+    # img = Image.open(image_path)
+    img = plt.imread(image_path)
+
+    plt.figure()
+    plt.imshow(img)
+    plt.title(f"{image_filename}")
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-# Fuse detections across models
+# Fuse detections across models with WBF
 # TODO: think whether joblib approach is more readable?
 image_width_height = np.array(dataloader.dataset[0][0].shape[-2:])[::-1]
+
+config_fusion = config["fusion"]
 
 fused_detections_ds = fuse_ensemble_detections_WBF(
     ensemble_detections_ds,
     image_width_height=image_width_height,
-    iou_thr_ensemble=0.5,
-    skip_box_thr=0.0001,
-    max_n_detections=300,
+    max_n_detections=config_fusion["max_n_detections"],
+    wbf_kwargs=config_fusion["method_kwargs"],
+    # should be larger than expected maximum number of detections after fusion
+    # ---- method kwargs ----
 )
 
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# Fuse detections across models with NMS
+
+config_fusion = config["fusion"]
+
+fused_detections_nms_ds = fuse_ensemble_detections_NMS(
+    ensemble_detections_ds,
+    image_width_height=image_width_height,
+    max_n_detections=config_fusion["max_n_detections"],
+    nms_kwargs={
+        "iou_thr": config_fusion["method_kwargs"]["iou_thr"],
+    },
+    # should be larger than expected maximum number of detections after fusion
+    # ---- method kwargs ----
+)
+
+# fused_detections_ds = fused_detections_nms_ds
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Remove low confidence detections
 confidence_threshold_post_fusion = 0.5
@@ -214,7 +290,7 @@ fused_detections_ds_ = fused_detections_ds.where(
 # - load ground truth
 # - compute metrics
 
-gt_bboxes_ds = load_bboxes.from_files(annotations_file_path, format="COCO")
+# gt_bboxes_ds = load_bboxes.from_files(annotations_file_path, format="COCO")
 
 iou_threshold_tp = 0.25
 fused_detections_ds_, gt_bboxes_ds = compute_precision_recall_ds(

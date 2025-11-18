@@ -87,7 +87,7 @@ class EnsembleDetector(LightningModule):
 
         return raw_prediction_dicts_per_sample
 
-    def format_predictions(self) -> xr.Dataset:
+    def format_predictions(self, attrs: dict) -> xr.Dataset:
         """Format as ethology detections dataset with model axis."""
         # Get results from trainer
         raw_predictions_per_model = self.trainer.predict_loop.predictions
@@ -156,4 +156,5 @@ class EnsembleDetector(LightningModule):
                 "id": np.arange(max_n_detections),
                 "model": np.arange(len(self.list_models)),
             },
+            attrs=attrs if attrs else {},
         )

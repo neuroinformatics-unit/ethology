@@ -2,93 +2,10 @@
 
 import numpy as np
 import xarray as xr
-from ensemble_boxes import weighted_boxes_fusion
+from ensemble_boxes import weighted_boxes_fusion, nms
 
 
-# TODO: review shapes are ok in docstring
-def _fuse_single_image_detections_WBF(
-    position,  # bboxes_x1y1: np.ndarray,  # model, annot, 4
-    shape,  # bboxes_x2y2: np.ndarray,  # model, annot, 4
-    confidence: np.ndarray,  # model, annot
-    label: np.ndarray,  # model, annot
-    image_width_height: np.ndarray,  # = np.array([4096, 2160]),
-    iou_thr_ensemble: float = 0.5,
-    skip_box_thr: float = 0.0001,
-    max_n_detections: int = 300,
-    # confidence_th_post_fusion: float = 0.7,
-) -> tuple[xr.DataArray, xr.DataArray, xr.DataArray, xr.DataArray]:
-    """Fuse detections across models for a single image using WBF.
-
-    Parameters
-    ----------
-    position: np.ndarray
-        Detected positions of bounding boxes in a single image, with shape
-        2, n_annot, n_models.
-    shape: np.ndarray
-        Detected shapes of bounding boxes in a single image, with shape
-        2, n_annot, n_models.
-    confidence: np.ndarray
-        Confidence scores for each bounding box, with shape
-        n_annotations, n_models.
-    label: np.ndarray
-        Labels for each bounding box, with shape n_annotations, n_models.
-    image_width_height: np.ndarray
-        Width and height of the image, with shape 2.
-    iou_thr_ensemble: float
-        IoU threshold for detections to be considered for fusion.
-    skip_box_thr: float
-        Threshold for skipping boxes with confidence below this value.
-    max_n_detections: int
-        Fused bounding boxes arrays are padded to this total number of boxes.
-        Its value should be larger than the expected maximum number of
-        detections per image **after** fusing across models.
-    confidence_th_post_fusion: float
-        Threshold for removing fused detections whose confidence is below
-        this value.
-
-    Returns
-    -------
-    tuple[xr.DataArray, xr.DataArray, xr.DataArray, xr.DataArray]
-        Tuple of xr.DataArrays containing the fused detections. The arrays
-        are padded to max_n_detections and contain the data for the centroid,
-        shape, confidence and label of the fused detections.
-
-    """
-    # Prepare single image arrays for fusion
-    list_bboxes_per_model, list_confidence_per_model, list_label_per_model = (
-        _preprocess_single_image_detections(
-            position, shape, confidence, label, image_width_height
-        )
-    )
-
-    # ------------------------------------
-    # Run WBF on one image
-    ensemble_x1y1_x2y2_norm, ensemble_scores, ensemble_labels = (
-        weighted_boxes_fusion(
-            list_bboxes_per_model,
-            list_confidence_per_model,
-            list_label_per_model,
-            iou_thr=iou_thr_ensemble,
-            skip_box_thr=skip_box_thr,
-        )
-    )
-
-    # ------------------------------------
-
-    # Format output as xarray dataarrays
-    centroid_da, shape_da, confidence_da, label_da = (
-        _postprocess_single_image_detections(
-            ensemble_x1y1_x2y2_norm,
-            ensemble_scores,
-            ensemble_labels,
-            image_width_height,
-            max_n_detections,
-        )
-    )
-
-    return centroid_da, shape_da, confidence_da, label_da
-
-
+# ----------- Helper functions ---------------------------
 def _preprocess_single_image_detections(
     position: xr.DataArray,
     shape: xr.DataArray,
@@ -251,21 +168,19 @@ def _postprocess_multi_image_fused_arrays(
     }
 
 
+# -------------------------------------
+
+
 def fuse_ensemble_detections_WBF(
     ensemble_detections_ds: xr.Dataset,
     image_width_height: np.ndarray,
-    iou_thr_ensemble: float = 0.5,
-    skip_box_thr: float = 0.0001,
-    max_n_detections: int = 300,
+    max_n_detections: int,
+    wbf_kwargs: dict,
+    # iou_thr_ensemble: float = 0.5,
+    # skip_box_thr: float = 0.0001,
+    # max_n_detections: int = 300,
 ) -> xr.Dataset:
     """Fuse ensemble detections across models using WBF."""
-
-    wbf_kwargs = {
-        "iou_thr_ensemble": iou_thr_ensemble,
-        "skip_box_thr": skip_box_thr,
-        "max_n_detections": max_n_detections,
-        "image_width_height": image_width_height,
-    }
 
     # Run WBF across image_id
     centroid_fused_da, shape_fused_da, confidence_fused_da, label_fused_da = (
@@ -275,7 +190,11 @@ def fuse_ensemble_detections_WBF(
             ensemble_detections_ds.shape,
             ensemble_detections_ds.confidence,
             ensemble_detections_ds.label,
-            kwargs=wbf_kwargs,
+            kwargs={
+                "image_width_height": image_width_height,
+                "max_n_detections": max_n_detections,
+                **wbf_kwargs,
+            },
             input_core_dims=[  # do not broadcast across these
                 ["space", "id", "model"],
                 ["space", "id", "model"],
@@ -311,3 +230,151 @@ def fuse_ensemble_detections_WBF(
     # FIX: why is id not a coordinate in the output dataset?
     # FIX: order of dimensions should be image_id, space, id
     return xr.Dataset(data_vars=fused_data_arrays)
+
+
+def fuse_ensemble_detections_NMS(
+    ensemble_detections_ds: xr.Dataset,
+    image_width_height: np.ndarray,
+    max_n_detections: int,
+    nms_kwargs: dict,
+    # iou_thr_ensemble: float = 0.5,
+    # skip_box_thr: float = 0.0001,
+    # max_n_detections: int = 300,
+) -> xr.Dataset:
+    """Fuse ensemble detections across models using WBF."""
+
+        # Run WBF across image_id
+    centroid_fused_da, shape_fused_da, confidence_fused_da, label_fused_da = (
+        xr.apply_ufunc(
+            _fuse_single_image_detections_NMS,
+            ensemble_detections_ds.position,  # .data array is passed
+            ensemble_detections_ds.shape,
+            ensemble_detections_ds.confidence,
+            ensemble_detections_ds.label,
+            kwargs={
+                "image_width_height": image_width_height,
+                "max_n_detections": max_n_detections,
+                **nms_kwargs,
+            },
+            input_core_dims=[  # do not broadcast across these
+                ["space", "id", "model"],
+                ["space", "id", "model"],
+                ["id", "model"],
+                ["id", "model"],
+            ],
+            output_core_dims=[
+                ["space", "id"],
+                ["space", "id"],
+                ["id"],
+                ["id"],
+            ],
+            vectorize=True,
+            # loop over non-core dims (i.e. image_id);
+            # assumes function only takes arrays over core dims as input
+            exclude_dims={"id"},
+            # to allow dimensions that change size btw input and output
+        )
+    )
+
+    # Post process data arrays
+    fused_data_arrays = {
+        "position": centroid_fused_da,
+        "shape": shape_fused_da,
+        "confidence": confidence_fused_da,
+        "label": label_fused_da,
+    }
+    fused_data_arrays = _postprocess_multi_image_fused_arrays(
+        **fused_data_arrays
+    )
+
+    # Return a dataset
+    # FIX: why is id not a coordinate in the output dataset?
+    # FIX: order of dimensions should be image_id, space, id
+    return xr.Dataset(data_vars=fused_data_arrays)
+
+
+# --------------- Single image ---------------------------
+def _fuse_single_image_detections_WBF(
+    position,  # bboxes_x1y1: np.ndarray,  # model, annot, 4
+    shape,  # bboxes_x2y2: np.ndarray,  # model, annot, 4
+    confidence: np.ndarray,  # model, annot
+    label: np.ndarray,  # model, annot
+    image_width_height: np.ndarray,  # = np.array([4096, 2160]),
+    max_n_detections: int,
+    **wbf_kwargs: dict,  # WBF only kwargs
+) -> tuple[xr.DataArray, xr.DataArray, xr.DataArray, xr.DataArray]:
+    """Fuse detections across models for a single image using WBF."""
+    # Prepare single image arrays for fusion
+    list_bboxes_per_model, list_confidence_per_model, list_label_per_model = (
+        _preprocess_single_image_detections(
+            position, shape, confidence, label, image_width_height
+        )
+    )
+
+    # ------------------------------------
+    # Run WBF on one image
+    ensemble_x1y1_x2y2_norm, ensemble_scores, ensemble_labels = (
+        weighted_boxes_fusion(
+            list_bboxes_per_model,
+            list_confidence_per_model,
+            list_label_per_model,
+            **wbf_kwargs,
+        )
+    )
+
+    # ------------------------------------
+
+    # Format output as xarray dataarrays
+    centroid_da, shape_da, confidence_da, label_da = (
+        _postprocess_single_image_detections(
+            ensemble_x1y1_x2y2_norm,
+            ensemble_scores,
+            ensemble_labels,
+            image_width_height,
+            max_n_detections,
+        )
+    )
+
+    return centroid_da, shape_da, confidence_da, label_da
+
+
+def _fuse_single_image_detections_NMS(
+    position,  # bboxes_x1y1: np.ndarray,  # model, annot, 4
+    shape,  # bboxes_x2y2: np.ndarray,  # model, annot, 4
+    confidence: np.ndarray,  # model, annot
+    label: np.ndarray,  # model, annot
+    image_width_height: np.ndarray,  # = np.array([4096, 2160]),
+    max_n_detections: int,
+    **nms_kwargs: dict,  # NMS only kwargs
+) -> tuple[xr.DataArray, xr.DataArray, xr.DataArray, xr.DataArray]:
+    """Fuse detections across models for a single image using NMS."""
+    # Prepare single image arrays for fusion
+    list_bboxes_per_model, list_confidence_per_model, list_label_per_model = (
+        _preprocess_single_image_detections(
+            position, shape, confidence, label, image_width_height
+        )
+    )
+
+    # ------------------------------------
+    # Run WBF on one image
+    ensemble_x1y1_x2y2_norm, ensemble_scores, ensemble_labels = nms(
+        list_bboxes_per_model,
+        list_confidence_per_model,
+        list_label_per_model,
+        **nms_kwargs,
+    )
+
+    # ------------------------------------
+
+    # Format output as xarray dataarrays
+    centroid_da, shape_da, confidence_da, label_da = (
+        _postprocess_single_image_detections(
+            ensemble_x1y1_x2y2_norm,
+            ensemble_scores,
+            ensemble_labels,
+            image_width_height,
+            max_n_detections,
+        )
+    )
+
+    return centroid_da, shape_da, confidence_da, label_da
