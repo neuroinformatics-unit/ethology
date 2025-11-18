@@ -1,13 +1,12 @@
 """Wrappers around ensemble-boxes fusion functions."""
 
-import numpy as np
-import xarray as xr
+from collections.abc import Callable
+from functools import partial
+from typing import Literal, TypedDict, Unpack
 
 import ensemble_boxes
-
-from typing import Callable, Optional, Literal
-from functools import partial
-from typing import TypedDict, Unpack
+import numpy as np
+import xarray as xr
 
 VALID_FUSION_METHODS = {
     "weighted_boxes_fusion": ensemble_boxes.weighted_boxes_fusion,
@@ -16,18 +15,19 @@ VALID_FUSION_METHODS = {
     "non_maxium_weighted": ensemble_boxes.non_maximum_weighted,
 }
 
+
 class _TypeFusionKwargs(TypedDict, total=False):
     """Type hints for fusion method kwargs.
 
     Parameters for methods as described in the ensemble_boxes documentation.
     See https://github.com/ZFTurbo/Weighted-Boxes-Fusion
-    
+
     Parameters
     ----------
     weights: list[float]
         Weights for each model.
     iou_thr: float
-        IoU threshold for detections to be considered a true positive 
+        IoU threshold for detections to be considered a true positive
         during fusion.
     skip_box_thr: float
         Exclude from fusion boxes with confidence below this value.
@@ -42,7 +42,9 @@ class _TypeFusionKwargs(TypedDict, total=False):
         - 'absent_model_aware_avg': weighted average that takes into account the absent model.
     allows_overflow: bool
         Whether to allow the confidence score of the fused detections to exceed 1.
+
     """
+
     weights: list[float] | None
     iou_thr: float
     skip_box_thr: float
@@ -51,12 +53,15 @@ class _TypeFusionKwargs(TypedDict, total=False):
     conf_type: Literal["avg", "box_and_model_avg", "absent_model_aware_avg"]
     allows_overflow: bool
 
+
 # TODO:
 # @decorator-that-checks-output-is-a-detections-dataset
 def fuse_ensemble_detections(
     ensemble_detections_ds: xr.Dataset,
-    fusion_method: Literal["weighted_boxes_fusion", "nms", "soft_nms", "non_maximum_weighted"],
-    fusion_method_kwargs: Optional[dict] = None,
+    fusion_method: Literal[
+        "weighted_boxes_fusion", "nms", "soft_nms", "non_maximum_weighted"
+    ],
+    fusion_method_kwargs: dict | None = None,
     max_n_detections: int = 500,
 ) -> xr.Dataset:
     """Fuse ensemble detections across models using WBF."""
@@ -100,16 +105,16 @@ def fuse_ensemble_detections(
                 **fusion_method_kwargs,
             },
             input_core_dims=[  # do not broadcast across these
-                ["space", "id", "model"],   # centroid
-                ["space", "id", "model"],   # shape
-                ["id", "model"],            # confidence
-                ["id", "model"],            # label
+                ["space", "id", "model"],  # centroid
+                ["space", "id", "model"],  # shape
+                ["id", "model"],  # confidence
+                ["id", "model"],  # label
             ],
-            output_core_dims=[ # do not broadcast across these
-                ["space", "id"],    # centroid
-                ["space", "id"],    # shape
-                ["id"],             # confidence
-                ["id"],             # label
+            output_core_dims=[  # do not broadcast across these
+                ["space", "id"],  # centroid
+                ["space", "id"],  # shape
+                ["id"],  # confidence
+                ["id"],  # label
             ],
             vectorize=True,
             # TODO: can I avoid vectorize?
@@ -137,16 +142,17 @@ def fuse_ensemble_detections(
 
 def _validate_image_shape(image_shape) -> np.ndarray:
     """Validate and convert image shape to numpy array.
-    
+
     Args:
         image_shape: Image dimensions as (width, height).
             Should be array-like with 2 elements.
-    
+
     Returns:
         np.ndarray: Validated image shape as 1D array with 2 elements.
-    
+
     Raises:
         ValueError: If image_shape cannot be converted to a valid shape.
+
     """
     try:
         image_shape = np.asarray(image_shape)
@@ -155,7 +161,7 @@ def _validate_image_shape(image_shape) -> np.ndarray:
             f"Cannot convert 'image_shape' to array: {e}. "
             "Expected format: (width, height) as tuple or array-like."
         ) from e
-    
+
     # Flatten to handle (2,), (1,2) and (2,1) shapes
     image_shape = image_shape.flatten()
     if image_shape.shape != (2,):
@@ -163,7 +169,7 @@ def _validate_image_shape(image_shape) -> np.ndarray:
             f"'image_shape' must have exactly 2 elements (width, height), "
             f"got shape {image_shape.shape}"
         )
-    
+
     return image_shape
 
 
@@ -279,13 +285,14 @@ def _postprocess_single_image_detections(
 
     return centroid_da, shape_da, confidence_da, label_da
 
+
 def _fuse_single_image_detections(
     fusion_function: Callable,
-    position,  
-    shape, 
-    confidence: np.ndarray,  
-    label: np.ndarray, 
-    image_width_height: np.ndarray, 
+    position,
+    shape,
+    confidence: np.ndarray,
+    label: np.ndarray,
+    image_width_height: np.ndarray,
     max_n_detections: int,
     **fusion_kwargs: Unpack[_TypeFusionKwargs],  #  method-only kwargs
 ) -> tuple[xr.DataArray, xr.DataArray, xr.DataArray, xr.DataArray]:
@@ -380,6 +387,3 @@ def _postprocess_multi_image_fused_arrays(
         "confidence": confidence_da,
         "label": label_da,
     }
-
-
-

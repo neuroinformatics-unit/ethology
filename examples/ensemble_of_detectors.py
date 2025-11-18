@@ -10,7 +10,6 @@ import xarray as xr
 import yaml
 from lightning import Trainer
 from matplotlib import pyplot as plt
-from PIL import Image
 from torch.utils.data import DataLoader
 from torchvision.datasets import CocoDetection, wrap_dataset_for_transforms_v2
 
@@ -245,7 +244,7 @@ for image_id in range(350, 450, 10):
 # Fuse detections across models with WBF
 # TODO: think whether joblib approach is more readable?
 image_width_height = np.array(dataloader.dataset[0][0].shape[-2:])[::-1]
-ensemble_detections_ds.attrs['image_shape'] = image_width_height
+ensemble_detections_ds.attrs["image_shape"] = image_width_height
 
 config_fusion = config["fusion"]
 
@@ -253,7 +252,7 @@ config_fusion = config["fusion"]
 # %%
 fused_detections_ds = fuse_ensemble_detections(
     ensemble_detections_ds,
-    fusion_method=config_fusion['method'],
+    fusion_method=config_fusion["method"],
     fusion_method_kwargs=config_fusion["method_kwargs"],
     # max_n_detections=config_fusion["max_n_detections"],
     # should be larger than expected maximum number of detections after fusion
@@ -265,13 +264,13 @@ fused_detections_ds = fuse_ensemble_detections(
 
 fused_detections_nms_ds = fuse_ensemble_detections(
     ensemble_detections_ds,
-    fusion_method='soft_nms',
+    fusion_method="soft_nms",
     fusion_method_kwargs={
         "iou_thr": config_fusion["method_kwargs"]["iou_thr"],
-        "sigma":0.5,
-        "thresh":0.001
+        "sigma": 0.5,
+        "thresh": 0.001,
     },
-    max_n_detections=500
+    max_n_detections=500,
 )
 
 fused_detections_ds = fused_detections_nms_ds

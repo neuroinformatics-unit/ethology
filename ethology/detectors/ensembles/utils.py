@@ -1,7 +1,6 @@
 """Utility functions for reshaping outputs of ensembles of detectors."""
 
 import numpy as np
-import xarray as xr
 
 
 def get_padding_width(array, max_n):
@@ -24,5 +23,3 @@ def pad_to_max_first_dimension(list_arrays, fill_value=np.nan):
         for arr in list_arrays
     ]
     return list_arrays_padded
-
-
