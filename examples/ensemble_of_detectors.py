@@ -12,7 +12,7 @@ from lightning import Trainer
 from torch.utils.data import DataLoader
 from torchvision.datasets import CocoDetection, wrap_dataset_for_transforms_v2
 
-from ethology.detectors.ensembles.fusion import WBF_across_models
+from ethology.detectors.ensembles.fusion import fuse_ensemble_detections_WBF
 from ethology.detectors.ensembles.models import EnsembleDetector
 from ethology.detectors.evaluate import compute_precision_recall_ds
 from ethology.io.annotations import load_bboxes
@@ -182,17 +182,19 @@ trainer = Trainer(accelerator="gpu", devices=1, logger=False)
 _ = trainer.predict(ensemble_detector, dataloader)
 # [batch][sample][model]- dict
 
+
 # Format predictions as ethology detections dataset
-# TODO: think about syntax of format_predictions (should it be instance or 
+# TODO: think about syntax of format_predictions (should it be instance or
 # static method instead?)
+# Can it just be output from .predict?
 ensemble_detections_ds = ensemble_detector.format_predictions()
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Fuse detections across models
 # TODO: think whether joblib approach is more readable?
-image_width_height = np.array(dataloader.dataset[0][0].shape[-2:])[::-1] 
+image_width_height = np.array(dataloader.dataset[0][0].shape[-2:])[::-1]
 
-fused_detections_ds = WBF_across_models(
+fused_detections_ds = fuse_ensemble_detections_WBF(
     ensemble_detections_ds,
     image_width_height=image_width_height,
     iou_thr_ensemble=0.5,
@@ -249,11 +251,11 @@ print(f"Recall: {fused_detections_ds_.recall.mean().values:.4f}")
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Evaluate single models
 list_detections_ds_eval = []
-for k in range(ensemble_detections_ds.sizes["model"]):   
+for k in range(ensemble_detections_ds.sizes["model"]):
     detections_ds, _ = compute_precision_recall_ds(
         pred_bboxes_ds=ensemble_detections_ds.sel(model=k),
         gt_bboxes_ds=gt_bboxes_ds,
-        iou_threshold=iou_threshold_tp
+        iou_threshold=iou_threshold_tp,
     )
     list_detections_ds_eval.append(detections_ds)
 
