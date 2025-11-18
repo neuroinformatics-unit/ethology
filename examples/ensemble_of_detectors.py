@@ -14,10 +14,7 @@ from PIL import Image
 from torch.utils.data import DataLoader
 from torchvision.datasets import CocoDetection, wrap_dataset_for_transforms_v2
 
-from ethology.detectors.ensembles.fusion import (
-    fuse_ensemble_detections_NMS,
-    fuse_ensemble_detections_WBF,
-)
+from ethology.detectors.ensembles.fusion import fuse_ensemble_detections
 from ethology.detectors.ensembles.models import EnsembleDetector
 from ethology.detectors.evaluate import compute_precision_recall_ds
 from ethology.io.annotations import load_bboxes
@@ -167,7 +164,8 @@ config = {
         ],
     },
     "fusion": {
-        "method": "wbf",
+        "method": "weighted_boxes_fusion",
+        # "nms", "soft_nms", "weighted_boxes_fusion" or "non_maximum_weighted"
         "method_kwargs": {  # arguments as in ensemble_boxes.weighted_boxes_fusion
             "iou_thr": 0.5,  # iou threshold for the ensemble
             "skip_box_thr": 0.0001,
@@ -191,10 +189,8 @@ print(f"Ensemble detector is on device: {ensemble_detector.device}")
 # Use Trainer for inference (this sets the device flexibly)
 trainer = Trainer(accelerator="gpu", devices=1, logger=False)
 _ = trainer.predict(ensemble_detector, dataloader)
-# [batch][sample][model]- dict
 
 
-#
 # Format predictions as ethology detections dataset and add attrs
 # TODO: think about syntax of format_predictions (should it be instance or
 # static method instead?)
@@ -249,14 +245,17 @@ for image_id in range(350, 450, 10):
 # Fuse detections across models with WBF
 # TODO: think whether joblib approach is more readable?
 image_width_height = np.array(dataloader.dataset[0][0].shape[-2:])[::-1]
+ensemble_detections_ds.attrs['image_shape'] = image_width_height
 
 config_fusion = config["fusion"]
 
-fused_detections_ds = fuse_ensemble_detections_WBF(
+
+# %%
+fused_detections_ds = fuse_ensemble_detections(
     ensemble_detections_ds,
-    image_width_height=image_width_height,
-    max_n_detections=config_fusion["max_n_detections"],
-    wbf_kwargs=config_fusion["method_kwargs"],
+    fusion_method=config_fusion['method'],
+    fusion_method_kwargs=config_fusion["method_kwargs"],
+    # max_n_detections=config_fusion["max_n_detections"],
     # should be larger than expected maximum number of detections after fusion
     # ---- method kwargs ----
 )
@@ -264,20 +263,18 @@ fused_detections_ds = fuse_ensemble_detections_WBF(
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Fuse detections across models with NMS
 
-config_fusion = config["fusion"]
-
-fused_detections_nms_ds = fuse_ensemble_detections_NMS(
+fused_detections_nms_ds = fuse_ensemble_detections(
     ensemble_detections_ds,
-    image_width_height=image_width_height,
-    max_n_detections=config_fusion["max_n_detections"],
-    nms_kwargs={
+    fusion_method='soft_nms',
+    fusion_method_kwargs={
         "iou_thr": config_fusion["method_kwargs"]["iou_thr"],
+        "sigma":0.5,
+        "thresh":0.001
     },
-    # should be larger than expected maximum number of detections after fusion
-    # ---- method kwargs ----
+    max_n_detections=500
 )
 
-# fused_detections_ds = fused_detections_nms_ds
+fused_detections_ds = fused_detections_nms_ds
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Remove low confidence detections
 confidence_threshold_post_fusion = 0.5

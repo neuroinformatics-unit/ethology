@@ -87,7 +87,9 @@ class EnsembleDetector(LightningModule):
 
         return raw_prediction_dicts_per_sample
 
-    def format_predictions(self, attrs: dict) -> xr.Dataset:
+    # TODO:
+    # @decorator-that-checks-output-is-a-detections-dataset
+    def format_predictions(self, attrs: dict | None = None) -> xr.Dataset:
         """Format as ethology detections dataset with model axis."""
         # Get results from trainer
         raw_predictions_per_model = self.trainer.predict_loop.predictions
