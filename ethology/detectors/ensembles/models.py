@@ -6,10 +6,10 @@ from pathlib import Path
 import numpy as np
 import torch
 import torch.nn as nn
-import torchvision.models.detection as detection_models
 import xarray as xr
 import yaml
 from lightning import LightningModule
+from torchvision.models import detection, get_model, list_models
 
 from ethology.detectors.ensembles.utils import pad_to_max_first_dimension
 
@@ -32,38 +32,74 @@ class EnsembleDetector(LightningModule):
         with open(self.config_file) as f:
             self.config = yaml.safe_load(f)
 
+        # Run checks
+        self._validate_model_class()
+
         # Load list of models (nn.ModuleList)
-        self.list_models = self.load_models()
+        self.list_models = self._load_models()
 
-    def load_models(self) -> nn.ModuleList:
+    @staticmethod
+    def _validate_model_class(model_class_str: str) -> None:
+        """Validate that the model is part of torchvision.models.detection."""
+        valid_models = set(list_models(module=detection))
+        if model_class_str not in valid_models:
+            valid_sorted = ", ".join(sorted(valid_models))
+            raise ValueError(
+                f"'{model_class_str}' is not a supported detection model. "
+                f"Valid options: {valid_sorted}"
+            )
+
+    def _load_models(self) -> nn.ModuleList:
         """Load models from checkpoints."""
+        # Get model architecture
         models_config = self.config["models"]
-        model_class = getattr(detection_models, models_config["model_class"])
+        model = get_model(
+            models_config["model_class"],
+            **models_config.get("model_kwargs", {}),
+        )
 
+        # Load weights
         list_models = []
         for checkpoint_path in models_config["checkpoints"]:
-            # Get model architecture and weights
-            model = model_class(**models_config["model_kwargs"])
+            # Get checkpoint
             checkpoint = torch.load(checkpoint_path, map_location=self.device)
-            state_dict = checkpoint["state_dict"]
 
-            # Load state dict into model
-            # PyTorch Lightning saves the model with a "model."
-            # prefix in the state_dict keys if you defined self.model
-            # in your LightningModule - we remove the prefix here.
-            if any(key.startswith("model.") for key in state_dict):
-                model_state_dict = {
-                    key.replace("model.", "", 1): value
-                    for key, value in state_dict.items()
-                    if key.startswith("model.")
-                }
-            else:
-                model_state_dict = state_dict
-            model.load_state_dict(model_state_dict)
+            # Load state dict
+            model_state_dict = self._get_model_state_dict(checkpoint)
+            model.load_state_dict(model_state_dict, strict=True)
 
-            # Append to list
             list_models.append(model)
+
         return nn.ModuleList(list_models)
+
+    @staticmethod
+    def _get_model_state_dict(checkpoint):
+        # Handle different checkpoint formats
+        if "state_dict" in checkpoint:
+            state_dict = checkpoint["state_dict"]
+        elif isinstance(checkpoint, dict):
+            # Checkpoint might be the state dict itself
+            state_dict = checkpoint
+        else:
+            raise ValueError(
+                "Checkpoint format not recognized. "
+                "Expected 'state_dict' key or dict of tensors."
+            )
+
+        # Load state dict into model
+        # PyTorch Lightning saves the model with a "model."
+        # prefix in the state_dict keys if you defined self.model
+        # in your LightningModule - we remove the prefix here.
+        if any(key.startswith("model.") for key in state_dict):
+            model_state_dict = {
+                key.replace("model.", "", 1): value
+                for key, value in state_dict.items()
+                if key.startswith("model.")
+            }
+        else:
+            model_state_dict = state_dict
+
+        return model_state_dict
 
     def predict_step(self, batch, batch_idx):
         """Predict step for a single batch."""
