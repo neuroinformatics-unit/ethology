@@ -126,9 +126,7 @@ class EnsembleDetector(LightningModule):
         return raw_prediction_dicts_per_sample
 
     @_check_output(ValidBboxDetectionsDataset)
-    def format_predictions(
-        self, attrs: dict | None = None
-    ) -> xr.Dataset:
+    def format_predictions(self, attrs: dict | None = None) -> xr.Dataset:
         """Format as ethology detections dataset with model axis."""
         # Get results from trainer
         raw_predictions_per_model = self.trainer.predict_loop.predictions

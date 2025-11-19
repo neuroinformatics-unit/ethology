@@ -53,7 +53,7 @@ class _TypeFusionKwargs(TypedDict, total=False):
         - 'absent_model_aware_avg': weighted average that takes into account the absent model.
     allows_overflow: bool
         Whether to allow the confidence score of the fused detections to exceed 1.
-    
+
     """
 
 
