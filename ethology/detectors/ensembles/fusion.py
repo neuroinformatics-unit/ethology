@@ -5,8 +5,16 @@ from functools import partial
 from typing import Literal, TypedDict, Unpack
 
 import ensemble_boxes
+from collections.abc import Callable
+from functools import partial
+from typing import Literal, TypedDict, Unpack
+
+import ensemble_boxes
 import numpy as np
 import xarray as xr
+
+from ethology.io.detections.validate import ValidBboxDetectionsDataset
+from ethology.io.validate import _check_output
 
 VALID_FUSION_METHODS = {
     "weighted_boxes_fusion": ensemble_boxes.weighted_boxes_fusion,
@@ -16,17 +24,20 @@ VALID_FUSION_METHODS = {
 }
 
 
+
 class _TypeFusionKwargs(TypedDict, total=False):
     """Type hints for fusion method kwargs.
 
     Parameters for methods as described in the ensemble_boxes documentation.
     See https://github.com/ZFTurbo/Weighted-Boxes-Fusion
 
+
     Parameters
     ----------
     weights: list[float]
         Weights for each model.
     iou_thr: float
+        IoU threshold for detections to be considered a true positive
         IoU threshold for detections to be considered a true positive
         during fusion.
     skip_box_thr: float
@@ -42,8 +53,9 @@ class _TypeFusionKwargs(TypedDict, total=False):
         - 'absent_model_aware_avg': weighted average that takes into account the absent model.
     allows_overflow: bool
         Whether to allow the confidence score of the fused detections to exceed 1.
-
+    
     """
+
 
     weights: list[float] | None
     iou_thr: float
@@ -54,10 +66,13 @@ class _TypeFusionKwargs(TypedDict, total=False):
     allows_overflow: bool
 
 
-# TODO:
-# @decorator-that-checks-output-is-a-detections-dataset
+@_check_output(ValidBboxDetectionsDataset)
 def fuse_ensemble_detections(
     ensemble_detections_ds: xr.Dataset,
+    fusion_method: Literal[
+        "weighted_boxes_fusion", "nms", "soft_nms", "non_maximum_weighted"
+    ],
+    fusion_method_kwargs: dict | None = None,
     fusion_method: Literal[
         "weighted_boxes_fusion", "nms", "soft_nms", "non_maximum_weighted"
     ],
