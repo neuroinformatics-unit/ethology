@@ -11,15 +11,15 @@ import xarray as xr
 from pandera.typing.pandas import DataFrame
 
 from ethology.io.annotations.validate import (
+    ValidBboxAnnotationsDataset,
     ValidBboxesDataFrame,
-    ValidBboxesDataset,
     ValidCOCO,
     ValidVIA,
-    _check_output,
 )
+from ethology.io.validate import _check_output
 
 
-@_check_output(ValidBboxesDataset)
+@_check_output(ValidBboxAnnotationsDataset)
 def from_files(
     file_paths: Path | str | list[Path | str],
     format: Literal["VIA", "COCO"],

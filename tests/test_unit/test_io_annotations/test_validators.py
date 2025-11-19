@@ -11,7 +11,7 @@ from ethology.io.annotations.json_schemas.utils import (
     _extract_properties_keys,
 )
 from ethology.io.annotations.validate import (
-    ValidBboxesDataset,
+    ValidBboxAnnotationsDataset,
     ValidCOCO,
     ValidVIA,
 )
@@ -557,7 +557,7 @@ def test_valid_bboxes_dataset_validation(
     expected_error_message: str,
     request: pytest.FixtureRequest,
 ):
-    """Test ValidBboxesDataset validation with various input scenarios."""
+    """Test bbox annotations dataset validator with various input scenarios."""
     # Get dataset to validate
     if isinstance(sample_dataset, str):
         dataset = request.getfixturevalue(sample_dataset)
@@ -566,7 +566,7 @@ def test_valid_bboxes_dataset_validation(
 
     # Run validation and check exception
     with expected_exception as excinfo:
-        validator = ValidBboxesDataset(dataset=dataset)
+        validator = ValidBboxAnnotationsDataset(dataset=dataset)
 
     if excinfo:
         error_msg = str(excinfo.value)
