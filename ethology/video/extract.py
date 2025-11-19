@@ -1,12 +1,12 @@
 import json
 from datetime import datetime
 from pathlib import Path
+from typing import Annotated
 
 import cv2
 import numpy as np
 import typer
 from loguru import logger
-from typing_extensions import Annotated
 
 VALID_METHODS = ["uniform"]
 
@@ -80,6 +80,7 @@ def compute_frames_to_extract(
     ------
     ValueError
         If the method is not supported.
+
     """
     # Get list of full paths to video files
     if video_dir.is_file():
@@ -130,6 +131,7 @@ def extract_frames_from_metadata(
     -------
     Path
         The path to the directory containing the extracted frames.
+
     """
     # Load metadata file
     with open(frames_to_label_file) as f:
