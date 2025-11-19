@@ -1,7 +1,89 @@
 """Utils for validating `ethology` objects."""
 
+from abc import ABC, abstractmethod
 from collections.abc import Callable
 from functools import wraps
+
+import xarray as xr
+from attrs import define, field
+
+
+@define
+class ValidDataset(ABC):
+    """An abstract base class for valid ``ethology`` datasets.
+
+    It checks that the input dataset has:
+
+    - required dimensions
+    - required data variables
+
+    Subclasses must define ``required_dims`` and ``required_data_vars``
+    attributes.
+
+    Attributes
+    ----------
+    dataset : xarray.Dataset
+        The xarray dataset to validate.
+    required_dims : set
+        Set of required dimension names (defined by subclasses).
+    required_data_vars : set
+        Set of required data variable names (defined by subclasses).
+
+    Raises
+    ------
+    TypeError
+        If the input is not an xarray Dataset.
+    ValueError
+        If the dataset is missing required data variables or dimensions.
+
+    Notes
+    -----
+    The dataset can have other data variables and dimensions, but only the
+    required ones are checked.
+
+    """
+
+    dataset: xr.Dataset = field()
+
+    # Subclasses should override these abstract properties
+    @property
+    @abstractmethod
+    def required_dims(self) -> set:
+        """Subclasses must provide a required_dims property."""
+        pass
+
+    @property
+    @abstractmethod
+    def required_data_vars(self) -> set:
+        """Subclasses must provide a required_data_vars property."""
+        pass
+
+    # Validators
+    @dataset.validator
+    def _check_dataset_type(self, attribute, value):
+        """Ensure the input is an xarray Dataset."""
+        if not isinstance(value, xr.Dataset):
+            raise TypeError(
+                f"Expected an xarray Dataset, but got {type(value)}."
+            )
+
+    @dataset.validator
+    def _check_required_data_variables(self, attribute, value):
+        """Ensure the dataset has all required data variables."""
+        missing_vars = self.required_data_vars - set(value.data_vars)
+        if missing_vars:
+            raise ValueError(
+                f"Missing required data variables: {sorted(missing_vars)}"
+            )
+
+    @dataset.validator
+    def _check_required_dimensions(self, attribute, value):
+        """Ensure the dataset has all required dimensions."""
+        missing_dims = self.required_dims - set(value.dims)
+        if missing_dims:
+            raise ValueError(
+                f"Missing required dimensions: {sorted(missing_dims)}"
+            )
 
 
 def _check_output(validator: type):

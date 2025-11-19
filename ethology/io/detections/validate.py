@@ -1,11 +1,12 @@
 """Validators for detection datasets."""
 
-import xarray as xr
 from attrs import define, field
+
+from ethology.io.validate import ValidDataset
 
 
 @define
-class ValidBboxDetectionsDataset:
+class ValidBboxDetectionsDataset(ValidDataset):
     """Class for valid ``ethology`` bounding box detections datasets.
 
     It checks that the input dataset has:
@@ -17,6 +18,10 @@ class ValidBboxDetectionsDataset:
     ----------
     dataset : xarray.Dataset
         The xarray dataset to validate.
+    required_dims : set
+        Set of required dimension names.
+    required_data_vars : set
+        Set of required data variable names.
 
     Raises
     ------
@@ -32,9 +37,7 @@ class ValidBboxDetectionsDataset:
 
     """
 
-    dataset: xr.Dataset = field()
-
-    # Minimum requirements for annotations datasets holding bboxes
+    # Minimum requirements for a bbox dataset holding detections
     required_dims: set = field(
         default={"image_id", "space", "id"},
         init=False,
@@ -43,29 +46,3 @@ class ValidBboxDetectionsDataset:
         default={"position", "shape", "confidence"},
         init=False,
     )
-
-    @dataset.validator
-    def _check_dataset_type(self, attribute, value):
-        """Ensure the input is an xarray Dataset."""
-        if not isinstance(value, xr.Dataset):
-            raise TypeError(
-                f"Expected an xarray Dataset, but got {type(value)}."
-            )
-
-    @dataset.validator
-    def _check_required_data_variables(self, attribute, value):
-        """Ensure the dataset has all required data variables."""
-        missing_vars = self.required_data_vars - set(value.data_vars)
-        if missing_vars:
-            raise ValueError(
-                f"Missing required data variables: {sorted(missing_vars)}"
-            )
-
-    @dataset.validator
-    def _check_required_dimensions(self, attribute, value):
-        """Ensure the dataset has all required dimensions."""
-        missing_dims = self.required_dims - set(value.dims)
-        if missing_dims:
-            raise ValueError(
-                f"Missing required dimensions: {sorted(missing_dims)}"
-            )
