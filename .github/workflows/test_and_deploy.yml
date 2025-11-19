@@ -8,6 +8,11 @@ on:
       - '*'
   pull_request:
 
+# Cancel in-progress runs if a new run is triggered, except for main branch.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
 jobs:
   linting:
     runs-on: ubuntu-latest

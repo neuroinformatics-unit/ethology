@@ -18,6 +18,11 @@ on:
   merge_group:
   workflow_dispatch:
 
+# Cancel in-progress runs if a new run is triggered, except for main branch.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
 jobs:
   linting:
     # scheduled workflows should not run on forks
