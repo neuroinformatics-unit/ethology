@@ -1,13 +1,10 @@
 """Validators for annotation files and datasets."""
 
 import json
-from collections.abc import Callable
-from functools import wraps
 from pathlib import Path
 
 import pandas as pd
 import pandera.pandas as pa
-import xarray as xr
 from attrs import define, field
 from pandera.typing import Index
 
@@ -17,6 +14,7 @@ from ethology.io.annotations.json_schemas.utils import (
     _check_required_keys_in_dict,
     _get_default_schema,
 )
+from ethology.io.validate import ValidDataset
 
 
 @define
@@ -227,7 +225,7 @@ class ValidCOCO:
 
 
 @define
-class ValidBboxesDataset:
+class ValidBboxAnnotationsDataset(ValidDataset):
     """Class for valid ``ethology`` bounding box annotations datasets.
 
     It checks that the input dataset has:
@@ -239,6 +237,10 @@ class ValidBboxesDataset:
     ----------
     dataset : xarray.Dataset
         The xarray dataset to validate.
+    required_dims : set
+        Set of required dimension names.
+    required_data_vars : set
+        Set of required data variable names.
 
     Raises
     ------
@@ -254,9 +256,7 @@ class ValidBboxesDataset:
 
     """
 
-    dataset: xr.Dataset = field()
-
-    # Minimum requirements for annotations datasets holding bboxes
+    # Minimum requirements for a bbox dataset holding detections
     required_dims: set = field(
         default={"image_id", "space", "id"},
         init=False,
@@ -265,32 +265,6 @@ class ValidBboxesDataset:
         default={"position", "shape"},
         init=False,
     )
-
-    @dataset.validator
-    def _check_dataset_type(self, attribute, value):
-        """Ensure the input is an xarray Dataset."""
-        if not isinstance(value, xr.Dataset):
-            raise TypeError(
-                f"Expected an xarray Dataset, but got {type(value)}."
-            )
-
-    @dataset.validator
-    def _check_required_data_variables(self, attribute, value):
-        """Ensure the dataset has all required data variables."""
-        missing_vars = self.required_data_vars - set(value.data_vars)
-        if missing_vars:
-            raise ValueError(
-                f"Missing required data variables: {sorted(missing_vars)}"
-            )
-
-    @dataset.validator
-    def _check_required_dimensions(self, attribute, value):
-        """Ensure the dataset has all required dimensions."""
-        missing_dims = self.required_dims - set(value.dims)
-        if missing_dims:
-            raise ValueError(
-                f"Missing required dimensions: {sorted(missing_dims)}"
-            )
 
 
 class ValidBboxesDataFrame(pa.DataFrameModel):
@@ -573,38 +547,3 @@ class ValidBboxesDataFrameCOCO(pa.DataFrameModel):
 
         """
         return all(df.index == df["annotation_id"])
-
-
-def _check_output(validator: type):
-    """Return a decorator that validates the output of a function."""
-
-    def decorator(function: Callable) -> Callable:
-        @wraps(function)  # to preserve function metadata
-        def wrapper(*args, **kwargs):
-            result = function(*args, **kwargs)
-            validator(result)
-            return result
-
-        return wrapper
-
-    return decorator
-
-
-def _check_input(validator: type, input_index: int = 0):
-    """Return a decorator that validates a specific input of a function.
-
-    By default, the first input is validated. If the input index is
-    larger than the number of inputs, no validation is performed.
-    """
-
-    def decorator(function: Callable) -> Callable:
-        @wraps(function)
-        def wrapper(*args, **kwargs):
-            if len(args) > input_index:
-                validator(args[input_index])
-            result = function(*args, **kwargs)
-            return result
-
-        return wrapper
-
-    return decorator
