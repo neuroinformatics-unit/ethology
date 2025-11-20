@@ -1,25 +1,23 @@
 ValidCOCO
 =========
 
-.. currentmodule:: ethology.io.annotations.validate
+.. currentmodule:: ethology.validators.annotations
 
 .. autoclass:: ValidCOCO
    :members:
-   :show-inheritance:
    :inherited-members:
-   :exclude-members: Config
-
-
-   
-   
-
-   
-   
-   
    
 
    
    
 
-.. minigallery:: ethology.io.annotations.validate.ValidCOCO
+   
+   
+   
+   
+
+   
+   
+
+.. minigallery:: ethology.validators.annotations.ValidCOCO
    :add-heading: Examples using ``ValidCOCO``

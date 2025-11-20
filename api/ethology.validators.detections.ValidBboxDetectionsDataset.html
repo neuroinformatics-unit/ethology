@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>ethology.datasets.split &#8212; ethology</title>
+    <title>ValidBboxDetectionsDataset &#8212; ethology</title>
   
   
   
@@ -49,13 +49,13 @@
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/design-tabs.js?v=f930bc37"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'api/ethology.datasets.split';</script>
-    <link rel="canonical" href="https://ethology.neuroinformatics.dev/api/ethology.datasets.split.html" />
+    <script>DOCUMENTATION_OPTIONS.pagename = 'api/ethology.validators.detections.ValidBboxDetectionsDataset';</script>
+    <link rel="canonical" href="https://ethology.neuroinformatics.dev/api/ethology.validators.detections.ValidBboxDetectionsDataset.html" />
     <link rel="icon" href="../_static/light-logo-niu.png"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="split_dataset_group_by" href="ethology.datasets.split.split_dataset_group_by.html" />
-    <link rel="prev" title="API reference" href="../api_index.html" />
+    <link rel="next" title="ethology.validators.json_schemas.utils" href="ethology.validators.json_schemas.utils.html" />
+    <link rel="prev" title="ethology.validators.detections" href="ethology.validators.detections.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="" />
@@ -345,7 +345,7 @@
      aria-label="Section Navigation">
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
-<li class="toctree-l1 current active has-children"><a class="current reference internal" href="#">ethology.datasets.split</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="ethology.datasets.split.html">ethology.datasets.split</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="ethology.datasets.split.split_dataset_group_by.html">split_dataset_group_by</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ethology.datasets.split.split_dataset_random.html">split_dataset_random</a></li>
 </ul>
@@ -366,8 +366,8 @@
 <li class="toctree-l2"><a class="reference internal" href="ethology.validators.annotations.ValidVIA.html">ValidVIA</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="ethology.validators.detections.html">ethology.validators.detections</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="ethology.validators.detections.ValidBboxDetectionsDataset.html">ValidBboxDetectionsDataset</a></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="ethology.validators.detections.html">ethology.validators.detections</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">ValidBboxDetectionsDataset</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1"><a class="reference internal" href="ethology.validators.json_schemas.utils.html">ethology.validators.json_schemas.utils</a></li>
@@ -418,7 +418,10 @@
     
     <li class="breadcrumb-item"><a href="../api_index.html" class="nav-link">API reference</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">ethology.datasets.split</span></li>
+    
+    <li class="breadcrumb-item"><a href="ethology.validators.detections.html" class="nav-link">ethology.validators.detections</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">ValidBboxDetectionsDataset</span></li>
   </ul>
 </nav>
 </div>
@@ -435,22 +438,76 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="ethology-datasets-split">
-<h1>ethology.datasets.split<a class="headerlink" href="#ethology-datasets-split" title="Link to this heading">#</a></h1>
-<p class="rubric">Description</p>
-<p id="module-ethology.datasets.split">Utilities for splitting annotations datasets.</p>
-<p class="rubric">Functions</p>
-<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
-<tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="ethology.datasets.split.split_dataset_group_by.html#ethology.datasets.split.split_dataset_group_by" title="ethology.datasets.split.split_dataset_group_by"><code class="xref py py-obj docutils literal notranslate"><span class="pre">split_dataset_group_by</span></code></a></p></td>
-<td><p>Split an annotations dataset by grouping variable.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="ethology.datasets.split.split_dataset_random.html#ethology.datasets.split.split_dataset_random" title="ethology.datasets.split.split_dataset_random"><code class="xref py py-obj docutils literal notranslate"><span class="pre">split_dataset_random</span></code></a></p></td>
-<td><p>Split an annotations dataset using random sampling.</p></td>
-</tr>
-</tbody>
-</table>
-</div>
+  <section id="validbboxdetectionsdataset">
+<h1>ValidBboxDetectionsDataset<a class="headerlink" href="#validbboxdetectionsdataset" title="Link to this heading">#</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="ethology.validators.detections.ValidBboxDetectionsDataset">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ethology.validators.detections.</span></span><span class="sig-name descname"><span class="pre">ValidBboxDetectionsDataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ethology/validators/detections.html#ValidBboxDetectionsDataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ethology.validators.detections.ValidBboxDetectionsDataset" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="ethology.validators.utils.ValidDataset.html#ethology.validators.utils.ValidDataset" title="ethology.validators.utils.ValidDataset"><code class="xref py py-class docutils literal notranslate"><span class="pre">ValidDataset</span></code></a></p>
+<p>Class for valid <code class="docutils literal notranslate"><span class="pre">ethology</span></code> bounding box detections datasets.</p>
+<p>This class validates that the input dataset:</p>
+<ul class="simple">
+<li><p>is an xarray Dataset,</p></li>
+<li><p>has <code class="docutils literal notranslate"><span class="pre">image_id</span></code>, <code class="docutils literal notranslate"><span class="pre">space</span></code>, <code class="docutils literal notranslate"><span class="pre">id</span></code> as dimensions,</p></li>
+<li><p>has <code class="docutils literal notranslate"><span class="pre">position</span></code>, <code class="docutils literal notranslate"><span class="pre">shape</span></code> and <code class="docutils literal notranslate"><span class="pre">confidence</span></code> as data variables,</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">position</span></code> and <code class="docutils literal notranslate"><span class="pre">shape</span></code> span at least the dimensions <code class="docutils literal notranslate"><span class="pre">image_id</span></code>,
+<code class="docutils literal notranslate"><span class="pre">space</span></code> and <code class="docutils literal notranslate"><span class="pre">id</span></code>,</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">confidence</span></code> spans at least the dimensions <code class="docutils literal notranslate"><span class="pre">image_id</span></code> and <code class="docutils literal notranslate"><span class="pre">id</span></code>.</p></li>
+</ul>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ethology.validators.detections.ValidBboxDetectionsDataset.dataset">
+<span class="sig-name descname"><span class="pre">dataset</span></span><a class="headerlink" href="#ethology.validators.detections.ValidBboxDetectionsDataset.dataset" title="Link to this definition">#</a></dt>
+<dd><p>The xarray dataset to validate.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="(in xarray v2025.10.1)">xarray.Dataset</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ethology.validators.detections.ValidBboxDetectionsDataset.required_dims">
+<span class="sig-name descname"><span class="pre">required_dims</span></span><a class="headerlink" href="#ethology.validators.detections.ValidBboxDetectionsDataset.required_dims" title="Link to this definition">#</a></dt>
+<dd><p>The set of required dimension names: <code class="docutils literal notranslate"><span class="pre">image_id</span></code>, <code class="docutils literal notranslate"><span class="pre">space</span></code> and
+<code class="docutils literal notranslate"><span class="pre">id</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#set" title="(in Python v3.14)">set</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="ethology.validators.detections.ValidBboxDetectionsDataset.required_data_vars">
+<span class="sig-name descname"><span class="pre">required_data_vars</span></span><a class="headerlink" href="#ethology.validators.detections.ValidBboxDetectionsDataset.required_data_vars" title="Link to this definition">#</a></dt>
+<dd><p>A dictionary mapping data variable names to their required minimum
+dimensions:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">position</span></code> maps to <code class="docutils literal notranslate"><span class="pre">image_id</span></code>, <code class="docutils literal notranslate"><span class="pre">space</span></code> and <code class="docutils literal notranslate"><span class="pre">id</span></code>,</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">shape</span></code> maps to <code class="docutils literal notranslate"><span class="pre">image_id</span></code>, <code class="docutils literal notranslate"><span class="pre">space</span></code> and <code class="docutils literal notranslate"><span class="pre">id</span></code>,</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">confidence</span></code> maps to <code class="docutils literal notranslate"><span class="pre">image_id</span></code> and <code class="docutils literal notranslate"><span class="pre">id</span></code>.</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)">dict</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#set" title="(in Python v3.14)">set</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#TypeError" title="(in Python v3.14)"><strong>TypeError</strong></a> – If the input is not an xarray Dataset.</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If the dataset is missing required data variables or dimensions,
+    or if any required dimensions are missing for any data variable.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>The dataset can have other data variables and dimensions, but only the
+required ones are checked.</p>
+</dd></dl>
+
 </section>
 
 
@@ -464,20 +521,20 @@
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="../api_index.html"
+       href="ethology.validators.detections.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">API reference</p>
+        <p class="prev-next-title">ethology.validators.detections</p>
       </div>
     </a>
     <a class="right-next"
-       href="ethology.datasets.split.split_dataset_group_by.html"
+       href="ethology.validators.json_schemas.utils.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">split_dataset_group_by</p>
+        <p class="prev-next-title">ethology.validators.json_schemas.utils</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -493,10 +550,27 @@
 
 
   <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#ethology.validators.detections.ValidBboxDetectionsDataset"><code class="docutils literal notranslate"><span class="pre">ValidBboxDetectionsDataset</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ethology.validators.detections.ValidBboxDetectionsDataset.dataset"><code class="docutils literal notranslate"><span class="pre">ValidBboxDetectionsDataset.dataset</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ethology.validators.detections.ValidBboxDetectionsDataset.required_dims"><code class="docutils literal notranslate"><span class="pre">ValidBboxDetectionsDataset.required_dims</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ethology.validators.detections.ValidBboxDetectionsDataset.required_data_vars"><code class="docutils literal notranslate"><span class="pre">ValidBboxDetectionsDataset.required_data_vars</span></code></a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="../_sources/api/ethology.datasets.split.rst.txt"
+      <li><a href="../_sources/api/ethology.validators.detections.ValidBboxDetectionsDataset.rst.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div></div>

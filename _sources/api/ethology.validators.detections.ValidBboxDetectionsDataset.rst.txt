@@ -1,0 +1,23 @@
+ValidBboxDetectionsDataset
+==========================
+
+.. currentmodule:: ethology.validators.detections
+
+.. autoclass:: ValidBboxDetectionsDataset
+   :members:
+   :inherited-members:
+   
+
+   
+   
+
+   
+   
+   
+   
+
+   
+   
+
+.. minigallery:: ethology.validators.detections.ValidBboxDetectionsDataset
+   :add-heading: Examples using ``ValidBboxDetectionsDataset``

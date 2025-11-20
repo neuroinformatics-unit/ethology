@@ -1,0 +1,101 @@
+ValidBboxAnnotationsCOCO
+========================
+
+.. currentmodule:: ethology.validators.annotations
+
+.. autoclass:: ValidBboxAnnotationsCOCO
+   :members:
+   :inherited-members:
+   
+
+   
+   
+
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+   
+   
+      ~ValidBboxAnnotationsCOCO.build_schema_
+   
+   
+      ~ValidBboxAnnotationsCOCO.check_idx_and_annotation_id
+   
+   
+      ~ValidBboxAnnotationsCOCO.empty
+   
+   
+      ~ValidBboxAnnotationsCOCO.example
+   
+   
+      ~ValidBboxAnnotationsCOCO.get_metadata
+   
+   
+      ~ValidBboxAnnotationsCOCO.map_df_columns_to_COCO_fields
+   
+   
+      ~ValidBboxAnnotationsCOCO.pydantic_validate
+   
+   
+      ~ValidBboxAnnotationsCOCO.strategy
+   
+   
+      ~ValidBboxAnnotationsCOCO.to_json_schema
+   
+   
+      ~ValidBboxAnnotationsCOCO.to_schema
+   
+   
+      ~ValidBboxAnnotationsCOCO.to_yaml
+   
+   
+      ~ValidBboxAnnotationsCOCO.validate
+   
+   
+   
+
+.. minigallery:: ethology.validators.annotations.ValidBboxAnnotationsCOCO
+   :add-heading: Examples using ``ValidBboxAnnotationsCOCO``

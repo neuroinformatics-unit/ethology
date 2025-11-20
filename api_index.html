@@ -44,7 +44,7 @@
   <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="_static/documentation_options.js?v=9a9d36d9"></script>
+    <script src="_static/documentation_options.js?v=3ee5b2c0"></script>
     <script src="_static/doctools.js?v=9bcbadda"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/design-tabs.js?v=f930bc37"></script>
@@ -120,7 +120,7 @@
   
   
   
-    <p class="title logo__title">ethology v0.1.1.dev2</p>
+    <p class="title logo__title">ethology v0.1.1.dev3</p>
   
 </a></div>
     
@@ -358,12 +358,21 @@
 <li class="toctree-l2"><a class="reference internal" href="api/ethology.io.annotations.save_bboxes.to_COCO_file.html">to_COCO_file</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="api/ethology.io.annotations.validate.html">ethology.io.annotations.validate</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
-<li class="toctree-l2"><a class="reference internal" href="api/ethology.io.annotations.validate.ValidBboxesDataFrame.html">ValidBboxesDataFrame</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/ethology.io.annotations.validate.ValidBboxesDataFrameCOCO.html">ValidBboxesDataFrameCOCO</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/ethology.io.annotations.validate.ValidBboxesDataset.html">ValidBboxesDataset</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/ethology.io.annotations.validate.ValidCOCO.html">ValidCOCO</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/ethology.io.annotations.validate.ValidVIA.html">ValidVIA</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="api/ethology.validators.annotations.html">ethology.validators.annotations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/ethology.validators.annotations.ValidBboxAnnotationsCOCO.html">ValidBboxAnnotationsCOCO</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/ethology.validators.annotations.ValidBboxAnnotationsDataFrame.html">ValidBboxAnnotationsDataFrame</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/ethology.validators.annotations.ValidBboxAnnotationsDataset.html">ValidBboxAnnotationsDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/ethology.validators.annotations.ValidCOCO.html">ValidCOCO</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/ethology.validators.annotations.ValidVIA.html">ValidVIA</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="api/ethology.validators.detections.html">ethology.validators.detections</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/ethology.validators.detections.ValidBboxDetectionsDataset.html">ValidBboxDetectionsDataset</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="api/ethology.validators.json_schemas.utils.html">ethology.validators.json_schemas.utils</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="api/ethology.validators.utils.html">ethology.validators.utils</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/ethology.validators.utils.ValidDataset.html">ValidDataset</a></li>
 </ul>
 </details></li>
 </ul>
@@ -438,8 +447,17 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="api/ethology.io.annotations.save_bboxes.html#module-ethology.io.annotations.save_bboxes" title="ethology.io.annotations.save_bboxes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ethology.io.annotations.save_bboxes</span></code></a></p></td>
 <td><p>Save <code class="docutils literal notranslate"><span class="pre">ethology</span></code> bounding box annotations datasets to various formats.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="api/ethology.io.annotations.validate.html#module-ethology.io.annotations.validate" title="ethology.io.annotations.validate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ethology.io.annotations.validate</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="api/ethology.validators.annotations.html#module-ethology.validators.annotations" title="ethology.validators.annotations"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ethology.validators.annotations</span></code></a></p></td>
 <td><p>Validators for annotation files and datasets.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="api/ethology.validators.detections.html#module-ethology.validators.detections" title="ethology.validators.detections"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ethology.validators.detections</span></code></a></p></td>
+<td><p>Validators for detection datasets.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="api/ethology.validators.json_schemas.utils.html#module-ethology.validators.json_schemas.utils" title="ethology.validators.json_schemas.utils"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ethology.validators.json_schemas.utils</span></code></a></p></td>
+<td><p>Utility functions for JSON schema files.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="api/ethology.validators.utils.html#module-ethology.validators.utils" title="ethology.validators.utils"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ethology.validators.utils</span></code></a></p></td>
+<td><p>Utils for validating <cite>ethology</cite> objects.</p></td>
 </tr>
 </tbody>
 </table>

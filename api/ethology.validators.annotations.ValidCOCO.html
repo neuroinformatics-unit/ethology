@@ -44,18 +44,18 @@
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../_static/documentation_options.js?v=9a9d36d9"></script>
+    <script src="../_static/documentation_options.js?v=3ee5b2c0"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/design-tabs.js?v=f930bc37"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'api/ethology.io.annotations.validate.ValidCOCO';</script>
-    <link rel="canonical" href="https://ethology.neuroinformatics.dev/api/ethology.io.annotations.validate.ValidCOCO.html" />
+    <script>DOCUMENTATION_OPTIONS.pagename = 'api/ethology.validators.annotations.ValidCOCO';</script>
+    <link rel="canonical" href="https://ethology.neuroinformatics.dev/api/ethology.validators.annotations.ValidCOCO.html" />
     <link rel="icon" href="../_static/light-logo-niu.png"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="ValidVIA" href="ethology.io.annotations.validate.ValidVIA.html" />
-    <link rel="prev" title="ValidBboxesDataset" href="ethology.io.annotations.validate.ValidBboxesDataset.html" />
+    <link rel="next" title="ValidVIA" href="ethology.validators.annotations.ValidVIA.html" />
+    <link rel="prev" title="ValidBboxAnnotationsDataset" href="ethology.validators.annotations.ValidBboxAnnotationsDataset.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="" />
@@ -120,7 +120,7 @@
   
   
   
-    <p class="title logo__title">ethology v0.1.1.dev2</p>
+    <p class="title logo__title">ethology v0.1.1.dev3</p>
   
 </a></div>
     
@@ -358,12 +358,21 @@
 <li class="toctree-l2"><a class="reference internal" href="ethology.io.annotations.save_bboxes.to_COCO_file.html">to_COCO_file</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1 current active has-children"><a class="reference internal" href="ethology.io.annotations.validate.html">ethology.io.annotations.validate</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="ethology.io.annotations.validate.ValidBboxesDataFrame.html">ValidBboxesDataFrame</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ethology.io.annotations.validate.ValidBboxesDataFrameCOCO.html">ValidBboxesDataFrameCOCO</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ethology.io.annotations.validate.ValidBboxesDataset.html">ValidBboxesDataset</a></li>
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="ethology.validators.annotations.html">ethology.validators.annotations</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="ethology.validators.annotations.ValidBboxAnnotationsCOCO.html">ValidBboxAnnotationsCOCO</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ethology.validators.annotations.ValidBboxAnnotationsDataFrame.html">ValidBboxAnnotationsDataFrame</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ethology.validators.annotations.ValidBboxAnnotationsDataset.html">ValidBboxAnnotationsDataset</a></li>
 <li class="toctree-l2 current active"><a class="current reference internal" href="#">ValidCOCO</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ethology.io.annotations.validate.ValidVIA.html">ValidVIA</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ethology.validators.annotations.ValidVIA.html">ValidVIA</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="ethology.validators.detections.html">ethology.validators.detections</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="ethology.validators.detections.ValidBboxDetectionsDataset.html">ValidBboxDetectionsDataset</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="ethology.validators.json_schemas.utils.html">ethology.validators.json_schemas.utils</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="ethology.validators.utils.html">ethology.validators.utils</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="ethology.validators.utils.ValidDataset.html">ValidDataset</a></li>
 </ul>
 </details></li>
 </ul>
@@ -410,7 +419,7 @@
     <li class="breadcrumb-item"><a href="../api_index.html" class="nav-link">API reference</a></li>
     
     
-    <li class="breadcrumb-item"><a href="ethology.io.annotations.validate.html" class="nav-link">ethology.io.annotations.validate</a></li>
+    <li class="breadcrumb-item"><a href="ethology.validators.annotations.html" class="nav-link">ethology.validators.annotations</a></li>
     
     <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">ValidCOCO</span></li>
   </ul>
@@ -432,15 +441,15 @@
   <section id="validcoco">
 <h1>ValidCOCO<a class="headerlink" href="#validcoco" title="Link to this heading">#</a></h1>
 <dl class="py class">
-<dt class="sig sig-object py" id="ethology.io.annotations.validate.ValidCOCO">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ethology.io.annotations.validate.</span></span><span class="sig-name descname"><span class="pre">ValidCOCO</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ethology/io/annotations/validate.html#ValidCOCO"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ethology.io.annotations.validate.ValidCOCO" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="ethology.validators.annotations.ValidCOCO">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">ethology.validators.annotations.</span></span><span class="sig-name descname"><span class="pre">ValidCOCO</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ethology/validators/annotations.html#ValidCOCO"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#ethology.validators.annotations.ValidCOCO" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Class for valid COCO JSON annotation files.</p>
 <p>It checks the input file is a valid JSON file, matches
 the COCO schema and contains the required keys.</p>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="ethology.io.annotations.validate.ValidCOCO.path">
-<span class="sig-name descname"><span class="pre">path</span></span><a class="headerlink" href="#ethology.io.annotations.validate.ValidCOCO.path" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="ethology.validators.annotations.ValidCOCO.path">
+<span class="sig-name descname"><span class="pre">path</span></span><a class="headerlink" href="#ethology.validators.annotations.ValidCOCO.path" title="Link to this definition">#</a></dt>
 <dd><p>Path to the COCO JSON file, passed as an input.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -450,8 +459,8 @@ the COCO schema and contains the required keys.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="ethology.io.annotations.validate.ValidCOCO.schema">
-<span class="sig-name descname"><span class="pre">schema</span></span><a class="headerlink" href="#ethology.io.annotations.validate.ValidCOCO.schema" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="ethology.validators.annotations.ValidCOCO.schema">
+<span class="sig-name descname"><span class="pre">schema</span></span><a class="headerlink" href="#ethology.validators.annotations.ValidCOCO.schema" title="Link to this definition">#</a></dt>
 <dd><p>The JSON schema is set to the default COCO schema.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -461,8 +470,8 @@ the COCO schema and contains the required keys.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="ethology.io.annotations.validate.ValidCOCO.required_keys">
-<span class="sig-name descname"><span class="pre">required_keys</span></span><a class="headerlink" href="#ethology.io.annotations.validate.ValidCOCO.required_keys" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="ethology.validators.annotations.ValidCOCO.required_keys">
+<span class="sig-name descname"><span class="pre">required_keys</span></span><a class="headerlink" href="#ethology.validators.annotations.ValidCOCO.required_keys" title="Link to this definition">#</a></dt>
 <dd><p>The required keys for the COCO JSON file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -475,9 +484,9 @@ the COCO schema and contains the required keys.</p>
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If the JSON file cannot be decoded.</p></li>
-<li><p><strong>jsonschema.exceptions.ValidationError</strong> – If the type of any of the keys in the JSON file
+<li><p><a class="reference external" href="https://python-jsonschema.readthedocs.io/en/stable/api/jsonschema/exceptions/#jsonschema.exceptions.ValidationError" title="(in jsonschema v4.25.1)"><strong>jsonschema.exceptions.ValidationError</strong></a> – If the type of any of the keys in the JSON file
     does not match the type specified in the schema.</p></li>
-<li><p><strong>jsonschema.exceptions.SchemaError</strong> – If the schema is invalid.</p></li>
+<li><p><a class="reference external" href="https://python-jsonschema.readthedocs.io/en/stable/api/jsonschema/exceptions/#jsonschema.exceptions.SchemaError" title="(in jsonschema v4.25.1)"><strong>jsonschema.exceptions.SchemaError</strong></a> – If the schema is invalid.</p></li>
 <li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If the COCO JSON file is missing any of the required keys.</p></li>
 </ul>
 </dd>
@@ -497,16 +506,16 @@ the COCO schema and contains the required keys.</p>
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="ethology.io.annotations.validate.ValidBboxesDataset.html"
+       href="ethology.validators.annotations.ValidBboxAnnotationsDataset.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">ValidBboxesDataset</p>
+        <p class="prev-next-title">ValidBboxAnnotationsDataset</p>
       </div>
     </a>
     <a class="right-next"
-       href="ethology.io.annotations.validate.ValidVIA.html"
+       href="ethology.validators.annotations.ValidVIA.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
@@ -533,10 +542,10 @@ the COCO schema and contains the required keys.</p>
   </div>
   <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#ethology.io.annotations.validate.ValidCOCO"><code class="docutils literal notranslate"><span class="pre">ValidCOCO</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ethology.io.annotations.validate.ValidCOCO.path"><code class="docutils literal notranslate"><span class="pre">ValidCOCO.path</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ethology.io.annotations.validate.ValidCOCO.schema"><code class="docutils literal notranslate"><span class="pre">ValidCOCO.schema</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ethology.io.annotations.validate.ValidCOCO.required_keys"><code class="docutils literal notranslate"><span class="pre">ValidCOCO.required_keys</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#ethology.validators.annotations.ValidCOCO"><code class="docutils literal notranslate"><span class="pre">ValidCOCO</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ethology.validators.annotations.ValidCOCO.path"><code class="docutils literal notranslate"><span class="pre">ValidCOCO.path</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ethology.validators.annotations.ValidCOCO.schema"><code class="docutils literal notranslate"><span class="pre">ValidCOCO.schema</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ethology.validators.annotations.ValidCOCO.required_keys"><code class="docutils literal notranslate"><span class="pre">ValidCOCO.required_keys</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -546,7 +555,7 @@ the COCO schema and contains the required keys.</p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="../_sources/api/ethology.io.annotations.validate.ValidCOCO.rst.txt"
+      <li><a href="../_sources/api/ethology.validators.annotations.ValidCOCO.rst.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div></div>

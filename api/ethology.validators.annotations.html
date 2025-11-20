@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>ethology.datasets.split &#8212; ethology</title>
+    <title>ethology.validators.annotations &#8212; ethology</title>
   
   
   
@@ -49,13 +49,13 @@
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/design-tabs.js?v=f930bc37"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'api/ethology.datasets.split';</script>
-    <link rel="canonical" href="https://ethology.neuroinformatics.dev/api/ethology.datasets.split.html" />
+    <script>DOCUMENTATION_OPTIONS.pagename = 'api/ethology.validators.annotations';</script>
+    <link rel="canonical" href="https://ethology.neuroinformatics.dev/api/ethology.validators.annotations.html" />
     <link rel="icon" href="../_static/light-logo-niu.png"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="split_dataset_group_by" href="ethology.datasets.split.split_dataset_group_by.html" />
-    <link rel="prev" title="API reference" href="../api_index.html" />
+    <link rel="next" title="ValidBboxAnnotationsCOCO" href="ethology.validators.annotations.ValidBboxAnnotationsCOCO.html" />
+    <link rel="prev" title="to_COCO_file" href="ethology.io.annotations.save_bboxes.to_COCO_file.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="" />
@@ -345,7 +345,7 @@
      aria-label="Section Navigation">
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
-<li class="toctree-l1 current active has-children"><a class="current reference internal" href="#">ethology.datasets.split</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="ethology.datasets.split.html">ethology.datasets.split</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="ethology.datasets.split.split_dataset_group_by.html">split_dataset_group_by</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ethology.datasets.split.split_dataset_random.html">split_dataset_random</a></li>
 </ul>
@@ -358,7 +358,7 @@
 <li class="toctree-l2"><a class="reference internal" href="ethology.io.annotations.save_bboxes.to_COCO_file.html">to_COCO_file</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="ethology.validators.annotations.html">ethology.validators.annotations</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l1 current active has-children"><a class="current reference internal" href="#">ethology.validators.annotations</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="ethology.validators.annotations.ValidBboxAnnotationsCOCO.html">ValidBboxAnnotationsCOCO</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ethology.validators.annotations.ValidBboxAnnotationsDataFrame.html">ValidBboxAnnotationsDataFrame</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ethology.validators.annotations.ValidBboxAnnotationsDataset.html">ValidBboxAnnotationsDataset</a></li>
@@ -418,7 +418,7 @@
     
     <li class="breadcrumb-item"><a href="../api_index.html" class="nav-link">API reference</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">ethology.datasets.split</span></li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">ethology.validators.annotations</span></li>
   </ul>
 </nav>
 </div>
@@ -435,18 +435,27 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="ethology-datasets-split">
-<h1>ethology.datasets.split<a class="headerlink" href="#ethology-datasets-split" title="Link to this heading">#</a></h1>
+  <section id="ethology-validators-annotations">
+<h1>ethology.validators.annotations<a class="headerlink" href="#ethology-validators-annotations" title="Link to this heading">#</a></h1>
 <p class="rubric">Description</p>
-<p id="module-ethology.datasets.split">Utilities for splitting annotations datasets.</p>
-<p class="rubric">Functions</p>
+<p id="module-ethology.validators.annotations">Validators for annotation files and datasets.</p>
+<p class="rubric">Classes</p>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="ethology.datasets.split.split_dataset_group_by.html#ethology.datasets.split.split_dataset_group_by" title="ethology.datasets.split.split_dataset_group_by"><code class="xref py py-obj docutils literal notranslate"><span class="pre">split_dataset_group_by</span></code></a></p></td>
-<td><p>Split an annotations dataset by grouping variable.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="ethology.validators.annotations.ValidBboxAnnotationsCOCO.html#ethology.validators.annotations.ValidBboxAnnotationsCOCO" title="ethology.validators.annotations.ValidBboxAnnotationsCOCO"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ValidBboxAnnotationsCOCO</span></code></a></p></td>
+<td><p>Class for COCO-exportable bounding box annotations dataframes.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="ethology.datasets.split.split_dataset_random.html#ethology.datasets.split.split_dataset_random" title="ethology.datasets.split.split_dataset_random"><code class="xref py py-obj docutils literal notranslate"><span class="pre">split_dataset_random</span></code></a></p></td>
-<td><p>Split an annotations dataset using random sampling.</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="ethology.validators.annotations.ValidBboxAnnotationsDataFrame.html#ethology.validators.annotations.ValidBboxAnnotationsDataFrame" title="ethology.validators.annotations.ValidBboxAnnotationsDataFrame"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ValidBboxAnnotationsDataFrame</span></code></a></p></td>
+<td><p>Class for valid bounding boxes intermediate dataframes.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="ethology.validators.annotations.ValidBboxAnnotationsDataset.html#ethology.validators.annotations.ValidBboxAnnotationsDataset" title="ethology.validators.annotations.ValidBboxAnnotationsDataset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ValidBboxAnnotationsDataset</span></code></a></p></td>
+<td><p>Class for valid <code class="docutils literal notranslate"><span class="pre">ethology</span></code> bounding box annotations datasets.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="ethology.validators.annotations.ValidCOCO.html#ethology.validators.annotations.ValidCOCO" title="ethology.validators.annotations.ValidCOCO"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ValidCOCO</span></code></a></p></td>
+<td><p>Class for valid COCO JSON annotation files.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="ethology.validators.annotations.ValidVIA.html#ethology.validators.annotations.ValidVIA" title="ethology.validators.annotations.ValidVIA"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ValidVIA</span></code></a></p></td>
+<td><p>Class for valid VIA JSON annotation files.</p></td>
 </tr>
 </tbody>
 </table>
@@ -464,20 +473,20 @@
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="../api_index.html"
+       href="ethology.io.annotations.save_bboxes.to_COCO_file.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">API reference</p>
+        <p class="prev-next-title">to_COCO_file</p>
       </div>
     </a>
     <a class="right-next"
-       href="ethology.datasets.split.split_dataset_group_by.html"
+       href="ethology.validators.annotations.ValidBboxAnnotationsCOCO.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">split_dataset_group_by</p>
+        <p class="prev-next-title">ValidBboxAnnotationsCOCO</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -496,7 +505,7 @@
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="../_sources/api/ethology.datasets.split.rst.txt"
+      <li><a href="../_sources/api/ethology.validators.annotations.rst.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div></div>

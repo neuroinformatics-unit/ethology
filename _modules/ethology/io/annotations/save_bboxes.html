@@ -43,7 +43,7 @@
   <link rel="preload" as="script" href="../../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../../_static/documentation_options.js?v=9a9d36d9"></script>
+    <script src="../../../../_static/documentation_options.js?v=3ee5b2c0"></script>
     <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/design-tabs.js?v=f930bc37"></script>
@@ -117,7 +117,7 @@
   
   
   
-    <p class="title logo__title">ethology v0.1.1.dev2</p>
+    <p class="title logo__title">ethology v0.1.1.dev3</p>
   
 </a></div>
     
@@ -403,19 +403,18 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">xarray</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">xr</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pandera.typing.pandas</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataFrame</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">ethology.io.annotations.validate</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
-    <span class="n">ValidBboxesDataFrameCOCO</span><span class="p">,</span>
-    <span class="n">ValidBboxesDataset</span><span class="p">,</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ethology.validators.annotations</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">ValidBboxAnnotationsCOCO</span><span class="p">,</span>
+    <span class="n">ValidBboxAnnotationsDataset</span><span class="p">,</span>
     <span class="n">ValidCOCO</span><span class="p">,</span>
-    <span class="n">_check_input</span><span class="p">,</span>
-    <span class="n">_check_output</span><span class="p">,</span>
 <span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ethology.validators.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">_check_input</span><span class="p">,</span> <span class="n">_check_output</span>
 
 
 <div class="viewcode-block" id="to_COCO_file">
 <a class="viewcode-back" href="../../../../api/ethology.io.annotations.save_bboxes.to_COCO_file.html#ethology.io.annotations.save_bboxes.to_COCO_file">[docs]</a>
-<span class="nd">@_check_input</span><span class="p">(</span><span class="n">validator</span><span class="o">=</span><span class="n">ValidBboxesDataset</span><span class="p">)</span>
-<span class="nd">@_check_output</span><span class="p">(</span><span class="n">validator</span><span class="o">=</span><span class="n">ValidCOCO</span><span class="p">)</span>  <span class="c1"># check output is ethology importable</span>
+<span class="nd">@_check_input</span><span class="p">(</span><span class="n">validator</span><span class="o">=</span><span class="n">ValidBboxAnnotationsDataset</span><span class="p">)</span>
+<span class="nd">@_check_output</span><span class="p">(</span><span class="n">validator</span><span class="o">=</span><span class="n">ValidCOCO</span><span class="p">)</span>  <span class="c1"># check output is ethology-importable</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">to_COCO_file</span><span class="p">(</span><span class="n">dataset</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">output_filepath</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Save an ``ethology`` bounding box annotations dataset to a COCO file.</span>
 
@@ -451,11 +450,11 @@
 
 
 
-<span class="nd">@_check_input</span><span class="p">(</span><span class="n">validator</span><span class="o">=</span><span class="n">ValidBboxesDataset</span><span class="p">)</span>
+<span class="nd">@_check_input</span><span class="p">(</span><span class="n">validator</span><span class="o">=</span><span class="n">ValidBboxAnnotationsDataset</span><span class="p">)</span>
 <span class="nd">@pa</span><span class="o">.</span><span class="n">check_types</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">_to_COCO_exportable_df</span><span class="p">(</span>
     <span class="n">ds</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataFrame</span><span class="p">[</span><span class="n">ValidBboxesDataFrameCOCO</span><span class="p">]:</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataFrame</span><span class="p">[</span><span class="n">ValidBboxAnnotationsCOCO</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert dataset of bounding boxes annotations to a COCO-exportable df.</span>
 
 <span class="sd">    The returned dataframe is validated using ValidBBoxesDataFrameCOCO.</span>
@@ -493,7 +492,7 @@
     <span class="k">return</span> <span class="n">df</span><span class="p">[</span><span class="n">cols_to_select</span><span class="p">]</span>
 
 
-<span class="nd">@_check_input</span><span class="p">(</span><span class="n">validator</span><span class="o">=</span><span class="n">ValidBboxesDataset</span><span class="p">)</span>
+<span class="nd">@_check_input</span><span class="p">(</span><span class="n">validator</span><span class="o">=</span><span class="n">ValidBboxAnnotationsDataset</span><span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">_get_raw_df_from_ds</span><span class="p">(</span><span class="n">ds</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Get preliminary dataframe from a dataset of bounding boxes annotations.</span>
 
@@ -559,7 +558,7 @@
 <span class="nd">@pa</span><span class="o">.</span><span class="n">check_types</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">_add_COCO_data_to_df</span><span class="p">(</span>
     <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">ds_attrs</span><span class="p">:</span> <span class="nb">dict</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataFrame</span><span class="p">[</span><span class="n">ValidBboxesDataFrameCOCO</span><span class="p">]:</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataFrame</span><span class="p">[</span><span class="n">ValidBboxAnnotationsCOCO</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Add COCO-required data to preliminary dataframe.</span>
 
 <span class="sd">    The input dataframe is obtained from a dataset of bounding boxes</span>
@@ -661,7 +660,9 @@
 
 
 <span class="nd">@pa</span><span class="o">.</span><span class="n">check_types</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">_create_COCO_dict</span><span class="p">(</span><span class="n">df</span><span class="p">:</span> <span class="n">DataFrame</span><span class="p">[</span><span class="n">ValidBboxesDataFrameCOCO</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_create_COCO_dict</span><span class="p">(</span>
+    <span class="n">df</span><span class="p">:</span> <span class="n">DataFrame</span><span class="p">[</span><span class="n">ValidBboxAnnotationsCOCO</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Extract COCO dictionary from a COCO-exportable dataframe.</span>
 
 <span class="sd">    Parameters</span>
@@ -677,7 +678,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">COCO_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="n">map_columns_to_COCO_fields</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="n">ValidBboxesDataFrameCOCO</span><span class="o">.</span><span class="n">map_df_columns_to_COCO_fields</span><span class="p">()</span>
+        <span class="n">ValidBboxAnnotationsCOCO</span><span class="o">.</span><span class="n">map_df_columns_to_COCO_fields</span><span class="p">()</span>
     <span class="p">)</span>
     <span class="k">for</span> <span class="n">sections</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;images&quot;</span><span class="p">,</span> <span class="s2">&quot;categories&quot;</span><span class="p">,</span> <span class="s2">&quot;annotations&quot;</span><span class="p">]:</span>
         <span class="c1"># Extract and rename required columns for this section</span>

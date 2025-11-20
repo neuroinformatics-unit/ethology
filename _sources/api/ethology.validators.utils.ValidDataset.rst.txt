@@ -1,0 +1,23 @@
+ValidDataset
+============
+
+.. currentmodule:: ethology.validators.utils
+
+.. autoclass:: ValidDataset
+   
+   
+   
+
+   
+   
+
+   
+   
+   
+   
+
+   
+   
+
+.. minigallery:: ethology.validators.utils.ValidDataset
+   :add-heading: Examples using ``ValidDataset``

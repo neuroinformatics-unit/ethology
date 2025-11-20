@@ -1,0 +1,21 @@
+﻿ethology.validators.utils
+=========================
+
+.. rubric:: Description
+
+.. automodule:: ethology.validators.utils
+
+.. currentmodule:: ethology.validators.utils
+
+
+.. rubric:: Classes
+
+.. autosummary::
+    :toctree: .
+    :nosignatures:
+    
+    ValidDataset
+    
+
+
+

@@ -19,4 +19,7 @@ Information on specific functions, classes, and methods.
     ethology.datasets.split
     ethology.io.annotations.load_bboxes
     ethology.io.annotations.save_bboxes
-    ethology.io.annotations.validate
+    ethology.validators.annotations
+    ethology.validators.detections
+    ethology.validators.json_schemas.utils
+    ethology.validators.utils

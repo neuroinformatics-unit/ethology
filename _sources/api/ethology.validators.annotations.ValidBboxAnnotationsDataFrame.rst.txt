@@ -1,0 +1,95 @@
+ValidBboxAnnotationsDataFrame
+=============================
+
+.. currentmodule:: ethology.validators.annotations
+
+.. autoclass:: ValidBboxAnnotationsDataFrame
+   :members:
+   :inherited-members:
+   :exclude-members: Config
+
+   
+   
+
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+   
+   
+      ~ValidBboxAnnotationsDataFrame.build_schema_
+   
+   
+      ~ValidBboxAnnotationsDataFrame.empty
+   
+   
+      ~ValidBboxAnnotationsDataFrame.example
+   
+   
+      ~ValidBboxAnnotationsDataFrame.get_empty_values
+   
+   
+      ~ValidBboxAnnotationsDataFrame.get_metadata
+   
+   
+      ~ValidBboxAnnotationsDataFrame.pydantic_validate
+   
+   
+      ~ValidBboxAnnotationsDataFrame.strategy
+   
+   
+      ~ValidBboxAnnotationsDataFrame.to_json_schema
+   
+   
+      ~ValidBboxAnnotationsDataFrame.to_schema
+   
+   
+      ~ValidBboxAnnotationsDataFrame.to_yaml
+   
+   
+      ~ValidBboxAnnotationsDataFrame.validate
+   
+   
+   
+
+.. minigallery:: ethology.validators.annotations.ValidBboxAnnotationsDataFrame
+   :add-heading: Examples using ``ValidBboxAnnotationsDataFrame``
