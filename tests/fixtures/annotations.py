@@ -117,22 +117,6 @@ def small_schema() -> dict:
     }
 
 
-@pytest.fixture()
-def default_VIA_schema() -> dict:
-    """Get default VIA schema."""
-    from ethology.io.annotations.json_schemas.utils import _get_default_schema
-
-    return _get_default_schema("VIA")
-
-
-@pytest.fixture()
-def default_COCO_schema() -> dict:
-    """Get default COCO schema."""
-    from ethology.io.annotations.json_schemas.utils import _get_default_schema
-
-    return _get_default_schema("COCO")
-
-
 # ----------------- Bboxes dataset validation fixtures -----------------
 @pytest.fixture
 def valid_bbox_annotations_dataset():

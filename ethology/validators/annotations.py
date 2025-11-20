@@ -8,13 +8,13 @@ import pandera.pandas as pa
 from attrs import define, field
 from pandera.typing import Index
 
-from ethology.io.annotations.json_schemas.utils import (
+from ethology.validators.json_schemas.utils import (
     _check_file_is_json,
     _check_file_matches_schema,
     _check_required_keys_in_dict,
     _get_default_schema,
 )
-from ethology.io.validate import ValidDataset
+from ethology.validators.utils import ValidDataset
 
 
 @define

@@ -16,7 +16,7 @@ from ethology.io.annotations.save_bboxes import (
     _get_raw_df_from_ds,
     to_COCO_file,
 )
-from ethology.io.annotations.validate import ValidBboxAnnotationsCOCO
+from ethology.validators.annotations import ValidBboxAnnotationsCOCO
 
 
 def read_JSON_as_dict(file_path: str | Path) -> dict:

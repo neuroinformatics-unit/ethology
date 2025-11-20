@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 import xarray as xr
 
-from ethology.io.detections.validate import ValidBboxDetectionsDataset
+from ethology.validators.detections import ValidBboxDetectionsDataset
 
 
 @pytest.fixture

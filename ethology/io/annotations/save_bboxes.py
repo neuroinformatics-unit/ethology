@@ -11,12 +11,12 @@ import pytz
 import xarray as xr
 from pandera.typing.pandas import DataFrame
 
-from ethology.io.annotations.validate import (
+from ethology.validators.annotations import (
     ValidBboxAnnotationsCOCO,
     ValidBboxAnnotationsDataset,
     ValidCOCO,
 )
-from ethology.io.validate import _check_input, _check_output
+from ethology.validators.utils import _check_input, _check_output
 
 
 @_check_input(validator=ValidBboxAnnotationsDataset)

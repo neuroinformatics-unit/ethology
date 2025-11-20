@@ -2,7 +2,7 @@
 
 from attrs import define, field
 
-from ethology.io.validate import ValidDataset
+from ethology.validators.utils import ValidDataset
 
 
 @define
