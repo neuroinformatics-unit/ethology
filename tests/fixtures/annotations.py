@@ -135,8 +135,8 @@ def default_COCO_schema() -> dict:
 
 # ----------------- Bboxes dataset validation fixtures -----------------
 @pytest.fixture
-def valid_bboxes_dataset():
-    """Create a valid xarray dataset for bboxes validation."""
+def valid_bbox_annotations_dataset():
+    """Create a valid bbox annotations dataset for validation."""
     image_ids = [1, 2, 3]
     annotation_ids = [0, 1, 2]  # three per frame
     space_dims = ["x", "y"]
@@ -145,13 +145,13 @@ def valid_bboxes_dataset():
     position_data = np.zeros(
         (len(image_ids), len(space_dims), len(annotation_ids))
     )
-    shape_data = np.zeros((len(image_ids), len(annotation_ids)))
+    shape_data = np.copy(position_data)
 
     # Create the dataset
     ds = xr.Dataset(
         data_vars={
             "position": (["image_id", "space", "id"], position_data),
-            "shape": (["image_id", "id"], shape_data),
+            "shape": (["image_id", "space", "id"], shape_data),
         },
         coords={
             "image_id": image_ids,
@@ -164,10 +164,15 @@ def valid_bboxes_dataset():
 
 
 @pytest.fixture
-def valid_bboxes_dataset_extra_vars_and_dims(
-    valid_bboxes_dataset: xr.Dataset,
+def valid_bbox_annotations_dataset_extra_vars_and_dims(
+    valid_bbox_annotations_dataset: xr.Dataset,
 ) -> xr.Dataset:
-    ds = valid_bboxes_dataset.copy(deep=True)
+    """Create a valid bbox annotations dataset for validation.
+
+    The dataset is valid but contains more variables and dimensions than
+    the minimum required for a bbox annotations dataset.
+    """
+    ds = valid_bbox_annotations_dataset.copy(deep=True)
     ds.coords["extra_dim"] = [10, 20, 30]
     ds["extra_var_1"] = (["image_id"], np.random.rand(len(ds.image_id)))
     ds["extra_var_2"] = (["id"], np.random.rand(len(ds.id)))

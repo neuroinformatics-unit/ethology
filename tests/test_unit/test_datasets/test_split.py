@@ -23,12 +23,12 @@ def split_at_any_delimiter(text: str, delimiters: list[str]) -> list[str]:
 
 
 @pytest.fixture
-def valid_bboxes_dataset_to_split_1(valid_bboxes_dataset):
+def valid_bbox_annotations_ds_to_split_1(valid_bbox_annotations_dataset):
     # We add a `foo` variable to the dataset that is
     # one-dimensional along the `image_id` dimension to
     # use for grouping by.
     # Note: len(valid_bboxes_dataset.image_id) = 3
-    ds = valid_bboxes_dataset.copy(deep=True)
+    ds = valid_bbox_annotations_dataset.copy(deep=True)
     ds["foo"] = (
         ["image_id"],
         np.array([0, 1, 1]),
@@ -37,14 +37,14 @@ def valid_bboxes_dataset_to_split_1(valid_bboxes_dataset):
 
 
 @pytest.fixture
-def valid_bboxes_dataset_to_split_2(valid_bboxes_dataset):
+def valid_bbox_annotations_ds_to_split_2(valid_bbox_annotations_dataset):
     # We add a `foo` variable to the dataset that is
     # one-dimensional along the `image_id` dimension to
     # use for grouping by. In this case we ensure we have
     # 3 groups to be able to split using 3 folds (with
     # GroupKFold we cannot have more folds than groups).
     # Note: len(valid_bboxes_dataset.image_id) = 3
-    ds = valid_bboxes_dataset.copy(deep=True)
+    ds = valid_bbox_annotations_dataset.copy(deep=True)
     ds["foo"] = (
         ["image_id"],
         np.array([0, 1, 2]),
@@ -150,12 +150,12 @@ def test_approximate_subset_sum(inputs, expected_subset_dict):
     "inputs",
     [
         {
-            "dataset": "valid_bboxes_dataset_to_split_1",
+            "dataset": "valid_bbox_annotations_ds_to_split_1",
             "list_fractions": [0.334, 0.666],
             "samples_coordinate": "image_id",
         },  # fractions in increasing order
         {
-            "dataset": "valid_bboxes_dataset_to_split_1",
+            "dataset": "valid_bbox_annotations_ds_to_split_1",
             "list_fractions": [0.666, 0.334],
             "samples_coordinate": "image_id",
         },  # fractions in decreasing order
@@ -207,12 +207,12 @@ def test_split_dataset_group_by_apss(inputs, request):
     "inputs",
     [
         {
-            "dataset": "valid_bboxes_dataset_to_split_2",
+            "dataset": "valid_bbox_annotations_ds_to_split_2",
             "list_fractions": [0.334, 0.666],
             "samples_coordinate": "image_id",
         },  # fractions in increasing order
         {
-            "dataset": "valid_bboxes_dataset_to_split_2",
+            "dataset": "valid_bbox_annotations_ds_to_split_2",
             "list_fractions": [0.666, 0.334],
             "samples_coordinate": "image_id",
         },  # fractions in decreasing order
@@ -258,10 +258,10 @@ def test_split_dataset_group_by_kfold(inputs, request):
     )
 
 
-def test_split_dataset_group_by_kfold_seed(valid_bboxes_dataset_to_split_2):
+def test_split_dataset_group_by_kfold_seed(valid_bbox_annotations_ds_to_split_2):
     """Test the behaviour of the seed when using the `kfold` method."""
     # prepare inputs
-    dataset = valid_bboxes_dataset_to_split_2
+    dataset = valid_bbox_annotations_ds_to_split_2
     list_fractions = [0.334, 0.666]
     samples_coordinate = "image_id"
     group_by_var = "foo"
@@ -313,7 +313,7 @@ def test_split_dataset_group_by_kfold_seed(valid_bboxes_dataset_to_split_2):
     ],
 )
 def test_split_dataset_group_by(
-    method, function_to_mock, valid_bboxes_dataset_to_split_1
+    method, function_to_mock, valid_bbox_annotations_ds_to_split_1
 ):
     """Test the wrapper function dispatches to the appropriate method."""
     # Create mock return datasets
@@ -322,7 +322,7 @@ def test_split_dataset_group_by(
     # Patch the internal function and call the wrapper
     with patch(function_to_mock, return_value=mock_return_value) as mock:
         _ds_subset_1, _ds_subset_2 = split_dataset_group_by(
-            dataset=valid_bboxes_dataset_to_split_1,
+            dataset=valid_bbox_annotations_ds_to_split_1,
             group_by_var="foo",
             list_fractions=[0.334, 0.666],
             samples_coordinate="image_id",
@@ -336,8 +336,8 @@ def test_split_dataset_group_by(
 @pytest.mark.parametrize(
     "dataset, expected_method",
     [
-        ("valid_bboxes_dataset_to_split_1", "apss"),
-        ("valid_bboxes_dataset_to_split_2", "kfold"),
+        ("valid_bbox_annotations_ds_to_split_1", "apss"),
+        ("valid_bbox_annotations_ds_to_split_2", "kfold"),
     ],
 )
 def test_split_dataset_group_by_auto(dataset, expected_method, request):
@@ -365,12 +365,12 @@ def test_split_dataset_group_by_auto(dataset, expected_method, request):
 
 
 def test_split_dataset_group_by_unknown_method(
-    valid_bboxes_dataset_to_split_1,
+    valid_bbox_annotations_ds_to_split_1,
 ):
     """Test that an unknown method raises a ValueError."""
     with pytest.raises(ValueError, match="Unknown method"):
         split_dataset_group_by(
-            dataset=valid_bboxes_dataset_to_split_1,
+            dataset=valid_bbox_annotations_ds_to_split_1,
             group_by_var="foo",
             list_fractions=[0.5, 0.5],
             method="unknown_method",
@@ -381,17 +381,17 @@ def test_split_dataset_group_by_unknown_method(
     "inputs",
     [
         {
-            "dataset": "valid_bboxes_dataset_to_split_1",
+            "dataset": "valid_bbox_annotations_ds_to_split_1",
             "list_fractions": [0.334, 0.666],
             "samples_coordinate": "image_id",
         },  # fractions in increasing order
         {
-            "dataset": "valid_bboxes_dataset_to_split_1",
+            "dataset": "valid_bbox_annotations_ds_to_split_1",
             "list_fractions": [0.666, 0.334],
             "samples_coordinate": "image_id",
         },  # fractions in decreasing order
         {
-            "dataset": "valid_bboxes_dataset_to_split_1",
+            "dataset": "valid_bbox_annotations_ds_to_split_1",
             "list_fractions": [1 / 3, 1 / 3, 1 / 3],
             "samples_coordinate": "image_id",
         },  # more than two fractions
@@ -444,26 +444,26 @@ def test_split_dataset_random(inputs, request):
     [
         (
             "auto",
-            "valid_bboxes_dataset_to_split_1",
+            "valid_bbox_annotations_ds_to_split_1",
             # dataset that will trigger auto-selection of apss
             # with the requested fractions 0.334 and 0.666
             "Auto-selected approximate subset-sum method",
         ),
         (
             "auto",
-            "valid_bboxes_dataset_to_split_2",
+            "valid_bbox_annotations_ds_to_split_2",
             # dataset with 3 groups so kfold method can be used
             "Using group k-fold method with",
         ),
         (
             "kfold",
-            "valid_bboxes_dataset_to_split_2",
+            "valid_bbox_annotations_ds_to_split_2",
             # dataset with 3 groups so kfold method can be used
             "Using group k-fold method with",
         ),
         (
             "apss",
-            "valid_bboxes_dataset_to_split_2",
+            "valid_bbox_annotations_ds_to_split_2",
             # dataset with 3 groups so apss method can be used
             "Using approximate subset-sum method with",
         ),
@@ -639,7 +639,7 @@ def test_split_dataset_warning_empty_subset(
 ):
     """Test that a warning is thrown when at least one subset is empty."""
     # Get dataset to split
-    ds = request.getfixturevalue("valid_bboxes_dataset_to_split_1")
+    ds = request.getfixturevalue("valid_bbox_annotations_ds_to_split_1")
     inputs["dataset"] = ds
 
     # We use fractions that will cause an empty subset

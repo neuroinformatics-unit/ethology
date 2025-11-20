@@ -460,12 +460,12 @@ def test_COCO_non_unique_image_IDs(annotations_test_data: dict):
     "sample_dataset, expected_exception, expected_error_message",
     [
         (
-            "valid_bboxes_dataset",
+            "valid_bbox_annotations_dataset",
             does_not_raise(),
             "",
         ),
         (
-            "valid_bboxes_dataset_extra_vars_and_dims",
+            "valid_bbox_annotations_dataset_extra_vars_and_dims",
             does_not_raise(),
             "",
         ),
@@ -542,16 +542,16 @@ def test_COCO_non_unique_image_IDs(annotations_test_data: dict):
         ),
     ],
     ids=[
-        "valid_bboxes_dataset",
-        "valid_bboxes_dataset_extra_vars_and_dims",
-        "invalid_bboxes_dataset_type",
-        "invalid_bboxes_dataset_missing_data_var",
-        "invalid_bboxes_dataset_missing_multiple_data_vars",
-        "invalid_bboxes_dataset_missing_dimension",
-        "invalid_bboxes_dataset_missing_multiple_dimensions",
+        "valid_bbox_annotations_dataset",
+        "valid_bbox_annotations_dataset_extra_vars_and_dims",
+        "invalid_bbox_annotations_dataset_type",
+        "invalid_bbox_annotations_dataset_missing_data_var",
+        "invalid_bbox_annotations_dataset_missing_multiple_data_vars",
+        "invalid_bbox_annotations_dataset_missing_dimension",
+        "invalid_bbox_annotations_dataset_missing_multiple_dimensions",
     ],
 )
-def test_valid_bboxes_dataset_validation(
+def test_validator_bbox_annotations_dataset(
     sample_dataset: str | dict,
     expected_exception: pytest.raises,
     expected_error_message: str,
