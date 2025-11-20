@@ -191,8 +191,8 @@ def valid_bbox_detections_dataset_extra_vars_and_dims(
             ),
             pytest.raises(ValueError),
             (
-                "Missing required dimensions (['space']) "
-                "in data variable 'shape'."
+                "Some data variables are missing required dimensions:"
+                "\n  - data variable 'shape' is missing dimensions ['space']"
             ),
         ),
     ],

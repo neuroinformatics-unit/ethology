@@ -581,8 +581,8 @@ def test_COCO_non_unique_image_IDs(annotations_test_data: dict):
             ),
             pytest.raises(ValueError),
             (
-                "Missing required dimensions (['space']) "
-                "in data variable 'shape'."
+                "Some data variables are missing required dimensions:"
+                "\n  - data variable 'shape' is missing dimensions ['space']"
             ),
         ),
     ],

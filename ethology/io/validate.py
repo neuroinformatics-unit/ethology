@@ -88,18 +88,22 @@ class ValidDataset(ABC):
     @dataset.validator
     def _check_dimensions_per_data_variable(self, attribute, value):
         """Ensure the dataset has all required dimensions."""
-        for (
-            data_var,
-            required_dims_in_data_var,
-        ) in self.required_data_vars.items():
-            missing_dims = required_dims_in_data_var - set(
+        error_messages = []
+        for data_var, dims_per_data_var in self.required_data_vars.items():
+            missing_dims = dims_per_data_var - set(
                 value.data_vars[data_var].coords
             )
             if missing_dims:
-                raise ValueError(
-                    f"Missing required dimensions ({sorted(missing_dims)}) "
-                    f"in data variable '{data_var}'."
+                error_messages.append(
+                    f"data variable '{data_var}' is missing "
+                    f"dimensions {sorted(missing_dims)}"
                 )
+
+        if error_messages:
+            raise ValueError(
+                "Some data variables are missing required dimensions:\n  - "
+                + "\n  - ".join(error_messages)
+            )
 
 
 def _check_output(validator: type):
