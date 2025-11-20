@@ -267,7 +267,7 @@ class ValidBboxAnnotationsDataset(ValidDataset):
     )
 
 
-class ValidBboxesDataFrame(pa.DataFrameModel):
+class ValidBboxAnnotationsDataFrame(pa.DataFrameModel):
     """Class for valid bounding boxes intermediate dataframes.
 
     We use this dataframe internally as an intermediate step in the process of
@@ -396,7 +396,7 @@ class ValidBboxesDataFrame(pa.DataFrameModel):
         }
 
 
-class ValidBboxesDataFrameCOCO(pa.DataFrameModel):
+class ValidBboxAnnotationsCOCO(pa.DataFrameModel):
     """Class for COCO-exportable bounding box annotations dataframes.
 
     The validation checks the required columns exist and their types are
