@@ -258,7 +258,9 @@ def test_split_dataset_group_by_kfold(inputs, request):
     )
 
 
-def test_split_dataset_group_by_kfold_seed(valid_bbox_annotations_ds_to_split_2):
+def test_split_dataset_group_by_kfold_seed(
+    valid_bbox_annotations_ds_to_split_2,
+):
     """Test the behaviour of the seed when using the `kfold` method."""
     # prepare inputs
     dataset = valid_bbox_annotations_ds_to_split_2
