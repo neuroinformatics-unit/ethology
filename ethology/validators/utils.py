@@ -12,10 +12,12 @@ from attrs import define, field
 class ValidDataset(ABC):
     """An abstract base class for valid ``ethology`` datasets.
 
-    It checks that the input dataset has:
+    This class validates that the input dataset:
 
-    - required dimensions
-    - required data variables
+    - is an xarray Dataset
+    - contains all required dimensions
+    - contains all required data variables
+    - has the correct dimensions for each data variable
 
     Subclasses must define ``required_dims`` and ``required_data_vars``
     attributes.
@@ -24,17 +26,21 @@ class ValidDataset(ABC):
     ----------
     dataset : xarray.Dataset
         The xarray dataset to validate.
-    required_dims : set
-        Set of required dimension names (defined by subclasses).
-    required_data_vars : set
-        Set of required data variable names (defined by subclasses).
+    required_dims : set[str]
+        A set of required dimension names. This attribute should be
+        defined by any subclass inheriting from this class.
+    required_data_vars : dict[str, set]
+        A dictionary mapping data variable names to their required dimensions.
+        This attribute should be defined by any subclass inheriting from
+        this class.
 
     Raises
     ------
     TypeError
         If the input is not an xarray Dataset.
     ValueError
-        If the dataset is missing required data variables or dimensions.
+        If the dataset is missing required data variables or dimensions,
+        or if any required dimensions are missing for any data variable.
 
     Notes
     -----
@@ -49,13 +55,13 @@ class ValidDataset(ABC):
     @property
     @abstractmethod
     def required_dims(self) -> set:
-        """Subclasses must provide a required_dims property."""
+        """Subclasses must provide a ``required_dims`` property."""
         pass  # pragma: no cover
 
     @property
     @abstractmethod
     def required_data_vars(self) -> dict[str, set]:
-        """Subclasses must provide a required_data_vars property."""
+        """Subclasses must provide a ``required_data_vars`` property."""
         pass  # pragma: no cover
 
     # Validators
