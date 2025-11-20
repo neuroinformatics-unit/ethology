@@ -54,7 +54,7 @@ class ValidDataset(ABC):
 
     @property
     @abstractmethod
-    def required_data_vars(self) -> set:
+    def required_data_vars(self) -> dict[str, set]:
         """Subclasses must provide a required_data_vars property."""
         pass
 
@@ -70,7 +70,7 @@ class ValidDataset(ABC):
     @dataset.validator
     def _check_required_data_variables(self, attribute, value):
         """Ensure the dataset has all required data variables."""
-        missing_vars = self.required_data_vars - set(value.data_vars)
+        missing_vars = self.required_data_vars.keys() - set(value.data_vars)
         if missing_vars:
             raise ValueError(
                 f"Missing required data variables: {sorted(missing_vars)}"
@@ -84,6 +84,22 @@ class ValidDataset(ABC):
             raise ValueError(
                 f"Missing required dimensions: {sorted(missing_dims)}"
             )
+
+    @dataset.validator
+    def _check_dimensions_per_data_variable(self, attribute, value):
+        """Ensure the dataset has all required dimensions."""
+        for (
+            data_var,
+            required_dims_in_data_var,
+        ) in self.required_data_vars.items():
+            missing_dims = required_dims_in_data_var - set(
+                value.data_vars[data_var].coords
+            )
+            if missing_dims:
+                raise ValueError(
+                    f"Missing required dimensions ({sorted(missing_dims)}) "
+                    f"in data variable '{data_var}'."
+                )
 
 
 def _check_output(validator: type):

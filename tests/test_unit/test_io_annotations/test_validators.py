@@ -470,6 +470,27 @@ def test_COCO_non_unique_image_IDs(annotations_test_data: dict):
             "",
         ),
         (
+            xr.Dataset(
+                coords={
+                    "image_id": np.arange(3),
+                    "space": np.arange(2),
+                    "id": np.arange(2),
+                },
+                data_vars={
+                    "position": (
+                        ["image_id", "space", "id"],
+                        np.zeros((3, 2, 2)),
+                    ),
+                    "shape": (
+                        ["image_id", "space", "id", "foo"],
+                        np.zeros((3, 2, 2, 1)),
+                    ),
+                },
+            ),
+            does_not_raise(),
+            "",
+        ),
+        (
             {"position": [1, 2, 3], "shape": [4, 5, 6]},
             pytest.raises(TypeError),
             "Expected an xarray Dataset, but got <class 'dict'>.",
@@ -540,15 +561,41 @@ def test_COCO_non_unique_image_IDs(annotations_test_data: dict):
             pytest.raises(ValueError),
             "Missing required dimensions: ['image_id', 'space']",
         ),
+        (
+            xr.Dataset(
+                coords={
+                    "image_id": np.arange(3),
+                    "space": np.arange(2),
+                    "id": np.arange(2),
+                },
+                data_vars={
+                    "position": (
+                        ["image_id", "space", "id"],
+                        np.zeros((3, 2, 2)),
+                    ),
+                    "shape": (
+                        ["image_id", "id"],
+                        np.zeros((3, 2)),
+                    ),
+                },
+            ),
+            pytest.raises(ValueError),
+            (
+                "Missing required dimensions (['space']) "
+                "in data variable 'shape'."
+            ),
+        ),
     ],
     ids=[
-        "valid_bbox_annotations_dataset",
-        "valid_bbox_annotations_dataset_extra_vars_and_dims",
-        "invalid_bbox_annotations_dataset_type",
-        "invalid_bbox_annotations_dataset_missing_data_var",
-        "invalid_bbox_annotations_dataset_missing_multiple_data_vars",
-        "invalid_bbox_annotations_dataset_missing_dimension",
-        "invalid_bbox_annotations_dataset_missing_multiple_dimensions",
+        "valid_bbox_annotations",
+        "valid_bbox_annotations_extra_vars_and_dims",
+        "valid_bbox_detections_extra_dims_in_shape_var",
+        "invalid_bbox_annotations_type",
+        "invalid_bbox_annotations_missing_data_var",
+        "invalid_bbox_annotations_missing_multiple_data_vars",
+        "invalid_bbox_annotations_missing_dimension",
+        "invalid_bbox_annotations_missing_multiple_dimensions",
+        "invalid_bbox_annotations_missing_dimension_in_data_var",
     ],
 )
 def test_validator_bbox_annotations_dataset(
@@ -574,4 +621,7 @@ def test_validator_bbox_annotations_dataset(
     else:
         assert validator.dataset is dataset
         assert validator.required_dims == {"image_id", "space", "id"}
-        assert validator.required_data_vars == {"position", "shape"}
+        assert validator.required_data_vars == {
+            "position": {"id", "image_id", "space"},
+            "shape": {"id", "image_id", "space"},
+        }
