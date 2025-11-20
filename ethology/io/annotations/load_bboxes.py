@@ -10,16 +10,16 @@ import pandera.pandas as pa
 import xarray as xr
 from pandera.typing.pandas import DataFrame
 
-from ethology.io.annotations.validate import (
-    ValidBboxesDataFrame,
-    ValidBboxesDataset,
+from ethology.validators.annotations import (
+    ValidBboxAnnotationsDataFrame,
+    ValidBboxAnnotationsDataset,
     ValidCOCO,
     ValidVIA,
-    _check_output,
 )
+from ethology.validators.utils import _check_output
 
 
-@_check_output(ValidBboxesDataset)
+@_check_output(ValidBboxAnnotationsDataset)
 def from_files(
     file_paths: Path | str | list[Path | str],
     format: Literal["VIA", "COCO"],
@@ -138,7 +138,7 @@ def from_files(
 
 
 def _get_map_attributes_from_df(
-    df: DataFrame[ValidBboxesDataFrame],
+    df: DataFrame[ValidBboxAnnotationsDataFrame],
 ) -> tuple[dict, dict]:
     """Get the map attributes from the dataframe.
 
@@ -179,7 +179,7 @@ def _get_map_attributes_from_df(
 @pa.check_types
 def _df_from_multiple_files(
     list_filepaths: list[Path | str], format: Literal["VIA", "COCO"]
-) -> DataFrame[ValidBboxesDataFrame]:
+) -> DataFrame[ValidBboxAnnotationsDataFrame]:
     """Read annotations from multiple files as a valid intermediate dataframe.
 
     Parameters
@@ -242,7 +242,7 @@ def _df_from_multiple_files(
 @pa.check_types
 def _df_from_single_file(
     file_path: Path | str, format: Literal["VIA", "COCO"]
-) -> DataFrame[ValidBboxesDataFrame]:
+) -> DataFrame[ValidBboxAnnotationsDataFrame]:
     """Read annotations from a single file as a valid intermediate dataframe.
 
     Parameters
@@ -374,7 +374,7 @@ def _df_rows_from_valid_VIA_file(file_path: Path) -> list[dict]:
 
             else:
                 supercategory, category, category_id = (
-                    ValidBboxesDataFrame.get_empty_values()[key]
+                    ValidBboxAnnotationsDataFrame.get_empty_values()[key]
                     for key in ["supercategory", "category", "category_id"]
                 )
 
@@ -428,7 +428,7 @@ def _get_image_shape_attr_as_integer(
         ValidBboxesDataFrame.get_empty_values().
 
     """
-    default_value = ValidBboxesDataFrame.get_empty_values()[
+    default_value = ValidBboxAnnotationsDataFrame.get_empty_values()[
         f"image_{attr_name}"
     ]
     try:
@@ -557,7 +557,9 @@ def _df_rows_from_valid_COCO_file(file_path: Path) -> list[dict]:
 
 
 @pa.check_types
-def _df_to_xarray_ds(df: DataFrame[ValidBboxesDataFrame]) -> xr.Dataset:
+def _df_to_xarray_ds(
+    df: DataFrame[ValidBboxAnnotationsDataFrame],
+) -> xr.Dataset:
     """Convert a bounding box annotations dataframe to an xarray dataset.
 
     Parameters
@@ -585,7 +587,7 @@ def _df_to_xarray_ds(df: DataFrame[ValidBboxesDataFrame]) -> xr.Dataset:
 
     """
     # Drop columns if all values in that column are empty
-    default_values = ValidBboxesDataFrame.get_empty_values()
+    default_values = ValidBboxAnnotationsDataFrame.get_empty_values()
     list_empty_cols = [
         col for col in default_values if all(df[col] == default_values[col])
     ]

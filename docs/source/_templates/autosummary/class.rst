@@ -3,11 +3,9 @@
 .. currentmodule:: {{ module }}
 
 .. autoclass:: {{ objname }}
-   :members:
-   :show-inheritance:
-   :inherited-members:
-   :exclude-members: Config
-
+   {% if objname != 'ValidDataset' %}:members:{% endif %}
+   {% if objname != 'ValidDataset' %}:inherited-members:{% endif %}
+   {% if objname == 'ValidBboxAnnotationsDataFrame' %}:exclude-members: Config{% endif %}
 
    {% block methods %}
    {% set ns = namespace(has_public_methods=false) %}

@@ -70,7 +70,7 @@ templates_path = ["_templates"]
 # Automatically generate stub pages for API
 autosummary_generate = True
 autosummary_generate_overwrite = False
-autodoc_default_flags = ["members", "inherited-members"]
+autodoc_default_options = {"show-inheritance": True}  # applies to all classes
 
 # Prefix section labels with the document name
 autosectionlabel_prefix_document = True
@@ -182,6 +182,10 @@ intersphinx_mapping = {
     "pandera": ("https://pandera.readthedocs.io/en/stable/", None),
     "movement": ("https://movement.neuroinformatics.dev/latest/", None),
     "sklearn": ("https://scikit-learn.org/stable/", None),
+    "jsonschema": (
+        "https://python-jsonschema.readthedocs.io/en/stable/",
+        None,
+    ),
 }
 
 

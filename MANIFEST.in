@@ -12,5 +12,5 @@ recursive-exclude examples *
 recursive-include docs *
 
 # Include json schemas
-recursive-include ethology/io/annotations/json_schemas/schemas *.json
-recursive-include ethology/io/annotations/json_schemas/schemas *.md
+recursive-include ethology/validators/json_schemas/schemas *.json
+recursive-include ethology/validators/json_schemas/schemas *.md
