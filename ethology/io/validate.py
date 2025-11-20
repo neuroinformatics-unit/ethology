@@ -50,13 +50,13 @@ class ValidDataset(ABC):
     @abstractmethod
     def required_dims(self) -> set:
         """Subclasses must provide a required_dims property."""
-        pass
+        pass  # pragma: no cover
 
     @property
     @abstractmethod
     def required_data_vars(self) -> dict[str, set]:
         """Subclasses must provide a required_data_vars property."""
-        pass
+        pass  # pragma: no cover
 
     # Validators
     @dataset.validator
