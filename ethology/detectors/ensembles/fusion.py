@@ -18,6 +18,10 @@ VALID_FUSION_METHODS = {
     "non_maxium_weighted": ensemble_boxes.non_maximum_weighted,
 }
 
+fusion_method_type = Literal[
+    "weighted_boxes_fusion", "nms", "soft_nms", "non_maxium_weighted"
+]
+
 
 class _TypeFusionKwargs(TypedDict, total=False):
     """Type hints for fusion method kwargs.
@@ -63,15 +67,22 @@ class _TypeFusionKwargs(TypedDict, total=False):
 
 
 @_check_output(ValidBboxDetectionsDataset)
-def fuse_ensemble_detections(
+def fuse_detections(
     ensemble_detections_ds: xr.Dataset,
-    fusion_method: Literal[
-        "weighted_boxes_fusion", "nms", "soft_nms", "non_maximum_weighted"
-    ],
+    fusion_method: fusion_method_type,
     fusion_method_kwargs: dict | None = None,
-    max_n_detections: int = 500,
+    max_n_detections: int | None = None,
 ) -> xr.Dataset:
-    """Fuse ensemble detections across models using WBF."""
+    """Fuse ensemble detections across models using WBF.
+
+    You can set a max_n_detections if upper bound is known a prior to
+    reduce memory usage.
+
+    """
+    # Check if input dataset has 'model' dimension
+    if "model" not in ensemble_detections_ds.dims:
+        raise ValueError("Input dataset must have 'model' dimension. ")
+
     # Check if image_width_height defined in dataset
     image_shape = ensemble_detections_ds.attrs.get("image_shape")
     if image_shape is None:
@@ -82,6 +93,10 @@ def fuse_ensemble_detections(
         )
     else:
         image_width_height = _validate_image_shape(image_shape)
+
+    # Compute upper bound of max_n_detections
+    if not max_n_detections:
+        max_n_detections = _estimate_max_n_detections(ensemble_detections_ds)
 
     # Build single-image partial fusion function for the selected method
     if fusion_method not in VALID_FUSION_METHODS:
@@ -94,10 +109,6 @@ def fuse_ensemble_detections(
         _fuse_single_image_detections, fusion_function
     )
 
-    # Prepare kwargs for fusion function
-    if not fusion_method_kwargs:
-        fusion_method_kwargs = {}
-
     # Run fusion across image_id using apply_ufunc
     centroid_fused_da, shape_fused_da, confidence_fused_da, label_fused_da = (
         xr.apply_ufunc(
@@ -109,7 +120,7 @@ def fuse_ensemble_detections(
             kwargs={
                 "image_width_height": image_width_height,
                 "max_n_detections": max_n_detections,
-                **fusion_method_kwargs,
+                **(fusion_method_kwargs if fusion_method_kwargs else {}),
             },
             input_core_dims=[  # do not broadcast across these
                 ["space", "id", "model"],  # centroid
@@ -132,7 +143,7 @@ def fuse_ensemble_detections(
         )
     )
 
-    # Post process data arrays
+    # Postprocess data arrays
     fused_data_arrays = {
         "position": centroid_fused_da,
         "shape": shape_fused_da,
@@ -178,6 +189,19 @@ def _validate_image_shape(image_shape) -> np.ndarray:
         )
 
     return image_shape
+
+
+def _estimate_max_n_detections(ensemble_detections_ds: xr.Dataset) -> int:
+    """Get upper bound for maximum number of boxes per image after fusion."""
+    detections_w_non_nan_position = (
+        ensemble_detections_ds.position.notnull().all(dim="space")
+    )  # True if non-nan x and y
+    return (
+        detections_w_non_nan_position.sum(dim="id")
+        .max(dim="image_id")
+        .sum()
+        .item()
+    )
 
 
 def _preprocess_single_image_detections(
