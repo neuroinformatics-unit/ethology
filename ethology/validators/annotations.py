@@ -8,13 +8,13 @@ import pandera.pandas as pa
 from attrs import define, field
 from pandera.typing import Index
 
-from ethology.io.annotations.json_schemas.utils import (
+from ethology.validators.json_schemas.utils import (
     _check_file_is_json,
     _check_file_matches_schema,
     _check_required_keys_in_dict,
     _get_default_schema,
 )
-from ethology.io.validate import ValidDataset
+from ethology.validators.utils import ValidDataset
 
 
 @define
@@ -228,26 +228,36 @@ class ValidCOCO:
 class ValidBboxAnnotationsDataset(ValidDataset):
     """Class for valid ``ethology`` bounding box annotations datasets.
 
-    It checks that the input dataset has:
+    This class validates that the input dataset:
 
-    - ``image_id``, ``space``, ``id`` as dimensions
-    - ``position`` and ``shape`` as data variables
+    - is an xarray Dataset,
+    - has ``image_id``, ``space``, ``id`` as dimensions,
+    - has ``position`` and ``shape`` as data variables,
+    - both data variables span at least the dimensions ``image_id``,
+      ``space`` and ``id``.
+
 
     Attributes
     ----------
     dataset : xarray.Dataset
         The xarray dataset to validate.
-    required_dims : set
-        Set of required dimension names.
-    required_data_vars : set
-        Set of required data variable names.
+    required_dims : set[str]
+        The set of required dimension names: ``image_id``, ``space`` and
+        ``id``.
+    required_data_vars : dict[str, set]
+        A dictionary mapping data variable names to their required minimum
+        dimensions:
+
+        - ``position`` maps to ``image_id``, ``space`` and ``id``,
+        - ``shape`` maps to ``image_id``, ``space`` and ``id``.
 
     Raises
     ------
     TypeError
         If the input is not an xarray Dataset.
     ValueError
-        If the dataset is missing required data variables or dimensions.
+        If the dataset is missing required data variables or dimensions,
+        or if any required dimensions are missing for any data variable.
 
     Notes
     -----
@@ -261,13 +271,16 @@ class ValidBboxAnnotationsDataset(ValidDataset):
         default={"image_id", "space", "id"},
         init=False,
     )
-    required_data_vars: set = field(
-        default={"position", "shape"},
+    required_data_vars: dict = field(
+        default={
+            "position": {"image_id", "space", "id"},
+            "shape": {"image_id", "space", "id"},
+        },
         init=False,
     )
 
 
-class ValidBboxesDataFrame(pa.DataFrameModel):
+class ValidBboxAnnotationsDataFrame(pa.DataFrameModel):
     """Class for valid bounding boxes intermediate dataframes.
 
     We use this dataframe internally as an intermediate step in the process of
@@ -396,7 +409,7 @@ class ValidBboxesDataFrame(pa.DataFrameModel):
         }
 
 
-class ValidBboxesDataFrameCOCO(pa.DataFrameModel):
+class ValidBboxAnnotationsCOCO(pa.DataFrameModel):
     """Class for COCO-exportable bounding box annotations dataframes.
 
     The validation checks the required columns exist and their types are
