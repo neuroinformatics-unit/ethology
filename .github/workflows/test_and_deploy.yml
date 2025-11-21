@@ -5,7 +5,7 @@ on:
     branches:
       - '*'
     tags:
-      - '*'
+      - 'v*'
   pull_request:
 
 # Cancel in-progress runs if a new run is triggered, except for main branch.
@@ -48,10 +48,19 @@ jobs:
           python-version: ${{ matrix.python-version }}
           secret-codecov-token: ${{ secrets.CODECOV_TOKEN }}
 
+  check_tag:
+    name: Check if trigger is tag and if it points to commit on main
+    outputs:
+      tag_on_main: ${{ steps.check.outputs.tag_on_main }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: neuroinformatics-unit/actions/check_tag_on_main@tags-filter
+        id: check
+
   build_sdist_wheels:
     name: Build source distribution
-    needs: [test]
-    if: github.event_name == 'push' && github.ref_type == 'tag'
+    needs: [test, check_tag]
+    if: github.event_name == 'push' && needs.check_tag.outputs.tag_on_main == 'true'
     runs-on: ubuntu-latest
     steps:
     - uses: neuroinformatics-unit/actions/build_sdist_wheels@v2
@@ -59,8 +68,8 @@ jobs:
 
   upload_all:
     name: Publish build distributions
-    needs: [build_sdist_wheels]
-    if: github.event_name == 'push' && github.ref_type == 'tag'
+    needs: [build_sdist_wheels, check_tag]
+    if: github.event_name == 'push' && needs.check_tag.outputs.tag_on_main == 'true'
     runs-on: ubuntu-latest
     steps:
     - uses: actions/download-artifact@v6
