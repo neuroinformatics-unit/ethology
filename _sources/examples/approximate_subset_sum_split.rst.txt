@@ -406,7 +406,7 @@ we would do:
 
  .. code-block:: none
 
-    2025-11-20 20:34:21.658 | INFO     | ethology.datasets.split:split_dataset_group_by:211 - Using group k-fold method with 3 folds and seed=42.
+    2025-11-21 11:12:11.478 | INFO     | ethology.datasets.split:split_dataset_group_by:211 - Using group k-fold method with 3 folds and seed=42.
 
 
 
@@ -498,8 +498,8 @@ seed values, to generate two different splits.
 
  .. code-block:: none
 
-    2025-11-20 20:34:21.680 | INFO     | ethology.datasets.split:split_dataset_group_by:211 - Using group k-fold method with 3 folds and seed=42.
-    2025-11-20 20:34:21.699 | INFO     | ethology.datasets.split:split_dataset_group_by:211 - Using group k-fold method with 3 folds and seed=43.
+    2025-11-21 11:12:11.500 | INFO     | ethology.datasets.split:split_dataset_group_by:211 - Using group k-fold method with 3 folds and seed=42.
+    2025-11-21 11:12:11.519 | INFO     | ethology.datasets.split:split_dataset_group_by:211 - Using group k-fold method with 3 folds and seed=43.
 
 
 
@@ -639,7 +639,7 @@ function with the ``method`` parameter set to ``apss``
 
  .. code-block:: none
 
-    2025-11-20 20:34:23.145 | INFO     | ethology.datasets.split:split_dataset_group_by:219 - Using approximate subset-sum method with epsilon=0.
+    2025-11-21 11:12:12.780 | INFO     | ethology.datasets.split:split_dataset_group_by:219 - Using approximate subset-sum method with epsilon=0.
 
 
 
@@ -753,7 +753,7 @@ fractions.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 22.242 seconds)
+   **Total running time of the script:** (0 minutes 21.928 seconds)
 
 
 .. _sphx_glr_download_examples_approximate_subset_sum_split.py:
