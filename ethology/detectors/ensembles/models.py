@@ -54,12 +54,8 @@ class EnsembleDetector(LightningModule):
 
     def _load_models(self) -> nn.ModuleList:
         """Load models from checkpoints."""
-        # Get model architecture
+        # Get model config
         models_config = self.config["models"]
-        model = get_model(
-            models_config["model_class"],
-            **models_config.get("model_kwargs", {}),
-        )
 
         # Load weights
         list_models = []
@@ -67,10 +63,15 @@ class EnsembleDetector(LightningModule):
             # Get checkpoint
             checkpoint = torch.load(checkpoint_path, map_location=self.device)
 
-            # Load state dict
+            # Instantiate model with ckpt weights
+            model = get_model(
+                models_config["model_class"],
+                **models_config.get("model_kwargs", {}),
+            )
             model_state_dict = self._get_model_state_dict(checkpoint)
             model.load_state_dict(model_state_dict, strict=True)
 
+            # Append model to list
             list_models.append(model)
 
         return nn.ModuleList(list_models)
