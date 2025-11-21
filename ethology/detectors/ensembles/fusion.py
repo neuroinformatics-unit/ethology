@@ -8,8 +8,8 @@ import ensemble_boxes
 import numpy as np
 import xarray as xr
 
-from ethology.io.detections.validate import ValidBboxDetectionsDataset
-from ethology.io.validate import _check_output
+from ethology.validators.detections import ValidBboxDetectionsDataset
+from ethology.validators.utils import _check_output
 
 VALID_FUSION_METHODS = {
     "weighted_boxes_fusion": ensemble_boxes.weighted_boxes_fusion,

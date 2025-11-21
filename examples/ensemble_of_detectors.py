@@ -1,3 +1,4 @@
+"""Evaluating ensemble of trained detectors."""
 # %%
 # imports
 
@@ -13,7 +14,7 @@ from matplotlib import pyplot as plt
 from torch.utils.data import DataLoader
 from torchvision.datasets import CocoDetection, wrap_dataset_for_transforms_v2
 
-from ethology.detectors.ensembles.fusion import fuse_ensemble_detections
+from ethology.detectors.ensembles.fusion import fuse_detections
 from ethology.detectors.ensembles.models import EnsembleDetector
 from ethology.detectors.evaluate import compute_precision_recall_ds
 from ethology.io.annotations import load_bboxes
@@ -165,11 +166,13 @@ config = {
     "fusion": {
         "method": "weighted_boxes_fusion",
         # "nms", "soft_nms", "weighted_boxes_fusion" or "non_maximum_weighted"
-        "method_kwargs": {  # arguments as in ensemble_boxes.weighted_boxes_fusion
+        "method_kwargs": {
+            # arguments as in ensemble_boxes.weighted_boxes_fusion
             "iou_thr": 0.5,  # iou threshold for the ensemble
             "skip_box_thr": 0.0001,
         },
-        # "n_jobs": -1,  # workers for joblib.Parallel, n_workers should be <= number of CPU cores
+        # "n_jobs": -1,  # workers for joblib.Parallel,
+        # n_workers should be <= number of CPU cores
         # "confidence_threshold_post_fusion": 0.0,
         "max_n_detections": 300,
     },
@@ -245,11 +248,10 @@ for image_id in range(350, 450, 10):
 # TODO: think whether joblib approach is more readable?
 image_width_height = np.array(dataloader.dataset[0][0].shape[-2:])[::-1]
 ensemble_detections_ds.attrs["image_shape"] = image_width_height
-config_fusion = config["fusion"]
+config_fusion: dict = config["fusion"]
 
 
-# %%
-fused_detections_ds = fuse_ensemble_detections(
+fused_detections_ds = fuse_detections(
     ensemble_detections_ds,
     fusion_method=config_fusion["method"],
     fusion_method_kwargs=config_fusion["method_kwargs"],
@@ -261,18 +263,18 @@ fused_detections_ds = fuse_ensemble_detections(
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Fuse detections across models with NMS
 
-fused_detections_nms_ds = fuse_ensemble_detections(
-    ensemble_detections_ds,
-    fusion_method="soft_nms",
-    fusion_method_kwargs={
-        "iou_thr": config_fusion["method_kwargs"]["iou_thr"],
-        "sigma": 0.5,
-        "thresh": 0.001,
-    },
-    max_n_detections=500,
-)
+# fused_detections_nms_ds = fuse_ensemble_detections(
+#     ensemble_detections_ds,
+#     fusion_method="soft_nms",
+#     fusion_method_kwargs={
+#         "iou_thr": config_fusion["method_kwargs"]["iou_thr"],
+#         "sigma": 0.5,
+#         "thresh": 0.001,
+#     },
+#     max_n_detections=500,
+# )
 
-fused_detections_ds = fused_detections_nms_ds
+# fused_detections_ds = fused_detections_nms_ds
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Remove low confidence detections
 confidence_threshold_post_fusion = 0.5
@@ -294,7 +296,8 @@ fused_detections_ds_, gt_bboxes_ds = compute_precision_recall_ds(
     iou_threshold=iou_threshold_tp,
 )
 
-# All models on full August dataset, without removing low confidence detections:
+# All models on full August dataset, without removing low
+# confidence detections:
 # confidence_threshold_post_fusion = 0.0
 # Precision: 0.5920
 # Recall: 0.8455

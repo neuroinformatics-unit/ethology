@@ -12,8 +12,8 @@ from lightning import LightningModule
 from torchvision.models import detection, get_model, list_models
 
 from ethology.detectors.ensembles.utils import pad_to_max_first_dimension
-from ethology.io.detections.validate import ValidBboxDetectionsDataset
-from ethology.io.validate import _check_output
+from ethology.validators.detections import ValidBboxDetectionsDataset
+from ethology.validators.utils import _check_output
 
 
 class EnsembleDetector(LightningModule):

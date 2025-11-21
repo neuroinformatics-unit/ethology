@@ -81,7 +81,7 @@ def evaluate_detections_hungarian_ds(
 
 def _evaluate_detections_hungarian_arrays(
     pred_bboxes: np.ndarray, gt_bboxes: np.ndarray, iou_threshold: float
-) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+) -> tuple[np.ndarray, ...]:
     """Compute true positives, false positives, and missed detections.
 
     Uses Hungarian algorithm for matching and takes arrays of bboxes as input
