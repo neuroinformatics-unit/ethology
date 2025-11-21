@@ -254,32 +254,30 @@ def _postprocess_single_image_detections(
     )
 
     # Combine x1y1, x2y2, scores and labels in one array
-    ensemble_x1y2_x2y2_scores_labels = np.c_[
-        ensemble_x1y1_x2y2, ensemble_scores, ensemble_labels
-    ]
+    ensemble_data = np.c_[ensemble_x1y1_x2y2, ensemble_scores, ensemble_labels]
 
     # Remove rows with nan coordinates
-    ensemble_x1y2_x2y2_scores_labels = ensemble_x1y2_x2y2_scores_labels[
+    ensemble_data = ensemble_data[
         ~np.any(np.isnan(ensemble_x1y1_x2y2), axis=1)
     ]
 
     # Check padding
-    if ensemble_x1y2_x2y2_scores_labels.shape[0] > max_n_detections:
+    if ensemble_data.shape[0] > max_n_detections:
         raise ValueError(
             "Insufficient padding provided. "
             "The estimated maximum number of detections per image was set to "
             f"{max_n_detections}, "
-            f"but {ensemble_x1y2_x2y2_scores_labels.shape[0]} detections were "
+            f"but {ensemble_data.shape[0]} detections were "
             "found in one of the images after fusion. Please increase the "
             "maximum number of detections per image."
         )
 
     # Pad combined array to max_n_detections
     # (this is required to concatenate across image_ids)
-    ensemble_x1y2_x2y2_scores_labels = np.pad(
-        ensemble_x1y2_x2y2_scores_labels,
+    ensemble_data = np.pad(
+        ensemble_data,
         (
-            (0, max_n_detections - ensemble_x1y2_x2y2_scores_labels.shape[0]),
+            (0, max_n_detections - ensemble_data.shape[0]),
             (0, 0),
         ),
         "constant",
@@ -289,9 +287,9 @@ def _postprocess_single_image_detections(
     # Format output as xarray dataarrays
     centroid_da, shape_da, confidence_da, label_da = (
         _single_image_detections_as_dataarrays(
-            ensemble_x1y2_x2y2_scores_labels[:, 0:4],
-            ensemble_x1y2_x2y2_scores_labels[:, 4],
-            ensemble_x1y2_x2y2_scores_labels[:, 5],
+            ensemble_data[:, 0:4],
+            ensemble_data[:, 4],
+            ensemble_data[:, 5],
         )
     )
 
