@@ -108,8 +108,6 @@ class EnsembleDetector(LightningModule):
         """Predict step for a single batch."""
         # ------------------------------
         # Run all models in ensemble in GPU
-        # TODO: can I vectorize this?
-        # https://docs.pytorch.org/tutorials/intermediate/ensembling.html
         images_batch, _annotations_batch = batch
         raw_prediction_dicts_per_model = [
             model(images_batch) for model in self.list_models
