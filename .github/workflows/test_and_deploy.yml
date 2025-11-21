@@ -8,10 +8,11 @@ on:
       - '*'
   pull_request:
 
-# Cancel in-progress runs if a new run is triggered, except for main branch.
+# Cancel in-progress runs of the same workflow with the same git ref,
+# except for the main branch.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+  group: ${{ github.workflow }}-${{ github.ref }}  # defines workflows that cancel each other
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}  # do not cancel if ref is main
 
 jobs:
   linting:
