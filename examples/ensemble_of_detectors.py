@@ -245,7 +245,6 @@ for image_id in range(350, 450, 10):
 # TODO: think whether joblib approach is more readable?
 image_width_height = np.array(dataloader.dataset[0][0].shape[-2:])[::-1]
 ensemble_detections_ds.attrs["image_shape"] = image_width_height
-
 config_fusion = config["fusion"]
 
 
@@ -324,8 +323,14 @@ print(f"Recall: {fused_detections_ds_.recall.mean().values:.4f}")
 # Evaluate single models
 list_detections_ds_eval = []
 for k in range(ensemble_detections_ds.sizes["model"]):
+    # filter low confidence detections (for a fairer comparison)
+    detections_one_model = ensemble_detections_ds.where(
+        ensemble_detections_ds.confidence >= confidence_threshold_post_fusion
+    ).sel(model=k)
+
+    # evaluate
     detections_ds, _ = compute_precision_recall_ds(
-        pred_bboxes_ds=ensemble_detections_ds.sel(model=k),
+        pred_bboxes_ds=detections_one_model,
         gt_bboxes_ds=gt_bboxes_ds,
         iou_threshold=iou_threshold_tp,
     )
