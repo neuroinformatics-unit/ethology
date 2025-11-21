@@ -5,11 +5,6 @@ from functools import partial
 from typing import Literal, TypedDict, Unpack
 
 import ensemble_boxes
-from collections.abc import Callable
-from functools import partial
-from typing import Literal, TypedDict, Unpack
-
-import ensemble_boxes
 import numpy as np
 import xarray as xr
 
@@ -22,7 +17,6 @@ VALID_FUSION_METHODS = {
     "soft_nms": ensemble_boxes.soft_nms,
     "non_maxium_weighted": ensemble_boxes.non_maximum_weighted,
 }
-
 
 
 class _TypeFusionKwargs(TypedDict, total=False):
@@ -48,14 +42,16 @@ class _TypeFusionKwargs(TypedDict, total=False):
         Threshold for boxes to keep after soft NMS.
     conf_type: Literal["avg", "box_and_model_avg", "absent_model_aware_avg"]
         Method to compute the confidence score of the fused detections.
+
         - "avg": Average confidence score of the fused detections (default).
         - 'box_and_model_avg': box and model wise hybrid weighted average.
-        - 'absent_model_aware_avg': weighted average that takes into account the absent model.
+        - 'absent_model_aware_avg': weighted average that takes into account
+          the absent model.
     allows_overflow: bool
-        Whether to allow the confidence score of the fused detections to exceed 1.
+        Whether to allow the confidence score of the fused detections to
+        exceed 1.
 
     """
-
 
     weights: list[float] | None
     iou_thr: float
@@ -73,10 +69,6 @@ def fuse_ensemble_detections(
         "weighted_boxes_fusion", "nms", "soft_nms", "non_maximum_weighted"
     ],
     fusion_method_kwargs: dict | None = None,
-    fusion_method: Literal[
-        "weighted_boxes_fusion", "nms", "soft_nms", "non_maximum_weighted"
-    ],
-    fusion_method_kwargs: dict | None = None,
     max_n_detections: int = 500,
 ) -> xr.Dataset:
     """Fuse ensemble detections across models using WBF."""
@@ -84,9 +76,9 @@ def fuse_ensemble_detections(
     image_shape = ensemble_detections_ds.attrs.get("image_shape")
     if image_shape is None:
         raise KeyError(
-            "Required attribute 'image_shape' not found in the dataset attributes. "
-            "Please ensure the dataset has 'image_shape' (width, height in pixels) "
-            "in its attributes."
+            "Required attribute 'image_shape' not found in the dataset "
+            "attributes. Please ensure the dataset has 'image_shape' "
+            "(width, height in pixels) in its attributes."
         )
     else:
         image_width_height = _validate_image_shape(image_shape)
@@ -194,7 +186,7 @@ def _preprocess_single_image_detections(
     confidence: xr.DataArray,
     label: xr.DataArray,
     image_width_height: np.ndarray,
-) -> list[np.ndarray]:
+) -> tuple[list[np.ndarray], list[np.ndarray], list[np.ndarray]]:
     """Prepare ensemble detections on a single image for fusion."""
     # Prepare boxes array --> position, shape arrays to x1y1x2y normalised
     bboxes_x1y1 = (position - shape / 2) / image_width_height[:, None, None]
@@ -252,7 +244,10 @@ def _postprocess_single_image_detections(
     image_width_height,
     max_n_detections,
 ):
-    """Unnormalise, pad and format fused single-image detections as data arrays."""
+    """Postprocess fused single-image detections as dataarrays.
+
+    Unnormalise, pad and format as data arrays.
+    """
     # Undo boxes x1y1 x2y2 normalization
     ensemble_x1y1_x2y2 = ensemble_x1y1_x2y2_norm * np.tile(
         image_width_height, (1, 2)
@@ -272,9 +267,11 @@ def _postprocess_single_image_detections(
     if ensemble_x1y2_x2y2_scores_labels.shape[0] > max_n_detections:
         raise ValueError(
             "Insufficient padding provided. "
-            f"The estimated maximum number of detections per image was set to {max_n_detections}, "
-            f"but {ensemble_x1y2_x2y2_scores_labels.shape[0]} detections were found in one of the images "
-            "after fusion. Please increase the maximum number of detections per image."
+            "The estimated maximum number of detections per image was set to "
+            f"{max_n_detections}, "
+            f"but {ensemble_x1y2_x2y2_scores_labels.shape[0]} detections were "
+            "found in one of the images after fusion. Please increase the "
+            "maximum number of detections per image."
         )
 
     # Pad combined array to max_n_detections

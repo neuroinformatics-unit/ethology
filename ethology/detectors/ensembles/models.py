@@ -27,6 +27,7 @@ class EnsembleDetector(LightningModule):
     """
 
     def __init__(self, config_file: str | Path):
+        """Initialise ensemble of detectors."""
         super().__init__()
 
         # Load config
@@ -35,7 +36,7 @@ class EnsembleDetector(LightningModule):
             self.config = yaml.safe_load(f)
 
         # Run checks
-        self._validate_model_class()
+        self._validate_model_class(self.config["models"]["model_class"])
 
         # Load list of models (nn.ModuleList)
         self.list_models = self._load_models()
@@ -137,7 +138,11 @@ class EnsembleDetector(LightningModule):
         )  # [sample][model]
 
         # Parse output from dicts
-        output_per_sample = {"boxes": [], "scores": [], "labels": []}
+        output_per_sample: dict[str, list] = {
+            "boxes": [],
+            "scores": [],
+            "labels": [],
+        }
         for ky in output_per_sample:
             output_per_sample[ky] = [
                 [sample[m][ky] for m in range(len(self.list_models))]
@@ -146,7 +151,9 @@ class EnsembleDetector(LightningModule):
 
         # Pad across models and across image_ids
         fill_value = {"boxes": np.nan, "scores": np.nan, "labels": -1}
-        output_per_sample_padded = {ky: [] for ky in output_per_sample}
+        output_per_sample_padded: dict[str, list] = {
+            ky: [] for ky in output_per_sample
+        }
         for ky in output_per_sample_padded:
             output_per_sample_padded[ky] = pad_to_max_first_dimension(
                 [

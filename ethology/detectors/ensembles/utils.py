@@ -11,7 +11,7 @@ def get_padding_width(array, max_n):
 
 
 def pad_to_max_first_dimension(list_arrays, fill_value=np.nan):
-    """Pad arrays to maximum number across all arrays in the first dimension."""
+    """Pad arrays in list to maximum size of their first dimension."""
     max_n_detections = max(array.shape[0] for array in list_arrays)
     list_arrays_padded = [
         np.pad(
