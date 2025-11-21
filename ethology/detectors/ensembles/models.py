@@ -12,7 +12,7 @@ from lightning import LightningModule
 from torchvision.models import detection, get_model, list_models
 
 from ethology.detectors.ensembles.utils import pad_to_max_first_dimension
-from ethology.validators.detections import ValidBboxDetectionsDataset
+from ethology.validators.detections import ValidBboxDetectionsEnsembleDataset
 from ethology.validators.utils import _check_output
 
 
@@ -125,7 +125,7 @@ class EnsembleDetector(LightningModule):
 
         return raw_prediction_dicts_per_sample
 
-    @_check_output(ValidBboxDetectionsDataset)
+    @_check_output(ValidBboxDetectionsEnsembleDataset)
     def format_predictions(self, attrs: dict | None = None) -> xr.Dataset:
         """Format as ethology detections dataset with model axis."""
         # Get results from trainer

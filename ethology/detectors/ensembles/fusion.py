@@ -8,8 +8,11 @@ import ensemble_boxes
 import numpy as np
 import xarray as xr
 
-from ethology.validators.detections import ValidBboxDetectionsDataset
-from ethology.validators.utils import _check_output
+from ethology.validators.detections import (
+    ValidBboxDetectionsDataset,
+    ValidBboxDetectionsEnsembleDataset,
+)
+from ethology.validators.utils import _check_input, _check_output
 
 VALID_FUSION_METHODS = {
     "weighted_boxes_fusion": ensemble_boxes.weighted_boxes_fusion,
@@ -66,6 +69,7 @@ class _TypeFusionKwargs(TypedDict, total=False):
     allows_overflow: bool
 
 
+@_check_input(ValidBboxDetectionsEnsembleDataset)
 @_check_output(ValidBboxDetectionsDataset)
 def fuse_detections(
     ensemble_detections_ds: xr.Dataset,
@@ -79,10 +83,6 @@ def fuse_detections(
     reduce memory usage.
 
     """
-    # Check if input dataset has 'model' dimension
-    if "model" not in ensemble_detections_ds.dims:
-        raise ValueError("Input dataset must have 'model' dimension. ")
-
     # Check if image_width_height defined in dataset
     image_shape = ensemble_detections_ds.attrs.get("image_shape")
     if image_shape is None:
@@ -191,6 +191,7 @@ def _validate_image_shape(image_shape) -> np.ndarray:
     return image_shape
 
 
+@_check_input(ValidBboxDetectionsEnsembleDataset)
 def _estimate_max_n_detections(ensemble_detections_ds: xr.Dataset) -> int:
     """Get upper bound for maximum number of boxes per image after fusion."""
     detections_w_non_nan_position = (
