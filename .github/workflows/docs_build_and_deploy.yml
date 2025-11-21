@@ -48,7 +48,7 @@ jobs:
     outputs:
       tag_on_main: ${{ steps.check.outputs.tag_on_main }}
     steps:
-      - uses: neuroinformatics-unit/actions/check_tag_on_main@v2
+      - uses: neuroinformatics-unit/actions/check_tag_on_main@tags-filter
         id: check
 
   deploy_sphinx_docs:
