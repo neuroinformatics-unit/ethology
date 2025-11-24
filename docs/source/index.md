@@ -29,6 +29,11 @@ Get in touch, request a feature or contribute to the project.
 :::
 ::::
 
+
+:::{figure} _static/path33.png
+:align: center
+:::
+
 :::{warning}
 🏗️ The package is currently in early development stages and the interface is subject to change. Feel free to play around and provide feedback.
 :::

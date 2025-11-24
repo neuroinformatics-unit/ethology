@@ -141,6 +141,8 @@ html_css_files = [
     ("css/custom.css", {"priority": 100}),
 ]
 html_favicon = "_static/light-logo-niu.png"
+html_logo = "_static/path33.png"
+
 
 # The linkcheck builder will skip verifying that anchors exist when checking
 # these URLs
