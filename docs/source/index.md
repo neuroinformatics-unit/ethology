@@ -44,6 +44,8 @@ If you are looking to analyse your pose estimation tracks with a user-friendly t
 [movement](https://movement.neuroinformatics.dev)!
 :::
 
+Pablo the porcupine is remixed from the original photograph "[Two Porcupines](https://www.flickr.com/photos/57557144@N06/7980886456)" by [DenaliNPS](https://www.flickr.com/photos/57557144@N06) which is licensed under [CC BY 2.0](https://creativecommons.org/licenses/by/2.0/?ref=openverse).
+
 ```{toctree}
 :maxdepth: 2
 :hidden:
