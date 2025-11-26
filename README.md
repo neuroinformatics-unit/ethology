@@ -15,7 +15,7 @@ Mix-and-match computer vision tools for your animal behaviour analysis.
 
 Create a conda environment and install the package
 ```sh
-conda create -n ethology-env python=3.12 -y
+conda create -n ethology-env python=3.13 -y
 conda activate ethology-env
 pip install ethology
 ```
