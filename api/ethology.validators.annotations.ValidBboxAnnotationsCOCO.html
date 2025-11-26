@@ -44,7 +44,7 @@
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../_static/documentation_options.js?v=a58bc63e"></script>
+    <script src="../_static/documentation_options.js?v=d7d3075c"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/design-tabs.js?v=f930bc37"></script>
@@ -120,7 +120,7 @@
   
   
   
-    <p class="title logo__title">ethology v0.1.1</p>
+    <p class="title logo__title">ethology v0.1.2.dev1</p>
   
 </a></div>
     
@@ -653,7 +653,7 @@ for more details.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.description">
-<span class="sig-name descname"><span class="pre">description</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional[str]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.description" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">description</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span> <span class="pre">|</span> <span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.description" title="Link to this definition">#</a></dt>
 <dd><p>arbitrary textual description</p>
 </dd></dl>
 
@@ -665,14 +665,14 @@ for more details.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.dtype">
-<span class="sig-name descname"><span class="pre">dtype</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional[PandasDtypeInputTypes]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.dtype" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">dtype</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">PandasDtypeInputTypes</span> <span class="pre">|</span> <span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.dtype" title="Link to this definition">#</a></dt>
 <dd><p>datatype of the dataframe. This overrides the data types specified in
 any of the fields.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.from_format">
-<span class="sig-name descname"><span class="pre">from_format</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional[Union[Format,</span> <span class="pre">Callable]]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.from_format" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">from_format</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Union[Format,</span> <span class="pre">Callable]</span> <span class="pre">|</span> <span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.from_format" title="Link to this definition">#</a></dt>
 <dd><p>data format before validation. This option only applies to
 schemas used in the context of the pandera type constructor
 <code class="docutils literal notranslate"><span class="pre">pa.typing.DataFrame[Schema](data)</span></code>. If None, assumes a data structure
@@ -681,7 +681,7 @@ compatible with the <code class="docutils literal notranslate"><span class="pre"
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.from_format_kwargs">
-<span class="sig-name descname"><span class="pre">from_format_kwargs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional[dict[str,</span> <span class="pre">Any]]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.from_format_kwargs" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">from_format_kwargs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict[str,</span> <span class="pre">Any]</span> <span class="pre">|</span> <span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.from_format_kwargs" title="Link to this definition">#</a></dt>
 <dd><p>a dictionary keyword arguments to pass into the reader function that
 converts the object of type <code class="docutils literal notranslate"><span class="pre">from_format</span></code> to a pandera-validate-able
 data structure. The reader function is implemented in the pandera.typing
@@ -690,7 +690,7 @@ generic types via the <code class="docutils literal notranslate"><span class="pr
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.metadata">
-<span class="sig-name descname"><span class="pre">metadata</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional[dict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.metadata" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">metadata</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span> <span class="pre">|</span> <span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.metadata" title="Link to this definition">#</a></dt>
 <dd><p>a dictionary object to store key-value data at schema level</p>
 </dd></dl>
 
@@ -702,7 +702,7 @@ generic types via the <code class="docutils literal notranslate"><span class="pr
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.multiindex_name">
-<span class="sig-name descname"><span class="pre">multiindex_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional[str]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.multiindex_name" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">multiindex_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span> <span class="pre">|</span> <span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.multiindex_name" title="Link to this definition">#</a></dt>
 <dd><p>name of multiindex</p>
 </dd></dl>
 
@@ -727,7 +727,7 @@ if <code class="docutils literal notranslate"><span class="pre">&quot;filter&quo
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.name">
-<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional[str]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'ValidBboxAnnotationsCOCO'</span></em><a class="headerlink" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.name" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span> <span class="pre">|</span> <span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'ValidBboxAnnotationsCOCO'</span></em><a class="headerlink" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.name" title="Link to this definition">#</a></dt>
 <dd><p>name of schema</p>
 </dd></dl>
 
@@ -746,13 +746,13 @@ if <code class="docutils literal notranslate"><span class="pre">&quot;filter&quo
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.title">
-<span class="sig-name descname"><span class="pre">title</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional[str]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.title" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">title</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span> <span class="pre">|</span> <span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.title" title="Link to this definition">#</a></dt>
 <dd><p>human-readable label for schema</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.to_format">
-<span class="sig-name descname"><span class="pre">to_format</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional[Union[Format,</span> <span class="pre">Callable]]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.to_format" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">to_format</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Union[Format,</span> <span class="pre">Callable]</span> <span class="pre">|</span> <span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.to_format" title="Link to this definition">#</a></dt>
 <dd><p>data format to serialize into after validation. This option only applies
 to  schemas used in the context of the pandera type constructor
 <code class="docutils literal notranslate"><span class="pre">pa.typing.DataFrame[Schema](data)</span></code>. If None, returns a dataframe.</p>
@@ -760,14 +760,14 @@ to  schemas used in the context of the pandera type constructor
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.to_format_buffer">
-<span class="sig-name descname"><span class="pre">to_format_buffer</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional[Union[str,</span> <span class="pre">Callable]]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.to_format_buffer" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">to_format_buffer</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Union[str,</span> <span class="pre">Callable]</span> <span class="pre">|</span> <span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.to_format_buffer" title="Link to this definition">#</a></dt>
 <dd><p>Buffer to be provided when to_format is a custom callable. See docs for
 example of how to implement an example of a to format function.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.to_format_kwargs">
-<span class="sig-name descname"><span class="pre">to_format_kwargs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional[dict[str,</span> <span class="pre">Any]]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.to_format_kwargs" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">to_format_kwargs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict[str,</span> <span class="pre">Any]</span> <span class="pre">|</span> <span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.to_format_kwargs" title="Link to this definition">#</a></dt>
 <dd><p>a dictionary keyword arguments to pass into the writer function that
 converts the pandera-validate-able object to type <code class="docutils literal notranslate"><span class="pre">to_format</span></code>.
 The writer function is implemented in the pandera.typing
@@ -776,7 +776,7 @@ generic types via the <code class="docutils literal notranslate"><span class="pr
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.unique">
-<span class="sig-name descname"><span class="pre">unique</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional[Union[str,</span> <span class="pre">list[str]]]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.unique" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">unique</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Union[str,</span> <span class="pre">list[str]]</span> <span class="pre">|</span> <span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.unique" title="Link to this definition">#</a></dt>
 <dd><p>make sure certain column combinations are unique</p>
 </dd></dl>
 
@@ -840,7 +840,7 @@ generic types via the <code class="docutils literal notranslate"><span class="pr
 <dd><p>Provide metadata for columns and schema level</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>]</span></p>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -930,13 +930,13 @@ FastAPI integration.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>check_obj</strong> (<em>pd.DataFrame</em>) – the dataframe to be validated.</p></li>
-<li><p><strong>head</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]</span>) – validate the first n rows. Rows overlapping with <cite>tail</cite> or
+<li><p><strong>head</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – validate the first n rows. Rows overlapping with <cite>tail</cite> or
 <cite>sample</cite> are de-duplicated.</p></li>
-<li><p><strong>tail</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]</span>) – validate the last n rows. Rows overlapping with <cite>head</cite> or
+<li><p><strong>tail</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – validate the last n rows. Rows overlapping with <cite>head</cite> or
 <cite>sample</cite> are de-duplicated.</p></li>
-<li><p><strong>sample</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]</span>) – validate a random sample of n rows. Rows overlapping
+<li><p><strong>sample</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – validate a random sample of n rows. Rows overlapping
 with <cite>head</cite> or <cite>tail</cite> are de-duplicated.</p></li>
-<li><p><strong>random_state</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]</span>) – random seed for the <code class="docutils literal notranslate"><span class="pre">sample</span></code> argument.</p></li>
+<li><p><strong>random_state</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – random seed for the <code class="docutils literal notranslate"><span class="pre">sample</span></code> argument.</p></li>
 <li><p><strong>lazy</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – if True, lazily evaluates dataframe against all validation
 checks and raises a <code class="docutils literal notranslate"><span class="pre">SchemaErrors</span></code>. Otherwise, raise
 <code class="docutils literal notranslate"><span class="pre">SchemaError</span></code> as soon as one occurs.</p></li>
