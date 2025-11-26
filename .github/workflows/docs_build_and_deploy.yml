@@ -37,10 +37,10 @@ jobs:
     steps:
       - uses: neuroinformatics-unit/actions/build_sphinx_docs@main
         with:
-          python-version: 3.13
           use-make: true
           fetch-tags: true
           use-artifactci: lazy
+          # default Python version is 3.x
 
   deploy_sphinx_docs:
     name: Deploy Sphinx Docs
