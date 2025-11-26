@@ -11,7 +11,7 @@ development environment. In the following, we assume you have
 To install `ethology` for development, first create and activate a `conda` environment:
 
 ```sh
-conda create -n ethology-dev python=3.12
+conda create -n ethology-dev python=3.13
 conda activate ethology-dev
 ```
 
