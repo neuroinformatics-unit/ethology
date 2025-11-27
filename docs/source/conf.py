@@ -158,7 +158,9 @@ linkcheck_anchors_ignore_for_url = [
 ]
 # A list of regular expressions that match URIs that should not be checked
 linkcheck_ignore = [
-    "https://opensource.org/license/bsd-3-clause/",  # to avoid odd 403 error
+    # to avoid odd 403 client errors
+    "https://opensource.org/license/bsd-3-clause/",
+    "https://figshare.com/ndownloader/files/53674187",
 ]
 
 myst_url_schemes = {
