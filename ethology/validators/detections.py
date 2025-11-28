@@ -1,6 +1,8 @@
 """Validators for detection datasets."""
 
-from attrs import define, field
+from typing import ClassVar
+
+from attrs import define
 
 from ethology.validators.utils import ValidDataset
 
@@ -50,15 +52,9 @@ class ValidBboxDetectionsDataset(ValidDataset):
     """
 
     # Minimum requirements for a bbox dataset holding detections
-    required_dims: set = field(
-        default={"image_id", "space", "id"},
-        init=False,
-    )
-    required_data_vars: dict = field(
-        default={
-            "position": {"image_id", "space", "id"},
-            "shape": {"image_id", "space", "id"},
-            "confidence": {"image_id", "id"},
-        },
-        init=False,
-    )
+    required_dims: ClassVar[set] = {"image_id", "space", "id"}
+    required_data_vars: ClassVar[dict] = {
+        "position": {"image_id", "space", "id"},
+        "shape": {"image_id", "space", "id"},
+        "confidence": {"image_id", "id"},
+    }

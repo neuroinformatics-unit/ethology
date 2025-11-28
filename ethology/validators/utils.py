@@ -1,8 +1,9 @@
 """Utils for validating `ethology` objects."""
 
-from abc import ABC, abstractmethod
+from abc import ABC
 from collections.abc import Callable
 from functools import wraps
+from typing import ClassVar
 
 import xarray as xr
 from attrs import define, field
@@ -51,18 +52,35 @@ class ValidDataset(ABC):
 
     dataset: xr.Dataset = field()
 
-    # Subclasses should override these abstract properties
-    @property
-    @abstractmethod
-    def required_dims(self) -> set:
-        """Subclasses must provide a ``required_dims`` property."""
-        pass  # pragma: no cover
+    # # Subclasses should override these abstract properties
+    # @property
+    # @abstractmethod
+    # def required_dims(self) -> set:
+    #     """Subclasses must provide a ``required_dims`` property."""
+    #     pass  # pragma: no cover
 
-    @property
-    @abstractmethod
-    def required_data_vars(self) -> dict[str, set]:
-        """Subclasses must provide a ``required_data_vars`` property."""
-        pass  # pragma: no cover
+    # @property
+    # @abstractmethod
+    # def required_data_vars(self) -> dict[str, set]:
+    #     """Subclasses must provide a ``required_data_vars`` property."""
+    #     pass  # pragma: no cover
+
+    required_dims: ClassVar[set]
+    required_data_vars: ClassVar[dict[str, set]]
+
+    def __init_subclass__(cls, **kwargs):
+        """Verify that subclasses define required class variables."""
+        super().__init_subclass__(**kwargs)
+
+        if not hasattr(cls, "required_dims"):
+            raise TypeError(
+                f"{cls.__name__} must define 'required_dims' class variable"
+            )
+        if not hasattr(cls, "required_data_vars"):
+            raise TypeError(
+                f"{cls.__name__} must define 'required_data_vars' "
+                "class variable"
+            )
 
     # Validators
     @dataset.validator

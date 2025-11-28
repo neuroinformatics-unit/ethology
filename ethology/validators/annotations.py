@@ -2,6 +2,7 @@
 
 import json
 from pathlib import Path
+from typing import ClassVar
 
 import pandas as pd
 import pandera.pandas as pa
@@ -267,17 +268,11 @@ class ValidBboxAnnotationsDataset(ValidDataset):
     """
 
     # Minimum requirements for a bbox dataset holding detections
-    required_dims: set = field(
-        default={"image_id", "space", "id"},
-        init=False,
-    )
-    required_data_vars: dict = field(
-        default={
-            "position": {"image_id", "space", "id"},
-            "shape": {"image_id", "space", "id"},
-        },
-        init=False,
-    )
+    required_dims: ClassVar[set] = {"image_id", "space", "id"}
+    required_data_vars: ClassVar[dict[str, set]] = {
+        "position": {"image_id", "space", "id"},
+        "shape": {"image_id", "space", "id"},
+    }
 
 
 class ValidBboxAnnotationsDataFrame(pa.DataFrameModel):
