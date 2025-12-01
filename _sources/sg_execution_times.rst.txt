@@ -6,7 +6,7 @@
 
 Computation times
 =================
-**00:27.401** total execution time for 2 files **from all galleries**:
+**00:27.636** total execution time for 2 files **from all galleries**:
 
 .. container::
 
@@ -33,8 +33,8 @@ Computation times
      - Time
      - Mem (MB)
    * - :ref:`sphx_glr_examples_approximate_subset_sum_split.py` (``../../examples/approximate_subset_sum_split.py``)
-     - 00:22.030
+     - 00:22.170
      - 0.0
    * - :ref:`sphx_glr_examples_coco_bbox_ethology_and_movement.py` (``../../examples/coco_bbox_ethology_and_movement.py``)
-     - 00:05.371
+     - 00:05.467
      - 0.0
