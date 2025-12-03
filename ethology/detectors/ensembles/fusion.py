@@ -145,10 +145,10 @@ def fuse_detections(
 
     # Postprocess data arrays
     fused_data_arrays = _postprocess_multi_image_fused_arrays(
-        position = centroid_fused_da,
-        shape = shape_fused_da,
-        confidence = confidence_fused_da,
-        label = label_fused_da,
+        position=centroid_fused_da,
+        shape=shape_fused_da,
+        confidence=confidence_fused_da,
+        label=label_fused_da,
     )
 
     # Return a dataset
@@ -413,7 +413,7 @@ def _postprocess_multi_image_fused_arrays(
     # Pad labels with -1 rather than nan
     label_da = label_da.fillna(-1).astype(int)
 
-    # Assign id coordinates to data arrays 
+    # Assign id coordinates to data arrays
     # (these are lost after apply_ufunc because exclude_dims is used)
     n_max_detections = position_da.sizes["id"]
     id_coords = np.arange(n_max_detections)

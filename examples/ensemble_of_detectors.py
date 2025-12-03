@@ -262,6 +262,7 @@ fused_detections_ds = fuse_detections(
 
 # %%
 from ethology.validators.detections import ValidBboxDetectionsDataset
+
 ValidBboxDetectionsDataset(fused_detections_ds)
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
