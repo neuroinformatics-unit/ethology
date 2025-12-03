@@ -30,9 +30,6 @@ class ValidVIA:
     ----------
     path : Path | str
         Path to the VIA JSON file, passed as an input.
-
-    Class Attributes
-    ----------------
     schema : ClassVar[dict]
         The JSON schema is set to the default VIA schema.
     required_keys : ClassVar[dict]
@@ -119,9 +116,6 @@ class ValidCOCO:
     ----------
     path : Path | str
         Path to the COCO JSON file, passed as an input.
-
-    Class Attributes
-    ----------------
     schema : ClassVar[dict]
         The JSON schema is set to the default COCO schema.
     required_keys : ClassVar[dict]
@@ -234,9 +228,6 @@ class ValidBboxAnnotationsDataset(ValidDataset):
     ----------
     dataset : xarray.Dataset
         The xarray dataset to validate.
-
-    Class Attributes
-    ----------------
     required_dims : ClassVar[set]
         The set of required dimension names: ``image_id``, ``space`` and
         ``id``.
