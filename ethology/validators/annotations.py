@@ -50,21 +50,15 @@ class ValidVIA:
     """
 
     path: Path = field(converter=Path)
-    schema: dict = field(
-        default=_get_default_schema("VIA"),
-        init=False,
-    )
-    required_keys: dict = field(
-        default={
-            "main": ["_via_img_metadata", "_via_attributes"],
-            "images": ["filename"],
-            "regions": ["shape_attributes"],
-            "shape_attributes": ["x", "y", "width", "height"],
-        },
-        init=False,
-        # with init=False the attribute is always initialized
-        # with the default value
-    )
+
+    # class variables
+    schema: ClassVar[dict] = _get_default_schema("VIA")
+    required_keys: ClassVar[dict] = {
+        "main": ["_via_img_metadata", "_via_attributes"],
+        "images": ["filename"],
+        "regions": ["shape_attributes"],
+        "shape_attributes": ["x", "y", "width", "height"],
+    }
 
     # Note: the validators are applied in order
     @path.validator
@@ -142,23 +136,15 @@ class ValidCOCO:
     """
 
     path: Path = field(converter=Path)
-    schema: dict = field(
-        default=_get_default_schema("COCO"),
-        init=False,
-        # with init=False the attribute is always initialized
-        # with the default value
-    )
 
-    # The keys of "required_keys" match the 1st level keys in a COCO JSON file
-    required_keys: dict = field(
-        default={
-            "main": ["images", "annotations", "categories"],
-            "images": ["id", "file_name", "width", "height"],
-            "annotations": ["id", "image_id", "bbox", "category_id"],
-            "categories": ["id", "name"],  # exclude "supercategory"
-        },
-        init=False,
-    )
+    # class variables
+    schema: ClassVar[dict] = _get_default_schema("COCO")
+    required_keys: ClassVar[dict] = {
+        "main": ["images", "annotations", "categories"],
+        "images": ["id", "file_name", "width", "height"],
+        "annotations": ["id", "image_id", "bbox", "category_id"],
+        "categories": ["id", "name"],  # exclude "supercategory"
+    }  # keys match the 1st level keys in a COCO JSON file
 
     # Note: the validators are applied in order
     @path.validator

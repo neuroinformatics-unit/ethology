@@ -52,19 +52,7 @@ class ValidDataset(ABC):
 
     dataset: xr.Dataset = field()
 
-    # # Subclasses should override these abstract properties
-    # @property
-    # @abstractmethod
-    # def required_dims(self) -> set:
-    #     """Subclasses must provide a ``required_dims`` property."""
-    #     pass  # pragma: no cover
-
-    # @property
-    # @abstractmethod
-    # def required_data_vars(self) -> dict[str, set]:
-    #     """Subclasses must provide a ``required_data_vars`` property."""
-    #     pass  # pragma: no cover
-
+    # class variables
     required_dims: ClassVar[set]
     required_data_vars: ClassVar[dict[str, set]]
 
