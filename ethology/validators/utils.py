@@ -21,18 +21,21 @@ class ValidDataset(ABC):
     - has the correct dimensions for each data variable
 
     Subclasses must define ``required_dims`` and ``required_data_vars``
-    attributes.
+    class attributes.
 
     Attributes
     ----------
     dataset : xarray.Dataset
         The xarray dataset to validate.
-    required_dims : set[str]
-        A set of required dimension names. This attribute should be
+
+    Class Attributes
+    ----------------
+    required_dims : ClassVar[set[str]]
+        A set of required dimension names. This class attribute must be
         defined by any subclass inheriting from this class.
-    required_data_vars : dict[str, set]
+    required_data_vars : ClassVar[dict[str, set]]
         A dictionary mapping data variable names to their required dimensions.
-        This attribute should be defined by any subclass inheriting from
+        This class attribute must be defined by any subclass inheriting from
         this class.
 
     Raises

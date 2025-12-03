@@ -25,10 +25,13 @@ class ValidBboxDetectionsDataset(ValidDataset):
     ----------
     dataset : xarray.Dataset
         The xarray dataset to validate.
-    required_dims : set
+
+    Class Attributes
+    ----------------
+    required_dims : ClassVar[set]
         The set of required dimension names: ``image_id``, ``space`` and
         ``id``.
-    required_data_vars : dict[str, set]
+    required_data_vars : ClassVar[dict[str, set]]
         A dictionary mapping data variable names to their required minimum
         dimensions:
 
