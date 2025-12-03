@@ -107,7 +107,6 @@ class EnsembleDetector(LightningModule):
 
     def predict_step(self, batch, batch_idx):
         """Predict step for a single batch."""
-        # ------------------------------
         # Run all models in ensemble in GPU
         images_batch, _annotations_batch = batch
         raw_prediction_dicts_per_model = [

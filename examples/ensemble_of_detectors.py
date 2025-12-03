@@ -210,7 +210,7 @@ ensemble_detections_ds = ensemble_detector.format_predictions(
 # Some nice plots:
 # ensemble_detections_ds.confidence.sel(image_id=0).plot()
 # ensemble_detections_ds.confidence.sel(model=0).plot()
-for m in range(5):
+for m in range(ensemble_detections_ds.model.size):
     plt.figure()
     ensemble_detections_ds.confidence.sel(model=m).plot()
 
@@ -260,6 +260,10 @@ fused_detections_ds = fuse_detections(
     # ---- method kwargs ----
 )
 
+# %%
+from ethology.validators.detections import ValidBboxDetectionsDataset
+ValidBboxDetectionsDataset(fused_detections_ds)
+
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Fuse detections across models with NMS
 
@@ -277,7 +281,7 @@ fused_detections_ds = fuse_detections(
 # fused_detections_ds = fused_detections_nms_ds
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 # Remove low confidence detections
-confidence_threshold_post_fusion = 0.5
+confidence_threshold_post_fusion = 0.4
 fused_detections_ds_ = fused_detections_ds.where(
     fused_detections_ds.confidence >= confidence_threshold_post_fusion
 )

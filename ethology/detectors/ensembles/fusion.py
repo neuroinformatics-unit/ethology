@@ -144,14 +144,11 @@ def fuse_detections(
     )
 
     # Postprocess data arrays
-    fused_data_arrays = {
-        "position": centroid_fused_da,
-        "shape": shape_fused_da,
-        "confidence": confidence_fused_da,
-        "label": label_fused_da,
-    }
     fused_data_arrays = _postprocess_multi_image_fused_arrays(
-        **fused_data_arrays
+        position = centroid_fused_da,
+        shape = shape_fused_da,
+        confidence = confidence_fused_da,
+        label = label_fused_da,
     )
 
     # Return a dataset
@@ -408,7 +405,7 @@ def _postprocess_multi_image_fused_arrays(
     """Postprocess fused data arrays on multiple images after fusion."""
     data_arrays = [position, shape, confidence, label]
 
-    # Remove padding across annotations
+    # Remove extra padding across annotations
     position_da, shape_da, confidence_da, label_da = [
         da.dropna(dim="id", how="all") for da in data_arrays
     ]
@@ -416,9 +413,13 @@ def _postprocess_multi_image_fused_arrays(
     # Pad labels with -1 rather than nan
     label_da = label_da.fillna(-1).astype(int)
 
+    # Assign id coordinates to data arrays 
+    # (these are lost after apply_ufunc because exclude_dims is used)
+    n_max_detections = position_da.sizes["id"]
+    id_coords = np.arange(n_max_detections)
     return {
-        "position": position_da,
-        "shape": shape_da,
-        "confidence": confidence_da,
-        "label": label_da,
+        "position": position_da.assign_coords(id=id_coords),
+        "shape": shape_da.assign_coords(id=id_coords),
+        "confidence": confidence_da.assign_coords(id=id_coords),
+        "label": label_da.assign_coords(id=id_coords),
     }
