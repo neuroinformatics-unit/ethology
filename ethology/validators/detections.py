@@ -55,8 +55,9 @@ class ValidBboxDetectionsDataset(ValidDataset):
     """
 
     # Minimum requirements for a bbox dataset holding detections
+    # Should not be modified after initialization
     required_dims: ClassVar[set] = {"image_id", "space", "id"}
-    required_data_vars: ClassVar[dict] = {
+    required_data_vars: ClassVar[dict[str, set]] = {
         "position": {"image_id", "space", "id"},
         "shape": {"image_id", "space", "id"},
         "confidence": {"image_id", "id"},

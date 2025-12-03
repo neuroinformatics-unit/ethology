@@ -54,7 +54,7 @@ class ValidVIA:
 
     path: Path = field(converter=Path)
 
-    # class variables
+    # class variables: should not be modified after initialization
     schema: ClassVar[dict] = _get_default_schema("VIA")
     required_keys: ClassVar[dict] = {
         "main": ["_via_img_metadata", "_via_attributes"],
@@ -143,7 +143,7 @@ class ValidCOCO:
 
     path: Path = field(converter=Path)
 
-    # class variables
+    # class variables: should not be modified after initialization
     schema: ClassVar[dict] = _get_default_schema("COCO")
     required_keys: ClassVar[dict] = {
         "main": ["images", "annotations", "categories"],
@@ -263,6 +263,7 @@ class ValidBboxAnnotationsDataset(ValidDataset):
     """
 
     # Minimum requirements for a bbox dataset holding detections
+    # Should not be modified after initialization
     required_dims: ClassVar[set] = {"image_id", "space", "id"}
     required_data_vars: ClassVar[dict[str, set]] = {
         "position": {"image_id", "space", "id"},
