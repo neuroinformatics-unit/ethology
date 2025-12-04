@@ -11,15 +11,15 @@ import xarray as xr
 from joblib import Parallel, delayed
 from tqdm import tqdm
 
+from ethology.detectors.ensembles.utils import (
+    centroid_shape_to_corners,
+    corners_to_centroid_shape,
+)
 from ethology.validators.detections import (
     ValidBboxDetectionsDataset,
     ValidBboxDetectionsEnsembleDataset,
 )
 from ethology.validators.utils import _check_input, _check_output
-from ethology.detectors.ensembles.utils import (
-    centroid_shape_to_corners,
-    corners_to_centroid_shape,
-)
 
 # ------------------- Supported fusion methods ------------------
 # from ensemble_boxes
