@@ -13,8 +13,8 @@ from torch.nn.parallel import parallel_apply
 from torchvision.models import detection, get_model, list_models
 
 from ethology.detectors.ensembles.utils import (
-    corners_to_centroid_shape,
-    pad_to_max_first_dimension,
+    _corners_to_centroid_shape,
+    _pad_to_max_first_dimension,
 )
 from ethology.validators.detections import ValidBboxDetectionsEnsembleDataset
 from ethology.validators.utils import _check_output
@@ -173,11 +173,11 @@ class EnsembleDetector(LightningModule):
             ky: [] for ky in output_per_sample
         }
         for ky in output_per_sample_padded:
-            output_per_sample_padded[ky] = pad_to_max_first_dimension(
+            output_per_sample_padded[ky] = _pad_to_max_first_dimension(
                 [
                     # pad across models
                     np.stack(
-                        pad_to_max_first_dimension(
+                        _pad_to_max_first_dimension(
                             output_one_sample, fill_value[ky]
                         ),
                         axis=-1,
@@ -199,7 +199,7 @@ class EnsembleDetector(LightningModule):
         # Compute centroid and shape arrays
         # centroid_array = 0.5 * (bboxes_array[:, 0:2] + bboxes_array[:, 2:4])
         # shape_array = bboxes_array[:, 2:4] - bboxes_array[:, 0:2]
-        centroid_array, shape_array = corners_to_centroid_shape(
+        centroid_array, shape_array = _corners_to_centroid_shape(
             bboxes_array[:, 0:2], bboxes_array[:, 2:4]
         )
 

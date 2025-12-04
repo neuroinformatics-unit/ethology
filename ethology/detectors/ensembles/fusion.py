@@ -12,8 +12,8 @@ from joblib import Parallel, delayed
 from tqdm import tqdm
 
 from ethology.detectors.ensembles.utils import (
-    centroid_shape_to_corners,
-    corners_to_centroid_shape,
+    _centroid_shape_to_corners,
+    _corners_to_centroid_shape,
 )
 from ethology.validators.detections import (
     ValidBboxDetectionsDataset,
@@ -251,7 +251,7 @@ def _preprocess_single_image_detections(
     """Prepare detections of an ensemble on a single image for fusion."""
     # Prepare boxes array
     # transform position and shape arrays to x1y1x2y normalised
-    x1y1, x2y2 = centroid_shape_to_corners(position, shape)
+    x1y1, x2y2 = _centroid_shape_to_corners(position, shape)
     bboxes_x1y1 = x1y1 / image_width_height[:, None, None]
     bboxes_x2y2 = x2y2 / image_width_height[:, None, None]
     bboxes_x1y1_x2y2_normalised = np.transpose(
@@ -371,7 +371,7 @@ def _parse_single_image_detections_as_dataarrays(
         id_array = np.arange(n_detections)
 
     # Extract bbox centre and shape
-    centroid, shape = corners_to_centroid_shape(
+    centroid, shape = _corners_to_centroid_shape(
         x1y1_x2y2_array[:, 0:2], x1y1_x2y2_array[:, 2:4]
     )
 
