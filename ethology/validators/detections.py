@@ -63,7 +63,7 @@ class ValidBboxDetectionsDataset(ValidDataset):
 
 @define
 class ValidBboxDetectionsEnsembleDataset(ValidDataset):
-    """Class for valid ``ethology`` bounding box ensembledetections datasets.
+    """Class for valid ``ethology`` bounding box ensemble detections datasets.
 
     This class validates that the input dataset:
 
@@ -80,10 +80,10 @@ class ValidBboxDetectionsEnsembleDataset(ValidDataset):
     ----------
     dataset : xarray.Dataset
         The xarray dataset to validate.
-    required_dims : set
+    required_dims : ClassVar[set]
         The set of required dimension names: ``image_id``, ``space``, ``id``
-         and ``model``.
-    required_data_vars : dict[str, set]
+        and ``model``.
+    required_data_vars : ClassVar[dict[str, set]]
         A dictionary mapping data variable names to their required minimum
         dimensions:
 
@@ -107,6 +107,7 @@ class ValidBboxDetectionsEnsembleDataset(ValidDataset):
     """
 
     # Minimum requirements for a bbox dataset holding detections
+    # Should not be modified after initialization
     required_dims: ClassVar[set] = {"image_id", "space", "id", "model"}
     required_data_vars: ClassVar[dict] = {
         "position": {"image_id", "space", "id", "model"},
