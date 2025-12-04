@@ -27,9 +27,9 @@ def _pad_to_max_first_dimension(list_arrays, fill_value=np.nan):
 
 def _centroid_shape_to_corners(position, shape):
     """Convert centroid and shape arrays to x1y1, x2y2 corner arrays.
-    
-    x1y1 is the top left corner (min x-coordinate, min y-coordinate), 
-    x2y2 is the bottom right corner (max x-coordinate, max y-coordinate) 
+
+    x1y1 is the top left corner (min x-coordinate, min y-coordinate),
+    x2y2 is the bottom right corner (max x-coordinate, max y-coordinate)
     of the bounding box.
 
     Space dimension is assumed to be the second dimension.
@@ -43,7 +43,7 @@ def _centroid_shape_to_corners(position, shape):
 
 def _corners_to_centroid_shape(x1y1, x2y2):
     """Convert x1y1, x2y2 corner arrays to centroid and shape arrays.
-    
+
     Space dimension is assumed to be the second dimension.
     """
     return (

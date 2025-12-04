@@ -142,7 +142,7 @@ def _postprocess_multi_image_fused_arrays(
     """
     # Transpose results from list-of-tuples to tuple-of-lists
     da_names = ("position", "shape", "confidence", "label")
-    da_lists = zip(*results_per_img_id)
+    da_lists = zip(*results_per_img_id, strict=True)
 
     # Concatenate lists of dataarrays along image_id dimension and
     # remove extra padding in "id" dimension
@@ -182,8 +182,8 @@ def _validate_image_shape(image_shape) -> np.ndarray:
 def _estimate_max_n_detections(ensemble_detections_ds: xr.Dataset) -> int:
     """Get upper bound for maximum number of boxes per image after fusion.
 
-    We assume no detections are fused and all images have as many detections as the maximum
-    number of non-nan detections per image.
+    We assume no detections are fused and all images have as many
+    detections as the maximum number of non-nan detections per image.
     """
     detections_w_non_nan_position = (
         ensemble_detections_ds.position.notnull().all(dim="space")
@@ -209,7 +209,7 @@ def _fuse_single_image_detections(
     max_n_detections: int,
     **fusion_kwargs: Unpack[_TypeFusionMethodKwargs],  #  method-only kwargs
 ) -> TupleFourDataArrays:
-    """Fuse detections across models for a single image using selected method."""
+    """Fuse detections for a single image with selected method."""
     # Prepare single image arrays for fusion
     list_bboxes_per_model, list_confidence_per_model, list_label_per_model = (
         _preprocess_single_image_detections(
@@ -284,20 +284,21 @@ def _preprocess_single_image_detections(
     ]
     return (
         _chop_end_of_array(
-            list_arrays_per_model, list_non_nan_bboxes_per_model
-        )
-        for list_arrays_per_model in [
-            list_x1y1_x2y2_norm_per_model,
-            list_confidence_per_model,
-            list_label_per_model,
-        ]
+            list_x1y1_x2y2_norm_per_model, list_non_nan_bboxes_per_model
+        ),
+        _chop_end_of_array(
+            list_confidence_per_model, list_non_nan_bboxes_per_model
+        ),
+        _chop_end_of_array(
+            list_label_per_model, list_non_nan_bboxes_per_model
+        ),
     )
 
 
 def _chop_end_of_array(
     list_arrays: list[np.ndarray], list_end_lengths: list[int]
 ) -> list[np.ndarray]:
-    """Chop end of arrays in list to the desired length along the first dimension."""
+    """Chop end of arrays in list to desired length along first dimension."""
     return [
         arr[:n] for arr, n in zip(list_arrays, list_end_lengths, strict=True)
     ]
@@ -346,7 +347,7 @@ def _postprocess_single_image_detections(
 def _remove_nan_and_pad_to_max(
     input_array, mask_non_nan_rows, max_n_detections, fill_value=np.nan
 ):
-    """Remove non-nan from input array and pad with nans, all along first dimension."""
+    """Remove non-nan from input array and pad, all along first dimension."""
     # Initialise array with nans
     padded_array = np.full(
         (max_n_detections, *input_array.shape[1:]),

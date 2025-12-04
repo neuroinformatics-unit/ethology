@@ -111,7 +111,9 @@ def test_centroid_shape_to_corners(
         )
     ],
 )
-def test_corners_to_centroid_shape(x1y1, x2y2, expected_position, expected_shape):
+def test_corners_to_centroid_shape(
+    x1y1, x2y2, expected_position, expected_shape
+):
     position, shape = _corners_to_centroid_shape(x1y1, x2y2)
     np.testing.assert_array_equal(position, expected_position)
     np.testing.assert_array_equal(shape, expected_shape)

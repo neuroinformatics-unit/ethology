@@ -9,7 +9,6 @@ import torch.nn as nn
 import xarray as xr
 import yaml
 from lightning import LightningModule
-from torch.nn.parallel import parallel_apply
 from torchvision.models import detection, get_model, list_models
 
 from ethology.detectors.ensembles.utils import (
