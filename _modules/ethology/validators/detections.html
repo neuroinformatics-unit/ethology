@@ -43,7 +43,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../_static/documentation_options.js?v=e02b8d36"></script>
+    <script src="../../../_static/documentation_options.js?v=4453092f"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
@@ -117,7 +117,7 @@
   
   
   
-    <p class="title logo__title">ethology v0.1.2.dev2</p>
+    <p class="title logo__title">ethology v0.1.2.dev3</p>
   
 </a></div>
     
@@ -392,7 +392,9 @@
   <h1>Source code for ethology.validators.detections</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Validators for detection datasets.&quot;&quot;&quot;</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">attrs</span><span class="w"> </span><span class="kn">import</span> <span class="n">define</span><span class="p">,</span> <span class="n">field</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">ClassVar</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">attrs</span><span class="w"> </span><span class="kn">import</span> <span class="n">define</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">ethology.validators.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">ValidDataset</span>
 
@@ -417,10 +419,10 @@
 <span class="sd">    ----------</span>
 <span class="sd">    dataset : xarray.Dataset</span>
 <span class="sd">        The xarray dataset to validate.</span>
-<span class="sd">    required_dims : set</span>
+<span class="sd">    required_dims : ClassVar[set]</span>
 <span class="sd">        The set of required dimension names: ``image_id``, ``space`` and</span>
 <span class="sd">        ``id``.</span>
-<span class="sd">    required_data_vars : dict[str, set]</span>
+<span class="sd">    required_data_vars : ClassVar[dict[str, set]]</span>
 <span class="sd">        A dictionary mapping data variable names to their required minimum</span>
 <span class="sd">        dimensions:</span>
 
@@ -444,18 +446,13 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># Minimum requirements for a bbox dataset holding detections</span>
-    <span class="n">required_dims</span><span class="p">:</span> <span class="nb">set</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span>
-        <span class="n">default</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;image_id&quot;</span><span class="p">,</span> <span class="s2">&quot;space&quot;</span><span class="p">,</span> <span class="s2">&quot;id&quot;</span><span class="p">},</span>
-        <span class="n">init</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-    <span class="p">)</span>
-    <span class="n">required_data_vars</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span>
-        <span class="n">default</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;position&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;image_id&quot;</span><span class="p">,</span> <span class="s2">&quot;space&quot;</span><span class="p">,</span> <span class="s2">&quot;id&quot;</span><span class="p">},</span>
-            <span class="s2">&quot;shape&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;image_id&quot;</span><span class="p">,</span> <span class="s2">&quot;space&quot;</span><span class="p">,</span> <span class="s2">&quot;id&quot;</span><span class="p">},</span>
-            <span class="s2">&quot;confidence&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;image_id&quot;</span><span class="p">,</span> <span class="s2">&quot;id&quot;</span><span class="p">},</span>
-        <span class="p">},</span>
-        <span class="n">init</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-    <span class="p">)</span></div>
+    <span class="c1"># Should not be modified after initialization</span>
+    <span class="n">required_dims</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">set</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;image_id&quot;</span><span class="p">,</span> <span class="s2">&quot;space&quot;</span><span class="p">,</span> <span class="s2">&quot;id&quot;</span><span class="p">}</span>
+    <span class="n">required_data_vars</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">set</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;position&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;image_id&quot;</span><span class="p">,</span> <span class="s2">&quot;space&quot;</span><span class="p">,</span> <span class="s2">&quot;id&quot;</span><span class="p">},</span>
+        <span class="s2">&quot;shape&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;image_id&quot;</span><span class="p">,</span> <span class="s2">&quot;space&quot;</span><span class="p">,</span> <span class="s2">&quot;id&quot;</span><span class="p">},</span>
+        <span class="s2">&quot;confidence&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;image_id&quot;</span><span class="p">,</span> <span class="s2">&quot;id&quot;</span><span class="p">},</span>
+    <span class="p">}</span></div>
 
 </pre></div>
 

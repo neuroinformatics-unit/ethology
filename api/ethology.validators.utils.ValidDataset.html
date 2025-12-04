@@ -44,7 +44,7 @@
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../_static/documentation_options.js?v=e02b8d36"></script>
+    <script src="../_static/documentation_options.js?v=4453092f"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/design-tabs.js?v=f930bc37"></script>
@@ -120,7 +120,7 @@
   
   
   
-    <p class="title logo__title">ethology v0.1.2.dev2</p>
+    <p class="title logo__title">ethology v0.1.2.dev3</p>
   
 </a></div>
     
@@ -370,7 +370,6 @@
 <li class="toctree-l2"><a class="reference internal" href="ethology.validators.detections.ValidBboxDetectionsDataset.html">ValidBboxDetectionsDataset</a></li>
 </ul>
 </details></li>
-<li class="toctree-l1"><a class="reference internal" href="ethology.validators.json_schemas.utils.html">ethology.validators.json_schemas.utils</a></li>
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="ethology.validators.utils.html">ethology.validators.utils</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
 <li class="toctree-l2 current active"><a class="current reference internal" href="#">ValidDataset</a></li>
 </ul>
@@ -453,7 +452,7 @@
 <li><p>has the correct dimensions for each data variable</p></li>
 </ul>
 <p>Subclasses must define <code class="docutils literal notranslate"><span class="pre">required_dims</span></code> and <code class="docutils literal notranslate"><span class="pre">required_data_vars</span></code>
-attributes.</p>
+class attributes.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="ethology.validators.utils.ValidDataset.dataset">
 <span class="sig-name descname"><span class="pre">dataset</span></span><a class="headerlink" href="#ethology.validators.utils.ValidDataset.dataset" title="Link to this definition">#</a></dt>
@@ -468,11 +467,11 @@ attributes.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="ethology.validators.utils.ValidDataset.required_dims">
 <span class="sig-name descname"><span class="pre">required_dims</span></span><a class="headerlink" href="#ethology.validators.utils.ValidDataset.required_dims" title="Link to this definition">#</a></dt>
-<dd><p>A set of required dimension names. This attribute should be
+<dd><p>A set of required dimension names. This class attribute must be
 defined by any subclass inheriting from this class.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#set" title="(in Python v3.14)">set</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a>]</p>
+<dd class="field-odd"><p>ClassVar[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#set" title="(in Python v3.14)">set</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a>]]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -481,11 +480,11 @@ defined by any subclass inheriting from this class.</p>
 <dt class="sig sig-object py" id="ethology.validators.utils.ValidDataset.required_data_vars">
 <span class="sig-name descname"><span class="pre">required_data_vars</span></span><a class="headerlink" href="#ethology.validators.utils.ValidDataset.required_data_vars" title="Link to this definition">#</a></dt>
 <dd><p>A dictionary mapping data variable names to their required dimensions.
-This attribute should be defined by any subclass inheriting from
+This class attribute must be defined by any subclass inheriting from
 this class.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)">dict</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#set" title="(in Python v3.14)">set</a>]</p>
+<dd class="field-odd"><p>ClassVar[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)">dict</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#set" title="(in Python v3.14)">set</a>]]</p>
 </dd>
 </dl>
 </dd></dl>

@@ -21,5 +21,4 @@ Information on specific functions, classes, and methods.
     ethology.io.annotations.save_bboxes
     ethology.validators.annotations
     ethology.validators.detections
-    ethology.validators.json_schemas.utils
     ethology.validators.utils

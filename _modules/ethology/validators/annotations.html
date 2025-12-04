@@ -43,7 +43,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../_static/documentation_options.js?v=e02b8d36"></script>
+    <script src="../../../_static/documentation_options.js?v=4453092f"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
@@ -117,7 +117,7 @@
   
   
   
-    <p class="title logo__title">ethology v0.1.2.dev2</p>
+    <p class="title logo__title">ethology v0.1.2.dev3</p>
   
 </a></div>
     
@@ -394,6 +394,7 @@
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">ClassVar</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">pandera.pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pa</span>
@@ -423,9 +424,9 @@
 <span class="sd">    ----------</span>
 <span class="sd">    path : Path | str</span>
 <span class="sd">        Path to the VIA JSON file, passed as an input.</span>
-<span class="sd">    schema : dict</span>
+<span class="sd">    schema : ClassVar[dict]</span>
 <span class="sd">        The JSON schema is set to the default VIA schema.</span>
-<span class="sd">    required_keys : dict</span>
+<span class="sd">    required_keys : ClassVar[dict]</span>
 <span class="sd">        The required keys for the VIA JSON file.</span>
 
 <span class="sd">    Raises</span>
@@ -443,21 +444,15 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">path</span><span class="p">:</span> <span class="n">Path</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">converter</span><span class="o">=</span><span class="n">Path</span><span class="p">)</span>
-    <span class="n">schema</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span>
-        <span class="n">default</span><span class="o">=</span><span class="n">_get_default_schema</span><span class="p">(</span><span class="s2">&quot;VIA&quot;</span><span class="p">),</span>
-        <span class="n">init</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-    <span class="p">)</span>
-    <span class="n">required_keys</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span>
-        <span class="n">default</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;main&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;_via_img_metadata&quot;</span><span class="p">,</span> <span class="s2">&quot;_via_attributes&quot;</span><span class="p">],</span>
-            <span class="s2">&quot;images&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;filename&quot;</span><span class="p">],</span>
-            <span class="s2">&quot;regions&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;shape_attributes&quot;</span><span class="p">],</span>
-            <span class="s2">&quot;shape_attributes&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="s2">&quot;width&quot;</span><span class="p">,</span> <span class="s2">&quot;height&quot;</span><span class="p">],</span>
-        <span class="p">},</span>
-        <span class="n">init</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="c1"># with init=False the attribute is always initialized</span>
-        <span class="c1"># with the default value</span>
-    <span class="p">)</span>
+
+    <span class="c1"># class variables: should not be modified after initialization</span>
+    <span class="n">schema</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="n">_get_default_schema</span><span class="p">(</span><span class="s2">&quot;VIA&quot;</span><span class="p">)</span>
+    <span class="n">required_keys</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;main&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;_via_img_metadata&quot;</span><span class="p">,</span> <span class="s2">&quot;_via_attributes&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;images&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;filename&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;regions&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;shape_attributes&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;shape_attributes&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="s2">&quot;width&quot;</span><span class="p">,</span> <span class="s2">&quot;height&quot;</span><span class="p">],</span>
+    <span class="p">}</span>
 
     <span class="c1"># Note: the validators are applied in order</span>
     <span class="nd">@path</span><span class="o">.</span><span class="n">validator</span>
@@ -518,9 +513,9 @@
 <span class="sd">    ----------</span>
 <span class="sd">    path : Path | str</span>
 <span class="sd">        Path to the COCO JSON file, passed as an input.</span>
-<span class="sd">    schema : dict</span>
+<span class="sd">    schema : ClassVar[dict]</span>
 <span class="sd">        The JSON schema is set to the default COCO schema.</span>
-<span class="sd">    required_keys : dict</span>
+<span class="sd">    required_keys : ClassVar[dict]</span>
 <span class="sd">        The required keys for the COCO JSON file.</span>
 
 <span class="sd">    Raises</span>
@@ -538,23 +533,15 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">path</span><span class="p">:</span> <span class="n">Path</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">converter</span><span class="o">=</span><span class="n">Path</span><span class="p">)</span>
-    <span class="n">schema</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span>
-        <span class="n">default</span><span class="o">=</span><span class="n">_get_default_schema</span><span class="p">(</span><span class="s2">&quot;COCO&quot;</span><span class="p">),</span>
-        <span class="n">init</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="c1"># with init=False the attribute is always initialized</span>
-        <span class="c1"># with the default value</span>
-    <span class="p">)</span>
 
-    <span class="c1"># The keys of &quot;required_keys&quot; match the 1st level keys in a COCO JSON file</span>
-    <span class="n">required_keys</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span>
-        <span class="n">default</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;main&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;images&quot;</span><span class="p">,</span> <span class="s2">&quot;annotations&quot;</span><span class="p">,</span> <span class="s2">&quot;categories&quot;</span><span class="p">],</span>
-            <span class="s2">&quot;images&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="s2">&quot;file_name&quot;</span><span class="p">,</span> <span class="s2">&quot;width&quot;</span><span class="p">,</span> <span class="s2">&quot;height&quot;</span><span class="p">],</span>
-            <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="s2">&quot;image_id&quot;</span><span class="p">,</span> <span class="s2">&quot;bbox&quot;</span><span class="p">,</span> <span class="s2">&quot;category_id&quot;</span><span class="p">],</span>
-            <span class="s2">&quot;categories&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">],</span>  <span class="c1"># exclude &quot;supercategory&quot;</span>
-        <span class="p">},</span>
-        <span class="n">init</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-    <span class="p">)</span>
+    <span class="c1"># class variables: should not be modified after initialization</span>
+    <span class="n">schema</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="n">_get_default_schema</span><span class="p">(</span><span class="s2">&quot;COCO&quot;</span><span class="p">)</span>
+    <span class="n">required_keys</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;main&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;images&quot;</span><span class="p">,</span> <span class="s2">&quot;annotations&quot;</span><span class="p">,</span> <span class="s2">&quot;categories&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;images&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="s2">&quot;file_name&quot;</span><span class="p">,</span> <span class="s2">&quot;width&quot;</span><span class="p">,</span> <span class="s2">&quot;height&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="s2">&quot;image_id&quot;</span><span class="p">,</span> <span class="s2">&quot;bbox&quot;</span><span class="p">,</span> <span class="s2">&quot;category_id&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;categories&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">],</span>  <span class="c1"># exclude &quot;supercategory&quot;</span>
+    <span class="p">}</span>  <span class="c1"># keys match the 1st level keys in a COCO JSON file</span>
 
     <span class="c1"># Note: the validators are applied in order</span>
     <span class="nd">@path</span><span class="o">.</span><span class="n">validator</span>
@@ -641,10 +628,10 @@
 <span class="sd">    ----------</span>
 <span class="sd">    dataset : xarray.Dataset</span>
 <span class="sd">        The xarray dataset to validate.</span>
-<span class="sd">    required_dims : set[str]</span>
+<span class="sd">    required_dims : ClassVar[set]</span>
 <span class="sd">        The set of required dimension names: ``image_id``, ``space`` and</span>
 <span class="sd">        ``id``.</span>
-<span class="sd">    required_data_vars : dict[str, set]</span>
+<span class="sd">    required_data_vars : ClassVar[dict[str, set]]</span>
 <span class="sd">        A dictionary mapping data variable names to their required minimum</span>
 <span class="sd">        dimensions:</span>
 
@@ -667,17 +654,12 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># Minimum requirements for a bbox dataset holding detections</span>
-    <span class="n">required_dims</span><span class="p">:</span> <span class="nb">set</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span>
-        <span class="n">default</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;image_id&quot;</span><span class="p">,</span> <span class="s2">&quot;space&quot;</span><span class="p">,</span> <span class="s2">&quot;id&quot;</span><span class="p">},</span>
-        <span class="n">init</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-    <span class="p">)</span>
-    <span class="n">required_data_vars</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span>
-        <span class="n">default</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;position&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;image_id&quot;</span><span class="p">,</span> <span class="s2">&quot;space&quot;</span><span class="p">,</span> <span class="s2">&quot;id&quot;</span><span class="p">},</span>
-            <span class="s2">&quot;shape&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;image_id&quot;</span><span class="p">,</span> <span class="s2">&quot;space&quot;</span><span class="p">,</span> <span class="s2">&quot;id&quot;</span><span class="p">},</span>
-        <span class="p">},</span>
-        <span class="n">init</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-    <span class="p">)</span></div>
+    <span class="c1"># Should not be modified after initialization</span>
+    <span class="n">required_dims</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">set</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;image_id&quot;</span><span class="p">,</span> <span class="s2">&quot;space&quot;</span><span class="p">,</span> <span class="s2">&quot;id&quot;</span><span class="p">}</span>
+    <span class="n">required_data_vars</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">set</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;position&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;image_id&quot;</span><span class="p">,</span> <span class="s2">&quot;space&quot;</span><span class="p">,</span> <span class="s2">&quot;id&quot;</span><span class="p">},</span>
+        <span class="s2">&quot;shape&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;image_id&quot;</span><span class="p">,</span> <span class="s2">&quot;space&quot;</span><span class="p">,</span> <span class="s2">&quot;id&quot;</span><span class="p">},</span>
+    <span class="p">}</span></div>
 
 
 
