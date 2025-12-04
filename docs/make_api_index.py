@@ -4,7 +4,7 @@ import os
 from pathlib import Path
 
 # Modules to exclude from the API index
-exclude_modules = ["ethology.io.annotations.json_schemas"]
+exclude_modules = ["ethology.validators.json_schemas"]
 
 # Set the current working directory to the directory of this script
 script_dir = Path(__file__).resolve().parent

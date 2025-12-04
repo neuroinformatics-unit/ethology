@@ -2,6 +2,7 @@
 
 import json
 from pathlib import Path
+from typing import ClassVar
 
 import pandas as pd
 import pandera.pandas as pa
@@ -29,9 +30,9 @@ class ValidVIA:
     ----------
     path : Path | str
         Path to the VIA JSON file, passed as an input.
-    schema : dict
+    schema : ClassVar[dict]
         The JSON schema is set to the default VIA schema.
-    required_keys : dict
+    required_keys : ClassVar[dict]
         The required keys for the VIA JSON file.
 
     Raises
@@ -49,21 +50,15 @@ class ValidVIA:
     """
 
     path: Path = field(converter=Path)
-    schema: dict = field(
-        default=_get_default_schema("VIA"),
-        init=False,
-    )
-    required_keys: dict = field(
-        default={
-            "main": ["_via_img_metadata", "_via_attributes"],
-            "images": ["filename"],
-            "regions": ["shape_attributes"],
-            "shape_attributes": ["x", "y", "width", "height"],
-        },
-        init=False,
-        # with init=False the attribute is always initialized
-        # with the default value
-    )
+
+    # class variables: should not be modified after initialization
+    schema: ClassVar[dict] = _get_default_schema("VIA")
+    required_keys: ClassVar[dict] = {
+        "main": ["_via_img_metadata", "_via_attributes"],
+        "images": ["filename"],
+        "regions": ["shape_attributes"],
+        "shape_attributes": ["x", "y", "width", "height"],
+    }
 
     # Note: the validators are applied in order
     @path.validator
@@ -121,9 +116,9 @@ class ValidCOCO:
     ----------
     path : Path | str
         Path to the COCO JSON file, passed as an input.
-    schema : dict
+    schema : ClassVar[dict]
         The JSON schema is set to the default COCO schema.
-    required_keys : dict
+    required_keys : ClassVar[dict]
         The required keys for the COCO JSON file.
 
     Raises
@@ -141,23 +136,15 @@ class ValidCOCO:
     """
 
     path: Path = field(converter=Path)
-    schema: dict = field(
-        default=_get_default_schema("COCO"),
-        init=False,
-        # with init=False the attribute is always initialized
-        # with the default value
-    )
 
-    # The keys of "required_keys" match the 1st level keys in a COCO JSON file
-    required_keys: dict = field(
-        default={
-            "main": ["images", "annotations", "categories"],
-            "images": ["id", "file_name", "width", "height"],
-            "annotations": ["id", "image_id", "bbox", "category_id"],
-            "categories": ["id", "name"],  # exclude "supercategory"
-        },
-        init=False,
-    )
+    # class variables: should not be modified after initialization
+    schema: ClassVar[dict] = _get_default_schema("COCO")
+    required_keys: ClassVar[dict] = {
+        "main": ["images", "annotations", "categories"],
+        "images": ["id", "file_name", "width", "height"],
+        "annotations": ["id", "image_id", "bbox", "category_id"],
+        "categories": ["id", "name"],  # exclude "supercategory"
+    }  # keys match the 1st level keys in a COCO JSON file
 
     # Note: the validators are applied in order
     @path.validator
@@ -241,10 +228,10 @@ class ValidBboxAnnotationsDataset(ValidDataset):
     ----------
     dataset : xarray.Dataset
         The xarray dataset to validate.
-    required_dims : set[str]
+    required_dims : ClassVar[set]
         The set of required dimension names: ``image_id``, ``space`` and
         ``id``.
-    required_data_vars : dict[str, set]
+    required_data_vars : ClassVar[dict[str, set]]
         A dictionary mapping data variable names to their required minimum
         dimensions:
 
@@ -267,17 +254,12 @@ class ValidBboxAnnotationsDataset(ValidDataset):
     """
 
     # Minimum requirements for a bbox dataset holding detections
-    required_dims: set = field(
-        default={"image_id", "space", "id"},
-        init=False,
-    )
-    required_data_vars: dict = field(
-        default={
-            "position": {"image_id", "space", "id"},
-            "shape": {"image_id", "space", "id"},
-        },
-        init=False,
-    )
+    # Should not be modified after initialization
+    required_dims: ClassVar[set] = {"image_id", "space", "id"}
+    required_data_vars: ClassVar[dict[str, set]] = {
+        "position": {"image_id", "space", "id"},
+        "shape": {"image_id", "space", "id"},
+    }
 
 
 class ValidBboxAnnotationsDataFrame(pa.DataFrameModel):

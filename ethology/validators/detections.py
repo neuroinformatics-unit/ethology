@@ -1,6 +1,8 @@
 """Validators for detection datasets."""
 
-from attrs import define, field
+from typing import ClassVar
+
+from attrs import define
 
 from ethology.validators.utils import ValidDataset
 
@@ -23,10 +25,10 @@ class ValidBboxDetectionsDataset(ValidDataset):
     ----------
     dataset : xarray.Dataset
         The xarray dataset to validate.
-    required_dims : set
+    required_dims : ClassVar[set]
         The set of required dimension names: ``image_id``, ``space`` and
         ``id``.
-    required_data_vars : dict[str, set]
+    required_data_vars : ClassVar[dict[str, set]]
         A dictionary mapping data variable names to their required minimum
         dimensions:
 
@@ -50,18 +52,13 @@ class ValidBboxDetectionsDataset(ValidDataset):
     """
 
     # Minimum requirements for a bbox dataset holding detections
-    required_dims: set = field(
-        default={"image_id", "space", "id"},
-        init=False,
-    )
-    required_data_vars: dict = field(
-        default={
-            "position": {"image_id", "space", "id"},
-            "shape": {"image_id", "space", "id"},
-            "confidence": {"image_id", "id"},
-        },
-        init=False,
-    )
+    # Should not be modified after initialization
+    required_dims: ClassVar[set] = {"image_id", "space", "id"}
+    required_data_vars: ClassVar[dict[str, set]] = {
+        "position": {"image_id", "space", "id"},
+        "shape": {"image_id", "space", "id"},
+        "confidence": {"image_id", "id"},
+    }
 
 
 @define
@@ -110,15 +107,9 @@ class ValidBboxDetectionsEnsembleDataset(ValidDataset):
     """
 
     # Minimum requirements for a bbox dataset holding detections
-    required_dims: set = field(
-        default={"image_id", "space", "id", "model"},
-        init=False,
-    )
-    required_data_vars: dict = field(
-        default={
-            "position": {"image_id", "space", "id", "model"},
-            "shape": {"image_id", "space", "id", "model"},
-            "confidence": {"image_id", "id", "model"},
-        },
-        init=False,
-    )
+    required_dims: ClassVar[set] = {"image_id", "space", "id", "model"}
+    required_data_vars: ClassVar[dict] = {
+        "position": {"image_id", "space", "id", "model"},
+        "shape": {"image_id", "space", "id", "model"},
+        "confidence": {"image_id", "id", "model"},
+    }
