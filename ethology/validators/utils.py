@@ -1,8 +1,9 @@
 """Utils for validating `ethology` objects."""
 
-from abc import ABC, abstractmethod
+from abc import ABC
 from collections.abc import Callable
 from functools import wraps
+from typing import ClassVar
 
 import xarray as xr
 from attrs import define, field
@@ -20,18 +21,18 @@ class ValidDataset(ABC):
     - has the correct dimensions for each data variable
 
     Subclasses must define ``required_dims`` and ``required_data_vars``
-    attributes.
+    class attributes.
 
     Attributes
     ----------
     dataset : xarray.Dataset
         The xarray dataset to validate.
-    required_dims : set[str]
-        A set of required dimension names. This attribute should be
+    required_dims : ClassVar[set[str]]
+        A set of required dimension names. This class attribute must be
         defined by any subclass inheriting from this class.
-    required_data_vars : dict[str, set]
+    required_data_vars : ClassVar[dict[str, set]]
         A dictionary mapping data variable names to their required dimensions.
-        This attribute should be defined by any subclass inheriting from
+        This class attribute must be defined by any subclass inheriting from
         this class.
 
     Raises
@@ -51,18 +52,23 @@ class ValidDataset(ABC):
 
     dataset: xr.Dataset = field()
 
-    # Subclasses should override these abstract properties
-    @property
-    @abstractmethod
-    def required_dims(self) -> set:
-        """Subclasses must provide a ``required_dims`` property."""
-        pass  # pragma: no cover
+    # class variables
+    required_dims: ClassVar[set]
+    required_data_vars: ClassVar[dict[str, set]]
 
-    @property
-    @abstractmethod
-    def required_data_vars(self) -> dict[str, set]:
-        """Subclasses must provide a ``required_data_vars`` property."""
-        pass  # pragma: no cover
+    def __init_subclass__(cls, **kwargs):
+        """Verify that subclasses define required class variables."""
+        super().__init_subclass__(**kwargs)
+
+        if not hasattr(cls, "required_dims"):
+            raise TypeError(
+                f"{cls.__name__} must define 'required_dims' class variable"
+            )
+        if not hasattr(cls, "required_data_vars"):
+            raise TypeError(
+                f"{cls.__name__} must define 'required_data_vars' "
+                "class variable"
+            )
 
     # Validators
     @dataset.validator
