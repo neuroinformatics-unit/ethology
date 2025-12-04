@@ -2,11 +2,14 @@
 
 from collections.abc import Callable
 from functools import partial
-from typing import Literal, TypedDict, Unpack
+from typing import Literal, TypeAlias, TypedDict, Unpack
 
 import ensemble_boxes
 import numpy as np
+import pandas as pd
 import xarray as xr
+from joblib import Parallel, delayed
+from tqdm import tqdm
 
 from ethology.validators.detections import (
     ValidBboxDetectionsDataset,
@@ -14,6 +17,8 @@ from ethology.validators.detections import (
 )
 from ethology.validators.utils import _check_input, _check_output
 
+# ------------------- Supported fusion methods ------------------
+# from ensemble_boxes
 VALID_FUSION_METHODS = {
     "weighted_boxes_fusion": ensemble_boxes.weighted_boxes_fusion,
     "nms": ensemble_boxes.nms,
@@ -21,13 +26,25 @@ VALID_FUSION_METHODS = {
     "non_maxium_weighted": ensemble_boxes.non_maximum_weighted,
 }
 
-fusion_method_type = Literal[
-    "weighted_boxes_fusion", "nms", "soft_nms", "non_maxium_weighted"
+
+#  ------------------ Custom types  ----------------------
+TypeFusionMethod = Literal[
+    "weighted_boxes_fusion",
+    "nms",
+    "soft_nms",
+    "non_maxium_weighted",
+]
+
+TupleFourDataArrays: TypeAlias = tuple[
+    xr.DataArray,
+    xr.DataArray,
+    xr.DataArray,
+    xr.DataArray,
 ]
 
 
-class _TypeFusionKwargs(TypedDict, total=False):
-    """Type hints for fusion method kwargs.
+class _TypeFusionMethodKwargs(TypedDict, total=False):
+    """Type hints for fusion method keyword arguments.
 
     Parameters for methods as described in the ensemble_boxes documentation.
     See https://github.com/ZFTurbo/Weighted-Boxes-Fusion
@@ -39,20 +56,19 @@ class _TypeFusionKwargs(TypedDict, total=False):
         Weights for each model.
     iou_thr: float
         IoU threshold for detections to be considered a true positive
-        IoU threshold for detections to be considered a true positive
         during fusion.
     skip_box_thr: float
-        Exclude from fusion boxes with confidence below this value.
+        Exclude boxes with confidence below this value from fusion.
     sigma: float
-        Sigma for soft NMS.
+        Sigma for soft non-maximum supression.
     thresh: float
-        Threshold for boxes to keep after soft NMS.
+        Threshold for boxes to keep after soft non-maximum supression.
     conf_type: Literal["avg", "box_and_model_avg", "absent_model_aware_avg"]
         Method to compute the confidence score of the fused detections.
 
         - "avg": Average confidence score of the fused detections (default).
-        - 'box_and_model_avg': box and model wise hybrid weighted average.
-        - 'absent_model_aware_avg': weighted average that takes into account
+        - "box_and_model_avg": box and model wise hybrid weighted average.
+        - "absent_model_aware_avg": weighted average that takes into account
           the absent model.
     allows_overflow: bool
         Whether to allow the confidence score of the fused detections to
@@ -69,13 +85,17 @@ class _TypeFusionKwargs(TypedDict, total=False):
     allows_overflow: bool
 
 
+# ----------------------------------
+
+
 @_check_input(ValidBboxDetectionsEnsembleDataset)
 @_check_output(ValidBboxDetectionsDataset)
 def fuse_detections(
     ensemble_detections_ds: xr.Dataset,
-    fusion_method: fusion_method_type,
+    fusion_method: TypeFusionMethod,
     fusion_method_kwargs: dict | None = None,
     max_n_detections: int | None = None,
+    n_workers: int | None = -1,  # number of workers for joblib.Parallel
 ) -> xr.Dataset:
     """Fuse ensemble detections across models using WBF.
 
@@ -109,46 +129,26 @@ def fuse_detections(
         _fuse_single_image_detections, fusion_function
     )
 
-    # Run fusion across image_id using apply_ufunc
-    centroid_fused_da, shape_fused_da, confidence_fused_da, label_fused_da = (
-        xr.apply_ufunc(
-            _fuse_single_image_detections_partial,
-            ensemble_detections_ds.position,  # .data array is passed
-            ensemble_detections_ds.shape,
-            ensemble_detections_ds.confidence,
-            ensemble_detections_ds.label,
-            kwargs={
-                "image_width_height": image_width_height,
-                "max_n_detections": max_n_detections,
-                **(fusion_method_kwargs if fusion_method_kwargs else {}),
-            },
-            input_core_dims=[  # do not broadcast across these
-                ["space", "id", "model"],  # centroid
-                ["space", "id", "model"],  # shape
-                ["id", "model"],  # confidence
-                ["id", "model"],  # label
-            ],
-            output_core_dims=[  # do not broadcast across these
-                ["space", "id"],  # centroid
-                ["space", "id"],  # shape
-                ["id"],  # confidence
-                ["id"],  # label
-            ],
-            vectorize=True,
-            # TODO: can I avoid vectorize?
-            # loop over non-core dims (i.e. image_id);
-            # assumes function only takes arrays over core dims as input
-            exclude_dims={"id"},
-            # to allow dimensions that change size between input and output
+    # Run fusion across image_id
+    # if n_workers is None:
+    #     n_workers = -1
+
+    results_per_img_id = Parallel(n_jobs=n_workers)(
+        delayed(_fuse_single_image_detections_partial)(
+            ensemble_detections_ds.position.sel(image_id=img_id).values,
+            ensemble_detections_ds.shape.sel(image_id=img_id).values,
+            ensemble_detections_ds.confidence.sel(image_id=img_id).values,
+            ensemble_detections_ds.label.sel(image_id=img_id).values,
+            image_width_height,
+            max_n_detections,
+            **fusion_method_kwargs,
         )
+        for img_id in tqdm(ensemble_detections_ds.image_id)
     )
 
     # Postprocess data arrays
     fused_data_arrays = _postprocess_multi_image_fused_arrays(
-        position=centroid_fused_da,
-        shape=shape_fused_da,
-        confidence=confidence_fused_da,
-        label=label_fused_da,
+        results_per_img_id, ensemble_detections_ds.image_id
     )
 
     # Return a dataset
@@ -209,15 +209,16 @@ def _preprocess_single_image_detections(
     label: xr.DataArray,
     image_width_height: np.ndarray,
 ) -> tuple[list[np.ndarray], list[np.ndarray], list[np.ndarray]]:
-    """Prepare ensemble detections on a single image for fusion."""
-    # Prepare boxes array --> position, shape arrays to x1y1x2y normalised
+    """Prepare detections of an ensemble on a single image for fusion."""
+    # Prepare boxes array
+    # transform position and shape arrays to x1y1x2y normalised
     bboxes_x1y1 = (position - shape / 2) / image_width_height[:, None, None]
     bboxes_x2y2 = (position + shape / 2) / image_width_height[:, None, None]
     bboxes_x1y1_x2y2_normalised = np.concat([bboxes_x1y1, bboxes_x2y2])
-    # 4, n_annot, n_models
+    # shape: 4, max_n_annotations_per_frame, n_models
 
     # Get list of bboxes per model
-    # arrays need to be tall for WBF
+    # arrays need to be tall for fusion methods
     n_models = bboxes_x1y1_x2y2_normalised.shape[-1]
     list_bboxes_per_model = [
         arr.squeeze()
@@ -308,7 +309,7 @@ def _postprocess_single_image_detections(
 
     # Format output as xarray dataarrays
     centroid_da, shape_da, confidence_da, label_da = (
-        _single_image_detections_as_dataarrays(
+        _parse_single_image_detections_as_dataarrays(
             ensemble_data[:, 0:4],
             ensemble_data[:, 4],
             ensemble_data[:, 5],
@@ -320,15 +321,15 @@ def _postprocess_single_image_detections(
 
 def _fuse_single_image_detections(
     fusion_function: Callable,
-    position,
-    shape,
+    position: np.ndarray,
+    shape: np.ndarray,
     confidence: np.ndarray,
     label: np.ndarray,
     image_width_height: np.ndarray,
     max_n_detections: int,
-    **fusion_kwargs: Unpack[_TypeFusionKwargs],  #  method-only kwargs
-) -> tuple[xr.DataArray, xr.DataArray, xr.DataArray, xr.DataArray]:
-    """Fuse detections across models for a single image using WBF."""
+    **fusion_kwargs: Unpack[_TypeFusionMethodKwargs],  #  method-only kwargs
+) -> TupleFourDataArrays:
+    """Fuse detections across models for a single image using selected method."""
     # Prepare single image arrays for fusion
     list_bboxes_per_model, list_confidence_per_model, list_label_per_model = (
         _preprocess_single_image_detections(
@@ -336,8 +337,7 @@ def _fuse_single_image_detections(
         )
     )
 
-    # ------------------------------------
-    # Run WBF on one image
+    # Run fusion method on one image
     ensemble_x1y1_x2y2_norm, ensemble_scores, ensemble_labels = (
         fusion_function(
             list_bboxes_per_model,
@@ -346,8 +346,6 @@ def _fuse_single_image_detections(
             **fusion_kwargs,
         )
     )
-
-    # ------------------------------------
 
     # Format output as xarray dataarrays
     centroid_da, shape_da, confidence_da, label_da = (
@@ -363,13 +361,13 @@ def _fuse_single_image_detections(
     return centroid_da, shape_da, confidence_da, label_da
 
 
-def _single_image_detections_as_dataarrays(
+def _parse_single_image_detections_as_dataarrays(
     x1y1_x2y2_array: np.ndarray,
     scores_array: np.ndarray,
     labels_array: np.ndarray,
     id_array: np.ndarray | None = None,
-) -> tuple[xr.DataArray, xr.DataArray, xr.DataArray, xr.DataArray]:
-    """Format single image fused detections as data arrays."""
+) -> TupleFourDataArrays:
+    """Format array of single image fused results as data arrays."""
     if id_array is None:
         n_detections = x1y1_x2y2_array.shape[0]
         id_array = np.arange(n_detections)
@@ -396,30 +394,53 @@ def _single_image_detections_as_dataarrays(
     )
 
 
+@_check_output(ValidBboxDetectionsDataset)
 def _postprocess_multi_image_fused_arrays(
-    position: xr.DataArray,
-    shape: xr.DataArray,
-    confidence: xr.DataArray,
-    label: xr.DataArray,
-) -> dict:
-    """Postprocess fused data arrays on multiple images after fusion."""
-    data_arrays = [position, shape, confidence, label]
+    results_per_img_id: list[TupleFourDataArrays],
+    list_img_id: list,
+) -> xr.Dataset:
+    """Postprocess fused data arrays on multiple images after fusion.
 
-    # Remove extra padding across annotations
-    position_da, shape_da, confidence_da, label_da = [
-        da.dropna(dim="id", how="all") for da in data_arrays
-    ]
+    Fix padding and assign id coordinates.
+    """
+    # Parse results from joblib
+    # (output from joblib is a list of n = n_images, each element
+    # containing a tuple of data arrays)
+    list_da_dict = {}
+    (
+        list_da_dict["position"],
+        list_da_dict["shape"],
+        list_da_dict["confidence"],
+        list_da_dict["label"],
+    ) = list(zip(*results_per_img_id))
+
+    # Concatenate lists of dataarrays along image_id dimension
+    fused_da_dict = {}
+    for da_str, list_da in list_da_dict.items():
+        fused_da_dict[da_str] = xr.concat(
+            list_da,
+            pd.Index(list_img_id, name="image_id"),
+        )
+
+    # Remove extra padding in id dimension
+    fixed_padding_da_dict = {}
+    for da_str, da in fused_da_dict.items():
+        fixed_padding_da_dict[da_str] = da.dropna(dim="id", how="all")
 
     # Pad labels with -1 rather than nan
-    label_da = label_da.fillna(-1).astype(int)
+    fixed_padding_da_dict["label"] = (
+        fixed_padding_da_dict["label"].fillna(-1).astype(int)
+    )
 
-    # Assign id coordinates to data arrays
-    # (these are lost after apply_ufunc because exclude_dims is used)
-    n_max_detections = position_da.sizes["id"]
-    id_coords = np.arange(n_max_detections)
-    return {
-        "position": position_da.assign_coords(id=id_coords),
-        "shape": shape_da.assign_coords(id=id_coords),
-        "confidence": confidence_da.assign_coords(id=id_coords),
-        "label": label_da.assign_coords(id=id_coords),
-    }
+    # Format as dataset
+    return xr.Dataset(data_vars=fixed_padding_da_dict)
+    # # Assign id coordinates to data arrays
+    # # (these are lost after apply_ufunc because exclude_dims is used)
+    # n_max_detections = fixed_padding_da_dict["position"].sizes["id"]
+    # id_coords = np.arange(n_max_detections)
+
+    # fixed_id_coord_da_dict = {}
+    # for da_str, da in fixed_padding_da_dict.items():
+    #     fixed_id_coord_da_dict[da_str] = da.assign_coords(id=id_coords)
+
+    # return fixed_padding_da_dict
