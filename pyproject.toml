@@ -19,7 +19,7 @@ classifiers = [
   "License :: OSI Approved :: BSD License",
 ]
 dependencies = [
-  "movement",
+  "movement>=0.10.0",  # save_bboxes.to_via_tracks_file added in 0.10.0
   "pandera[pandas]",
   "pycocotools",
   "scikit-learn",

@@ -26,6 +26,8 @@ except LookupError:
     # with a dummy version
     release = "0.0.0"
 
+doc_version = "dev" if "dev" in release else f"v{release}"
+
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
@@ -117,6 +119,11 @@ html_theme_options = {
             "type": "fontawesome",
         },
     ],
+    "switcher": {
+        "json_url": "https://ethology.neuroinformatics.dev/latest/_static/switcher.json",
+        "version_match": doc_version,
+    },
+    "navbar_end": ["version-switcher", "theme-switcher", "navbar-icon-links"],
     "logo": {
         "text": f"{project} v{release}",
     },
@@ -151,7 +158,9 @@ linkcheck_anchors_ignore_for_url = [
 ]
 # A list of regular expressions that match URIs that should not be checked
 linkcheck_ignore = [
-    "https://opensource.org/license/bsd-3-clause/",  # to avoid odd 403 error
+    # to avoid odd 403 client errors
+    "https://opensource.org/license/bsd-3-clause/",
+    "https://figshare.com/ndownloader/files/53674187",
 ]
 
 myst_url_schemes = {
