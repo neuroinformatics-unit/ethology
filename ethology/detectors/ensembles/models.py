@@ -9,6 +9,7 @@ import torch.nn as nn
 import xarray as xr
 import yaml
 from lightning import LightningModule
+from torch.nn.parallel import parallel_apply
 from torchvision.models import detection, get_model, list_models
 
 from ethology.detectors.ensembles.utils import (
@@ -112,9 +113,18 @@ class EnsembleDetector(LightningModule):
         """Predict step for a single batch."""
         # Run all models in ensemble in GPU
         images_batch, _annotations_batch = batch
+        # # -----------------------------------
         raw_prediction_dicts_per_model = [
             model(images_batch) for model in self.list_models
         ]  # [num_models][batch_size]
+
+        # Run all models in parallel on this GPU
+        # inputs = [(images_batch,)] * len(self.list_models[:3])
+        # raw_prediction_dicts_per_model = parallel_apply(
+        #     modules=self.list_models, #-----
+        #     inputs=[(images_batch,)] * len(self.list_models),
+        # )
+        # # -----------------------------------
 
         # Transpose to [batch_size][num_models] for easier downstream
         # processing
@@ -127,16 +137,23 @@ class EnsembleDetector(LightningModule):
 
         return raw_prediction_dicts_per_sample
 
+    @staticmethod
     @_check_output(ValidBboxDetectionsEnsembleDataset)
-    def format_predictions(self, attrs: dict | None = None) -> xr.Dataset:
-        """Format as ethology detections dataset with model axis."""
+    def format_predictions(
+        predictions: list[dict], attrs: dict | None = None
+    ) -> xr.Dataset:
+        """Format as ethology detections dataset with model axis.
+
+        predictions: raw_predictions_per_model
+        """
         # Get results from trainer
-        raw_predictions_per_model = self.trainer.predict_loop.predictions
+        # raw_predictions_per_model = self.trainer.predict_loop.predictions
 
         # Flatten batches
         raw_prediction_dicts_per_sample = list(
-            chain.from_iterable(raw_predictions_per_model)
+            chain.from_iterable(predictions)
         )  # [sample][model]
+        n_models = len(raw_prediction_dicts_per_sample[0])
 
         # Parse output from dicts
         output_per_sample: dict[str, list] = {
@@ -146,7 +163,7 @@ class EnsembleDetector(LightningModule):
         }
         for ky in output_per_sample:
             output_per_sample[ky] = [
-                [sample[m][ky] for m in range(len(self.list_models))]
+                [sample[m][ky] for m in range(n_models)]
                 for sample in raw_prediction_dicts_per_sample
             ]  # [sample][model]
 
@@ -204,7 +221,7 @@ class EnsembleDetector(LightningModule):
                 "image_id": np.arange(n_images),
                 "space": ["x", "y"],
                 "id": np.arange(max_n_detections),
-                "model": np.arange(len(self.list_models)),
+                "model": np.arange(n_models),
             },
             attrs=attrs if attrs else {},
         )
