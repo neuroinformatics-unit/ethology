@@ -16,6 +16,10 @@ from ethology.validators.detections import (
     ValidBboxDetectionsEnsembleDataset,
 )
 from ethology.validators.utils import _check_input, _check_output
+from ethology.detectors.ensembles.utils import (
+    centroid_shape_to_corners,
+    corners_to_centroid_shape,
+)
 
 # ------------------- Supported fusion methods ------------------
 # from ensemble_boxes
@@ -69,7 +73,7 @@ def fuse_detections(
     fusion_method: TypeFusionMethod,
     fusion_method_kwargs: dict | None = None,
     max_n_detections: int | None = None,
-    n_workers: int | None = -1,  
+    n_workers: int | None = -1,
 ) -> xr.Dataset:
     """Fuse ensemble detections across models using the selected method.
 
@@ -126,6 +130,7 @@ def fuse_detections(
 
 # ------- Multi image fusion ------------------
 
+
 @_check_output(ValidBboxDetectionsDataset)
 def _postprocess_multi_image_fused_arrays(
     results_per_img_id: list[TupleFourDataArrays],
@@ -176,7 +181,7 @@ def _validate_image_shape(image_shape) -> np.ndarray:
 @_check_input(ValidBboxDetectionsEnsembleDataset)
 def _estimate_max_n_detections(ensemble_detections_ds: xr.Dataset) -> int:
     """Get upper bound for maximum number of boxes per image after fusion.
-    
+
     We assume no detections are fused and all images have as many detections as the maximum
     number of non-nan detections per image.
     """
@@ -246,8 +251,9 @@ def _preprocess_single_image_detections(
     """Prepare detections of an ensemble on a single image for fusion."""
     # Prepare boxes array
     # transform position and shape arrays to x1y1x2y normalised
-    bboxes_x1y1 = (position - shape / 2) / image_width_height[:, None, None]
-    bboxes_x2y2 = (position + shape / 2) / image_width_height[:, None, None]
+    x1y1, x2y2 = centroid_shape_to_corners(position, shape)
+    bboxes_x1y1 = x1y1 / image_width_height[:, None, None]
+    bboxes_x2y2 = x2y2 / image_width_height[:, None, None]
     bboxes_x1y1_x2y2_normalised = np.transpose(
         np.concat(
             [bboxes_x1y1, bboxes_x2y2]
@@ -259,7 +265,7 @@ def _preprocess_single_image_detections(
     # Get list of bboxes per model
     # arrays need to be tall for fusion methods
     n_models = bboxes_x1y1_x2y2_normalised.shape[-1]
-    list_bboxes_per_model = [
+    list_x1y1_x2y2_norm_per_model = [
         arr.squeeze()
         for arr in np.split(bboxes_x1y1_x2y2_normalised, n_models, axis=-1)
     ]
@@ -273,12 +279,15 @@ def _preprocess_single_image_detections(
 
     # Remove rows with nan coordinates and return lists of arrays
     list_non_nan_bboxes_per_model = [
-        sum(~np.any(np.isnan(arr), axis=1)) for arr in list_bboxes_per_model
-    ]  
+        sum(~np.any(np.isnan(arr), axis=1))
+        for arr in list_x1y1_x2y2_norm_per_model
+    ]
     return (
-        _chop_end_of_array(list_arrays_per_model, list_non_nan_bboxes_per_model)
+        _chop_end_of_array(
+            list_arrays_per_model, list_non_nan_bboxes_per_model
+        )
         for list_arrays_per_model in [
-            list_bboxes_per_model,
+            list_x1y1_x2y2_norm_per_model,
             list_confidence_per_model,
             list_label_per_model,
         ]
@@ -361,8 +370,10 @@ def _parse_single_image_detections_as_dataarrays(
         n_detections = x1y1_x2y2_array.shape[0]
         id_array = np.arange(n_detections)
 
-    # Extract bbox corner coordinates
-    x1y1, x2y2 = x1y1_x2y2_array[:, 0:2], x1y1_x2y2_array[:, 2:4]
+    # Extract bbox centre and shape
+    centroid, shape = corners_to_centroid_shape(
+        x1y1_x2y2_array[:, 0:2], x1y1_x2y2_array[:, 2:4]
+    )
 
     # Shared coordinates
     id_coords = {"id": id_array}
@@ -371,13 +382,11 @@ def _parse_single_image_detections_as_dataarrays(
     # Build all DataArrays
     return (
         xr.DataArray(
-            (0.5 * (x1y1 + x2y2)).T,
+            centroid.T,
             dims=["space", "id"],
             coords=spatial_id_coords,
         ),
-        xr.DataArray(
-            (x2y2 - x1y1).T, dims=["space", "id"], coords=spatial_id_coords
-        ),
+        xr.DataArray(shape.T, dims=["space", "id"], coords=spatial_id_coords),
         xr.DataArray(scores_array, dims=["id"], coords=id_coords),
         xr.DataArray(labels_array, dims=["id"], coords=id_coords),
     )

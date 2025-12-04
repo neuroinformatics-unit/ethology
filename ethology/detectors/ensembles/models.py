@@ -11,7 +11,10 @@ import yaml
 from lightning import LightningModule
 from torchvision.models import detection, get_model, list_models
 
-from ethology.detectors.ensembles.utils import pad_to_max_first_dimension
+from ethology.detectors.ensembles.utils import (
+    corners_to_centroid_shape,
+    pad_to_max_first_dimension,
+)
 from ethology.validators.detections import ValidBboxDetectionsEnsembleDataset
 from ethology.validators.utils import _check_output
 
@@ -177,8 +180,11 @@ class EnsembleDetector(LightningModule):
         # arrays of shape (image_id, 4/1, n_max_detections, n_models)
 
         # Compute centroid and shape arrays
-        centroid_array = 0.5 * (bboxes_array[:, 0:2] + bboxes_array[:, 2:4])
-        shape_array = bboxes_array[:, 2:4] - bboxes_array[:, 0:2]
+        # centroid_array = 0.5 * (bboxes_array[:, 0:2] + bboxes_array[:, 2:4])
+        # shape_array = bboxes_array[:, 2:4] - bboxes_array[:, 0:2]
+        centroid_array, shape_array = corners_to_centroid_shape(
+            bboxes_array[:, 0:2], bboxes_array[:, 2:4]
+        )
 
         # Return as ethology detections dataset
         max_n_detections = bboxes_array.shape[-2]
