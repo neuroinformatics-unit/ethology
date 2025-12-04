@@ -4,6 +4,7 @@ import numpy as np
 import torch
 import torchvision.ops as ops
 import xarray as xr
+from ethology.detectors.ensembles.utils import _centroid_shape_to_corners
 from scipy.optimize import linear_sum_assignment
 
 
@@ -240,6 +241,9 @@ def _add_bboxes_min_max_corners(ds):
         out_fmt="xyxy",
     )
     """
-    ds["xy_min"] = ds.position - 0.5 * ds.shape
-    ds["xy_max"] = ds.position + 0.5 * ds.shape
+    # ds["xy_min"] = ds.position - 0.5 * ds.shape
+    # ds["xy_max"] = ds.position + 0.5 * ds.shape
+    ds["xy_min"], ds["xy_max"] = _centroid_shape_to_corners(
+        ds.position, ds.shape
+    )
     return ds
