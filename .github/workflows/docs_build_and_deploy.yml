@@ -13,7 +13,7 @@ on:
     branches:
       - main
     tags:
-      - '*'
+      - 'v*'
   pull_request:
   merge_group:
   workflow_dispatch:
@@ -35,20 +35,28 @@ jobs:
     name: Build Sphinx Docs
     runs-on: ubuntu-latest
     steps:
-      - uses: neuroinformatics-unit/actions/build_sphinx_docs@main
+      - uses: neuroinformatics-unit/actions/build_sphinx_docs@v2
         with:
           python-version: 3.13 # default for the action is 3.x
           use-make: true
           fetch-tags: true
           use-artifactci: lazy
 
+  check_tag:
+    name: Check if trigger is tag and if it points to commit on main
+    runs-on: ubuntu-latest
+    outputs:
+      tag_on_main: ${{ steps.check.outputs.tag_on_main }}
+    steps:
+      - uses: neuroinformatics-unit/actions/check_tag_on_main@v2
+        id: check
 
   deploy_sphinx_docs:
     name: Deploy Sphinx Docs
-    needs: build_sphinx_docs
+    needs: [build_sphinx_docs, check_tag]
     permissions:
       contents: write
-    if: (github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref_type == 'tag')) || github.event_name == 'workflow_dispatch'
+    if: (github.event_name == 'push' && (github.ref == 'refs/heads/main' || needs.check_tag.outputs.tag_on_main == 'true')) || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
       - uses: neuroinformatics-unit/actions/deploy_sphinx_docs@v2
