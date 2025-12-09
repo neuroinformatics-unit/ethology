@@ -35,7 +35,7 @@ jobs:
     name: Build Sphinx Docs
     runs-on: ubuntu-latest
     steps:
-      - uses: neuroinformatics-unit/actions/build_sphinx_docs@main
+      - uses: neuroinformatics-unit/actions/build_sphinx_docs@v2
         with:
           python-version: 3.13 # default for the action is 3.x
           use-make: true
@@ -48,7 +48,7 @@ jobs:
     outputs:
       tag_on_main: ${{ steps.check.outputs.tag_on_main }}
     steps:
-      - uses: neuroinformatics-unit/actions/check_tag_on_main@tags-filter
+      - uses: neuroinformatics-unit/actions/check_tag_on_main@v2
         id: check
 
   deploy_sphinx_docs:

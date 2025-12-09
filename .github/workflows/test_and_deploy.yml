@@ -54,7 +54,7 @@ jobs:
       tag_on_main: ${{ steps.check.outputs.tag_on_main }}
     runs-on: ubuntu-latest
     steps:
-      - uses: neuroinformatics-unit/actions/check_tag_on_main@tags-filter
+      - uses: neuroinformatics-unit/actions/check_tag_on_main@v2
         id: check
 
   build_sdist_wheels:
