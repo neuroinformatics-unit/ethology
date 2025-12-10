@@ -1,0 +1,101 @@
+# %%
+from pathlib import Path
+
+import torch
+import torchvision.transforms.v2 as transforms
+from lightning import Trainer
+from PIL import Image
+from torch.utils.data import DataLoader, Dataset
+
+from ethology.detectors.models import SingleDetector
+
+
+# %%
+# Helpers
+class SimpleImageDataset(Dataset):
+    """A simple dataset for images."""
+
+    def __init__(self, root_dir, file_pattern, transform=None):
+        self.root_dir = root_dir
+        self.transform = transform
+        self.image_files = sorted(self.root_dir.glob(file_pattern))
+
+    def __len__(self):
+        return len(self.image_files)
+
+    def __getitem__(self, idx):
+        img_path = Path(self.root_dir) / self.image_files[idx]
+        image = Image.open(img_path).convert("RGB")
+        if self.transform:
+            image = self.transform(image)
+        return image, {}  # return a dummy annotations dict
+
+
+# %%
+# Input data
+images_dir = Path(
+    "/home/sminano/swc/project_ethology/07.09.2023-frames/Sep2023_day4_reencoded"
+)
+
+
+# %%
+# Define config
+config = {
+    "model_kwargs": {
+        "num_classes": 2,
+        "weights": None,
+        "weights_backbone": None,
+    },
+    "checkpoint": "/home/sminano/swc/project_crabs/ml-runs/617393114420881798/f348d9d196934073bece1b877cbc4d38/checkpoints/last.ckpt",
+}
+
+# %%
+# Instantiate detector
+
+model = SingleDetector(config)
+
+# %%
+# Define dataset
+
+inference_transforms = transforms.Compose(
+    [
+        transforms.ToImage(),
+        transforms.ToDtype(torch.float32, scale=True),
+    ]
+)
+
+dataset = SimpleImageDataset(
+    images_dir,
+    "*.png",
+    transform=inference_transforms,
+)
+
+# dataloader
+dataloader = DataLoader(
+    dataset,
+    batch_size=12,  # 12,
+    shuffle=False,
+    num_workers=8,  # 4
+    # collate_fn=collate_fn_varying_n_bboxes,
+    # persistent_workers=True,
+    # pin_memory=True,  # <-- Faster CPU->GPU transfer
+    # because we guarantee a physical address for the data
+    # in memory, so we can use DMA that directly takes it to
+    # the GPU
+    # prefetch_factor=4,  # <-- Prefetch more batches
+    # multiprocessing_context="fork"
+    # if ref_config["num_workers"] > 0 and torch.backends.mps.is_available()
+    # else None,  # see https://github.com/pytorch/pytorch/issues/87688
+)
+# %%
+# Run inference on dataset
+# (format as detections dataset)
+trainer = Trainer(
+    accelerator="gpu",
+    devices=1,
+    logger=False,
+    precision="16-mixed",  # --- results change
+    # strategy = 'ddp' ?
+)
+predictions = trainer.predict(model, dataloader)
+# %%
