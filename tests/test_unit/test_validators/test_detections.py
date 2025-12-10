@@ -4,7 +4,10 @@ import numpy as np
 import pytest
 import xarray as xr
 
-from ethology.validators.detections import ValidBboxDetectionsDataset
+from ethology.validators.detections import (
+    ValidBboxDetectionsDataset,
+    ValidBboxDetectionsEnsembleDataset,
+)
 
 
 @pytest.fixture
@@ -39,6 +42,28 @@ def valid_bbox_detections_dataset():
 
 
 @pytest.fixture
+def valid_bbox_detections_ensemble_dataset(valid_bbox_detections_dataset):
+    """Create a valid bbox detections ensemble_dataset for validation."""
+    # Add model dimension
+    ds = valid_bbox_detections_dataset.expand_dims(
+        model=["model_a", "model_b"]
+    )
+
+    return ds
+
+
+@pytest.fixture
+def valid_bbox_detections_ensemble_dataset_extra_vars_and_dims(
+    valid_bbox_detections_ensemble_dataset: xr.Dataset,
+) -> xr.Dataset:
+    ds = valid_bbox_detections_ensemble_dataset.copy(deep=True)
+    ds.coords["extra_dim"] = [10, 20, 30]
+    ds["extra_var_1"] = (["image_id"], np.random.rand(len(ds.image_id)))
+    ds["extra_var_2"] = (["id"], np.random.rand(len(ds.id)))
+    return ds
+
+
+@pytest.fixture
 def valid_bbox_detections_dataset_extra_vars_and_dims(
     valid_bbox_detections_dataset: xr.Dataset,
 ) -> xr.Dataset:
@@ -49,44 +74,71 @@ def valid_bbox_detections_dataset_extra_vars_and_dims(
     return ds
 
 
+# Define validator configurations
+VALIDATOR_CONFIGS: dict = {
+    "detections_ds": {
+        "validator_class": ValidBboxDetectionsDataset,
+        "valid_fixture": "valid_bbox_detections_dataset",
+        "valid_fixture_extra": (
+            "valid_bbox_detections_dataset_extra_vars_and_dims"
+        ),
+        "required_dims": {"image_id", "space", "id"},
+        "required_data_vars": {
+            "position": {"image_id", "space", "id"},
+            "shape": {"image_id", "space", "id"},
+            "confidence": {"image_id", "id"},
+        },
+    },
+    "ensemble_ds": {
+        "validator_class": ValidBboxDetectionsEnsembleDataset,
+        "valid_fixture": "valid_bbox_detections_ensemble_dataset",
+        "valid_fixture_extra": (
+            "valid_bbox_detections_ensemble_dataset_extra_vars_and_dims"
+        ),
+        "required_dims": {"image_id", "space", "id", "model"},
+        "required_data_vars": {
+            "position": {"image_id", "space", "id", "model"},
+            "shape": {"image_id", "space", "id", "model"},
+            "confidence": {"image_id", "id", "model"},
+        },
+    },
+}
+
+
+@pytest.mark.parametrize("validator_type", ["detections_ds", "ensemble_ds"])
+@pytest.mark.parametrize(
+    "valid_fixture_key",
+    [
+        "valid_fixture",
+        "valid_fixture_extra",
+    ],
+)
+def test_validator_bbox_detections_dataset_valid(
+    validator_type: str,
+    valid_fixture_key: str,
+    request: pytest.FixtureRequest,
+):
+    """Test bbox detections dataset validation with valid datasets."""
+    config = VALIDATOR_CONFIGS[validator_type]
+    fixture_name = config[valid_fixture_key]
+    dataset = request.getfixturevalue(fixture_name)
+
+    validator_class = config["validator_class"]
+    with does_not_raise():
+        validator = validator_class(dataset=dataset)
+
+    assert validator.dataset is dataset
+    assert validator.required_dims == config["required_dims"]
+    assert validator.required_data_vars == config["required_data_vars"]
+
+
+@pytest.mark.parametrize(
+    "validator",
+    [ValidBboxDetectionsDataset, ValidBboxDetectionsEnsembleDataset],
+)
 @pytest.mark.parametrize(
     "sample_dataset, expected_exception, expected_error_message",
     [
-        (
-            "valid_bbox_detections_dataset",
-            does_not_raise(),
-            "",
-        ),
-        (
-            "valid_bbox_detections_dataset_extra_vars_and_dims",
-            does_not_raise(),
-            "",
-        ),
-        (
-            xr.Dataset(
-                coords={
-                    "image_id": np.arange(3),
-                    "space": np.arange(2),
-                    "id": np.arange(2),
-                },
-                data_vars={
-                    "position": (
-                        ["image_id", "space", "id"],
-                        np.zeros((3, 2, 2)),
-                    ),
-                    "shape": (
-                        ["image_id", "space", "id", "foo"],
-                        np.zeros((3, 2, 2, 1)),
-                    ),
-                    "confidence": (
-                        ["image_id", "id"],
-                        np.zeros((3, 2)),
-                    ),
-                },
-            ),
-            does_not_raise(),
-            "",
-        ),
         (
             {"position": [1, 2, 3], "shape": [4, 5, 6]},
             pytest.raises(TypeError),
@@ -130,13 +182,56 @@ def valid_bbox_detections_dataset_extra_vars_and_dims(
             pytest.raises(ValueError),
             "Missing required data variables: ['confidence', 'shape']",
         ),
+    ],
+    ids=[
+        "invalid_type",
+        "invalid_missing_data_var",
+        "invalid_missing_multiple_data_vars",
+    ],
+)
+def test_validator_bbox_detections_dataset_invalid(
+    validator: type[ValidBboxDetectionsDataset]
+    | type[ValidBboxDetectionsEnsembleDataset],
+    sample_dataset: xr.Dataset,
+    expected_exception: pytest.raises,
+    expected_error_message: str,
+):
+    """Test bbox annotations dataset validation in various input scenarios."""
+    # Run validation and check exception
+    with expected_exception as excinfo:
+        _validator = validator(dataset=sample_dataset)
+    if excinfo:
+        error_msg = str(excinfo.value)
+        assert error_msg in expected_error_message
+
+
+@pytest.mark.parametrize(
+    "validator",
+    [ValidBboxDetectionsDataset, ValidBboxDetectionsEnsembleDataset],
+)
+@pytest.mark.parametrize(
+    "sample_dataset, expected_exception, expected_error_message",
+    [
         (
             xr.Dataset(
-                coords={"image_id": np.arange(3), "id": np.arange(2)},
+                coords={
+                    "image_id": np.arange(3),
+                    "id": np.arange(2),
+                    "model": np.arange(2),
+                },
                 data_vars={
-                    "position": (["image_id", "id"], np.zeros((3, 2))),
-                    "shape": (["image_id", "id"], np.zeros((3, 2))),
-                    "confidence": (["image_id", "id"], np.zeros((3, 2))),
+                    "position": (
+                        ["image_id", "id", "model"],
+                        np.zeros((3, 2, 2)),
+                    ),
+                    "shape": (
+                        ["image_id", "id", "model"],
+                        np.zeros((3, 2, 2)),
+                    ),
+                    "confidence": (
+                        ["image_id", "id", "model"],
+                        np.zeros((3, 2, 2)),
+                    ),
                 },
             ),
             pytest.raises(ValueError),
@@ -148,19 +243,20 @@ def valid_bbox_detections_dataset_extra_vars_and_dims(
                     "foo": np.arange(3),
                     "bar": ["x", "y"],
                     "id": np.arange(2),
+                    "model": np.arange(2),
                 },
                 data_vars={
                     "position": (
-                        ["foo", "bar", "id"],
-                        np.zeros((3, 2, 2)),
+                        ["foo", "bar", "id", "model"],
+                        np.zeros((3, 2, 2, 2)),
                     ),
                     "shape": (
-                        ["foo", "bar", "id"],
-                        np.zeros((3, 2, 2)),
+                        ["foo", "bar", "id", "model"],
+                        np.zeros((3, 2, 2, 2)),
                     ),
                     "confidence": (
-                        ["foo", "id"],
-                        np.zeros((3, 2)),
+                        ["foo", "id", "model"],
+                        np.zeros((3, 2, 2)),
                     ),
                 },
             ),
@@ -173,19 +269,20 @@ def valid_bbox_detections_dataset_extra_vars_and_dims(
                     "image_id": np.arange(3),
                     "space": np.arange(2),
                     "id": np.arange(2),
+                    "model": np.arange(2),
                 },
                 data_vars={
                     "position": (
-                        ["image_id", "space", "id"],
-                        np.zeros((3, 2, 2)),
+                        ["image_id", "space", "id", "model"],
+                        np.zeros((3, 2, 2, 2)),
                     ),
                     "shape": (
-                        ["image_id", "id"],
-                        np.zeros((3, 2)),
+                        ["image_id", "id", "model"],
+                        np.zeros((3, 2, 2)),
                     ),
                     "confidence": (
-                        ["image_id", "id"],
-                        np.zeros((3, 2)),
+                        ["image_id", "id", "model"],
+                        np.zeros((3, 2, 2)),
                     ),
                 },
             ),
@@ -197,42 +294,21 @@ def valid_bbox_detections_dataset_extra_vars_and_dims(
         ),
     ],
     ids=[
-        "valid_bbox_detections",
-        "valid_bbox_detections_extra_vars_and_dims",
-        "valid_bbox_detections_extra_dims_in_shape_var",
-        "invalid_bbox_detections_type",
-        "invalid_bbox_detections_dataset_missing_data_var",
-        "invalid_bbox_detections_missing_multiple_data_vars",
-        "invalid_bbox_detections_missing_dimension",
-        "invalid_bbox_detections_missing_multiple_dimensions",
-        "invalid_bbox_detections_missing_dimension_in_data_var",
+        "invalid_missing_dimension",
+        "invalid_missing_multiple_dimensions",
+        "invalid_missing_dimension_in_data_var",
     ],
 )
-def test_validator_bbox_detections_dataset(
-    sample_dataset: str | dict,
+def test_validator_bbox_detections_dataset_missing_dims(
+    validator: type[ValidBboxDetectionsDataset]
+    | type[ValidBboxDetectionsEnsembleDataset],
+    sample_dataset: xr.Dataset,
     expected_exception: pytest.raises,
     expected_error_message: str,
-    request: pytest.FixtureRequest,
 ):
-    """Test bbox annotations dataset validation in various input scenarios."""
-    # Get dataset to validate
-    if isinstance(sample_dataset, str):
-        dataset = request.getfixturevalue(sample_dataset)
-    else:
-        dataset = sample_dataset
-
     # Run validation and check exception
     with expected_exception as excinfo:
-        validator = ValidBboxDetectionsDataset(dataset=dataset)
-
+        _validator = validator(dataset=sample_dataset)
     if excinfo:
         error_msg = str(excinfo.value)
         assert error_msg in expected_error_message
-    else:
-        assert validator.dataset is dataset
-        assert validator.required_dims == {"image_id", "space", "id"}
-        assert validator.required_data_vars == {
-            "position": {"image_id", "space", "id"},
-            "shape": {"image_id", "space", "id"},
-            "confidence": {"image_id", "id"},
-        }
