@@ -14,6 +14,11 @@ from torchvision.models.detection import (
     fasterrcnn_resnet50_fpn_v2,
 )
 
+from ethology.detectors.utils import (
+    _corners_to_centroid_shape,
+    _pad_to_max_first_dimension,
+)
+
 # from ethology.detectors.evaluate import compute_precision_recall_in_ds
 from ethology.validators.detections import ValidBboxDetectionsDataset
 from ethology.validators.utils import _check_output
@@ -93,7 +98,7 @@ class SingleDetector(LightningModule):
 
         # Instantiate model with ckpt weights
         model = get_model(
-            'fasterrcnn_resnet50_fpn_v2',
+            "fasterrcnn_resnet50_fpn_v2",
             **self.config.get("model_kwargs", {}),
         )
         model_state_dict = self._get_model_state_dict(checkpoint)
@@ -143,49 +148,46 @@ class SingleDetector(LightningModule):
         return raw_prediction_dicts
 
     def on_predict_epoch_end(self) -> None:
-        # format predictions as an xarray dataset?
+        # TODO:format predictions as an xarray dataset at the end of the epoch?
         pass
 
     # ------- Formatting -------------------
     @_check_output(ValidBboxDetectionsDataset)
     def format_predictions(
-        predictions: list[dict], attrs: dict | None = None
+        predictions: list[dict],
+        attrs: dict | None = None,
     ) -> xr.Dataset:
-        # Flatten list of predictions
-        # TODO: also ok if batch size = 1?
+        """Format predictions as an ethology detections dataset."""
+        # Flatten output predictions
         predictions_dict_per_img = list(chain.from_iterable(predictions))
 
         # Parse output from dicts
-        output_per_sample: dict[str, list] = {
-            "boxes": [],
-            "scores": [],
-            "labels": [],
+        output_per_sample = {
+            key: [sample[key] for sample in predictions_dict_per_img]
+            for key in ["boxes", "scores", "labels"]
         }
-        for ky in output_per_sample:
-            output_per_sample[ky] = [
-                sample[ky]
-                for sample in predictions_dict_per_img
-            ]  
 
         # Pad across image_ids
         fill_value = {"boxes": np.nan, "scores": np.nan, "labels": -1}
-        output_per_sample_padded: dict[str, list] = {
-            ky: [] for ky in output_per_sample
+        output_per_sample_padded = {
+            key: np.stack(
+                _pad_to_max_first_dimension(output_per_sample[key], val),
+                axis=0,
+            )
+            for key, val in fill_value.items()
         }
-        for ky in output_per_sample_padded:
-            output_per_sample_padded[ky] = [
-                    # pad across models
-                    np.stack(
-                        _pad_to_max_first_dimension(
-                            output_one_sample, fill_value[ky]
-                        ),
-                        axis=-1,
-                    )
-                    for output_one_sample in output_per_sample[ky]
-                ]
 
-        # Stack and reorder dimensions
+        # Compute centroid and shape arrays
+        bboxes_array = np.transpose(
+            output_per_sample_padded["boxes"], (0, -1, 1)
+        )
+        centroid_array, shape_array = _corners_to_centroid_shape(
+            bboxes_array[:, 0:2], bboxes_array[:, 2:4]
+        )
 
+        # Return as ethology detections dataset
+        max_n_detections = bboxes_array.shape[-2]
+        n_images = bboxes_array.shape[0]
         return xr.Dataset(
             data_vars={
                 "position": (
@@ -193,14 +195,19 @@ class SingleDetector(LightningModule):
                     centroid_array,
                 ),
                 "shape": (["image_id", "space", "id"], shape_array),
-                "confidence": (["image_id", "id"], scores_array),
-                "label": (["image_id", "id"], labels_array),
+                "confidence": (
+                    ["image_id", "id"],
+                    output_per_sample_padded["scores"],
+                ),
+                "label": (
+                    ["image_id", "id"],
+                    output_per_sample_padded["labels"],
+                ),
             },
             coords={
                 "image_id": np.arange(n_images),
                 "space": ["x", "y"],
                 "id": np.arange(max_n_detections),
-                "model": np.arange(n_models),
             },
             attrs=attrs if attrs else {},
         )
