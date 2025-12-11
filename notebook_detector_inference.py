@@ -8,7 +8,7 @@ from PIL import Image
 from torch.utils.data import DataLoader, Dataset
 
 from ethology.detectors.models import SingleDetector
-from ethology.io.annotations import save_bboxes, load_bboxes
+from ethology.io.annotations import load_bboxes, save_bboxes
 
 # %%
 # To use TF32 instead of full FP32
@@ -48,7 +48,6 @@ class SimpleImageDataset(Dataset):
 images_dir = Path(
     "/home/sminano/swc/project_ethology/07.09.2023-frames/Sep2023_day4_reencoded"
 )
-
 
 # %%
 # Define config
@@ -130,7 +129,10 @@ predictions_ds = model.format_predictions(
 )
 
 # %%
-# Export to COCO / VIA annotations?
+# Export as COCO annotations?
+# TODO: require "category" array in input dataset?
+# I think so, I dont think there are detectors that return label-less boxes?
+# predictions_ds = predictions_ds.rename_vars({'category':'label'})
 out_file = save_bboxes.to_COCO_file(predictions_ds, output_filepath="out.json")
 # %%
 # Load proofread annotations
