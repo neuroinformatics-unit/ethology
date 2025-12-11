@@ -200,7 +200,7 @@ class SingleDetector(LightningModule):
                     ["image_id", "id"],
                     output_per_sample_padded["scores"],
                 ),
-                "category": ( #------> labels are renamed as "category"!!
+                "category": (  # ------> labels are renamed as "category"!!
                     ["image_id", "id"],
                     output_per_sample_padded["labels"],
                 ),
