@@ -152,6 +152,7 @@ class SingleDetector(LightningModule):
         pass
 
     # ------- Formatting -------------------
+    @staticmethod
     @_check_output(ValidBboxDetectionsDataset)
     def format_predictions(
         predictions: list[dict],
@@ -186,7 +187,7 @@ class SingleDetector(LightningModule):
         )
 
         # Return as ethology detections dataset
-        max_n_detections = bboxes_array.shape[-2]
+        max_n_detections = bboxes_array.shape[-1]
         n_images = bboxes_array.shape[0]
         return xr.Dataset(
             data_vars={
@@ -199,7 +200,7 @@ class SingleDetector(LightningModule):
                     ["image_id", "id"],
                     output_per_sample_padded["scores"],
                 ),
-                "label": (
+                "category": ( #------> labels are renamed as "category"!!
                     ["image_id", "id"],
                     output_per_sample_padded["labels"],
                 ),
