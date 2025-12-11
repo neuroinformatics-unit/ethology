@@ -44,6 +44,11 @@ def valid_bbox_detections_dataset():
 def valid_bbox_detections_dataset_extra_vars_and_dims(
     valid_bbox_detections_dataset: xr.Dataset,
 ) -> xr.Dataset:
+    """Create a valid bbox detections dataset for validation.
+
+    The dataset is valid but contains more variables and dimensions than
+    the minimum required for a bbox detections dataset.
+    """
     ds = valid_bbox_detections_dataset.copy(deep=True)
     ds.coords["extra_dim"] = [10, 20, 30]
     ds["extra_var_1"] = (["image_id"], np.random.rand(len(ds.image_id)))

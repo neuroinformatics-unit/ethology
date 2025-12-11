@@ -238,9 +238,9 @@ def test_validate_bboxes_df_COCO(
 def test_get_raw_df_from_ds(
     annotations_test_data: dict, input_file: str, drop_variables: bool
 ):
-    """Test the function that gets the raw dataframe derived from the xarray
-    dataset fills in the appropriate category values, and includes the image
-    shape columns if present in the original dataset.
+    """Test that the function that computes the raw dataframe from the xarray
+    dataset includes the image shape columns, if they are present in the
+    original dataset.
     """
     # Read input dataset
     input_file = annotations_test_data[input_file]
@@ -250,8 +250,6 @@ def test_get_raw_df_from_ds(
     ds = from_files(input_file, format=format)
 
     # Drop "image_shape" data array if required
-    # NOTE: We no longer drop "category" as this is now a requirement for
-    # a ValidBboxAnnotationsDataset
     if drop_variables:
         ds = ds.drop_vars("image_shape")  # type: ignore
 

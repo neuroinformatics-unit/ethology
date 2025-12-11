@@ -102,10 +102,7 @@ def _get_raw_df_from_ds(ds: xr.Dataset) -> pd.DataFrame:
     """Get preliminary dataframe from a dataset of bounding boxes annotations.
 
     If the dataset has an "image_shape" array, the returned dataframe
-    will have "image_shape_x" and "image_shape_y" columns. The returned
-    dataframe will have a "category" column, filled with the relevant category
-    values, or filled with -1 if no category array was present in the
-    original dataset.
+    will have "image_shape_x" and "image_shape_y" columns.
 
     The returned dataframe is not COCO-exportable.
 
@@ -127,11 +124,6 @@ def _get_raw_df_from_ds(ds: xr.Dataset) -> pd.DataFrame:
     # Remove rows where position or shape data is nan
     # (where at least one of the specified columns contains a NaN value.)
     df_raw = df_raw.dropna(subset=["position", "shape"])
-
-    # Add "category" column if not present
-    # TODO: instead, throw a warning if not present?
-    # if "category" not in df_raw.columns:
-    #     df_raw["category"] = -1
 
     # Pivot the dataframe to get position_x, position_y, shape_x, shape_y, etc.
     index_cols = ["image_id", "id", "category"]

@@ -240,7 +240,7 @@ def test_COCO_non_unique_image_IDs(annotations_test_data: dict):
                     ),
                     "category": (
                         ["image_id", "id", "foo"],
-                        np.zeros((3, 2, 1)),
+                        np.ones((3, 2, 1)),
                     ),
                 },
             ),
@@ -266,7 +266,7 @@ def test_COCO_non_unique_image_IDs(annotations_test_data: dict):
                     ),
                     "category": (
                         ["image_id", "id"],
-                        np.zeros((3, 2)),
+                        np.ones((3, 2)),
                     ),
                 },
             ),
@@ -323,7 +323,7 @@ def test_COCO_non_unique_image_IDs(annotations_test_data: dict):
                     ),
                     "category": (
                         ["foo", "id"],
-                        np.zeros((3, 2)),
+                        np.ones((3, 2)),
                     ),
                 },
             ),
@@ -348,7 +348,7 @@ def test_COCO_non_unique_image_IDs(annotations_test_data: dict):
                     ),
                     "category": (
                         ["image_id", "id"],
-                        np.zeros((3, 2)),
+                        np.ones((3, 2)),
                     ),
                 },
             ),
