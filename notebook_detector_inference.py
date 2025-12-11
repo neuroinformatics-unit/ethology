@@ -8,12 +8,24 @@ from PIL import Image
 from torch.utils.data import DataLoader, Dataset
 
 from ethology.detectors.models import SingleDetector
+from ethology.io.annotations import save_bboxes, load_bboxes
+
+# %%
+# To use TF32 instead of full FP32
+# torch.set_float32_matmul_precision('medium')  # or 'high'
 
 
+# Note:
+# Since we are using precision="16-mixed", most of the operations are already
+# in FP16 and hitting the Tensor Cores. The set_float32_matmul_precision call
+# would only affect the few remaining FP32 operations.
 # %%
 # Helpers
 class SimpleImageDataset(Dataset):
-    """A simple dataset for images."""
+    """A simple dataset for images with no ground-truth.
+
+    It returns a dummy annotations dictionary.
+    """
 
     def __init__(self, root_dir, file_pattern, transform=None):
         self.root_dir = root_dir
@@ -94,8 +106,36 @@ trainer = Trainer(
     accelerator="gpu",
     devices=1,
     logger=False,
-    precision="16-mixed",  # --- results change
-    # strategy = 'ddp' ?
+    precision="16-mixed",  # --- results change;
+    # uses FP16 for most operations, FP32 for sensitive ones
+    # This setting reduces memory and speeds up training
 )
 predictions = trainer.predict(model, dataloader)
+
+
+# %%
+# TODO: can I do this at the end of the predict epoch?
+predictions_ds = model.format_predictions(
+    predictions,
+    {
+        "images_dir": images_dir,
+        "map_image_id_to_filename": {
+            id: filename.relative_to(
+                "/home/sminano/swc/project_ethology/07.09.2023-frames"
+            )
+            for id, filename in enumerate(dataset.image_files)
+        },
+        "map_category_to_str": {1: "crab"},
+    },
+)
+
+# %%
+# Export to COCO / VIA annotations?
+out_file = save_bboxes.to_COCO_file(predictions_ds, output_filepath="out.json")
+# %%
+# Load proofread annotations
+proofread_ds = load_bboxes.from_files(
+    "via_project_11Dec2025_12h44m_coco.json", format="COCO"
+)
+
 # %%
