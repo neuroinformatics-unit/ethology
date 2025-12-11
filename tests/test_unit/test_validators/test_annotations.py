@@ -238,6 +238,10 @@ def test_COCO_non_unique_image_IDs(annotations_test_data: dict):
                         ["image_id", "space", "id", "foo"],
                         np.zeros((3, 2, 2, 1)),
                     ),
+                    "category": (
+                        ["image_id", "id", "foo"],
+                        np.zeros((3, 2, 1)),
+                    ),
                 },
             ),
             does_not_raise(),
@@ -260,6 +264,10 @@ def test_COCO_non_unique_image_IDs(annotations_test_data: dict):
                         ["image_id", "space", "id"],
                         np.zeros((3, 2, 2)),
                     ),
+                    "category": (
+                        ["image_id", "id"],
+                        np.zeros((3, 2)),
+                    ),
                 },
             ),
             pytest.raises(ValueError),
@@ -280,7 +288,10 @@ def test_COCO_non_unique_image_IDs(annotations_test_data: dict):
                 },
             ),
             pytest.raises(ValueError),
-            "Missing required data variables: ['position', 'shape']",
+            (
+                "Missing required data variables: "
+                "['category', 'position', 'shape']"
+            ),
         ),
         (
             xr.Dataset(
@@ -288,6 +299,7 @@ def test_COCO_non_unique_image_IDs(annotations_test_data: dict):
                 data_vars={
                     "position": (["image_id", "id"], np.zeros((3, 2))),
                     "shape": (["image_id", "id"], np.zeros((3, 2))),
+                    "category": (["image_id", "id"], np.ones((3, 2))),
                 },
             ),
             pytest.raises(ValueError),
@@ -309,6 +321,10 @@ def test_COCO_non_unique_image_IDs(annotations_test_data: dict):
                         ["foo", "bar", "id"],
                         np.zeros((3, 2, 2)),
                     ),
+                    "category": (
+                        ["foo", "id"],
+                        np.zeros((3, 2)),
+                    ),
                 },
             ),
             pytest.raises(ValueError),
@@ -327,6 +343,10 @@ def test_COCO_non_unique_image_IDs(annotations_test_data: dict):
                         np.zeros((3, 2, 2)),
                     ),
                     "shape": (
+                        ["image_id", "id"],
+                        np.zeros((3, 2)),
+                    ),
+                    "category": (
                         ["image_id", "id"],
                         np.zeros((3, 2)),
                     ),
@@ -377,4 +397,5 @@ def test_validator_bbox_annotations_dataset(
         assert validator.required_data_vars == {
             "position": {"id", "image_id", "space"},
             "shape": {"id", "image_id", "space"},
+            "category": {"id", "image_id"},
         }

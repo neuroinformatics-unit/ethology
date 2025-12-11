@@ -57,5 +57,6 @@ class ValidBboxDetectionsDataset(ValidDataset):
     required_data_vars: ClassVar[dict[str, set]] = {
         "position": {"image_id", "space", "id"},
         "shape": {"image_id", "space", "id"},
+        "category": {"image_id", "id"},
         "confidence": {"image_id", "id"},
     }

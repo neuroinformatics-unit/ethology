@@ -129,8 +129,9 @@ def _get_raw_df_from_ds(ds: xr.Dataset) -> pd.DataFrame:
     df_raw = df_raw.dropna(subset=["position", "shape"])
 
     # Add "category" column if not present
-    if "category" not in df_raw.columns:
-        df_raw["category"] = -1
+    # TODO: instead, throw a warning if not present?
+    # if "category" not in df_raw.columns:
+    #     df_raw["category"] = -1
 
     # Pivot the dataframe to get position_x, position_y, shape_x, shape_y, etc.
     index_cols = ["image_id", "id", "category"]

@@ -19,6 +19,7 @@ def valid_bbox_detections_dataset():
         (len(image_ids), len(space_dims), len(annotation_ids))
     )
     shape_data = np.copy(position_data)
+    category_data = np.ones((len(image_ids), len(annotation_ids)))
     confidence_data = np.zeros((len(image_ids), len(annotation_ids)))
 
     # Create the dataset
@@ -26,6 +27,7 @@ def valid_bbox_detections_dataset():
         data_vars={
             "position": (["image_id", "space", "id"], position_data),
             "shape": (["image_id", "space", "id"], shape_data),
+            "category": (["image_id", "id"], category_data),
             "confidence": (["image_id", "id"], confidence_data),
         },
         coords={
@@ -78,6 +80,10 @@ def valid_bbox_detections_dataset_extra_vars_and_dims(
                         ["image_id", "space", "id", "foo"],
                         np.zeros((3, 2, 2, 1)),
                     ),
+                    "category": (
+                        ["image_id", "id"],
+                        np.ones((3, 2)),
+                    ),
                     "confidence": (
                         ["image_id", "id"],
                         np.zeros((3, 2)),
@@ -108,6 +114,10 @@ def valid_bbox_detections_dataset_extra_vars_and_dims(
                         ["image_id", "space", "id"],
                         np.zeros((3, 2, 2)),
                     ),
+                    "category": (
+                        ["image_id", "id"],
+                        np.ones((3, 2)),
+                    ),
                 },
             ),
             pytest.raises(ValueError),
@@ -125,6 +135,10 @@ def valid_bbox_detections_dataset_extra_vars_and_dims(
                         ["image_id", "space", "id"],
                         np.zeros((3, 2, 2)),
                     ),
+                    "category": (
+                        ["image_id", "id"],
+                        np.ones((3, 2)),
+                    ),
                 },
             ),
             pytest.raises(ValueError),
@@ -136,6 +150,7 @@ def valid_bbox_detections_dataset_extra_vars_and_dims(
                 data_vars={
                     "position": (["image_id", "id"], np.zeros((3, 2))),
                     "shape": (["image_id", "id"], np.zeros((3, 2))),
+                    "category": (["image_id", "id"], np.ones((3, 2))),
                     "confidence": (["image_id", "id"], np.zeros((3, 2))),
                 },
             ),
@@ -157,6 +172,10 @@ def valid_bbox_detections_dataset_extra_vars_and_dims(
                     "shape": (
                         ["foo", "bar", "id"],
                         np.zeros((3, 2, 2)),
+                    ),
+                    "category": (
+                        ["foo", "id"],
+                        np.ones((3, 2)),
                     ),
                     "confidence": (
                         ["foo", "id"],
@@ -182,6 +201,10 @@ def valid_bbox_detections_dataset_extra_vars_and_dims(
                     "shape": (
                         ["image_id", "id"],
                         np.zeros((3, 2)),
+                    ),
+                    "category": (
+                        ["image_id", "id"],
+                        np.ones((3, 2)),
                     ),
                     "confidence": (
                         ["image_id", "id"],
@@ -234,5 +257,6 @@ def test_validator_bbox_detections_dataset(
         assert validator.required_data_vars == {
             "position": {"image_id", "space", "id"},
             "shape": {"image_id", "space", "id"},
+            "category": {"image_id", "id"},
             "confidence": {"image_id", "id"},
         }

@@ -242,26 +242,23 @@ def test_get_raw_df_from_ds(
     dataset fills in the appropriate category values, and includes the image
     shape columns if present in the original dataset.
     """
+    # Read input dataset
     input_file = annotations_test_data[input_file]
     format: Literal["VIA", "COCO"] = (
         "VIA" if "VIA" in str(input_file) else "COCO"
     )
     ds = from_files(input_file, format=format)
 
-    # Drop data arrays if specified
+    # Drop "image_shape" data array if required
+    # NOTE: We no longer drop "category" as this is now a requirement for
+    # a ValidBboxAnnotationsDataset
     if drop_variables:
-        vars_to_drop = [
-            var
-            for var in ["category", "image_shape"]
-            if var in list(ds.data_vars.keys())
-        ]
-        ds = ds.drop_vars(vars_to_drop)  # type: ignore
+        ds = ds.drop_vars("image_shape")  # type: ignore
 
     # Get raw dataframe
     df_raw = _get_raw_df_from_ds(ds)
 
-    # The "category" column should always be present in the raw dataframe,
-    # even if the category array was not present in the original dataset
+    # List of expected columns
     list_expected_columns = [
         "image_id",
         "id",

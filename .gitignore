@@ -86,3 +86,6 @@ uv.lock
 
 # written by setuptools_scm
 **/_version.py
+
+# uv
+uv.lock
