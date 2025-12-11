@@ -147,9 +147,19 @@ class SingleDetector(LightningModule):
 
         return raw_prediction_dicts
 
-    def on_predict_epoch_end(self) -> None:
-        # TODO:format predictions as an xarray dataset at the end of the epoch?
-        pass
+    @_check_output(ValidBboxDetectionsDataset)
+    def run_inference(
+        self,
+        trainer,
+        dataloader,
+        attrs: dict | None = None,
+    ) -> xr.Dataset:
+        """Run inference and return the xarray dataset.
+
+        Convenience method that combines trainer.predict() and format_predictions().
+        """
+        predictions = trainer.predict(self, dataloader)
+        return self.format_predictions(predictions, attrs=attrs)
 
     # ------- Formatting -------------------
     @staticmethod

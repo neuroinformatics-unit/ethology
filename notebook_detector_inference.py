@@ -50,7 +50,7 @@ images_dir = Path(
 )
 
 # %%
-# Define config
+# Define model config
 config = {
     "model_kwargs": {
         "num_classes": 2,
@@ -59,11 +59,6 @@ config = {
     },
     "checkpoint": "/home/sminano/swc/project_crabs/ml-runs/617393114420881798/f348d9d196934073bece1b877cbc4d38/checkpoints/last.ckpt",
 }
-
-# %%
-# Instantiate detector
-
-model = SingleDetector(config)
 
 # %%
 # Define dataset
@@ -99,8 +94,14 @@ dataloader = DataLoader(
     # else None,  # see https://github.com/pytorch/pytorch/issues/87688
 )
 # %%
-# Run inference on dataset
+# Run inference using model on dataset
 # (format as detections dataset)
+
+
+# Instantiate detector
+model = SingleDetector(config)
+
+# Define trainer
 trainer = Trainer(
     accelerator="gpu",
     devices=1,
@@ -109,30 +110,42 @@ trainer = Trainer(
     # uses FP16 for most operations, FP32 for sensitive ones
     # This setting reduces memory and speeds up training
 )
-predictions = trainer.predict(model, dataloader)
+
+# dataset attrs
+ds_attrs = {
+    "images_dir": images_dir,
+    "map_image_id_to_filename": {
+        id: filename.relative_to(
+            "/home/sminano/swc/project_ethology/07.09.2023-frames"
+        )
+        for id, filename in enumerate(dataset.image_files)
+    },
+    "map_category_to_str": {1: "crab"},
+}
+
+predictions_ds = model.run_inference(trainer, dataloader, attrs=ds_attrs)
 
 
 # %%
-# TODO: can I do this at the end of the predict epoch?
-predictions_ds = model.format_predictions(
-    predictions,
-    {
-        "images_dir": images_dir,
-        "map_image_id_to_filename": {
-            id: filename.relative_to(
-                "/home/sminano/swc/project_ethology/07.09.2023-frames"
-            )
-            for id, filename in enumerate(dataset.image_files)
-        },
-        "map_category_to_str": {1: "crab"},
-    },
-)
+# Alternative
+# # TODO: can I do this at the end of the predict epoch?
+# predictions = trainer.predict(model, dataloader)
+# predictions_ds = model.format_predictions(
+#     predictions,
+#     {
+#         "images_dir": images_dir,
+#         "map_image_id_to_filename": {
+#             id: filename.relative_to(
+#                 "/home/sminano/swc/project_ethology/07.09.2023-frames"
+#             )
+#             for id, filename in enumerate(dataset.image_files)
+#         },
+#         "map_category_to_str": {1: "crab"},
+#     },
+# )
 
 # %%
 # Export as COCO annotations?
-# TODO: require "category" array in input dataset?
-# I think so, I dont think there are detectors that return label-less boxes?
-# predictions_ds = predictions_ds.rename_vars({'category':'label'})
 out_file = save_bboxes.to_COCO_file(predictions_ds, output_filepath="out.json")
 # %%
 # Load proofread annotations
