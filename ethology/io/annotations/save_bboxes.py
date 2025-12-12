@@ -126,10 +126,14 @@ def _get_raw_df_from_ds(ds: xr.Dataset) -> pd.DataFrame:
     df_raw = df_raw.dropna(subset=["position", "shape"])
 
     # Pivot the dataframe to get position_x, position_y, shape_x, shape_y, etc.
-    index_cols = ["image_id", "id", "category"]
-    pivot_values = ["position", "shape"]
-    if "image_shape" in df_raw.columns:
-        pivot_values.append("image_shape")
+    # pivot_values: variables with x and y values
+    # index_cols: variables **without** x and y values
+    pivot_values = [
+        c for c in ["position", "shape", "image_shape"] if c in df_raw.columns
+    ]
+    index_cols = [
+        c for c in df_raw.columns if c not in {*pivot_values, "space"}
+    ]
 
     df_raw = df_raw.pivot_table(
         index=index_cols,
