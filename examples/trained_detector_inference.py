@@ -1,82 +1,84 @@
+"""Run inference with a trained detector
+========================================
+
+Run inference with a trained detector on a dataset of images for proofreading.
+"""
+
 # %%
+# This example demonstrates how to run inference with a trained detector on a
+# dataset of images for later proofreading using the VIA annotation tool.
+#
+# The example assumes that the detector has already been trained and saved as a
+# checkpoint.
+#
+# The example also assumes that the dataset of images is stored in a directory.
+# %%
+# Imports
+# -------
 from pathlib import Path
 
-import torch
-import torchvision.transforms.v2 as transforms
 from lightning import Trainer
-from PIL import Image
-from torch.utils.data import DataLoader, Dataset
+from torch.utils.data import DataLoader
 
+from ethology.datasets.inference import (
+    InferenceImageDataset,
+    get_default_inference_transforms,
+)
 from ethology.detectors.models import SingleDetector
 from ethology.io.annotations import load_bboxes, save_bboxes
 
+# For interactive plots: install ipympl with `pip install ipympl` and uncomment
+# the following line in your notebook
+# %matplotlib widget
+
 # %%
+# Precision settings
+# ------------------
 # To use TF32 instead of full FP32
 # torch.set_float32_matmul_precision('medium')  # or 'high'
-
 
 # Note:
 # Since we are using precision="16-mixed", most of the operations are already
 # in FP16 and hitting the Tensor Cores. The set_float32_matmul_precision call
 # would only affect the few remaining FP32 operations.
-# %%
-# Helpers
-class SimpleImageDataset(Dataset):
-    """A simple dataset for images with no ground-truth.
-
-    It returns a dummy annotations dictionary.
-    """
-
-    def __init__(self, root_dir, file_pattern, transform=None):
-        self.root_dir = root_dir
-        self.transform = transform
-        self.image_files = sorted(self.root_dir.glob(file_pattern))
-
-    def __len__(self):
-        return len(self.image_files)
-
-    def __getitem__(self, idx):
-        img_path = Path(self.root_dir) / self.image_files[idx]
-        image = Image.open(img_path).convert("RGB")
-        if self.transform:
-            image = self.transform(image)
-        return image, {}  # return a dummy annotations dict
 
 
 # %%
 # Input data
+# -----------
+
+# TODO:Fetch images for inference
 images_dir = Path(
     "/home/sminano/swc/project_ethology/07.09.2023-frames/Sep2023_day4_reencoded"
 )
 
-# %%
-# Define model config
+# TODO:Fetch model config
 config = {
+    "model_class": "fasterrcnn_resnet50_fpn_v2",  # required
     "model_kwargs": {
-        "num_classes": 2,
+        "num_classes": 2,  # required!
         "weights": None,
         "weights_backbone": None,
     },
-    "checkpoint": "/home/sminano/swc/project_crabs/ml-runs/617393114420881798/f348d9d196934073bece1b877cbc4d38/checkpoints/last.ckpt",
+    # required
+    "checkpoint": (
+        "/home/sminano/swc/project_crabs/ml-runs/"
+        "617393114420881798/f348d9d196934073bece1b877cbc4d38/checkpoints/last.ckpt"
+    ),
 }
 
 # %%
-# Define dataset
+# Prepare dataset for inference
+# -----------------------------
 
-inference_transforms = transforms.Compose(
-    [
-        transforms.ToImage(),
-        transforms.ToDtype(torch.float32, scale=True),
-    ]
-)
-
-dataset = SimpleImageDataset(
+# Create dataset
+dataset = InferenceImageDataset(
     images_dir,
     "*.png",
-    transform=inference_transforms,
+    transform=get_default_inference_transforms(),
 )
 
-# dataloader
+# Create dataloader
 dataloader = DataLoader(
     dataset,
     batch_size=12,  # 12,
@@ -93,25 +95,26 @@ dataloader = DataLoader(
     # if ref_config["num_workers"] > 0 and torch.backends.mps.is_available()
     # else None,  # see https://github.com/pytorch/pytorch/issues/87688
 )
-# %%
-# Run inference using model on dataset
-# (format as detections dataset)
 
+# %%
+# Prepare model and trainer
+# -------------------------
 
 # Instantiate detector
 model = SingleDetector(config)
+print(config)
 
-# Define trainer
+# Instantiate trainer
 trainer = Trainer(
     accelerator="gpu",
     devices=1,
     logger=False,
-    precision="16-mixed",  # --- results change;
+    precision="16-mixed",
     # uses FP16 for most operations, FP32 for sensitive ones
     # This setting reduces memory and speeds up training
 )
 
-# dataset attrs
+# Define dataset attrs to add to predictions (optional)
 ds_attrs = {
     "images_dir": images_dir,
     "map_image_id_to_filename": {
@@ -123,34 +126,25 @@ ds_attrs = {
     "map_category_to_str": {1: "crab"},
 }
 
+# %%
+# Run inference using model on dataloader
+# ---------------------------------------
+# The predictions are formatted as an ``ethology`` detections dataset.
+
+# Run inference using model on dataloader
 predictions_ds = model.run_inference(trainer, dataloader, attrs=ds_attrs)
 
 
 # %%
-# Alternative
-# # TODO: can I do this at the end of the predict epoch?
-# predictions = trainer.predict(model, dataloader)
-# predictions_ds = model.format_predictions(
-#     predictions,
-#     {
-#         "images_dir": images_dir,
-#         "map_image_id_to_filename": {
-#             id: filename.relative_to(
-#                 "/home/sminano/swc/project_ethology/07.09.2023-frames"
-#             )
-#             for id, filename in enumerate(dataset.image_files)
-#         },
-#         "map_category_to_str": {1: "crab"},
-#     },
-# )
+# Export predictions as COCO annotations for proofreading
+# ---------------------------------------------------------
+
+
+out_file = save_bboxes.to_COCO_file(predictions_ds, output_filepath="out.json")
 
 # %%
-# Export as COCO annotations?
-out_file = save_bboxes.to_COCO_file(predictions_ds, output_filepath="out.json")
-# %%
-# Load proofread annotations
+# Load proofread annotations and compare
+# ---------------------------------------
 proofread_ds = load_bboxes.from_files(
     "via_project_11Dec2025_12h44m_coco.json", format="COCO"
 )
-
-# %%
