@@ -140,16 +140,18 @@ predictions_ds = model.run_inference(trainer, dataloader, attrs=ds_attrs)
 # Export predictions as COCO annotations for proofreading
 # ---------------------------------------------------------
 
-
 out_file = save_bboxes.to_COCO_file(predictions_ds, output_filepath="out.json")
 
 # %%
 # Load proofread annotations and compare
 # ---------------------------------------
+
 # proofread_ds = load_bboxes.from_files(
 #     "via_project_11Dec2025_12h44m_coco.json", format="COCO"
 # )
+#
 
+# %%
 # Clean-up
 # --------
 # To remove the output files we have just created, we can run the following:
