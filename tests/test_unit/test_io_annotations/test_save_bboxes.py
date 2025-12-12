@@ -8,6 +8,7 @@ from typing import Literal
 import pandas as pd
 import pandera.pandas as pa
 import pytest
+import xarray as xr
 
 from ethology.io.annotations.load_bboxes import from_files
 from ethology.io.annotations.save_bboxes import (
@@ -238,30 +239,25 @@ def test_validate_bboxes_df_COCO(
 def test_get_raw_df_from_ds(
     annotations_test_data: dict, input_file: str, drop_variables: bool
 ):
-    """Test the function that gets the raw dataframe derived from the xarray
-    dataset fills in the appropriate category values, and includes the image
-    shape columns if present in the original dataset.
+    """Test that the function that computes the raw dataframe from the xarray
+    dataset includes the image shape columns, if they are present in the
+    original dataset.
     """
+    # Read input dataset
     input_file = annotations_test_data[input_file]
     format: Literal["VIA", "COCO"] = (
         "VIA" if "VIA" in str(input_file) else "COCO"
     )
     ds = from_files(input_file, format=format)
 
-    # Drop data arrays if specified
+    # Drop "image_shape" data array if required
     if drop_variables:
-        vars_to_drop = [
-            var
-            for var in ["category", "image_shape"]
-            if var in list(ds.data_vars.keys())
-        ]
-        ds = ds.drop_vars(vars_to_drop)  # type: ignore
+        ds = ds.drop_vars("image_shape")  # type: ignore
 
     # Get raw dataframe
     df_raw = _get_raw_df_from_ds(ds)
 
-    # The "category" column should always be present in the raw dataframe,
-    # even if the category array was not present in the original dataset
+    # List of expected columns
     list_expected_columns = [
         "image_id",
         "id",
@@ -348,6 +344,56 @@ def test_add_COCO_data_to_df(annotations_test_data: dict):
 
     # other
     assert all(df_output["iscrowd"] == 0)
+
+
+def test_add_COCO_data_to_df_empty_category(annotations_test_data):
+    """Test that if the category ID is not included in map_category_to_str
+    the category name is mapped to an empty string.
+    """
+    # Read input file as bboxes dataset
+    input_file = annotations_test_data["small_bboxes_COCO.json"]
+    ds = from_files(input_file, format="COCO")
+
+    # Change map from category IDs to strings to a
+    # category ID that is not present in the dataset
+    assert 999 not in ds.map_category_to_str
+    ds.attrs["map_category_to_str"] = {999: "foo"}
+
+    # Get raw dataframe
+    df_raw = _get_raw_df_from_ds(ds)
+
+    # Fill in missing columns with defaults
+    df_output = _add_COCO_data_to_df(df_raw, ds.attrs)
+
+    # Check category name is an empty string
+    assert all(df_output["category"] == "")
+
+
+@pytest.mark.parametrize("supercategory_value", [999, "foo", True])
+def test_add_COCO_data_to_df_empty_supercategory(
+    annotations_test_data, supercategory_value
+):
+    """Test that if defined, the supercategory data variable is cast to str."""
+    # Read input file as bbox annotations dataset
+    input_file = annotations_test_data["small_bboxes_COCO.json"]
+    ds = from_files(input_file, format="COCO")
+
+    # Fill dataset with supercategory as data variable
+    ds["supercategory"] = xr.full_like(
+        ds.category,
+        fill_value=supercategory_value,
+        dtype=object,
+    )
+
+    # Get raw dataframe
+    df_raw = _get_raw_df_from_ds(ds)
+
+    # Fill in missing columns with defaults
+    df_output = _add_COCO_data_to_df(df_raw, ds.attrs)
+
+    # Check supercategory name has expected value and is cast as string
+    assert df_output["supercategory"].apply(lambda x: isinstance(x, str)).all()
+    assert all(df_output["supercategory"] == str(supercategory_value))
 
 
 def test_create_COCO_dict(sample_bboxes_df: Callable):

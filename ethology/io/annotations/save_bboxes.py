@@ -102,10 +102,7 @@ def _get_raw_df_from_ds(ds: xr.Dataset) -> pd.DataFrame:
     """Get preliminary dataframe from a dataset of bounding boxes annotations.
 
     If the dataset has an "image_shape" array, the returned dataframe
-    will have "image_shape_x" and "image_shape_y" columns. The returned
-    dataframe will have a "category" column, filled with the relevant category
-    values, or filled with -1 if no category array was present in the
-    original dataset.
+    will have "image_shape_x" and "image_shape_y" columns.
 
     The returned dataframe is not COCO-exportable.
 
@@ -128,15 +125,15 @@ def _get_raw_df_from_ds(ds: xr.Dataset) -> pd.DataFrame:
     # (where at least one of the specified columns contains a NaN value.)
     df_raw = df_raw.dropna(subset=["position", "shape"])
 
-    # Add "category" column if not present
-    if "category" not in df_raw.columns:
-        df_raw["category"] = -1
-
     # Pivot the dataframe to get position_x, position_y, shape_x, shape_y, etc.
-    index_cols = ["image_id", "id", "category"]
-    pivot_values = ["position", "shape"]
-    if "image_shape" in df_raw.columns:
-        pivot_values.append("image_shape")
+    # pivot_values: variables with x and y values
+    # index_cols: variables **without** x and y values
+    pivot_values = [
+        c for c in ["position", "shape", "image_shape"] if c in df_raw.columns
+    ]
+    index_cols = [
+        c for c in df_raw.columns if c not in {*pivot_values, "space"}
+    ]
 
     df_raw = df_raw.pivot_table(
         index=index_cols,
@@ -238,17 +235,22 @@ def _add_COCO_data_to_df(
         ]
     )
 
-    # Rename "category" to "category_id" (in dataset it is an integer)
-    # and compute "category" as string from "category_id"
-    map_category_to_str = ds_attrs["map_category_to_str"]
+    # Rename "category" to "category_id"
+    # (in input dataset "category" is an integer, but in COCO it is a str)
     df.rename(columns={"category": "category_id"}, inplace=True)
-    df["category"] = df["category_id"].map(map_category_to_str)
+    # and compute "category" as a string from "category_id"
+    map_category_to_str = ds_attrs["map_category_to_str"]
+    df["category"] = df["category_id"].map(
+        lambda x: map_category_to_str.get(x, "")
+    )  # set value to "" if category ID is not defined in map_category_to_str
 
-    # supercategory
+    # Set supercategory to empty string if not defined
     if "supercategory" not in df.columns:
         df["supercategory"] = ""
+    else:
+        df["supercategory"] = df["supercategory"].astype(str)
 
-    # other
+    # Set iscrowd always to 0
     df["iscrowd"] = 0
 
     # Set index name and add "annotation_id" as column

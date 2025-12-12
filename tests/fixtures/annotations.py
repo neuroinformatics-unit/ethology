@@ -130,12 +130,14 @@ def valid_bbox_annotations_dataset():
         (len(image_ids), len(space_dims), len(annotation_ids))
     )
     shape_data = np.copy(position_data)
+    category_data = np.ones((len(image_ids), len(annotation_ids)))
 
     # Create the dataset
     ds = xr.Dataset(
         data_vars={
             "position": (["image_id", "space", "id"], position_data),
             "shape": (["image_id", "space", "id"], shape_data),
+            "category": (["image_id", "id"], category_data),
         },
         coords={
             "image_id": image_ids,

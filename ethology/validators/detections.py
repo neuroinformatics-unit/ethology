@@ -15,10 +15,12 @@ class ValidBboxDetectionsDataset(ValidDataset):
 
     - is an xarray Dataset,
     - has ``image_id``, ``space``, ``id`` as dimensions,
-    - has ``position``, ``shape`` and ``confidence`` as data variables,
+    - has ``position``, ``shape``, ``category`` and ``confidence`` as data
+      variables,
     - ``position`` and ``shape`` span at least the dimensions ``image_id``,
       ``space`` and ``id``,
-    - ``confidence`` spans at least the dimensions ``image_id`` and ``id``.
+    - ``category`` and ``confidence`` span at least the dimensions
+      ``image_id`` and ``id``.
 
 
     Attributes
@@ -34,6 +36,7 @@ class ValidBboxDetectionsDataset(ValidDataset):
 
         - ``position`` maps to ``image_id``, ``space`` and ``id``,
         - ``shape`` maps to ``image_id``, ``space`` and ``id``,
+        - ``category`` maps to ``image_id`` and ``id``,
         - ``confidence`` maps to ``image_id`` and ``id``.
 
     Raises
@@ -57,5 +60,6 @@ class ValidBboxDetectionsDataset(ValidDataset):
     required_data_vars: ClassVar[dict[str, set]] = {
         "position": {"image_id", "space", "id"},
         "shape": {"image_id", "space", "id"},
+        "category": {"image_id", "id"},
         "confidence": {"image_id", "id"},
     }

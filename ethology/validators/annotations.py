@@ -219,9 +219,10 @@ class ValidBboxAnnotationsDataset(ValidDataset):
 
     - is an xarray Dataset,
     - has ``image_id``, ``space``, ``id`` as dimensions,
-    - has ``position`` and ``shape`` as data variables,
-    - both data variables span at least the dimensions ``image_id``,
+    - has ``position``, ``shape`` and ``category`` as data variables,
+    - ``position`` and ``shape`` span at least the dimensions ``image_id``,
       ``space`` and ``id``.
+    - ``category`` spans at least the dimensions ``image_id`` and ``id``.
 
 
     Attributes
@@ -237,6 +238,7 @@ class ValidBboxAnnotationsDataset(ValidDataset):
 
         - ``position`` maps to ``image_id``, ``space`` and ``id``,
         - ``shape`` maps to ``image_id``, ``space`` and ``id``.
+        - ``category`` maps to ``image_id`` and ``id``.
 
     Raises
     ------
@@ -259,6 +261,7 @@ class ValidBboxAnnotationsDataset(ValidDataset):
     required_data_vars: ClassVar[dict[str, set]] = {
         "position": {"image_id", "space", "id"},
         "shape": {"image_id", "space", "id"},
+        "category": {"image_id", "id"},
     }
 
 
