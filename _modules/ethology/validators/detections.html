@@ -43,7 +43,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../_static/documentation_options.js?v=8fda99e2"></script>
+    <script src="../../../_static/documentation_options.js?v=2ba21dfb"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
@@ -117,7 +117,7 @@
   
   
   
-    <p class="title logo__title">ethology v0.1.2.dev4</p>
+    <p class="title logo__title">ethology v0.1.2.dev5</p>
   
 </a></div>
     
@@ -409,10 +409,12 @@
 
 <span class="sd">    - is an xarray Dataset,</span>
 <span class="sd">    - has ``image_id``, ``space``, ``id`` as dimensions,</span>
-<span class="sd">    - has ``position``, ``shape`` and ``confidence`` as data variables,</span>
+<span class="sd">    - has ``position``, ``shape``, ``category`` and ``confidence`` as data</span>
+<span class="sd">      variables,</span>
 <span class="sd">    - ``position`` and ``shape`` span at least the dimensions ``image_id``,</span>
 <span class="sd">      ``space`` and ``id``,</span>
-<span class="sd">    - ``confidence`` spans at least the dimensions ``image_id`` and ``id``.</span>
+<span class="sd">    - ``category`` and ``confidence`` span at least the dimensions</span>
+<span class="sd">      ``image_id`` and ``id``.</span>
 
 
 <span class="sd">    Attributes</span>
@@ -428,6 +430,7 @@
 
 <span class="sd">        - ``position`` maps to ``image_id``, ``space`` and ``id``,</span>
 <span class="sd">        - ``shape`` maps to ``image_id``, ``space`` and ``id``,</span>
+<span class="sd">        - ``category`` maps to ``image_id`` and ``id``,</span>
 <span class="sd">        - ``confidence`` maps to ``image_id`` and ``id``.</span>
 
 <span class="sd">    Raises</span>
@@ -451,6 +454,7 @@
     <span class="n">required_data_vars</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">set</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s2">&quot;position&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;image_id&quot;</span><span class="p">,</span> <span class="s2">&quot;space&quot;</span><span class="p">,</span> <span class="s2">&quot;id&quot;</span><span class="p">},</span>
         <span class="s2">&quot;shape&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;image_id&quot;</span><span class="p">,</span> <span class="s2">&quot;space&quot;</span><span class="p">,</span> <span class="s2">&quot;id&quot;</span><span class="p">},</span>
+        <span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;image_id&quot;</span><span class="p">,</span> <span class="s2">&quot;id&quot;</span><span class="p">},</span>
         <span class="s2">&quot;confidence&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;image_id&quot;</span><span class="p">,</span> <span class="s2">&quot;id&quot;</span><span class="p">},</span>
     <span class="p">}</span></div>
 

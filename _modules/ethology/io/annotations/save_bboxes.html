@@ -43,7 +43,7 @@
   <link rel="preload" as="script" href="../../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../../_static/documentation_options.js?v=8fda99e2"></script>
+    <script src="../../../../_static/documentation_options.js?v=2ba21dfb"></script>
     <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/design-tabs.js?v=f930bc37"></script>
@@ -117,7 +117,7 @@
   
   
   
-    <p class="title logo__title">ethology v0.1.2.dev4</p>
+    <p class="title logo__title">ethology v0.1.2.dev5</p>
   
 </a></div>
     
@@ -497,10 +497,7 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Get preliminary dataframe from a dataset of bounding boxes annotations.</span>
 
 <span class="sd">    If the dataset has an &quot;image_shape&quot; array, the returned dataframe</span>
-<span class="sd">    will have &quot;image_shape_x&quot; and &quot;image_shape_y&quot; columns. The returned</span>
-<span class="sd">    dataframe will have a &quot;category&quot; column, filled with the relevant category</span>
-<span class="sd">    values, or filled with -1 if no category array was present in the</span>
-<span class="sd">    original dataset.</span>
+<span class="sd">    will have &quot;image_shape_x&quot; and &quot;image_shape_y&quot; columns.</span>
 
 <span class="sd">    The returned dataframe is not COCO-exportable.</span>
 
@@ -523,15 +520,15 @@
     <span class="c1"># (where at least one of the specified columns contains a NaN value.)</span>
     <span class="n">df_raw</span> <span class="o">=</span> <span class="n">df_raw</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;position&quot;</span><span class="p">,</span> <span class="s2">&quot;shape&quot;</span><span class="p">])</span>
 
-    <span class="c1"># Add &quot;category&quot; column if not present</span>
-    <span class="k">if</span> <span class="s2">&quot;category&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">df_raw</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
-        <span class="n">df_raw</span><span class="p">[</span><span class="s2">&quot;category&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
-
     <span class="c1"># Pivot the dataframe to get position_x, position_y, shape_x, shape_y, etc.</span>
-    <span class="n">index_cols</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;image_id&quot;</span><span class="p">,</span> <span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="s2">&quot;category&quot;</span><span class="p">]</span>
-    <span class="n">pivot_values</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;position&quot;</span><span class="p">,</span> <span class="s2">&quot;shape&quot;</span><span class="p">]</span>
-    <span class="k">if</span> <span class="s2">&quot;image_shape&quot;</span> <span class="ow">in</span> <span class="n">df_raw</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
-        <span class="n">pivot_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;image_shape&quot;</span><span class="p">)</span>
+    <span class="c1"># pivot_values: variables with x and y values</span>
+    <span class="c1"># index_cols: variables **without** x and y values</span>
+    <span class="n">pivot_values</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;position&quot;</span><span class="p">,</span> <span class="s2">&quot;shape&quot;</span><span class="p">,</span> <span class="s2">&quot;image_shape&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">df_raw</span><span class="o">.</span><span class="n">columns</span>
+    <span class="p">]</span>
+    <span class="n">index_cols</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">df_raw</span><span class="o">.</span><span class="n">columns</span> <span class="k">if</span> <span class="n">c</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">{</span><span class="o">*</span><span class="n">pivot_values</span><span class="p">,</span> <span class="s2">&quot;space&quot;</span><span class="p">}</span>
+    <span class="p">]</span>
 
     <span class="n">df_raw</span> <span class="o">=</span> <span class="n">df_raw</span><span class="o">.</span><span class="n">pivot_table</span><span class="p">(</span>
         <span class="n">index</span><span class="o">=</span><span class="n">index_cols</span><span class="p">,</span>
@@ -633,17 +630,22 @@
         <span class="p">]</span>
     <span class="p">)</span>
 
-    <span class="c1"># Rename &quot;category&quot; to &quot;category_id&quot; (in dataset it is an integer)</span>
-    <span class="c1"># and compute &quot;category&quot; as string from &quot;category_id&quot;</span>
-    <span class="n">map_category_to_str</span> <span class="o">=</span> <span class="n">ds_attrs</span><span class="p">[</span><span class="s2">&quot;map_category_to_str&quot;</span><span class="p">]</span>
+    <span class="c1"># Rename &quot;category&quot; to &quot;category_id&quot;</span>
+    <span class="c1"># (in input dataset &quot;category&quot; is an integer, but in COCO it is a str)</span>
     <span class="n">df</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="s2">&quot;category_id&quot;</span><span class="p">},</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">df</span><span class="p">[</span><span class="s2">&quot;category&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;category_id&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">map_category_to_str</span><span class="p">)</span>
+    <span class="c1"># and compute &quot;category&quot; as a string from &quot;category_id&quot;</span>
+    <span class="n">map_category_to_str</span> <span class="o">=</span> <span class="n">ds_attrs</span><span class="p">[</span><span class="s2">&quot;map_category_to_str&quot;</span><span class="p">]</span>
+    <span class="n">df</span><span class="p">[</span><span class="s2">&quot;category&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;category_id&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">map</span><span class="p">(</span>
+        <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">map_category_to_str</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+    <span class="p">)</span>  <span class="c1"># set value to &quot;&quot; if category ID is not defined in map_category_to_str</span>
 
-    <span class="c1"># supercategory</span>
+    <span class="c1"># Set supercategory to empty string if not defined</span>
     <span class="k">if</span> <span class="s2">&quot;supercategory&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
         <span class="n">df</span><span class="p">[</span><span class="s2">&quot;supercategory&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">df</span><span class="p">[</span><span class="s2">&quot;supercategory&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;supercategory&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
 
-    <span class="c1"># other</span>
+    <span class="c1"># Set iscrowd always to 0</span>
     <span class="n">df</span><span class="p">[</span><span class="s2">&quot;iscrowd&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
 
     <span class="c1"># Set index name and add &quot;annotation_id&quot; as column</span>
