@@ -235,7 +235,9 @@ def _add_COCO_data_to_df(
     # and compute "category" as string from "category_id"
     map_category_to_str = ds_attrs["map_category_to_str"]
     df.rename(columns={"category": "category_id"}, inplace=True)
-    df["category"] = df["category_id"].map(map_category_to_str)
+    df["category"] = df["category_id"].map(
+        lambda x: map_category_to_str.get(x, "")
+    )  # set value to "" if category ID is not defined in map_category_to_str
 
     # supercategory
     if "supercategory" not in df.columns:
