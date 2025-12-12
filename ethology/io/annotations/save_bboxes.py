@@ -235,19 +235,22 @@ def _add_COCO_data_to_df(
         ]
     )
 
-    # Rename "category" to "category_id" (in dataset it is an integer)
-    # and compute "category" as string from "category_id"
-    map_category_to_str = ds_attrs["map_category_to_str"]
+    # Rename "category" to "category_id"
+    # (in input dataset "category" is an integer, but in COCO it is a str)
     df.rename(columns={"category": "category_id"}, inplace=True)
+    # and compute "category" as a string from "category_id"
+    map_category_to_str = ds_attrs["map_category_to_str"]
     df["category"] = df["category_id"].map(
         lambda x: map_category_to_str.get(x, "")
     )  # set value to "" if category ID is not defined in map_category_to_str
 
-    # supercategory
+    # Set supercategory to empty string if not defined
     if "supercategory" not in df.columns:
         df["supercategory"] = ""
+    else:
+        df["supercategory"] = df["supercategory"].astype(str)
 
-    # other
+    # Set iscrowd always to 0
     df["iscrowd"] = 0
 
     # Set index name and add "annotation_id" as column
