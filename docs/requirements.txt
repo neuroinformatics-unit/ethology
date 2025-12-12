@@ -9,4 +9,5 @@ sphinx-autodoc-typehints
 sphinx-design
 sphinx-gallery
 sphinx-notfound-page
+sphinx-paramlinks  # for :paramref: Sphinx role, used by lightning docstrings
 sphinx-sitemap
