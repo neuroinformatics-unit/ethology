@@ -26,6 +26,7 @@ dependencies = [
   "torch",
   "torchvision",
   "loguru",
+  "lightning>=2.6.0",
 ]
 
 [project.urls]

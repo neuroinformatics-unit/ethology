@@ -37,6 +37,7 @@ extensions = [
     "sphinx.ext.autosummary",
     "sphinx.ext.viewcode",
     "sphinx.ext.intersphinx",
+    "sphinx.ext.doctest",  # for lightning docstrings
     "myst_parser",
     "nbsphinx",
     "notfound.extension",
@@ -44,6 +45,7 @@ extensions = [
     "sphinx_gallery.gen_gallery",
     "sphinx_sitemap",
     "sphinx.ext.autosectionlabel",
+    "sphinx_paramlinks",  # for :paramref: Sphinx role, used by lightning
 ]
 
 # Configure the myst parser to enable cool markdown features
@@ -186,6 +188,8 @@ intersphinx_mapping = {
         "https://python-jsonschema.readthedocs.io/en/stable/",
         None,
     ),
+    "torch": ("https://pytorch.org/docs/stable/", None),
+    "lightning": ("https://lightning.ai/docs/pytorch/stable/", None),
 }
 
 
