@@ -39,7 +39,10 @@ def test_get_padding_width(array, final_first_dim, expected_exception):
     [np.nan, 42, -1],
 )
 @pytest.mark.parametrize(
-    "list_arrays", [[np.zeros((1, 1)), np.zeros((3, 1)), np.zeros((42, 1))]]
+    "list_arrays",
+    [
+        [np.zeros((1, 1)), np.zeros((3, 1)), np.zeros((42, 1))],
+    ],
 )
 def test_pad_to_max_first_dimension(list_arrays, fill_value):
     list_arrays_padded = _pad_to_max_first_dimension(list_arrays, fill_value)
@@ -54,6 +57,23 @@ def test_pad_to_max_first_dimension(list_arrays, fill_value):
         for orig, padded in zip(list_arrays, list_arrays_padded, strict=True)
         if padded[orig.shape[0] :].size > 0
     )
+
+
+@pytest.mark.parametrize(
+    "fill_value",
+    [np.nan, 0.5],
+)
+def test_pad_to_max_first_dimension_dtype_mismatch(fill_value):
+    """Test that TypeError is raised for incompatible fill_value dtype."""
+    with pytest.raises(
+        TypeError,
+        match="Ensure fill_value is compatible with array dtype",
+    ):
+        list_int_arrays = [
+            np.zeros((2, 2), dtype=int),
+            np.zeros((3, 2), dtype=int),
+        ]
+        _pad_to_max_first_dimension(list_int_arrays, fill_value)
 
 
 def test_centroid_shape_to_corners():

@@ -3,20 +3,38 @@
 import numpy as np
 
 
-def _get_padding_width(array, max_n):
-    """Get pad width for array to max_n detections in the first dimension."""
+def _get_padding_width(array, final_first_dim):
+    """Get pad_width to pad the end of an array along the first dimension."""
+    # Throw an error if shape mismatch
+    if array.shape[0] > final_first_dim:
+        raise ValueError(
+            "Array has more rows than the requested padded size: "
+            f"{array.shape[0]} > {final_first_dim}"
+        )
     pad_width = array.ndim * [(0, 0)]
-    pad_width[0] = (0, max_n - array.shape[0])  # before, after
+    pad_width[0] = (0, final_first_dim - array.shape[0])
     return pad_width
 
 
 def _pad_to_max_first_dimension(list_arrays, fill_value=np.nan):
     """Pad arrays in list to maximum size of their first dimension."""
-    max_n_detections = max(array.shape[0] for array in list_arrays)
+    max_first_dimension = max(array.shape[0] for array in list_arrays)
+
+    # Check for dtype compatibility between fill_value and arrays
+    # (convert fill_value to numpy scalar/array to get its dtype first)
+    for i, arr in enumerate(list_arrays):
+        if not np.can_cast(np.asarray(fill_value).dtype, arr.dtype):
+            raise TypeError(
+                f"Cannot pad array (index {i}, dtype={arr.dtype}) "
+                f"with fill_value={fill_value!r} "
+                f"(type={type(fill_value).__name__}). "
+                f"Ensure fill_value is compatible with array dtype."
+            )
+
     list_arrays_padded = [
         np.pad(
             arr,
-            _get_padding_width(arr, max_n_detections),
+            _get_padding_width(arr, max_first_dimension),
             mode="constant",
             constant_values=fill_value,
         )
