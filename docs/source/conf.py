@@ -189,6 +189,7 @@ intersphinx_mapping = {
         None,
     ),
     "torch": ("https://pytorch.org/docs/stable/", None),
+    "torchvision": ("https://pytorch.org/vision/stable/", None),
     "lightning": ("https://lightning.ai/docs/pytorch/stable/", None),
 }
 
