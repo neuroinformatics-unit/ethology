@@ -38,17 +38,54 @@ class ObjectDetector(LightningModule):
     Parameters
     ----------
     config : dict
-        Configuration of the model.
+        Configuration of the model, with the expected keys:
+        - "model_class": str
+            Name of the model to initialise. Should be one of:
+            - ``fasterrcnn_resnet50_fpn_v2``,
+            - ``fasterrcnn_mobilenet_v3_large_fpn``,
+            - ``fcos_resnet50_fpn``,
+            - ``retinanet_resnet50_fpn_v2``.
+        - "model_kwargs": dict
+            Keyword arguments to pass to the model constructor. See
+            the `torchvision.models.detection module <https://docs.pytorch.org/vision/main/models.html#object-detection>`_
+            for further details.
+        - "checkpoint": str | None
+            Path to the trained model checkpoint. If ``None``, the model is
+            initialised from pretrained weights.
+
+    Attributes
+    ----------
+    config : dict
+        The configuration dictionary passed to the constructor.
+    model : torch.nn.Module
+        The object detector model.
+
+    Examples
+    --------
+    Initialise a Faster R-CNN model from pretrained weights:
+
+    >>> from ethology.detectors.models import ObjectDetector
+    >>> config = {
+    ...     "model_class": "fasterrcnn_resnet50_fpn_v2",
+    ...     "model_kwargs": {
+    ...         "num_classes": 2,
+    ...         "weights": None,
+    ...         "weights_backbone": None,
+    ...     },
+    ...     "checkpoint": "/path/to/checkpoint.ckpt",
+    ... }
+    >>> model = ObjectDetector(config)
 
     """
 
     def __init__(self, config: dict[str, Any]):
-        """Initialise the Faster R-CNN model with the given configuration."""
+        """Initialise object detector for the given configuration."""
         super().__init__()
         self.config = config
         self.model = self._configure_model()
 
-        # save all arguments passed to __init__
+        # save all arguments passed to __init__ to
+        # hparams attribute
         self.save_hyperparameters()
 
     # -------- Initialise model ----------------------------
@@ -63,11 +100,15 @@ class ObjectDetector(LightningModule):
         return model
 
     def _configure_model_pretrained(self) -> torch.nn.Module:
-        """Initialise object detector model from pretrained.
+        """Load pretrained weights into model.
 
-        Uses default weights, backbone, and box predictor. Initialises
-        classification head with random weights and size to the number
-        of classes.
+        Default weights are used when possible. If there is a shape mismatch
+        in the layers, the weights are reinitialised.
+
+        Returns
+        -------
+        torch.nn.Module
+            The initialised object detector model.
 
         Notes
         -----
@@ -76,18 +117,12 @@ class ObjectDetector(LightningModule):
         fine grained detection. They may be helpful in small datasets
         (< 100 images)
 
-        Parameters
-        ----------
-        model_name : str
-            Name of the model to initialise.
-        num_classes : int
-            Number of classes to initialise the classification head for.
-
         """
         # Get model name and number of classes
         # Default: fasterrcnn_resnet50_fpn_v2 and 2 classes
         model_name = self.config.get(
-            "model_name", "fasterrcnn_resnet50_fpn_v2"
+            "model_name",
+            "fasterrcnn_resnet50_fpn_v2",
         )
         num_classes = self.config.get("num_classes", 2)
 
@@ -99,8 +134,6 @@ class ObjectDetector(LightningModule):
             )
 
         # Load selected model with pretreained weights in backbone and head
-        # For faster-rcnn: both backbone and RPN are loaded with pretrained
-        # weights
         model = MODEL_REGISTRY[model_name](weights="DEFAULT")
 
         # Keep as much as possible from the bbox prediction head
@@ -109,15 +142,16 @@ class ObjectDetector(LightningModule):
             # (both cls_score and bbox_pred are reinitialised)
             # Note: in Faster R-CNN, the bbox regression is class-specific;
             # it learns a different way of refining bboxes for each class.
-            # So we need to reinitialise the full box predictor.
+            # So we need to reinitialise the full box predictor if the number
+            # of classes is different from COCO2017.
             in_features = model.roi_heads.box_predictor.cls_score.in_features
             model.roi_heads.box_predictor = faster_rcnn.FastRCNNPredictor(
                 in_features,
                 self.config["num_classes"],
             )
         elif "retinanet" in model_name:
-            # CHECK
-            # In retinanet bbox regression is class-agnostic
+            # In retinanet bbox regression is class-agnostic, so we can
+            # retain it
             in_channels = model.head.classification_head.conv[0].in_channels
             num_anchors = model.head.classification_head.num_anchors
             model.head.classification_head = (
@@ -127,8 +161,7 @@ class ObjectDetector(LightningModule):
             )
 
         elif "fcos" in model_name:
-            # CHECK
-            # In fcos bbox regression is class-agnostic
+            # In fcos bbox regression is class-agnostic, so we can retain it
             in_channels = model.head.classification_head.conv[0].in_channels
             num_anchors = model.head.classification_head.num_anchors
             model.head.classification_head = fcos.FCOSClassificationHead(
@@ -140,7 +173,7 @@ class ObjectDetector(LightningModule):
     def _configure_model_from_checkpoint(
         self, checkpoint_path: str
     ) -> torch.nn.Module:
-        """Initialise Faster R-CNN model from checkpoint."""
+        """Load weights from checkpoint into model."""
         # Get checkpoint
         checkpoint_dict = torch.load(checkpoint_path, map_location=self.device)
 
@@ -155,7 +188,14 @@ class ObjectDetector(LightningModule):
 
     @staticmethod
     def _get_model_state_dict(checkpoint: dict) -> dict:
-        """Get model state dict from checkpoint dictionary."""
+        """Get model state dict from checkpoint dictionary.
+
+        Returns
+        -------
+        dict
+            The model state dictionary.
+
+        """
         # Get the state_dict key if it exists,
         # otherwise use the checkpoint itself as the state dict
         state_dict = checkpoint.get("state_dict", checkpoint)
@@ -185,10 +225,26 @@ class ObjectDetector(LightningModule):
         dataloader: DataLoader,
         attrs: dict | None = None,
     ) -> xr.Dataset:
-        """Run inference and return the xarray dataset.
+        """Run inference on the input dataloader.
 
-        Convenience method that wraps trainer.predict() and
-        format_predictions().
+        Convenience method that wraps ``trainer.predict()`` and
+        ``_format_predictions()`` and returns the formatted predictions as an
+        ``ethology`` detections dataset.
+
+        Parameters
+        ----------
+        trainer : lightning.Trainer
+            The trainer to use for inference.
+        dataloader : torch.utils.data.DataLoader
+            The dataloader to use for inference.
+        attrs : dict | None
+            Attributes to add to the predictions dataset.
+
+        Returns
+        -------
+        xr.Dataset
+            The formatted predictions as an ``ethology`` detections dataset.
+
         """
         predictions = trainer.predict(self, dataloader)
         return self._format_predictions(predictions, attrs=attrs)
@@ -242,7 +298,7 @@ class ObjectDetector(LightningModule):
                     ["image_id", "id"],
                     output_per_sample_padded["scores"],
                 ),
-                "category": (  # labels are renamed as "category"
+                "category": (  # labels are renamed as "category" array
                     ["image_id", "id"],
                     output_per_sample_padded["labels"],
                 ),
