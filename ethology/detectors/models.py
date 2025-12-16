@@ -29,8 +29,11 @@ MODEL_REGISTRY = {
 }
 
 
-class SingleDetector(LightningModule):
-    """LightningModule implementation of Faster R-CNN for object detection.
+class ObjectDetector(LightningModule):
+    """LightningModule for object detection using torchvision models.
+
+    Supports Faster R-CNN, RetinaNet, and FCOS architectures.
+    This module is intended for inference only.
 
     Parameters
     ----------
@@ -60,16 +63,26 @@ class SingleDetector(LightningModule):
         return model
 
     def _configure_model_pretrained(self) -> torch.nn.Module:
-        """Initialise Faster R-CNN model from pretrained.
+        """Initialise object detector model from pretrained.
 
-        Use default weights, backbone, and box predictor. Initialise
+        Uses default weights, backbone, and box predictor. Initialises
         classification head with random weights and size to the number
         of classes.
 
+        Notes
+        -----
         Keeping the classification head may not be useful if the domain
         is very different to COCO or natural images, or if looking for
-        fine grained detection. They may be helpful in small datasets (< 100
-        images)
+        fine grained detection. They may be helpful in small datasets
+        (< 100 images)
+
+        Parameters
+        ----------
+        model_name : str
+            Name of the model to initialise.
+        num_classes : int
+            Number of classes to initialise the classification head for.
+
         """
         # Get model name and number of classes
         # Default: fasterrcnn_resnet50_fpn_v2 and 2 classes

@@ -25,7 +25,7 @@ from ethology.datasets.inference import (
     InferenceImageDataset,
     get_default_inference_transforms,
 )
-from ethology.detectors.models import SingleDetector
+from ethology.detectors.models import ObjectDetector
 from ethology.io.annotations import save_bboxes
 
 # For interactive plots: install ipympl with `pip install ipympl` and uncomment
@@ -102,7 +102,7 @@ dataloader = DataLoader(
 # -------------------------
 
 # Instantiate detector
-model = SingleDetector(config)
+model = ObjectDetector(config)
 print(config)
 
 # Instantiate trainer
