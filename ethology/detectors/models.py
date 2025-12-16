@@ -179,7 +179,7 @@ class ObjectDetector(LightningModule):
 
         # Instantiate model with ckpt weights
         model = get_model(
-            self.config["model_class"],  # "fasterrcnn_resnet50_fpn_v2",
+            self.config["model_class"],
             **self.config.get("model_kwargs", {}),
         )
         model_state_dict = self._get_model_state_dict(checkpoint_dict)
@@ -211,8 +211,28 @@ class ObjectDetector(LightningModule):
         }
 
     # ------- Inference -----------------------
-    def predict_step(self, batch, batch_idx) -> Any:
-        """Run inference on a batch of images."""
+    def predict_step(
+        self, batch: tuple[torch.Tensor, dict], batch_idx: int
+    ) -> dict:
+        """Run inference on a batch of images.
+
+        Parameters
+        ----------
+        batch : tuple[torch.Tensor, dict]
+            A tuple containing the batch of images and the corresponding
+            annotations.
+        batch_idx : int
+            The index of the batch.
+
+        Returns
+        -------
+        dict
+            The raw predictions as a dictionary with the keys:
+            - "boxes": torch.Tensor
+            - "scores": torch.Tensor
+            - "labels": torch.Tensor
+
+        """
         images_batch, _annotations_batch = batch
         raw_prediction_dicts = self.model(images_batch)
 
@@ -253,12 +273,33 @@ class ObjectDetector(LightningModule):
     @staticmethod
     @_check_output(ValidBboxDetectionsDataset)
     def _format_predictions(
-        predictions: list[dict],
+        predictions: list[list[dict]],
         attrs: dict | None = None,
     ) -> xr.Dataset:
-        """Format predictions as an ``ethology`` detections dataset."""
+        """Format predictions as an ``ethology`` detections dataset.
+
+        Empty batches are ignored. Outer list is batches, inner list is images.
+        """
+        # Check input data
+        if not isinstance(predictions, list):
+            raise TypeError(
+                f"predictions must be a list, got {type(predictions).__name__}"
+            )
+        if len(predictions) == 0:
+            raise ValueError(
+                "predictions list is empty. "
+                "Cannot format an empty predictions list."
+            )
+
         # Flatten output predictions
         predictions_dict_per_img = list(chain.from_iterable(predictions))
+
+        # Check flattened data
+        if len(predictions_dict_per_img) == 0:
+            raise ValueError(
+                "No predictions to format. "
+                "predictions list contains no image data."
+            )
 
         # Parse output from dicts
         output_per_sample = {
