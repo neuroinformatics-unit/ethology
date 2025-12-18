@@ -49,21 +49,21 @@ def centroid_shape_to_corners(position: np.ndarray, shape: np.ndarray):
     Parameters
     ----------
     position : numpy.ndarray
-        Array of centroid coordinates with shape (..., 2), where the last
-        dimension contains (x, y) coordinates.
+        Array of centroid coordinates with shape (..., 2, ...), where the
+        second dimension contains (x, y) coordinates.
     shape : numpy.ndarray
-        Array of bounding box dimensions with shape (..., 2), where the last
-        dimension contains (width, height).
+        Array of bounding box dimensions with shape (..., 2, ...), where the
+        second dimensioncontains (width, height).
 
     Returns
     -------
     x1y1 : numpy.ndarray
-        Array of top-left corner coordinates with shape (..., 2), where the
-        last dimension contains (x, y) coordinates. The top-left corner is
-        the bounding box corner with minimum x and y coordinate values.
+        Array of top-left corner coordinates with shape (..., 2,..), where the
+        second dimension contains (x, y) coordinates. The top-left corner
+        is the bounding box corner with minimum x and y coordinate values.
     x2y2 : numpy.ndarray
-        Array of bottom-right corner coordinates with shape (..., 2), where
-        the last dimension contains (x, y) coordinates.  The bottom-right
+        Array of bottom-right corner coordinates with shape (..., 2,..), where
+        the second dimension contains (x, y) coordinates. The bottom-right
         corner is the bounding box corner with maximum x and y coordinate
         values.
 
@@ -71,7 +71,7 @@ def centroid_shape_to_corners(position: np.ndarray, shape: np.ndarray):
     Raises
     ------
     ValueError : If position and shape have different shapes or
-    last dimension is not 2.
+    second dimension is not 2.
 
     See Also
     --------
@@ -85,10 +85,11 @@ def centroid_shape_to_corners(position: np.ndarray, shape: np.ndarray):
             f"got {position.shape} and {shape.shape}"
         )
 
-    # Check last dimension is 2D
-    if position.shape[-1] != 2 or shape.shape[-1] != 2:
+    # Check dimension at index 1 is 2D
+    if position.shape[1] != 2 or shape.shape[1] != 2:
         raise ValueError(
-            f"Both position and shape last dimension must be 2, "
+            "Dimension at index 1 must be 2"
+            " for both position and shape, "
             f"but got position: {position.shape}, shape: {shape.shape}"
         )
 
@@ -105,28 +106,29 @@ def corners_to_centroid_shape(x1y1: np.ndarray, x2y2: np.ndarray):
     Parameters
     ----------
     x1y1 : numpy.ndarray
-        Array of top-left corner coordinates with shape (..., 2), where the
-        last dimension contains (x, y) coordinates. The top-left corner is
-        the bounding box corner with minimum x and y coordinate values.
-    x2y2 : numpy.ndarray
-        Array of bottom-right corner coordinates with shape (..., 2), where
-        the last dimension contains (x, y) coordinates.  The bottom-right
-        corner is the bounding box corner with maximum x and y coordinate
+        Array of top-left corner coordinates with shape (..., 2, ...), where
+        the second dimension contains (x, y) coordinates. The top-left
+        corner is the bounding box corner with minimum x and y coordinate
         values.
+    x2y2 : numpy.ndarray
+        Array of bottom-right corner coordinates with shape (..., 2, ...),
+        where the second dimension contains (x, y) coordinates.
+        The bottom-right corner is the bounding box corner with maximum x
+        and y coordinate values.
 
     Returns
     -------
     centroid : numpy.ndarray
-        Array of centroid coordinates with shape (..., 2), where the
-        last dimension contains (x, y) coordinates
+        Array of centroid coordinates with shape (..., 2, ...), where the
+        second dimension contains (x, y) coordinates
     shape : numpy.ndarray
-        Array of bounding box dimensions with shape (..., 2), where the last
-        dimension contains (width, height).
+        Array of bounding box dimensions with shape (..., 2, ... ), where the
+        second dimension contains (width, height).
 
     Raises
     ------
-    ValueError : If x1y1 and x2y2 have different shapes or last dimension is
-    not 2.
+    ValueError : If x1y1 and x2y2 have different shapes or dimension
+    at index 1 is not 2.
 
     See Also
     --------
@@ -140,10 +142,10 @@ def corners_to_centroid_shape(x1y1: np.ndarray, x2y2: np.ndarray):
             f"got x1y1: {x1y1.shape}, x2y2: {x2y2.shape}"
         )
 
-    # Check last dimension is 2D
-    if x1y1.shape[-1] != 2 or x2y2.shape[-1] != 2:
+    # Check dimension at index 1 is 2D
+    if x1y1.shape[1] != 2 or x2y2.shape[1] != 2:
         raise ValueError(
-            f"Both x1y1 and x2y2 last dimension must be 2, "
+            f"Dimension at index 1 must be 2 for both x1y1 and x2y2, "
             f"but got x1y1: {x1y1.shape}, x2y2: {x2y2.shape}"
         )
 

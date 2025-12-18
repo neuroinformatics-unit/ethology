@@ -104,7 +104,11 @@ def test_pad_to_max_first_dimension_dtype_mismatch(fill_value):
             np.zeros((2, 3)),
             np.ones((2, 3)),
             pytest.raises(
-                ValueError, match="position and shape last dimension must be 2"
+                ValueError,
+                match=(
+                    "Dimension at index 1 must be 2 "
+                    "for both position and shape"
+                ),
             ),
         ),
     ],
@@ -141,7 +145,10 @@ def test_centroid_shape_to_corners(position, shape, expected_exception):
             np.zeros((2, 3)),
             np.ones((2, 3)),
             pytest.raises(
-                ValueError, match="x1y1 and x2y2 last dimension must be 2"
+                ValueError,
+                match=(
+                    "Dimension at index 1 must be 2 for both x1y1 and x2y2"
+                ),
             ),
         ),
     ],
