@@ -1,5 +1,6 @@
 """Lightning modules for detectors."""
 
+import difflib
 from itertools import chain
 from typing import Any
 
@@ -27,6 +28,8 @@ MODEL_CONSTRUCTORS_REGISTRY = {
     "fcos_resnet50_fpn": fcos.fcos_resnet50_fpn,
     "retinanet_resnet50_fpn_v2": retinanet.retinanet_resnet50_fpn_v2,
 }
+
+DEFAULT_NUM_CLASSES = 91
 
 
 class ObjectDetector(LightningModule):
@@ -81,22 +84,87 @@ class ObjectDetector(LightningModule):
     def __init__(self, config: dict[str, Any]):
         """Initialise object detector for the given configuration."""
         super().__init__()
-        self.config = config
+        self.config = self._validate_config(config)
         self.model = self._configure_model()
 
         # save all arguments passed to __init__ to
         # hparams attribute
         self.save_hyperparameters()
 
+    # --------- Validate config -----------------
+    @staticmethod
+    def _validate_config(config):
+        """Validate config dict for detector."""
+        # Check config is a dictionary
+        if not isinstance(config, dict):
+            raise TypeError(
+                "config must be a dictionary",
+                f"but got {type(config).__name__}",
+            )
+
+        # model_class should always be defined
+        if "model_class" not in config:
+            raise ValueError("model_class must be defined in config")
+
+        # model_class required when loading from checkpoint
+        # if "checkpoint" in config and "model_class" not in config:
+        #     raise ValueError(
+        #         "model_class must be defined in config "
+        #         "when loading from checkpoint"
+        #     )
+
+        # Check if model_class is supported if defined
+        if config["model_class"] not in MODEL_CONSTRUCTORS_REGISTRY:
+            model_class = config["model_class"]
+            raise ValueError(
+                f"Model '{model_class}' not supported. "
+                f"Available: {list(MODEL_CONSTRUCTORS_REGISTRY.keys())}"
+            )
+
+        # Check model_kwargs type is dict if provided
+        if "model_kwargs" in config:
+            if not isinstance(config["model_kwargs"], dict):
+                raise TypeError(
+                    f"model_kwargs must be a dict, got "
+                    f"{type(config['model_kwargs']).__name__}"
+                )
+
+            # Check for keys similar to 'num_classes' but not exact
+            list_fuzzy_matches = ["num_classes"]
+            for key in config["model_kwargs"]:
+                if key not in list_fuzzy_matches:
+                    close_matches = difflib.get_close_matches(
+                        key, list_fuzzy_matches
+                    )
+                    if close_matches:
+                        raise ValueError(
+                            f"Invalid key '{key}' in model_kwargs. "
+                            f"Did you mean '{close_matches[0]}'?"
+                        )
+
+        return config
+
     # -------- Initialise model ----------------------------
     def _configure_model(self) -> torch.nn.Module:
         """Initialise model from ckpt if provided, else from pretrained."""
-        if "checkpoint" in self.config:
+        # Extract model params as attributes
+        self.model_class = self.config.get("model_class")
+        self.model_kwargs = self.config.get("model_kwargs", {})
+
+        # Set num_classes to default if not set
+        if "num_classes" not in self.model_kwargs:
+            self.model_kwargs["num_classes"] = DEFAULT_NUM_CLASSES
+
+        # TODO: log model params?
+
+        # Delegate to the appropriate function
+        if "checkpoint" not in self.config:
+            model = self._configure_model_pretrained()
+        else:
             model = self._configure_model_from_checkpoint(
                 self.config["checkpoint"]
             )
-        else:
-            model = self._configure_model_pretrained()
+
         return model
 
     def _configure_model_pretrained(self) -> torch.nn.Module:
@@ -118,60 +186,59 @@ class ObjectDetector(LightningModule):
         (< 100 images)
 
         """
-        # Get model name and number of classes
-        # Default: fasterrcnn_resnet50_fpn_v2 and 2 classes
-        model_class = self.config.get(
-            "model_class",
-            "fasterrcnn_resnet50_fpn_v2",
-        )
-        n_classes = self.config.get("n_classes", 2)
-
-        # # Log
-        # self.logger.info(
-        #     f"Initialising model: {model_class} with {n_classes} classes"
-        # )
-
-        # Check if model is supported
-        if model_class not in MODEL_CONSTRUCTORS_REGISTRY:
-            raise ValueError(
-                f"Model '{model_class}' not supported. "
-                f"Available: {list(MODEL_CONSTRUCTORS_REGISTRY.keys())}"
-            )
-
         # Load selected model with pretreained weights in backbone and head
-        model = MODEL_CONSTRUCTORS_REGISTRY[model_class](weights="DEFAULT")
+        model = MODEL_CONSTRUCTORS_REGISTRY[self.model_class](
+            weights="DEFAULT"
+        )
 
-        # Keep as much as possible from the bbox prediction head
-        if "fasterrcnn" in model_class:
-            # Reinitialise box predictor for the required number of classes
-            # (both cls_score and bbox_pred are reinitialised)
-            # Note: in Faster R-CNN, the bbox regression is class-specific;
-            # it learns a different way of refining bboxes for each class.
-            # So we need to reinitialise the full box predictor if the number
-            # of classes is different from COCO2017.
-            in_features = model.roi_heads.box_predictor.cls_score.in_features
-            model.roi_heads.box_predictor = faster_rcnn.FastRCNNPredictor(
-                in_features,
-                n_classes,
-            )
-        elif "retinanet" in model_class:
-            # In retinanet bbox regression is class-agnostic, so we can
-            # retain it
-            in_channels = model.head.classification_head.conv[0][0].in_channels
-            num_anchors = model.head.classification_head.num_anchors
-            model.head.classification_head = (
-                retinanet.RetinaNetClassificationHead(
-                    in_channels, num_anchors, n_classes
+        # Adapt model if there is a mismatch with the requested number of
+        # classes
+        n_classes_model = self._get_n_classes_in_detector(
+            model, self.model_class
+        )  # shape of loaded model
+        if self.model_kwargs["num_classes"] != n_classes_model:
+            # Keep as much as possible from the bbox prediction head
+            if "fasterrcnn" in self.model_class:
+                # Reinitialise box predictor for the required number of classes
+                # (both cls_score and bbox_pred are reinitialised)
+                # Note: in Faster R-CNN, the bbox regression is class-specific;
+                # it learns a different way of refining bboxes for each class.
+                # So we need to reinitialise the full box predictor if the
+                # number of classes is different from COCO2017.
+                in_features = (
+                    model.roi_heads.box_predictor.cls_score.in_features
                 )
-            )
+                model.roi_heads.box_predictor = faster_rcnn.FastRCNNPredictor(
+                    in_features,
+                    self.model_kwargs["num_classes"],
+                )
+            elif "retinanet" in self.model_class:
+                # In retinanet bbox regression is class-agnostic, so we can
+                # retain it
+                in_channels = model.head.classification_head.conv[0][
+                    0
+                ].in_channels
+                num_anchors = model.head.classification_head.num_anchors
+                model.head.classification_head = (
+                    retinanet.RetinaNetClassificationHead(
+                        in_channels,
+                        num_anchors,
+                        self.model_kwargs["num_classes"],
+                    )
+                )
 
-        elif "fcos" in model_class:
-            # In fcos bbox regression is class-agnostic, so we can retain it
-            in_channels = model.head.classification_head.conv[0].in_channels
-            num_anchors = model.head.classification_head.num_anchors
-            model.head.classification_head = fcos.FCOSClassificationHead(
-                in_channels, num_anchors, n_classes
-            )
+            elif "fcos" in self.model_class:
+                # In fcos bbox regression is class-agnostic, so we can retain
+                # it
+                in_channels = model.head.classification_head.conv[
+                    0
+                ].in_channels
+                num_anchors = model.head.classification_head.num_anchors
+                model.head.classification_head = fcos.FCOSClassificationHead(
+                    in_channels,
+                    num_anchors,
+                    self.model_kwargs["num_classes"],
+                )
 
         return model
 
@@ -182,14 +249,29 @@ class ObjectDetector(LightningModule):
         # Get checkpoint
         checkpoint_dict = torch.load(checkpoint_path, map_location=self.device)
 
-        # Instantiate model with ckpt weights
-        model = get_model(
-            self.config["model_class"],
-            **self.config.get("model_kwargs", {}),
-        )
+        # Instantiate model
+        model = get_model(self.model_class, **self.model_kwargs)
+
+        # Get state dict from checkpoint and load into model
         model_state_dict = self._get_model_state_dict(checkpoint_dict)
         model.load_state_dict(model_state_dict, strict=True)
         return model
+
+    # ------ Convenience functions --------------
+    @staticmethod
+    def _get_n_classes_in_detector(model, model_class):
+        """Extract the number of classes based on model architecture."""
+        if "fasterrcnn" in model_class:
+            return model.roi_heads.box_predictor.cls_score.out_features
+        elif any(x in model_class for x in ["retinanet", "fcos"]):
+            cls_head = model.head.classification_head
+            return cls_head.cls_logits.out_channels // cls_head.num_anchors
+        else:
+            raise ValueError(
+                "Could not retrieve the number of classes "
+                "in the loaded detector."
+                f"Unsupported model class: {model_class}"
+            )
 
     @staticmethod
     def _get_model_state_dict(checkpoint: dict) -> dict:
