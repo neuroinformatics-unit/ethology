@@ -43,15 +43,55 @@ def _pad_to_max_first_dimension(list_arrays, fill_value=np.nan):
     return list_arrays_padded
 
 
-def _centroid_shape_to_corners(position, shape):
+def centroid_shape_to_corners(position: np.ndarray, shape: np.ndarray):
     """Convert centroid and shape arrays to x1y1, x2y2 corner arrays.
 
-    x1y1 is the top left corner (min x-coordinate, min y-coordinate),
-    x2y2 is the bottom right corner (max x-coordinate, max y-coordinate)
-    of the bounding box.
+    Parameters
+    ----------
+    position : numpy.ndarray
+        Array of centroid coordinates with shape (..., 2), where the last
+        dimension contains (x, y) coordinates.
+    shape : numpy.ndarray
+        Array of bounding box dimensions with shape (..., 2), where the last
+        dimension contains (width, height).
 
-    Space dimension is assumed to be the second dimension.
+    Returns
+    -------
+    x1y1 : numpy.ndarray
+        Array of top-left corner coordinates with shape (..., 2), where the
+        last dimension contains (x, y) coordinates. The top-left corner is
+        the bounding box corner with minimum x and y coordinate values.
+    x2y2 : numpy.ndarray
+        Array of bottom-right corner coordinates with shape (..., 2), where
+        the last dimension contains (x, y) coordinates.  The bottom-right
+        corner is the bounding box corner with maximum x and y coordinate
+        values.
+
+
+    Raises
+    ------
+    ValueError : If position and shape have different shapes or
+    last dimension is not 2.
+
+    See Also
+    --------
+    corners_to_centroid_shape : Inverse operation.
+
     """
+    # Check position and shape have compatible shapes
+    if position.shape != shape.shape:
+        raise ValueError(
+            f"position and shape must have the same shape, "
+            f"got {position.shape} and {shape.shape}"
+        )
+
+    # Check last dimension is 2D
+    if position.shape[-1] != 2 or shape.shape[-1] != 2:
+        raise ValueError(
+            f"Both position and shape last dimension must be 2, "
+            f"but got position: {position.shape}, shape: {shape.shape}"
+        )
+
     half_shape = shape / 2
     return (
         position - half_shape,  # x1y1
@@ -59,11 +99,54 @@ def _centroid_shape_to_corners(position, shape):
     )
 
 
-def _corners_to_centroid_shape(x1y1, x2y2):
+def corners_to_centroid_shape(x1y1: np.ndarray, x2y2: np.ndarray):
     """Convert x1y1, x2y2 corner arrays to centroid and shape arrays.
 
-    Space dimension is assumed to be the second dimension.
+    Parameters
+    ----------
+    x1y1 : numpy.ndarray
+        Array of top-left corner coordinates with shape (..., 2), where the
+        last dimension contains (x, y) coordinates. The top-left corner is
+        the bounding box corner with minimum x and y coordinate values.
+    x2y2 : numpy.ndarray
+        Array of bottom-right corner coordinates with shape (..., 2), where
+        the last dimension contains (x, y) coordinates.  The bottom-right
+        corner is the bounding box corner with maximum x and y coordinate
+        values.
+
+    Returns
+    -------
+    centroid : numpy.ndarray
+        Array of centroid coordinates with shape (..., 2), where the
+        last dimension contains (x, y) coordinates
+    shape : numpy.ndarray
+        Array of bounding box dimensions with shape (..., 2), where the last
+        dimension contains (width, height).
+
+    Raises
+    ------
+    ValueError : If x1y1 and x2y2 have different shapes or last dimension is
+    not 2.
+
+    See Also
+    --------
+    centroid_shape_to_corners : Inverse operation.
+
     """
+    # Check x1y1 and x2y2 have compatible shapes
+    if x1y1.shape != x2y2.shape:
+        raise ValueError(
+            f"x1y1 and x2y2 must have the same shape, "
+            f"got x1y1: {x1y1.shape}, x2y2: {x2y2.shape}"
+        )
+
+    # Check last dimension is 2D
+    if x1y1.shape[-1] != 2 or x2y2.shape[-1] != 2:
+        raise ValueError(
+            f"Both x1y1 and x2y2 last dimension must be 2, "
+            f"but got x1y1: {x1y1.shape}, x2y2: {x2y2.shape}"
+        )
+
     return (
         0.5 * (x1y1 + x2y2),  # centroid
         x2y2 - x1y1,  # shape
