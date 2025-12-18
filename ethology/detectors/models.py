@@ -21,7 +21,7 @@ from ethology.validators.utils import _check_output
 
 # Registry of supported models with their constructors
 MODEL_CONSTRUCTORS_REGISTRY = {
-    "fasterrcnn_resnet50_fpn_v2": (faster_rcnn.fasterrcnn_resnet50_fpn_v2),
+    "fasterrcnn_resnet50_fpn_v2": faster_rcnn.fasterrcnn_resnet50_fpn_v2,
     "fasterrcnn_mobilenet_v3_large_fpn": (
         faster_rcnn.fasterrcnn_mobilenet_v3_large_fpn
     ),
@@ -448,13 +448,21 @@ def _get_n_classes_in_detector(
         If the model architecture is not supported.
 
     """
+    if model not in MODEL_CONSTRUCTORS_REGISTRY:
+        raise ValueError(f"Unsupported model class: {model_class}")
     if "fasterrcnn" in model_class:
-        return model.roi_heads.box_predictor.cls_score.out_features
-    elif any(x in model_class for x in ["retinanet", "fcos"]):
-        cls_head = model.head.classification_head
-        return cls_head.cls_logits.out_channels // cls_head.num_anchors
+        return _get_fasterrcnn_n_classes(model)
     else:
-        raise ValueError(
-            f"Could not retrieve the number of classes. "
-            f"Unsupported model class: {model_class}"
-        )
+        # retinanet and fcos use anchor-based classification heads
+        return _get_anchor_based_n_classes(model)
+
+
+def _get_fasterrcnn_n_classes(model: torch.nn.Module) -> int:
+    return model.roi_heads.box_predictor.cls_score.out_features
+
+
+def _get_anchor_based_n_classes(model: torch.nn.Module) -> int:
+    # In anchor-based detectors, the classification head makes predictions
+    # for every anchor at each spatial location
+    cls_head = model.head.classification_head
+    return cls_head.cls_logits.out_channels // cls_head.num_anchors
