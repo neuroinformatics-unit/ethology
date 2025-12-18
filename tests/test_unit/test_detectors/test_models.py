@@ -1,13 +1,16 @@
+from collections.abc import Callable
 from contextlib import nullcontext as does_not_raise
+from pathlib import Path
 from unittest.mock import patch
 
 import numpy as np
 import pytest
 import torch
+from torchvision.models import get_model
 from torchvision.models.detection import faster_rcnn, fcos, retinanet
 
 from ethology.detectors.models import (
-    MODEL_CONSTRUCTORS_REGISTRY,
+    DEFAULT_NUM_CLASSES,
     ObjectDetector,
 )
 
@@ -20,32 +23,108 @@ MODEL_CLASS_REGISTRY = {
 }
 
 
-def get_n_classes_in_detector(model, model_class):
-    """Extract the number of classes from model based on its architecture."""
-    if "fasterrcnn" in model_class:
-        return model.roi_heads.box_predictor.cls_score.out_features
-    elif any(x in model_class for x in ["retinanet", "fcos"]):
-        cls_head = model.head.classification_head
-        return cls_head.cls_logits.out_channels // cls_head.num_anchors
-    else:
-        raise ValueError(f"Unsupported model class: {model_class}")
+@pytest.fixture
+def sample_coco2017_ckpt(tmp_path: Path) -> Callable:
+    def _checkpoint_path_and_classes(
+        model_class, format: str
+    ) -> tuple[Path, int]:
+        """Return the path to a sample checkpoint.
+
+        The checkpoint is for the requested architecture (model_class) and
+        format (Pytorch or Pytorch Lightning convention).
+        """
+        # Create a model with Faster RCNN COCO2017 weights and save its state
+        # should have 91 categories by default
+        model = get_model(model_class, weights="DEFAULT")
+        ckpt_filename = "test_coco2017_checkpoint"
+        n_classes_coco2017 = 91
+
+        if format == "lightning":
+            checkpoint_path = tmp_path / f"{ckpt_filename}.ckpt"
+
+            # Save as Lightning-style checkpoint (with "model." prefix)
+            state_dict = {
+                f"model.{k}": v for k, v in model.state_dict().items()
+            }
+            torch.save({"state_dict": state_dict}, checkpoint_path)
+
+        elif format == "torch":
+            checkpoint_path = tmp_path / f"{ckpt_filename}.pt"
+
+            # Save the state_dict as recommended in pytorch docs
+            # (see https://docs.pytorch.org/tutorials/beginner/saving_loading_models.html#saving-loading-model-for-inference)
+            torch.save(model.state_dict(), checkpoint_path)
+
+        else:
+            raise ValueError(f"Unsupported format: {format}")
+
+        return checkpoint_path, n_classes_coco2017
+
+    return _checkpoint_path_and_classes
+
+
+# -------------- Gral Configuration ---------------
+@pytest.mark.parametrize(
+    "config, expected_exception",
+    [
+        (
+            "",
+            pytest.raises(TypeError, match="config must be a dictionary"),
+        ),
+        (
+            {"checkpoint": "path/to/checkpoint"},
+            pytest.raises(
+                ValueError,
+                match=("model_class must be defined in config"),
+            ),
+        ),
+        (
+            {"model_class": "foo"},
+            pytest.raises(ValueError, match="Model 'foo' not supported"),
+        ),
+        (
+            {"model_class": "fcos_resnet50_fpn", "model_kwargs": "foo"},
+            pytest.raises(TypeError, match="model_kwargs must be a dict"),
+        ),
+        (
+            {
+                "model_class": "fcos_resnet50_fpn",
+                "model_kwargs": {"n_classes": 3},
+            },
+            pytest.raises(
+                ValueError,
+                match=(
+                    "Invalid key 'n_classes' in model_kwargs. "
+                    "Did you mean 'num_classes'?"
+                ),
+            ),
+        ),
+    ],
+)
+def test_validate_config(config, expected_exception):
+    """Test the config validation throws the expected errors."""
+    with expected_exception:
+        ObjectDetector._validate_config(config)
 
 
 @pytest.mark.parametrize(
     "input_config, expected_config_function",
     [
         (
-            {},
+            {"model_class": "fcos_resnet50_fpn"},
             "ethology.detectors.models.ObjectDetector._configure_model_pretrained",
         ),
         (
-            {"checkpoint": "/path/to/checkpoint"},
+            {
+                "model_class": "fcos_resnet50_fpn",
+                "checkpoint": "/path/to/checkpoint",
+            },
             "ethology.detectors.models.ObjectDetector._configure_model_from_checkpoint",
         ),
     ],
     ids=[
-        "without checkpoint",
-        "with checkpoint",
+        "config without checkpoint",
+        "config with checkpoint",
     ],
 )
 def test_configure_model(input_config, expected_config_function):
@@ -57,49 +136,6 @@ def test_configure_model(input_config, expected_config_function):
         mock_config_function.assert_called_once()
 
 
-# ------ configure model pretrained --------------
-
-
-def test_configure_model_pretrained_unsupported():
-    """Test that an unsupported detector in config raises ValueError."""
-    config = {"model_class": "foo", "num_classes": 2}
-    with pytest.raises(ValueError) as excinfo:
-        ObjectDetector(config)
-
-    # Check error message
-    assert "Model 'foo' not supported" in str(excinfo.value)
-    assert f"Available: {list(MODEL_CONSTRUCTORS_REGISTRY.keys())}" in str(
-        excinfo.value
-    )
-
-
-@pytest.mark.parametrize(
-    "input_config",
-    [
-        {},
-        {"model_class": "fcos_resnet50_fpn"},
-        {"n_classes": 3},
-    ],
-)
-def test_configure_model_pretrained_defaults(input_config):
-    """Test that default model and n_classes are used when not specified."""
-    # Get inputs from config and defaults if not defined
-    input_model_class = input_config.get(
-        "model_class", "fasterrcnn_resnet50_fpn_v2"
-    )
-    input_n_classes = input_config.get("n_classes", 2)
-
-    # Instantiate detector
-    detector = ObjectDetector(input_config)
-
-    # Check defaults
-    assert isinstance(detector.model, MODEL_CLASS_REGISTRY[input_model_class])
-    assert (
-        get_n_classes_in_detector(detector.model, input_model_class)
-        == input_n_classes
-    )
-
-
 @pytest.mark.parametrize(
     "model_class",
     [
@@ -109,25 +145,134 @@ def test_configure_model_pretrained_defaults(input_config):
         "fcos_resnet50_fpn",
     ],
 )
-@pytest.mark.parametrize("n_classes", [1, 2, 100])
-def test_configure_model_pretrained_n_classes(model_class, n_classes):
-    """Test that the number of classes is passed to the model."""
-    # Define config
-    config = {"model_class": model_class, "n_classes": n_classes}
-
+@pytest.mark.parametrize(
+    "model_kwargs, expected_num_classes",
+    [
+        ({"num_classes": 1}, 1),
+        ({"num_classes": 100}, 100),
+        ({}, DEFAULT_NUM_CLASSES),
+    ],
+)
+def test_configure_model_pretrained_n_classes(
+    model_class, model_kwargs, expected_num_classes
+):
+    """Test that the requested number of classes is passed to the model."""
     # Instantiate detector
+    config = {
+        "model_class": model_class,
+        "model_kwargs": model_kwargs,
+    }
     detector = ObjectDetector(config)
 
     # Check n of classes in output layer
-    assert get_n_classes_in_detector(detector.model, model_class) == n_classes
+    assert (
+        ObjectDetector._get_n_classes_in_detector(detector.model, model_class)
+        == expected_num_classes
+    )
+
+    # Check model architecture and type
+    assert isinstance(detector.model, MODEL_CLASS_REGISTRY[model_class])
     assert isinstance(detector.model, torch.nn.Module)
 
 
-# ------ configure model from checkpoint --------------
+# -------------- configure model from ckpt -----------
 
 
-def test_configure_model_from_checkpoint():
-    """Test that the requested model is loaded with the input checkpoint."""
+@pytest.mark.parametrize(
+    "format",
+    [
+        "lightning",
+        "torch",
+    ],
+)
+@pytest.mark.parametrize(
+    "model_class",
+    [
+        "fasterrcnn_resnet50_fpn_v2",
+        "fasterrcnn_mobilenet_v3_large_fpn",
+        "fcos_resnet50_fpn",
+        "retinanet_resnet50_fpn_v2",
+    ],
+)
+def test_configure_model_from_checkpoint(
+    sample_coco2017_ckpt, format, model_class
+):
+    """Test loading weights from a FasterRCNN checkpoint with 91 classes."""
+    # Get COCO2017 ckpt for input format and architecture
+    ckpt_path, n_classes = sample_coco2017_ckpt(model_class, format)
+
+    # Define config
+    input_config = {"model_class": model_class}
+    input_config["checkpoint"] = str(ckpt_path)
+
+    # Instantiate detector
+    detector = ObjectDetector(input_config)
+
+    # Check n_classes and type
+    assert (
+        ObjectDetector._get_n_classes_in_detector(detector.model, model_class)
+        == n_classes
+    )
+    assert isinstance(detector.model, torch.nn.Module)
+
+
+@pytest.mark.parametrize(
+    "format",
+    [
+        "lightning",
+        "torch",
+    ],
+)
+@pytest.mark.parametrize(
+    "input_config, expected_exception",
+    [
+        (
+            {
+                "model_class": "fasterrcnn_resnet50_fpn_v2",
+                "model_kwargs": {"num_classes": 2},
+            },
+            pytest.raises(
+                RuntimeError,
+                match=(
+                    r"Error\(s\) in loading state_dict for FasterRCNN:\n\t"
+                    r"size mismatch.*"
+                ),
+            ),
+        ),  # ckpt has 91 classes but config specifies 2
+        (
+            {
+                "model_class": "fcos_resnet50_fpn",
+            },
+            pytest.raises(
+                RuntimeError,
+                match=(
+                    r"Error\(s\) in loading state_dict for FCOS:\n\t"
+                    r"Missing key\(s\) in state_dict.*"
+                ),
+            ),
+        ),  # ckpt is fasterrcnn_resnet50_fpn_v2 but config fcos_resnet50_fpn
+    ],
+    ids=["mismatch_n_classes", "mismatch_architecture"],
+)
+def test_configure_model_from_checkpoint_invalid(
+    sample_coco2017_ckpt, format, input_config, expected_exception
+):
+    """Test loading weights from a FasterRCNN checkpoint with 91 classes."""
+    # Get fasterrcnn COCO2017 ckpt and add to config
+    fasterrcnn_ckpt_path, _ = sample_coco2017_ckpt(
+        "fasterrcnn_resnet50_fpn_v2", format
+    )
+    input_config["checkpoint"] = str(fasterrcnn_ckpt_path)
+
+    # Check detector instantiation throws error
+    with expected_exception:
+        _detector = ObjectDetector(input_config)
+
+
+# ----- --------------
+
+
+def test_get_n_classes_in_detector():
     pass
 
 
@@ -137,7 +282,11 @@ def test_get_model_state_dict():
     pass
 
 
+# --------------------
+
+
 # Do I need to test this?
+# smoketest?
 def test_predict_step():
     pass
 
