@@ -12,6 +12,7 @@ from torchvision.models.detection import faster_rcnn, fcos, retinanet
 from ethology.detectors.models import (
     DEFAULT_NUM_CLASSES,
     ObjectDetector,
+    _get_n_classes_in_detector,
 )
 
 # Map model names to class types
@@ -166,7 +167,7 @@ def test_configure_model_pretrained_n_classes(
 
     # Check n of classes in output layer
     assert (
-        ObjectDetector._get_n_classes_in_detector(detector.model, model_class)
+        _get_n_classes_in_detector(detector.model, model_class)
         == expected_num_classes
     )
 
@@ -209,10 +210,7 @@ def test_configure_model_from_checkpoint(
     detector = ObjectDetector(input_config)
 
     # Check n_classes and type
-    assert (
-        ObjectDetector._get_n_classes_in_detector(detector.model, model_class)
-        == n_classes
-    )
+    assert _get_n_classes_in_detector(detector.model, model_class) == n_classes
     assert isinstance(detector.model, torch.nn.Module)
 
 

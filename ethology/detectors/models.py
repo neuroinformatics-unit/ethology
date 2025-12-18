@@ -193,7 +193,7 @@ class ObjectDetector(LightningModule):
 
         # Adapt model if there is a mismatch with the requested number of
         # classes
-        n_classes_model = self._get_n_classes_in_detector(
+        n_classes_model = _get_n_classes_in_detector(
             model, self.model_class
         )  # shape of loaded model
         if self.model_kwargs["num_classes"] != n_classes_model:
@@ -258,21 +258,6 @@ class ObjectDetector(LightningModule):
         return model
 
     # ------ Convenience functions --------------
-    @staticmethod
-    def _get_n_classes_in_detector(model, model_class):
-        """Extract the number of classes based on model architecture."""
-        if "fasterrcnn" in model_class:
-            return model.roi_heads.box_predictor.cls_score.out_features
-        elif any(x in model_class for x in ["retinanet", "fcos"]):
-            cls_head = model.head.classification_head
-            return cls_head.cls_logits.out_channels // cls_head.num_anchors
-        else:
-            raise ValueError(
-                "Could not retrieve the number of classes "
-                "in the loaded detector."
-                f"Unsupported model class: {model_class}"
-            )
-
     @staticmethod
     def _get_model_state_dict(checkpoint: dict) -> dict:
         """Get model state dict from checkpoint dictionary.
@@ -437,4 +422,39 @@ class ObjectDetector(LightningModule):
                 "id": np.arange(max_n_detections),
             },
             attrs=attrs if attrs else {},
+        )
+
+
+def _get_n_classes_in_detector(
+    model: torch.nn.Module, model_class: str
+) -> int:
+    """Extract the number of classes from model based on its architecture.
+
+    Parameters
+    ----------
+    model : torch.nn.Module
+        The object detector model.
+    model_class : str
+        Name of the model architecture (e.g., "fasterrcnn_resnet50_fpn_v2").
+
+    Returns
+    -------
+    int
+        The number of classes the model is configured to detect.
+
+    Raises
+    ------
+    ValueError
+        If the model architecture is not supported.
+
+    """
+    if "fasterrcnn" in model_class:
+        return model.roi_heads.box_predictor.cls_score.out_features
+    elif any(x in model_class for x in ["retinanet", "fcos"]):
+        cls_head = model.head.classification_head
+        return cls_head.cls_logits.out_channels // cls_head.num_anchors
+    else:
+        raise ValueError(
+            f"Could not retrieve the number of classes. "
+            f"Unsupported model class: {model_class}"
         )
