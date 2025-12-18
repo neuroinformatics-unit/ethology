@@ -12,14 +12,14 @@ from torchvision.models import get_model
 from torchvision.models.detection import faster_rcnn, fcos, retinanet
 
 from ethology.detectors.utils import (
-    _corners_to_centroid_shape,
     _pad_to_max_first_dimension,
+    corners_to_centroid_shape,
 )
 from ethology.validators.detections import ValidBboxDetectionsDataset
 from ethology.validators.utils import _check_output
 
 # Registry of supported models with their constructors
-MODEL_REGISTRY = {
+MODEL_CONSTRUCTORS_REGISTRY = {
     "fasterrcnn_resnet50_fpn_v2": (faster_rcnn.fasterrcnn_resnet50_fpn_v2),
     "fasterrcnn_mobilenet_v3_large_fpn": (
         faster_rcnn.fasterrcnn_mobilenet_v3_large_fpn
@@ -68,7 +68,7 @@ class ObjectDetector(LightningModule):
     >>> config = {
     ...     "model_class": "fasterrcnn_resnet50_fpn_v2",
     ...     "model_kwargs": {
-    ...         "num_classes": 2,
+    ...         "n_classes": 2,
     ...         "weights": None,
     ...         "weights_backbone": None,
     ...     },
@@ -120,24 +120,29 @@ class ObjectDetector(LightningModule):
         """
         # Get model name and number of classes
         # Default: fasterrcnn_resnet50_fpn_v2 and 2 classes
-        model_name = self.config.get(
-            "model_name",
+        model_class = self.config.get(
+            "model_class",
             "fasterrcnn_resnet50_fpn_v2",
         )
-        num_classes = self.config.get("num_classes", 2)
+        n_classes = self.config.get("n_classes", 2)
+
+        # # Log
+        # self.logger.info(
+        #     f"Initialising model: {model_class} with {n_classes} classes"
+        # )
 
         # Check if model is supported
-        if model_name not in MODEL_REGISTRY:
+        if model_class not in MODEL_CONSTRUCTORS_REGISTRY:
             raise ValueError(
-                f"Model '{model_name}' not supported. "
-                f"Available: {list(MODEL_REGISTRY.keys())}"
+                f"Model '{model_class}' not supported. "
+                f"Available: {list(MODEL_CONSTRUCTORS_REGISTRY.keys())}"
             )
 
         # Load selected model with pretreained weights in backbone and head
-        model = MODEL_REGISTRY[model_name](weights="DEFAULT")
+        model = MODEL_CONSTRUCTORS_REGISTRY[model_class](weights="DEFAULT")
 
         # Keep as much as possible from the bbox prediction head
-        if "fasterrcnn" in model_name:
+        if "fasterrcnn" in model_class:
             # Reinitialise box predictor for the required number of classes
             # (both cls_score and bbox_pred are reinitialised)
             # Note: in Faster R-CNN, the bbox regression is class-specific;
@@ -147,25 +152,25 @@ class ObjectDetector(LightningModule):
             in_features = model.roi_heads.box_predictor.cls_score.in_features
             model.roi_heads.box_predictor = faster_rcnn.FastRCNNPredictor(
                 in_features,
-                self.config["num_classes"],
+                n_classes,
             )
-        elif "retinanet" in model_name:
+        elif "retinanet" in model_class:
             # In retinanet bbox regression is class-agnostic, so we can
             # retain it
-            in_channels = model.head.classification_head.conv[0].in_channels
+            in_channels = model.head.classification_head.conv[0][0].in_channels
             num_anchors = model.head.classification_head.num_anchors
             model.head.classification_head = (
                 retinanet.RetinaNetClassificationHead(
-                    in_channels, num_anchors, num_classes
+                    in_channels, num_anchors, n_classes
                 )
             )
 
-        elif "fcos" in model_name:
+        elif "fcos" in model_class:
             # In fcos bbox regression is class-agnostic, so we can retain it
             in_channels = model.head.classification_head.conv[0].in_channels
             num_anchors = model.head.classification_head.num_anchors
             model.head.classification_head = fcos.FCOSClassificationHead(
-                in_channels, num_anchors, num_classes
+                in_channels, num_anchors, n_classes
             )
 
         return model
@@ -321,7 +326,7 @@ class ObjectDetector(LightningModule):
         bboxes_array = np.transpose(
             output_per_sample_padded["boxes"], (0, -1, 1)
         )
-        centroid_array, shape_array = _corners_to_centroid_shape(
+        centroid_array, shape_array = corners_to_centroid_shape(
             bboxes_array[:, 0:2], bboxes_array[:, 2:4]
         )
 

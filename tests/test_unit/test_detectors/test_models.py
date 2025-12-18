@@ -3,8 +3,32 @@ from unittest.mock import patch
 
 import numpy as np
 import pytest
+import torch
+from torchvision.models.detection import faster_rcnn, fcos, retinanet
 
-from ethology.detectors.models import ObjectDetector
+from ethology.detectors.models import (
+    MODEL_CONSTRUCTORS_REGISTRY,
+    ObjectDetector,
+)
+
+# Map model names to class types
+MODEL_CLASS_REGISTRY = {
+    "fasterrcnn_resnet50_fpn_v2": faster_rcnn.FasterRCNN,
+    "fasterrcnn_mobilenet_v3_large_fpn": faster_rcnn.FasterRCNN,
+    "fcos_resnet50_fpn": fcos.FCOS,
+    "retinanet_resnet50_fpn_v2": retinanet.RetinaNet,
+}
+
+
+def get_n_classes_in_detector(model, model_class):
+    """Extract the number of classes from model based on its architecture."""
+    if "fasterrcnn" in model_class:
+        return model.roi_heads.box_predictor.cls_score.out_features
+    elif any(x in model_class for x in ["retinanet", "fcos"]):
+        cls_head = model.head.classification_head
+        return cls_head.cls_logits.out_channels // cls_head.num_anchors
+    else:
+        raise ValueError(f"Unsupported model class: {model_class}")
 
 
 @pytest.mark.parametrize(
@@ -33,9 +57,73 @@ def test_configure_model(input_config, expected_config_function):
         mock_config_function.assert_called_once()
 
 
-def test_configure_model_pretrained():
-    """Test that the requested model is loaded with pretrained weights."""
-    pass
+# ------ configure model pretrained --------------
+
+
+def test_configure_model_pretrained_unsupported():
+    """Test that an unsupported detector in config raises ValueError."""
+    config = {"model_class": "foo", "num_classes": 2}
+    with pytest.raises(ValueError) as excinfo:
+        ObjectDetector(config)
+
+    # Check error message
+    assert "Model 'foo' not supported" in str(excinfo.value)
+    assert f"Available: {list(MODEL_CONSTRUCTORS_REGISTRY.keys())}" in str(
+        excinfo.value
+    )
+
+
+@pytest.mark.parametrize(
+    "input_config",
+    [
+        {},
+        {"model_class": "fcos_resnet50_fpn"},
+        {"n_classes": 3},
+    ],
+)
+def test_configure_model_pretrained_defaults(input_config):
+    """Test that default model and n_classes are used when not specified."""
+    # Get inputs from config and defaults if not defined
+    input_model_class = input_config.get(
+        "model_class", "fasterrcnn_resnet50_fpn_v2"
+    )
+    input_n_classes = input_config.get("n_classes", 2)
+
+    # Instantiate detector
+    detector = ObjectDetector(input_config)
+
+    # Check defaults
+    assert isinstance(detector.model, MODEL_CLASS_REGISTRY[input_model_class])
+    assert (
+        get_n_classes_in_detector(detector.model, input_model_class)
+        == input_n_classes
+    )
+
+
+@pytest.mark.parametrize(
+    "model_class",
+    [
+        "fasterrcnn_resnet50_fpn_v2",
+        "fasterrcnn_mobilenet_v3_large_fpn",
+        "retinanet_resnet50_fpn_v2",
+        "fcos_resnet50_fpn",
+    ],
+)
+@pytest.mark.parametrize("n_classes", [1, 2, 100])
+def test_configure_model_pretrained_n_classes(model_class, n_classes):
+    """Test that the number of classes is passed to the model."""
+    # Define config
+    config = {"model_class": model_class, "n_classes": n_classes}
+
+    # Instantiate detector
+    detector = ObjectDetector(config)
+
+    # Check n of classes in output layer
+    assert get_n_classes_in_detector(detector.model, model_class) == n_classes
+    assert isinstance(detector.model, torch.nn.Module)
+
+
+# ------ configure model from checkpoint --------------
 
 
 def test_configure_model_from_checkpoint():
