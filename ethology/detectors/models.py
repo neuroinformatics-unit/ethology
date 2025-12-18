@@ -448,7 +448,7 @@ def _get_n_classes_in_detector(
         If the model architecture is not supported.
 
     """
-    if model not in MODEL_CONSTRUCTORS_REGISTRY:
+    if model_class not in MODEL_CONSTRUCTORS_REGISTRY:
         raise ValueError(f"Unsupported model class: {model_class}")
     if "fasterrcnn" in model_class:
         return _get_fasterrcnn_n_classes(model)
