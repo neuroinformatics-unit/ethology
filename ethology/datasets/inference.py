@@ -11,20 +11,30 @@ from torch.utils.data import Dataset
 class InferenceImageDataset(Dataset):
     """A simple dataset for images with no ground-truth annotations.
 
-    Attributes
+    Parameters
     ----------
     root_dir : pathlib.Path | str
         Path to the root directory containing the images.
     file_pattern : str
-        Pattern to match the image files.
-    transform : torchvision.transforms.v2.Compose | None
-        Transform to apply to the images.
+        Pattern to match the image filenames.
+    transforms : torchvision.transforms.v2.Compose | None, optional
+        Transforms to apply to the images. Default is None (i.e.,
+        no transform is applied to the image).
 
-    Returns
-    -------
-    tuple[torch.Tensor, dict]
-        A tuple containing the image as a tensor and a dummy annotations
-        dictionary.
+    Attributes
+    ----------
+    root_dir : pathlib.Path
+        Path to the root directory containing the images.
+    transforms : torchvision.transforms.v2.Compose | None
+        Transforms to apply to the images.
+    image_files : list[pathlib.Path]
+        List of paths to each of the image files, sorted
+        alphabetically.
+
+    See Also
+    --------
+    get_default_inference_transforms : Returns default transforms for
+        inference.
 
     Notes
     -----
@@ -51,22 +61,11 @@ class InferenceImageDataset(Dataset):
         self,
         root_dir: Path | str,
         file_pattern: str,
-        transform: transforms.Compose | None = None,
+        transforms: transforms.Compose | None = None,
     ):
-        """Initialise the dataset.
-
-        Parameters
-        ----------
-        root_dir : Path | str
-            Path to the root directory containing the images.
-        file_pattern : str
-            Pattern to match the image files.
-        transform : torchvision.transforms.Compose | None
-            Transform to apply to the images.
-
-        """
+        """Initialise dataset."""
         self.root_dir = Path(root_dir)
-        self.transform = transform
+        self.transforms = transforms
         self.image_files = sorted(self.root_dir.glob(file_pattern))
 
     def __len__(self) -> int:
@@ -74,12 +73,28 @@ class InferenceImageDataset(Dataset):
         return len(self.image_files)
 
     def __getitem__(self, idx: int) -> tuple[torch.Tensor, dict]:
-        """Return the image and the dummy annotations dictionary."""
+        """Return the image and an empty annotations dictionary.
+
+        Parameters
+        ----------
+        idx : int
+            Index of the image to retrieve.
+
+        Returns
+        -------
+        tuple[torch.Tensor, dict]
+            A tuple containing the image as a tensor and an empty
+            annotations dictionary.
+
+        """
+        # Open requested image
         img_path = Path(self.root_dir) / self.image_files[idx]
         image = Image.open(img_path).convert("RGB")
-        if self.transform:
-            image = self.transform(image)
-        return image, {}  # return a dummy annotations dict
+
+        # If transforms are specified, apply to the image
+        if self.transforms:
+            image = self.transforms(image)
+        return image, {}
 
 
 def get_default_inference_transforms() -> transforms.Compose:
