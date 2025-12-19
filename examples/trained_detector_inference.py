@@ -57,16 +57,17 @@ images_dir = Path(
 config = {
     "model_class": "fasterrcnn_resnet50_fpn_v2",  # required
     "model_kwargs": {
-        "num_classes": 2,  # required!
+        "num_classes": 2,
         "weights": None,
         "weights_backbone": None,
     },
-    # required
     "checkpoint": (
         "/home/sminano/swc/project_crabs/ml-runs/"
         "617393114420881798/f348d9d196934073bece1b877cbc4d38/checkpoints/last.ckpt"
     ),
 }
+
+# if no classes are specified: 91 (coco2017)
 
 # %%
 # Prepare dataset for inference
@@ -76,7 +77,7 @@ config = {
 dataset = InferenceImageDataset(
     images_dir,
     "*.png",
-    transform=get_default_inference_transforms(),
+    transforms=get_default_inference_transforms(),
 )
 
 # Create dataloader
@@ -100,6 +101,21 @@ dataloader = DataLoader(
 # %%
 # Prepare model and trainer
 # -------------------------
+
+# Pretreained options
+# ObjectDetector({"model_class": "fcos_resnet50_fpn"})
+# -- loads fcos_resnet50_fpn with coco2017 weights (91 classes)
+
+# ObjectDetector({"model_class": "fcos_resnet50_fpn",
+#   "model_kwargs":{"num_classes": 3}})
+# -- fcos_resnet50_fpn with coco2017 weights except for the last
+#    layers that are reinitialised with random weights for an output shape of
+#    3 classes
+
+# From checkpoint:
+# ObjectDetector({"model_class": "fcos_resnet50_fpn",
+#  "checkpoint": /path/to/ckpt})
+# -- will complain if checkpoint does not have 91 classes
 
 # Instantiate detector
 model = ObjectDetector(config)
