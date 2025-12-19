@@ -1,17 +1,20 @@
 from collections.abc import Callable
 from contextlib import nullcontext as does_not_raise
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import numpy as np
 import pytest
 import torch
+import xarray as xr
 from torchvision.models import get_model
 from torchvision.models.detection import faster_rcnn, fcos, retinanet
 
 from ethology.detectors.models import (
     DEFAULT_NUM_CLASSES,
     ObjectDetector,
+    _get_n_classes_anchor_based,
+    _get_n_classes_fasterrcnn,
     _get_n_classes_in_detector,
 )
 
@@ -64,7 +67,45 @@ def sample_coco2017_ckpt(tmp_path: Path) -> Callable:
     return _checkpoint_path_and_classes
 
 
-# -------------- Gral Configuration ---------------
+@pytest.fixture
+def valid_predictions_dataset():
+    """Create a valid bbox detections dataset to simulate predictions."""
+    image_ids = [
+        1,
+        2,
+    ]
+    annotation_ids = [0, 1]
+    space_dims = ["x", "y"]
+
+    # Create position, shape and confidence data all zeros
+    position_data = np.zeros(
+        (len(image_ids), len(space_dims), len(annotation_ids))
+    )
+    shape_data = np.copy(position_data)
+    category_data = np.ones((len(image_ids), len(annotation_ids)))
+    confidence_data = np.zeros((len(image_ids), len(annotation_ids)))
+
+    # Create the dataset
+    ds = xr.Dataset(
+        data_vars={
+            "position": (["image_id", "space", "id"], position_data),
+            "shape": (["image_id", "space", "id"], shape_data),
+            "category": (["image_id", "id"], category_data),
+            "confidence": (["image_id", "id"], confidence_data),
+        },
+        coords={
+            "image_id": image_ids,
+            "space": ["x", "y"],
+            "id": annotation_ids,
+        },
+    )
+
+    return ds
+
+
+# -------------- Gral model configuration ---------------
+
+
 @pytest.mark.parametrize(
     "config, expected_exception",
     [
@@ -176,7 +217,7 @@ def test_configure_model_pretrained_n_classes(
     assert isinstance(detector.model, torch.nn.Module)
 
 
-# -------------- configure model from ckpt -----------
+# -------------- Configure model from ckpt -----------
 
 
 @pytest.mark.parametrize(
@@ -267,35 +308,168 @@ def test_configure_model_from_checkpoint_invalid(
         _detector = ObjectDetector(input_config)
 
 
-# ----- --------------
+# -------- Convenience functions ---------------------------
 
 
-def test_get_n_classes_in_detector():
-    pass
+@pytest.mark.parametrize(
+    "model_class, expected_get_n_classes_fn",
+    [
+        ("fasterrcnn_resnet50_fpn_v2", "_get_n_classes_fasterrcnn"),
+        ("fasterrcnn_mobilenet_v3_large_fpn", "_get_n_classes_fasterrcnn"),
+        ("fcos_resnet50_fpn", "_get_n_classes_anchor_based"),
+        ("retinanet_resnet50_fpn_v2", "_get_n_classes_anchor_based"),
+    ],
+)
+def test_get_n_classes_in_detector(model_class, expected_get_n_classes_fn):
+    """Test _get_n_classes_in_detector delegates to the right function."""
+    model = torch.nn.Module()
+    function_to_patch = (
+        f"ethology.detectors.models.{expected_get_n_classes_fn}"
+    )
+    with patch(function_to_patch) as mock_get_n_classes_fn:
+        _ = _get_n_classes_in_detector(model, model_class)
+
+        # check expected function was called
+        mock_get_n_classes_fn.assert_called_once()
 
 
-# test with Lightning and torch checkpoints?
-def test_get_model_state_dict():
-    """Test that the model state dict retrieval from a checkpoint."""
-    pass
+def test_get_n_classes_in_detector_invalid():
+    model = torch.nn.Module()
+    with pytest.raises(ValueError, match="Unsupported model class: foo"):
+        _ = _get_n_classes_in_detector(model, "foo")
 
 
-# --------------------
+@pytest.mark.parametrize(
+    "model_class, counting_function",
+    [
+        ("fasterrcnn_resnet50_fpn_v2", _get_n_classes_fasterrcnn),
+        ("fasterrcnn_mobilenet_v3_large_fpn", _get_n_classes_fasterrcnn),
+        ("fcos_resnet50_fpn", _get_n_classes_anchor_based),
+        ("retinanet_resnet50_fpn_v2", _get_n_classes_anchor_based),
+    ],
+)
+@pytest.mark.parametrize(
+    "num_classes",
+    [
+        2,  # minimum meaningful value (background + 1 object class)
+        100,
+    ],
+)
+def test_get_n_classes_specific_function(
+    model_class, counting_function, num_classes
+):
+    """Test the _get_n_classes... architecture-specific functions."""
+    # Instantiate model using torch convenience fn
+    model = get_model(model_class, num_classes=num_classes)
+    assert counting_function(model) == num_classes
 
 
-# Do I need to test this?
-# smoketest?
+@pytest.mark.parametrize(
+    "checkpoint_dict",
+    [
+        {"layer1.weight": 1, "layer1.bias": 2},
+        # state dict at first level (torch no nesting)
+        {"state_dict": {"layer1.weight": 1, "layer1.bias": 2}},
+        # state dict under "state_dict" key (torch nested)
+        {"state_dict": {"model.layer1.weight": 1, "model.layer1.bias": 2}},
+        # state dict "state_dict" key using "model." prefix
+        # (nested with model. prefix, Lightning convention)
+    ],
+)
+def test_get_model_state_dict(checkpoint_dict):
+    """Test state_dict extraction from different checkpoint dict formats."""
+    expected_state_dict = {"layer1.weight": 1, "layer1.bias": 2}
+    state_dict_out = ObjectDetector._get_model_state_dict(checkpoint_dict)
+    assert state_dict_out == expected_state_dict
+
+
+# ---------- Inference ---------------------
+
+
 def test_predict_step():
-    pass
+    """Check predict_step returns expected structure."""
+    # Create a minimal detector
+    config = {"model_class": "fasterrcnn_resnet50_fpn_v2"}
+    detector = ObjectDetector(config)
+    detector.eval()
+
+    # Create a fake batch of 2 RGB images and empty annotations
+    batch_size = 2
+    images = torch.rand(batch_size, 3, 224, 224)
+    annotations = {}  # unused by predict_step
+    batch = (images, annotations)
+
+    # Run predict_step
+    predictions = detector.predict_step(batch, batch_idx=0)
+
+    # Check output is a list of dicts
+    assert isinstance(predictions, list)
+    assert len(predictions) == batch_size
+    assert all(isinstance(pred, dict) for pred in predictions)
+
+    # Check relevant keys exist
+    assert all("boxes" in pred for pred in predictions)
+    assert all("scores" in pred for pred in predictions)
+    assert all("labels" in pred for pred in predictions)
+
+    # Check arrays are torch tensors
+    assert all(isinstance(pred["boxes"], torch.Tensor) for pred in predictions)
+    assert all(
+        isinstance(pred["scores"], torch.Tensor) for pred in predictions
+    )
+    assert all(
+        isinstance(pred["labels"], torch.Tensor) for pred in predictions
+    )
 
 
-def test_run_inference():
+def test_run_inference(valid_predictions_dataset):
     """Test that both .predict and ._format_predictions are called."""
-    # sample_dataloader
-    # sample_trainer
+    # Create a minimal detector
+    config = {"model_class": "fasterrcnn_resnet50_fpn_v2"}
+    detector = ObjectDetector(config)
 
-    # with patch ...
-    pass
+    # Mock inputs to run_inference
+    mock_trainer = MagicMock()
+    mock_dataloader = MagicMock()
+    ds_attrs = {"source": "test"}
+
+    # Mock the output of trainer.predict
+    mock_predictions = [
+        [  # batch 0
+            {  # image 0
+                "boxes": torch.tensor(
+                    [
+                        [10.0, 20.0, 50.0, 60.0],
+                        [15.0, 25.0, 55.0, 65.0],
+                    ]
+                ),
+                "scores": torch.tensor([0.95, 0.87]),
+                "labels": torch.tensor([1, 2]),
+            }
+        ]
+    ]
+    mock_trainer.predict.return_value = mock_predictions
+
+    # Mock the output of detector._format_predictions
+    with patch.object(
+        ObjectDetector,
+        "_format_predictions",
+        return_value=valid_predictions_dataset,
+    ) as mock_format_fn:
+        result = detector.run_inference(
+            mock_trainer,
+            mock_dataloader,
+            attrs=ds_attrs,
+        )
+
+    # Verify trainer.predict was called once
+    mock_trainer.predict.assert_called_once_with(detector, mock_dataloader)
+
+    # Verify _format_predictions was called once
+    mock_format_fn.assert_called_once_with(mock_predictions, attrs=ds_attrs)
+
+    # Check the result from run_inference is the same as _format_predictions
+    assert result == valid_predictions_dataset
 
 
 @pytest.mark.parametrize(

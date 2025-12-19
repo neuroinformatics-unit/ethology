@@ -350,7 +350,34 @@ class ObjectDetector(LightningModule):
     ) -> xr.Dataset:
         """Format predictions as an ``ethology`` detections dataset.
 
-        Empty batches are ignored. Outer list is batches, inner list is images.
+        Parameters
+        ----------
+        predictions : list[list[dict]]
+            The raw predictions to format. The outer list corresponds to
+            batches, the inner list corresponds to images within a batch.
+            The dictionaries contain the following keys:
+            - "boxes": torch.Tensor of shape (n_boxes, 4) holding the bounding
+              box corners [x1, y1, x2, y2] in pixel coordinates for each
+              detection.
+            - "scores": torch.Tensor of shape (n_boxes,) holding the confidence
+              score for each detection.
+            - "labels": torch.Tensor of shape (n_boxes,) holding the integer
+              label for each detection.
+
+        attrs : dict | None
+            Dictionary of attributes to add to the predictions dataset as
+            ``attrs``.
+
+        Returns
+        -------
+        xr.Dataset
+            The predictions formatted as an ``ethology`` detections dataset.
+
+        Raises
+        ------
+        TypeError : If predictions is not a list.
+        ValueError : If predictions list is empty or contains no image data.
+
         """
         # Check input data
         if not isinstance(predictions, list):
@@ -451,17 +478,17 @@ def _get_n_classes_in_detector(
     if model_class not in MODEL_CONSTRUCTORS_REGISTRY:
         raise ValueError(f"Unsupported model class: {model_class}")
     if "fasterrcnn" in model_class:
-        return _get_fasterrcnn_n_classes(model)
+        return _get_n_classes_fasterrcnn(model)
     else:
         # retinanet and fcos use anchor-based classification heads
-        return _get_anchor_based_n_classes(model)
+        return _get_n_classes_anchor_based(model)
 
 
-def _get_fasterrcnn_n_classes(model: torch.nn.Module) -> int:
+def _get_n_classes_fasterrcnn(model: torch.nn.Module) -> int:
     return model.roi_heads.box_predictor.cls_score.out_features
 
 
-def _get_anchor_based_n_classes(model: torch.nn.Module) -> int:
+def _get_n_classes_anchor_based(model: torch.nn.Module) -> int:
     # In anchor-based detectors, the classification head makes predictions
     # for every anchor at each spatial location
     cls_head = model.head.classification_head
