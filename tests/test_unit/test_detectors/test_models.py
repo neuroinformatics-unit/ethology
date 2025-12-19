@@ -28,22 +28,21 @@ MODEL_CLASS_REGISTRY = {
 
 
 @pytest.fixture
-def sample_coco2017_ckpt(tmp_path: Path) -> Callable:
+def sample_checkpoint_path_and_classes(tmp_path: Path) -> Callable:
     def _checkpoint_path_and_classes(
-        model_class, format: str
+        model_class, ckpt_format: str, num_classes=91
     ) -> tuple[Path, int]:
         """Return the path to a sample checkpoint.
 
         The checkpoint is for the requested architecture (model_class) and
-        format (Pytorch or Pytorch Lightning convention).
+        format (Pytorch or Pytorch Lightning convention). By default,
         """
-        # Create a model with Faster RCNN COCO2017 weights and save its state
-        # should have 91 categories by default
-        model = get_model(model_class, weights="DEFAULT")
-        ckpt_filename = "test_coco2017_checkpoint"
-        n_classes_coco2017 = 91
+        # Create a model with randomly initialised weights and save its state
+        # If not specified it has 91 categories by default
+        model = get_model(model_class, num_classes=num_classes)
+        ckpt_filename = "test_checkpoint"
 
-        if format == "lightning":
+        if ckpt_format == "lightning":
             checkpoint_path = tmp_path / f"{ckpt_filename}.ckpt"
 
             # Save as Lightning-style checkpoint (with "model." prefix)
@@ -52,7 +51,7 @@ def sample_coco2017_ckpt(tmp_path: Path) -> Callable:
             }
             torch.save({"state_dict": state_dict}, checkpoint_path)
 
-        elif format == "torch":
+        elif ckpt_format == "torch":
             checkpoint_path = tmp_path / f"{ckpt_filename}.pt"
 
             # Save the state_dict as recommended in pytorch docs
@@ -60,9 +59,9 @@ def sample_coco2017_ckpt(tmp_path: Path) -> Callable:
             torch.save(model.state_dict(), checkpoint_path)
 
         else:
-            raise ValueError(f"Unsupported format: {format}")
+            raise ValueError(f"Unsupported format: {ckpt_format}")
 
-        return checkpoint_path, n_classes_coco2017
+        return checkpoint_path, num_classes
 
     return _checkpoint_path_and_classes
 
@@ -221,7 +220,7 @@ def test_configure_model_pretrained_n_classes(
 
 
 @pytest.mark.parametrize(
-    "format",
+    "ckpt_format",
     [
         "lightning",
         "torch",
@@ -236,23 +235,50 @@ def test_configure_model_pretrained_n_classes(
         "retinanet_resnet50_fpn_v2",
     ],
 )
+@pytest.mark.parametrize(
+    "num_classes",
+    [
+        None,  # use default (91)
+        5,
+    ],
+)
 def test_configure_model_from_checkpoint(
-    sample_coco2017_ckpt, format, model_class
+    sample_checkpoint_path_and_classes,
+    model_class,
+    ckpt_format,
+    num_classes,
 ):
-    """Test loading weights from a FasterRCNN checkpoint with 91 classes."""
-    # Get COCO2017 ckpt for input format and architecture
-    ckpt_path, n_classes = sample_coco2017_ckpt(model_class, format)
+    """Test loading weights from a checkpoint.
+
+    We test the cases of different checkpoint saving formats,
+    different model classes, and whether the number of classes in
+    the model architecture is different from the default (91 classes
+    for COCO2017).
+    """
+    # Get ckpt for specified architecture, num_classes and ckpt format
+    # If num_classes is None: model will the default number of classes
+    ckpt_kwargs = {} if num_classes is None else {"num_classes": num_classes}
+    ckpt_path, out_num_classes = sample_checkpoint_path_and_classes(
+        model_class, ckpt_format, **ckpt_kwargs
+    )
 
     # Define config
-    input_config = {"model_class": model_class}
-    input_config["checkpoint"] = str(ckpt_path)
+    input_config = {
+        "model_class": model_class,
+        "checkpoint": str(ckpt_path),
+    }
+    if num_classes is not None:
+        input_config["model_kwargs"] = {"num_classes": out_num_classes}
 
     # Instantiate detector
     detector = ObjectDetector(input_config)
 
-    # Check n_classes and type
-    assert _get_n_classes_in_detector(detector.model, model_class) == n_classes
+    # Check type and type
     assert isinstance(detector.model, torch.nn.Module)
+    assert (
+        _get_n_classes_in_detector(detector.model, model_class)
+        == out_num_classes
+    )
 
 
 @pytest.mark.parametrize(
@@ -294,11 +320,14 @@ def test_configure_model_from_checkpoint(
     ids=["mismatch_n_classes", "mismatch_architecture"],
 )
 def test_configure_model_from_checkpoint_invalid(
-    sample_coco2017_ckpt, format, input_config, expected_exception
+    sample_checkpoint_path_and_classes,
+    format,
+    input_config,
+    expected_exception,
 ):
     """Test loading weights from a FasterRCNN checkpoint with 91 classes."""
     # Get fasterrcnn COCO2017 ckpt and add to config
-    fasterrcnn_ckpt_path, _ = sample_coco2017_ckpt(
+    fasterrcnn_ckpt_path, _ = sample_checkpoint_path_and_classes(
         "fasterrcnn_resnet50_fpn_v2", format
     )
     input_config["checkpoint"] = str(fasterrcnn_ckpt_path)
