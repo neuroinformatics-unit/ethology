@@ -171,10 +171,15 @@ def test_validate_config(config, expected_exception):
 def test_configure_model(input_config, expected_config_function):
     """Test the constructor delegates correctly to the weight loading fn."""
     with patch(expected_config_function) as mock_config_function:
-        _model = ObjectDetector(input_config)
+        model = ObjectDetector(input_config)
 
         # check expected function was called
         mock_config_function.assert_called_once()
+
+        # check model params are saved as attributes
+        assert model._model_class  # check it is truthy
+        assert model.model_params  # should have at least num_classes
+        assert "num_classes" in model.model_params
 
 
 @pytest.mark.parametrize(

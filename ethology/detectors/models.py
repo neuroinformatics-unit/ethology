@@ -57,17 +57,13 @@ class ObjectDetector(LightningModule):
           Keyword arguments to pass to the model constructor. See
           the `torchvision.models.detection module
           <https://docs.pytorch.org/vision/main/models.html#object-detection>`_
-          for possible values for each supported model architecture.
+          for possible values for each supported model.
 
-          All models support ``num_classes`` as a keyword argument:
-
-          - If ``num_classes`` is not specified in ``model_kwargs``, the model
-            defaults to 91 classes (the number of COCO2017 categories).
-          - If ``num_classes`` is specified and is different from
-            91 (and no ``checkpoint`` is specified), pretrained COCO2017
-            weights are loaded in all layers except for the classification
-            head. In this case, classification layers are reshaped to the
-            selected number of classes and randomly initialised.
+          All models support ``num_classes`` as a keyword argument. If not
+          specified, it defaults to 91 (the number of COCO2017 categories).
+          See the Notes section for details on how weights are initialised
+          when requesting COCO2017 pretrained weights for a custom number
+          of classes.
 
         - **checkpoint** (*str, Path or None*) --
           Path to the trained model checkpoint. If provided, model weights
@@ -83,35 +79,33 @@ class ObjectDetector(LightningModule):
         The configuration dictionary passed to the constructor.
     model : torch.nn.Module
         The object detector model.
+    model_params : dict
+        The keyword arguments used to construct the model, with defaults
+        applied.
 
     Notes
     -----
-    For the Faster R-CNN ResNet architecture, we use the improved `v2` version
-    from `torchvision`.
+    For the Faster R-CNN ResNet architecture, we use the improved ``v2``
+    version from ``torchvision``.
 
-    When requesting a specific architecture with a number of classes that is
-    different to the number of classes in COCO2017 (91), and no checkpoint is
-    provided, we load the COCO2017 pretrained weights in the layers that don't
-    change size and initialise with random weights the layers for which there
-    would be a size mismatch due to the different number of classes. For
-    RetinaNet and FCOS, the bounding box regression head retains its pretrained
-    weights since it is class-agnostic and only the classification head
-    changes. For Faster R-CNN, the entire box predictor (classification and
-    regression) is initialised with random weights since bounding box
-    regression is class-specific.
+    We cover the following cases for weights initialisation. If no checkpoint
+    is provided and:
 
-    We cover the following cases for weights initialisation:
+    - ``num_classes`` is not specified (or is 91): pretrained COCO2017 weights
+      are loaded for both backbone and detection head.
+    - a custom ``num_classes`` is used: pretrained backbone weights are
+      retained and class-dependent layers are initialised with random weights.
 
-    - If no checkpoint is provided, and default classes are specified:
-      pretrained COCO2017 weights are loaded for both backbone and detection
-      head.
-    - If no checkpoint is provided, and a custom ``num_classes`` is used:
-      pretrained backbone weights are retained and class-dependent layers are
-      initialised with random weights.
-    - If a checkpoint is provided: all weights are loaded from the checkpoint.
-      Users must ensure that ``num_classes`` matches the number of classes the
-      checkpoint was trained with, otherwise loading will fail due to shape
-      mismatches.
+    For RetinaNet and FCOS, only the classification head is replaced when using
+    a custom number of classes, since bounding box regression is
+    class-agnostic.For Faster R-CNN, the entire box predictor
+    (classification and regression) is replaced since bounding box regression
+    is class-specific.
+
+    If a checkpoint is provided, all weights are loaded from the checkpoint.
+    Users must ensure that ``num_classes`` matches the number of classes the
+    checkpoint was trained with, otherwise loading will fail due to shape
+    mismatches.
 
     Examples
     --------
@@ -122,8 +116,7 @@ class ObjectDetector(LightningModule):
     >>> model = ObjectDetector({"model_class": "fcos_resnet50_fpn"})
 
     Initialise a FCOS model for three classes, reusing COCO2017 weights
-    whenever possible, and initialising weights from random in
-    class-dependent layers.
+    wherever possible and randomly initialising class-dependent layers.
 
     >>> from ethology.detectors.models import ObjectDetector
     >>> model = ObjectDetector(
@@ -216,14 +209,12 @@ class ObjectDetector(LightningModule):
     def _configure_model(self) -> torch.nn.Module:
         """Initialise model from ckpt if provided, else from pretrained."""
         # Extract model params as attributes
-        self.model_class = self.config.get("model_class")
-        self.model_kwargs = self.config.get("model_kwargs", {})
+        self._model_class = self.config.get("model_class")
+        self.model_params = self.config.get("model_kwargs", {})
 
         # Set num_classes to default if not set
-        if "num_classes" not in self.model_kwargs:
-            self.model_kwargs["num_classes"] = DEFAULT_NUM_CLASSES
-
-        # TODO: log model params?
+        if "num_classes" not in self.model_params:
+            self.model_params["num_classes"] = DEFAULT_NUM_CLASSES
 
         # Delegate to the appropriate function
         if "checkpoint" not in self.config:
@@ -255,18 +246,18 @@ class ObjectDetector(LightningModule):
 
         """
         # Load selected model with pretreained weights in backbone and head
-        model = MODEL_CONSTRUCTORS_REGISTRY[self.model_class](
+        model = MODEL_CONSTRUCTORS_REGISTRY[self._model_class](
             weights="DEFAULT"
         )
 
         # Adapt model if there is a mismatch with the requested number of
         # classes
         n_classes_model = _get_n_classes_in_detector(
-            model, self.model_class
+            model, self._model_class
         )  # shape of loaded model
-        if self.model_kwargs["num_classes"] != n_classes_model:
+        if self.model_params["num_classes"] != n_classes_model:
             # Keep as much as possible from the bbox prediction head
-            if "fasterrcnn" in self.model_class:
+            if "fasterrcnn" in self._model_class:
                 # Reinitialise box predictor for the required number of classes
                 # (both cls_score and bbox_pred are reinitialised)
                 # Note: in Faster R-CNN, the bbox regression is class-specific;
@@ -278,9 +269,9 @@ class ObjectDetector(LightningModule):
                 )
                 model.roi_heads.box_predictor = faster_rcnn.FastRCNNPredictor(
                     in_features,
-                    self.model_kwargs["num_classes"],
+                    self.model_params["num_classes"],
                 )
-            elif "retinanet" in self.model_class:
+            elif "retinanet" in self._model_class:
                 # In retinanet bbox regression is class-agnostic, so we can
                 # retain it
                 in_channels = model.head.classification_head.conv[0][
@@ -291,11 +282,11 @@ class ObjectDetector(LightningModule):
                     retinanet.RetinaNetClassificationHead(
                         in_channels,
                         num_anchors,
-                        self.model_kwargs["num_classes"],
+                        self.model_params["num_classes"],
                     )
                 )
 
-            elif "fcos" in self.model_class:
+            elif "fcos" in self._model_class:
                 # In fcos bbox regression is class-agnostic, so we can retain
                 # it
                 in_channels = model.head.classification_head.conv[
@@ -305,7 +296,7 @@ class ObjectDetector(LightningModule):
                 model.head.classification_head = fcos.FCOSClassificationHead(
                     in_channels,
                     num_anchors,
-                    self.model_kwargs["num_classes"],
+                    self.model_params["num_classes"],
                 )
 
         return model
@@ -318,7 +309,7 @@ class ObjectDetector(LightningModule):
         checkpoint_dict = torch.load(checkpoint_path, map_location=self.device)
 
         # Instantiate model
-        model = get_model(self.model_class, **self.model_kwargs)
+        model = get_model(self._model_class, **self.model_params)
 
         # Get state dict from checkpoint and load into model
         model_state_dict = self._get_model_state_dict(checkpoint_dict)
