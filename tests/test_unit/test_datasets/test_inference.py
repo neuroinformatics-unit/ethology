@@ -1,5 +1,6 @@
 import pytest
 import torch
+import torchvision.transforms.v2 as transforms
 from PIL import Image
 
 from ethology.datasets.inference import (
@@ -92,3 +93,24 @@ class TestInferenceImageDataset:
 
         # Check there are no jpg files
         assert not all([im.suffix == ".jpg" for im in dataset.image_files])
+
+    def test_default_transforms(self, sample_images_dir):
+        """Check that default transforms are assigned if None specified."""
+        # Create a minimal dataset
+        images_dir_path, _ = sample_images_dir
+        dataset = InferenceImageDataset(
+            root_dir=images_dir_path,
+            file_pattern="*.png",
+        )
+
+        # Get one sample
+        img, _annot = dataset[0]
+
+        # Check transforms are applied as expected
+        assert isinstance(img, torch.Tensor)
+        assert img.dtype == torch.float32
+        assert img.max() <= 1.0  # scaled from [0,255] to [0,1]
+
+        # Check type
+        assert isinstance(dataset.transforms, transforms.Compose)
+        assert len(dataset.transforms.transforms) == 2

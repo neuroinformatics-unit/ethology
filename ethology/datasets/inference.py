@@ -18,14 +18,14 @@ class InferenceImageDataset(Dataset):
     file_pattern : str
         Pattern to match the image filenames.
     transforms : torchvision.transforms.v2.Compose | None, optional
-        Transforms to apply to the images. Default is None (i.e.,
-        no transform is applied to the image).
+        Transforms to apply to the images. If None (default), the
+        transforms from ``get_default_inference_transforms()`` are used.
 
     Attributes
     ----------
     root_dir : pathlib.Path
         Path to the root directory containing the images.
-    transforms : torchvision.transforms.v2.Compose | None
+    transforms : torchvision.transforms.v2.Compose
         Transforms to apply to the images.
     image_files : list[pathlib.Path]
         List of paths to each of the image files, sorted
@@ -65,7 +65,11 @@ class InferenceImageDataset(Dataset):
     ):
         """Initialise dataset."""
         self.root_dir = Path(root_dir)
-        self.transforms = transforms
+        self.transforms = (
+            transforms
+            if transforms is not None
+            else get_default_inference_transforms()
+        )
         self.image_files = sorted(self.root_dir.glob(file_pattern))
 
     def __len__(self) -> int:
