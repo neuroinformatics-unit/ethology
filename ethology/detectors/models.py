@@ -1,4 +1,4 @@
-"""Lightning modules for detectors."""
+"""`PyTorch Lightning modules for detectors."""
 
 import difflib
 from itertools import chain
@@ -29,11 +29,15 @@ MODEL_CONSTRUCTORS_REGISTRY = {
     "retinanet_resnet50_fpn_v2": retinanet.retinanet_resnet50_fpn_v2,
 }
 
+# Default number of classes in torchvision detection models trained on COCO2017
+# Can verify with:
+# from torchvision.models.detection import FasterRCNN_ResNet50_FPN_V2_Weights
+# len(FasterRCNN_ResNet50_FPN_V2_Weights.DEFAULT.meta['categories'])
 DEFAULT_NUM_CLASSES = 91
 
 
 class ObjectDetector(LightningModule):
-    """LightningModule for object detection using torchvision models.
+    """LightningModule for `torchvision detection models <https://docs.pytorch.org/vision/0.24/models.html#object-detection-instance-segmentation-and-person-keypoint-detection>`_.
 
     Supports Faster R-CNN, RetinaNet, and FCOS architectures.
     This module is intended for inference only.
@@ -41,20 +45,25 @@ class ObjectDetector(LightningModule):
     Parameters
     ----------
     config : dict
-        Configuration of the model, with the expected keys:
-        - "model_class": str
-            Name of the model to initialise. Should be one of:
-            - ``fasterrcnn_resnet50_fpn_v2``,
-            - ``fasterrcnn_mobilenet_v3_large_fpn``,
-            - ``fcos_resnet50_fpn``,
-            - ``retinanet_resnet50_fpn_v2``.
-        - "model_kwargs": dict
-            Keyword arguments to pass to the model constructor. See
-            the `torchvision.models.detection module <https://docs.pytorch.org/vision/main/models.html#object-detection>`_
-            for further details.
-        - "checkpoint": str | None
-            Path to the trained model checkpoint. If ``None``, the model is
-            initialised from pretrained weights.
+        Configuration of the model. Expected keys:
+
+        - **model_class** (*str*) --
+          Name of the model to initialise. Should be one of
+          ``fasterrcnn_resnet50_fpn_v2``,
+          ``fasterrcnn_mobilenet_v3_large_fpn``,
+          ``fcos_resnet50_fpn``, or ``retinanet_resnet50_fpn_v2``.
+
+        - **model_kwargs** (*dict*) --
+          Keyword arguments to pass to the model constructor. See
+          the `torchvision.models.detection module
+          <https://docs.pytorch.org/vision/main/models.html#object-detection>`_
+          for possible values for each supported model architecture. If none
+          are provided, the selected model is loaded with weights pretrained
+          on COCO2017 (91 categories).
+
+        - **checkpoint** (*str or None*) --
+          Path to the trained model checkpoint. If ``None``, the model is
+          initialised from pretrained weights.
 
     Attributes
     ----------
@@ -63,18 +72,47 @@ class ObjectDetector(LightningModule):
     model : torch.nn.Module
         The object detector model.
 
+    Notes
+    -----
+    For the Faster R-CNN ResNet architecture, we use the improved `v2` version
+    from `torchvision`.
+
     Examples
     --------
-    Initialise a Faster R-CNN model from pretrained weights:
+    Initialise a FCOS model pretrained on COCO2017 with the default
+    91 classes:
+
+    >>> from ethology.detectors.models import ObjectDetector
+    >>> model = ObjectDetector({"model_class": "fcos_resnet50_fpn"})
+
+    Initialise a FCOS model for three classes, reusing COCO2017 weights
+    whenever possible, and initialising weights from random if not.
+
+    >>> from ethology.detectors.models import ObjectDetector
+    >>> model = ObjectDetector(
+    ...     {
+    ...         "model_class": "fcos_resnet50_fpn",
+    ...         "model_kwargs": {"num_classes": 3},
+    ...     }
+    ... )
+
+    Initialise a Faster R-CNN model with two classes (background included)
+    from a saved checkpoint:
 
     >>> from ethology.detectors.models import ObjectDetector
     >>> config = {
     ...     "model_class": "fasterrcnn_resnet50_fpn_v2",
-    ...     "model_kwargs": {
-    ...         "n_classes": 2,
-    ...         "weights": None,
-    ...         "weights_backbone": None,
-    ...     },
+    ...     "model_kwargs": {"num_classes": 2},
+    ...     "checkpoint": "/path/to/checkpoint/two/classes.ckpt",
+    ... }
+    >>> model = ObjectDetector(config)
+
+    Initialise a Faster R-CNN model with the default number of classes
+    (91) from a saved checkpoint:
+
+    >>> from ethology.detectors.models import ObjectDetector
+    >>> config = {
+    ...     "model_class": "fasterrcnn_resnet50_fpn_v2",
     ...     "checkpoint": "/path/to/checkpoint.ckpt",
     ... }
     >>> model = ObjectDetector(config)
@@ -105,13 +143,6 @@ class ObjectDetector(LightningModule):
         # model_class should always be defined
         if "model_class" not in config:
             raise ValueError("model_class must be defined in config")
-
-        # model_class required when loading from checkpoint
-        # if "checkpoint" in config and "model_class" not in config:
-        #     raise ValueError(
-        #         "model_class must be defined in config "
-        #         "when loading from checkpoint"
-        #     )
 
         # Check if model_class is supported if defined
         if config["model_class"] not in MODEL_CONSTRUCTORS_REGISTRY:
@@ -492,10 +523,12 @@ def _get_n_classes_in_detector(
 
 
 def _get_n_classes_fasterrcnn(model: torch.nn.Module) -> int:
+    """Get the number of classes from a Faster R-CNN model."""
     return model.roi_heads.box_predictor.cls_score.out_features
 
 
 def _get_n_classes_anchor_based(model: torch.nn.Module) -> int:
+    """Get the number of classes from an anchor-based model."""
     # In anchor-based detectors, the classification head makes predictions
     # for every anchor at each spatial location
     cls_head = model.head.classification_head
