@@ -188,11 +188,8 @@ intersphinx_mapping = {
         "https://python-jsonschema.readthedocs.io/en/stable/",
         None,
     ),
-    "torch": ("https://docs.pytorch.org/docs/stable/objects.inv", None),
-    "torchvision": (
-        "https://docs.pytorch.org/vision/stable/objects.inv",
-        None,
-    ),
+    "torch": ("https://pytorch.org/docs/stable/", None),
+    "torchvision": ("https://pytorch.org/vision/stable/", None),
     "lightning": ("https://lightning.ai/docs/pytorch/stable/", None),
 }
 
