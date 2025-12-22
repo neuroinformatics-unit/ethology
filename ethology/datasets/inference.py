@@ -11,19 +11,23 @@ from torch.utils.data import Dataset
 class InferenceImageDataset(Dataset):
     """A simple dataset for images with no ground-truth annotations.
 
+    The image files are sorted alphabetically. The annotations dictionary
+    returned by ``__getitem__`` is always empty to maintain a consistent
+    interface with training datasets.
+
     Parameters
     ----------
-    root_dir : pathlib.Path | str
+    images_dir
         Path to the root directory containing the images.
-    file_pattern : str
+    file_pattern
         Pattern to match the image filenames.
-    transforms : torchvision.transforms.v2.Compose | None, optional
+    transforms
         Transforms to apply to the images. If None (default), the
-        transforms from ``get_default_inference_transforms()`` are used.
+        transforms from :func:`get_default_inference_transforms` are used.
 
     Attributes
     ----------
-    root_dir : pathlib.Path
+    images_dir : pathlib.Path
         Path to the root directory containing the images.
     transforms : torchvision.transforms.v2.Compose
         Transforms to apply to the images.
@@ -36,12 +40,6 @@ class InferenceImageDataset(Dataset):
     get_default_inference_transforms : Returns default transforms for
         inference.
 
-    Notes
-    -----
-    This dataset is used for running inference on a dataset of images
-    without ground-truth annotations. The image files are sorted
-    alphabetically. The returned annotations dictionary is empty.
-
     Examples
     --------
     Create a dataset from 100 ``.png`` files in the ``/path/to/images``
@@ -49,7 +47,7 @@ class InferenceImageDataset(Dataset):
 
     >>> from ethology.datasets.inference import InferenceImageDataset
     >>> dataset = InferenceImageDataset(
-    ...     root_dir="/path/to/images",
+    ...     images_dir="/path/to/images",
     ...     file_pattern="*.png",
     ... )
     >>> len(dataset)
@@ -59,18 +57,18 @@ class InferenceImageDataset(Dataset):
 
     def __init__(
         self,
-        root_dir: Path | str,
+        images_dir: Path | str,
         file_pattern: str,
         transforms: transforms.Compose | None = None,
     ):
         """Initialise dataset."""
-        self.root_dir = Path(root_dir)
+        self.images_dir = Path(images_dir)
         self.transforms = (
             transforms
             if transforms is not None
             else get_default_inference_transforms()
         )
-        self.image_files = sorted(self.root_dir.glob(file_pattern))
+        self.image_files = sorted(self.images_dir.glob(file_pattern))
 
     def __len__(self) -> int:
         """Return the number of images in the dataset."""
@@ -92,7 +90,7 @@ class InferenceImageDataset(Dataset):
 
         """
         # Open requested image
-        img_path = Path(self.root_dir) / self.image_files[idx]
+        img_path = Path(self.images_dir) / self.image_files[idx]
         image = Image.open(img_path).convert("RGB")
 
         # If transforms are specified, apply to the image

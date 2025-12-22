@@ -44,7 +44,7 @@ class TestInferenceImageDataset:
         """Test dataset length matches number of images."""
         images_dir_path, list_images = sample_images_dir
         dataset = InferenceImageDataset(
-            root_dir=images_dir_path, file_pattern="*.png"
+            images_dir=images_dir_path, file_pattern="*.png"
         )
         assert len(dataset) == len(list_images)
 
@@ -52,7 +52,7 @@ class TestInferenceImageDataset:
         """Test __getitem__ returns (image, empty dict)."""
         images_dir_path, _ = sample_images_dir
         dataset = InferenceImageDataset(
-            root_dir=images_dir_path,
+            images_dir=images_dir_path,
             file_pattern="*.png",
             transforms=get_default_inference_transforms(),
         )
@@ -68,7 +68,7 @@ class TestInferenceImageDataset:
         """Test images in dataset are in alphabetical order."""
         images_dir_path, list_files_images_dir = sample_images_dir
         dataset = InferenceImageDataset(
-            root_dir=images_dir_path,
+            images_dir=images_dir_path,
             file_pattern="*.png",
         )
 
@@ -87,7 +87,7 @@ class TestInferenceImageDataset:
 
         # Build a dataset from that directory with png filter
         dataset = InferenceImageDataset(
-            root_dir=images_dir_path,
+            images_dir=images_dir_path,
             file_pattern="*.png",
         )
 
@@ -99,7 +99,7 @@ class TestInferenceImageDataset:
         # Create a minimal dataset
         images_dir_path, _ = sample_images_dir
         dataset = InferenceImageDataset(
-            root_dir=images_dir_path,
+            images_dir=images_dir_path,
             file_pattern="*.png",
         )
 
