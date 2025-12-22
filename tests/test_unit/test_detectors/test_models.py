@@ -513,52 +513,55 @@ def test_run_inference(valid_predictions_dataset):
                 # Batch 0: 3 images
                 [
                     {
-                        "boxes": np.array([[10, 20, 30, 40]], dtype=float),
-                        "scores": np.array([0.9]),
-                        "labels": np.array([1]),
-                    },  # one detection in image 1
+                        "boxes": torch.tensor([[10.0, 20.0, 30.0, 40.0]]),
+                        "scores": torch.tensor([0.9]),
+                        "labels": torch.tensor([1]),
+                    },  # one detection in image 1.
+                    # Note: float literals are torch.float32 by default
                     {
-                        "boxes": np.array(
+                        "boxes": torch.tensor(
                             [
-                                [14, 24, 34, 44],
-                                [15, 25, 35, 45],
+                                [14.0, 24.0, 34.0, 44.0],
+                                [15.0, 25.0, 35.0, 45.0],
                             ],
-                            dtype=float,
                         ),
-                        "scores": np.array([0.95, 0.85]),
-                        "labels": np.array([1, 0]),
+                        "scores": torch.tensor([0.95, 0.85]),
+                        "labels": torch.tensor([1, 0]),
                     },  # two detections in image 2
                     {
-                        "boxes": np.array(
+                        "boxes": torch.tensor(
                             [
-                                [18, 28, 38, 48],
-                                [19, 29, 39, 49],
-                                [20, 30, 40, 50],
-                                [21, 31, 41, 51],
+                                [18.0, 28.0, 38.0, 48.0],
+                                [19.0, 29.0, 39.0, 49.0],
+                                [20.0, 30.0, 40.0, 50.0],
+                                [21.0, 31.0, 41.0, 51.0],
                             ],
-                            dtype=float,
                         ),
-                        "scores": np.array([0.91, 0.81, 0.71, 0.61]),
-                        "labels": np.array([0, 0, 1, 1]),
+                        "scores": torch.tensor([0.91, 0.81, 0.71, 0.61]),
+                        "labels": torch.tensor([0, 0, 1, 1]),
                     },  # four detections in image 3
                 ],
                 # Batch 1: 2 images
                 [
                     {
-                        "boxes": np.array(
-                            [[22, 32, 42, 52], [23, 33, 43, 53]],
-                            dtype=float,
+                        "boxes": torch.tensor(
+                            [
+                                [22.0, 32.0, 42.0, 52.0],
+                                [23.0, 33.0, 43.0, 53.0],
+                            ],
                         ),
-                        "scores": np.array([0.92, 0.82]),
-                        "labels": np.array([1, 1]),
+                        "scores": torch.tensor([0.92, 0.82]),
+                        "labels": torch.tensor([1, 1]),
                     },  # 2 detections in image 1
                     {
-                        "boxes": np.array(
-                            [[26, 36, 46, 56], [27, 37, 47, 57]],
-                            dtype=float,
+                        "boxes": torch.tensor(
+                            [
+                                [26.0, 36.0, 46.0, 56.0],
+                                [27.0, 37.0, 47.0, 57.0],
+                            ],
                         ),
-                        "scores": np.array([0.93, 0.83]),
-                        "labels": np.array([0, 1]),
+                        "scores": torch.tensor([0.93, 0.83]),
+                        "labels": torch.tensor([0, 1]),
                     },  # 2 detections in image 2
                 ],
             ],
@@ -571,9 +574,11 @@ def test_run_inference(valid_predictions_dataset):
             [
                 [
                     {
-                        "boxes": np.array([[10, 20, 30, 40]], dtype=float),
-                        "scores": np.array([0.95]),
-                        "labels": np.array([2]),
+                        "boxes": torch.tensor(
+                            [[10.0, 20.0, 30.0, 40.0]], dtype=float
+                        ),
+                        "scores": torch.tensor([0.95]),
+                        "labels": torch.tensor([2]),
                     }
                 ],
             ],
@@ -586,9 +591,11 @@ def test_run_inference(valid_predictions_dataset):
             [
                 [
                     {
-                        "boxes": np.array([[10, 20, 30, 40]], dtype=float),
-                        "scores": np.array([0.95]),
-                        "labels": np.array([2]),
+                        "boxes": torch.tensor(
+                            [[10.0, 20.0, 30.0, 40.0]], dtype=float
+                        ),
+                        "scores": torch.tensor([0.95]),
+                        "labels": torch.tensor([2]),
                     }
                 ],
                 [],

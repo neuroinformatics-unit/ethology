@@ -345,24 +345,27 @@ class ObjectDetector(LightningModule):
     @staticmethod
     @_check_output(ValidBboxDetectionsDataset)
     def _format_predictions(
-        predictions: list[list[dict]],
+        predictions: list[list[dict[str, torch.Tensor]]],
         attrs: dict | None = None,
     ) -> xr.Dataset:
         """Format predictions as an ``ethology`` detections dataset.
 
         Parameters
         ----------
-        predictions : list[list[dict]]
+        predictions : list[list[dict[str, torch.Tensor]]]
             The raw predictions to format. The outer list corresponds to
             batches, the inner list corresponds to images within a batch.
             The dictionaries contain the following keys:
-            - "boxes": torch.Tensor of shape (n_boxes, 4) holding the bounding
-              box corners [x1, y1, x2, y2] in pixel coordinates for each
-              detection.
-            - "scores": torch.Tensor of shape (n_boxes,) holding the confidence
-              score for each detection.
-            - "labels": torch.Tensor of shape (n_boxes,) holding the integer
-              label for each detection.
+
+            - "boxes": ``torch.Tensor`` of shape ``(n_boxes, 4)`` and
+              floating-point dtype (typically ``torch.float32``), holding the
+              bounding box corners ``[x1, y1, x2, y2]`` in pixel coordinates
+              for each detection.
+            - "scores": ``torch.Tensor`` of shape ``(n_boxes,)`` and
+              floating-point dtype (typically ``torch.float32``), holding the
+              confidence score for each detection.
+            - "labels": ``torch.Tensor`` of shape ``(n_boxes,)`` and dtype
+              ``torch.int64``, holding the integer label for each detection.
 
         attrs : dict | None
             Dictionary of attributes to add to the predictions dataset as
@@ -400,13 +403,17 @@ class ObjectDetector(LightningModule):
                 "predictions list contains no image data."
             )
 
-        # Parse output from dicts
+        # Parse output from dicts and convert to numpy arrays
         output_per_sample = {
-            key: [sample[key] for sample in predictions_dict_per_img]
+            key: [
+                sample[key].cpu().numpy()
+                for sample in predictions_dict_per_img
+            ]
             for key in ["boxes", "scores", "labels"]
         }
 
         # Pad across image_ids
+        # (note: np.asarray(np.nan).dtype is float64)
         fill_value = {"boxes": np.nan, "scores": np.nan, "labels": -1}
         output_per_sample_padded = {
             key: np.stack(

@@ -23,7 +23,9 @@ def _pad_to_max_first_dimension(list_arrays, fill_value=np.nan):
     # Check for dtype compatibility between fill_value and arrays
     # (convert fill_value to numpy scalar/array to get its dtype first)
     for i, arr in enumerate(list_arrays):
-        if not np.can_cast(np.asarray(fill_value).dtype, arr.dtype):
+        if not np.can_cast(
+            np.asarray(fill_value).dtype, arr.dtype, "same_kind"
+        ):
             raise TypeError(
                 f"Cannot pad array (index {i}, dtype={arr.dtype}) "
                 f"with fill_value={fill_value!r} "
