@@ -1,9 +1,12 @@
 """Sphinx configuration for ethology documentation."""
 
+import inspect
 import os
 import sys
+from importlib import import_module
 from importlib.metadata import version as get_version
 
+from jinja2.filters import FILTERS
 from sphinx_gallery import sorting
 
 # Used when building API docs, put the dependencies
@@ -66,6 +69,7 @@ myst_enable_extensions = [
 # Automatically add anchors to markdown headings
 myst_heading_anchors = 4
 
+# -------- Autosummary
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
 
@@ -74,6 +78,47 @@ autosummary_generate = True
 autosummary_generate_overwrite = False
 autodoc_default_options = {"show-inheritance": True}  # applies to all classes
 
+
+def is_own_method(method_name, obj, modulename):
+    """Check if a method is defined in the class itself (not inherited).
+
+    Returns the method reference string if it's defined in the class,
+    empty string otherwise.
+    """
+    module = import_module(modulename)
+    if hasattr(module, "__all__") and obj not in module.__all__:
+        return ""
+
+    cls = getattr(module, obj)
+    if not inspect.isclass(cls):
+        return ""
+
+    # Check if method is defined in this class (not inherited)
+    if hasattr(cls, method_name):
+        # Check if it's in the class's __dict__ (defined in this class)
+        if method_name in cls.__dict__:
+            return f"~{obj}.{method_name}"
+        # Or check using inspect to see if it's defined in this class
+        try:
+            method = getattr(cls, method_name)
+            if inspect.ismethod(method) or inspect.isfunction(method):
+                # Check if the method's defining class is this class
+                if hasattr(method, "__qualname__"):
+                    qualname_parts = method.__qualname__.split(".")
+                    if len(qualname_parts) >= 2 and qualname_parts[-2] == obj:
+                        return f"~{obj}.{method_name}"
+                # Fallback: check if it's in __dict__
+                if method_name in cls.__dict__:
+                    return f"~{obj}.{method_name}"
+        except (AttributeError, TypeError):
+            pass
+
+    return ""
+
+
+FILTERS["is_own_method"] = is_own_method
+
+# -------------
 # Prefix section labels with the document name
 autosectionlabel_prefix_document = True
 
@@ -215,7 +260,6 @@ notfound_urls_prefix = None
 
 
 # sphinx-gallery configuration
-
 sphinx_gallery_conf = {
     "examples_dirs": ["../../examples"],
     "within_subsection_order": sorting.ExplicitOrder(

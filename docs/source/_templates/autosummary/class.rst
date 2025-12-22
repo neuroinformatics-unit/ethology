@@ -3,9 +3,8 @@
 .. currentmodule:: {{ module }}
 
 .. autoclass:: {{ objname }}
-   {% if objname != 'ValidDataset' %}:members:{% endif %}
-   {% if objname != 'ValidDataset' %}:inherited-members:{% endif %}
-   {% if objname == 'ValidBboxAnnotationsDataFrame' %}:exclude-members: Config{% endif %}
+   :members:
+   :show-inheritance:
 
    {% block methods %}
    {% set ns = namespace(has_public_methods=false) %}
@@ -24,11 +23,13 @@
    .. autosummary::
    {% for item in methods %}
    {% if not item.startswith('_') %}
-      ~{{ name }}.{{ item }}
+      {{ item|is_own_method(name, module) }}
    {% endif %}
    {%- endfor %}
    {% endif %}
    {% endblock %}
+
+   .. rubric:: {{ _('Details') }}
 
 .. minigallery:: {{ module }}.{{ objname }}
    :add-heading: Examples using ``{{ objname }}``
