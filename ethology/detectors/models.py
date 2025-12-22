@@ -1,4 +1,4 @@
-"""`PyTorch Lightning modules for detectors."""
+"""PyTorch Lightning modules for detectors."""
 
 import difflib
 from itertools import chain
@@ -57,13 +57,25 @@ class ObjectDetector(LightningModule):
           Keyword arguments to pass to the model constructor. See
           the `torchvision.models.detection module
           <https://docs.pytorch.org/vision/main/models.html#object-detection>`_
-          for possible values for each supported model architecture. If none
-          are provided, the selected model is loaded with weights pretrained
-          on COCO2017 (91 categories).
+          for possible values for each supported model architecture.
 
-        - **checkpoint** (*str or None*) --
-          Path to the trained model checkpoint. If ``None``, the model is
-          initialised from pretrained weights.
+          All models support ``num_classes`` as a keyword argument:
+
+          - If ``num_classes`` is not specified in ``model_kwargs``, the model
+            defaults to 91 classes (the number of COCO2017 categories).
+          - If ``num_classes`` is specified and is different from
+            91 (and no ``checkpoint`` is specified), pretrained COCO2017
+            weights are loaded in all layers except for the classification
+            head. In this case, classification layers are reshaped to the
+            selected number of classes and randomly initialised.
+
+        - **checkpoint** (*str, Path or None*) --
+          Path to the trained model checkpoint. If provided, model weights
+          are loaded entirely from the checkpoint file (no pretrained weights
+          are used). The checkpoint must match the architecture specified by
+          ``model_class`` and the number of classes in ``model_kwargs``.
+          If ``None``, the model is initialised using pretrained COCO2017
+          weights.
 
     Attributes
     ----------
@@ -77,6 +89,30 @@ class ObjectDetector(LightningModule):
     For the Faster R-CNN ResNet architecture, we use the improved `v2` version
     from `torchvision`.
 
+    When requesting a specific architecture with a number of classes that is
+    different to the number of classes in COCO2017 (91), and no checkpoint is
+    provided, we load the COCO2017 pretrained weights in the layers that don't
+    change size and initialise with random weights the layers for which there
+    would be a size mismatch due to the different number of classes. For
+    RetinaNet and FCOS, the bounding box regression head retains its pretrained
+    weights since it is class-agnostic and only the classification head
+    changes. For Faster R-CNN, the entire box predictor (classification and
+    regression) is initialised with random weights since bounding box
+    regression is class-specific.
+
+    We cover the following cases for weights initialisation:
+
+    - If no checkpoint is provided, and default classes are specified:
+      pretrained COCO2017 weights are loaded for both backbone and detection
+      head.
+    - If no checkpoint is provided, and a custom ``num_classes`` is used:
+      pretrained backbone weights are retained and class-dependent layers are
+      initialised with random weights.
+    - If a checkpoint is provided: all weights are loaded from the checkpoint.
+      Users must ensure that ``num_classes`` matches the number of classes the
+      checkpoint was trained with, otherwise loading will fail due to shape
+      mismatches.
+
     Examples
     --------
     Initialise a FCOS model pretrained on COCO2017 with the default
@@ -86,7 +122,8 @@ class ObjectDetector(LightningModule):
     >>> model = ObjectDetector({"model_class": "fcos_resnet50_fpn"})
 
     Initialise a FCOS model for three classes, reusing COCO2017 weights
-    whenever possible, and initialising weights from random if not.
+    whenever possible, and initialising weights from random in
+    class-dependent layers.
 
     >>> from ethology.detectors.models import ObjectDetector
     >>> model = ObjectDetector(
@@ -193,7 +230,7 @@ class ObjectDetector(LightningModule):
             model = self._configure_model_pretrained()
         else:
             model = self._configure_model_from_checkpoint(
-                self.config["checkpoint"]
+                str(self.config["checkpoint"])
             )
 
         return model
