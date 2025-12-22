@@ -159,9 +159,8 @@ class ObjectDetector(LightningModule):
         # hparams attribute
         self.save_hyperparameters()
 
-    # --------- Validate config -----------------
     @staticmethod
-    def _validate_config(config):
+    def _validate_config(config: dict):
         """Validate config dict for detector."""
         # Check config is a dictionary
         if not isinstance(config, dict):
@@ -205,7 +204,6 @@ class ObjectDetector(LightningModule):
 
         return config
 
-    # -------- Initialise model ----------------------------
     def _configure_model(self) -> torch.nn.Module:
         """Initialise model from ckpt if provided, else from pretrained."""
         # Extract model params as attributes
@@ -230,20 +228,7 @@ class ObjectDetector(LightningModule):
         """Load pretrained weights into model.
 
         Default weights are used when possible. If there is a shape mismatch
-        in the layers, the weights are reinitialised.
-
-        Returns
-        -------
-        torch.nn.Module
-            The initialised object detector model.
-
-        Notes
-        -----
-        Keeping the classification head may not be useful if the domain
-        is very different to COCO or natural images, or if looking for
-        fine grained detection. They may be helpful in small datasets
-        (< 100 images)
-
+        in the layers, the weights are initialised with random weights.
         """
         # Load selected model with pretreained weights in backbone and head
         model = MODEL_CONSTRUCTORS_REGISTRY[self._model_class](
@@ -321,11 +306,13 @@ class ObjectDetector(LightningModule):
     def _get_model_state_dict(checkpoint: dict) -> dict:
         """Get model state dict from checkpoint dictionary.
 
-        Returns
-        -------
-        dict
-            The model state dictionary.
-
+        The checkpoint dictionary is expected to be in one of the following:
+        - A dictionary with the state dictionary itself (torch flat
+          convention).
+        - A dictionary with a "state_dict" key containing the state dictionary
+          (torch nested convention).
+        - A dictionary with a "state_dict" key containing the state dictionary
+          where each key has a "model." prefix (Lightning convention).
         """
         # Get the state_dict key if it exists,
         # otherwise use the checkpoint itself as the state dict
@@ -343,25 +330,36 @@ class ObjectDetector(LightningModule):
 
     # ------- Inference -----------------------
     def predict_step(
-        self, batch: tuple[torch.Tensor, dict], batch_idx: int
+        self,
+        batch: tuple[torch.Tensor, dict],
+        batch_idx: int,
     ) -> dict:
-        """Run inference on a batch of images.
+        """Run an inference step on a batch of images.
 
         Parameters
         ----------
-        batch : tuple[torch.Tensor, dict]
+        batch
             A tuple containing the batch of images and the corresponding
             annotations.
-        batch_idx : int
+        batch_idx
             The index of the batch.
 
         Returns
         -------
         dict
             The raw predictions as a dictionary with the keys:
-            - "boxes": torch.Tensor
-            - "scores": torch.Tensor
-            - "labels": torch.Tensor
+
+            - **"boxes"** (*torch.Tensor*) --
+              Tensor of shape ``(n_boxes, 4)`` and floating-point dtype
+              (typically ``torch.float32``), holding the bounding box corners
+              ``[x1, y1, x2, y2]`` in pixel coordinates for each detection.
+            - **"scores"** (*torch.Tensor*) --
+              Tensor of shape ``(n_boxes,)`` and floating-point dtype
+              (typically ``torch.float32``), holding the confidence score for
+              each detection.
+            - **"labels"** (*torch.Tensor*) --
+              Tensor of shape ``(n_boxes,)`` and dtype ``torch.int64``,
+              holding the integer label for each detection.
 
         """
         images_batch, _annotations_batch = batch
@@ -379,21 +377,21 @@ class ObjectDetector(LightningModule):
         """Run inference on the input dataloader.
 
         Convenience method that wraps ``trainer.predict()`` and
-        ``_format_predictions()`` and returns the formatted predictions as an
-        ``ethology`` detections dataset.
+        returns the formatted predictions as an
+        ``ethology`` bounding box detections dataset.
 
         Parameters
         ----------
-        trainer : lightning.Trainer
+        trainer
             The trainer to use for inference.
-        dataloader : torch.utils.data.DataLoader
+        dataloader
             The dataloader to use for inference.
-        attrs : dict | None
-            Attributes to add to the predictions dataset.
+        attrs
+            Attributes to add to the ``ethology`` detections dataset.
 
         Returns
         -------
-        xr.Dataset
+        xarray.Dataset
             The formatted predictions as an ``ethology`` detections dataset.
 
         """
@@ -416,15 +414,17 @@ class ObjectDetector(LightningModule):
             batches, the inner list corresponds to images within a batch.
             The dictionaries contain the following keys:
 
-            - "boxes": ``torch.Tensor`` of shape ``(n_boxes, 4)`` and
-              floating-point dtype (typically ``torch.float32``), holding the
-              bounding box corners ``[x1, y1, x2, y2]`` in pixel coordinates
-              for each detection.
-            - "scores": ``torch.Tensor`` of shape ``(n_boxes,)`` and
-              floating-point dtype (typically ``torch.float32``), holding the
-              confidence score for each detection.
-            - "labels": ``torch.Tensor`` of shape ``(n_boxes,)`` and dtype
-              ``torch.int64``, holding the integer label for each detection.
+            - **boxes** (*torch.Tensor*) --
+              Tensor of shape ``(n_boxes, 4)`` and floating-point dtype
+              (typically ``torch.float32``), holding the bounding box corners
+              ``[x1, y1, x2, y2]`` in pixel coordinates for each detection.
+            - **scores** (*torch.Tensor*) --
+              Tensor of shape ``(n_boxes,)`` and floating-point dtype
+              (typically ``torch.float32``), holding the confidence score for
+              each detection.
+            - **labels** (*torch.Tensor*) --
+              Tensor of shape ``(n_boxes,)`` and dtype ``torch.int64``,
+              holding the integer label for each detection.
 
         attrs : dict | None
             Dictionary of attributes to add to the predictions dataset as
