@@ -140,6 +140,40 @@ def valid_predictions_dataset():
                 ),
             ),
         ),
+        (
+            {
+                "model_class": "fcos_resnet50_fpn",
+                "model_kwargs": {"num_classes": 3},
+            },
+            does_not_raise(),
+        ),
+        (
+            {
+                "model_class": "fcos_resnet50_fpn",
+                "model_kwargs": {"trainable_backbone_layers": 5},
+            },
+            does_not_raise(),
+        ),
+        (
+            {
+                "model_class": "fcos_resnet50_fpn",
+                "model_kwargs": {
+                    "num_classes": 3,
+                    "trainable_backbone_layers": 5,
+                },
+            },
+            does_not_raise(),
+        ),
+    ],
+    ids=[
+        "config wrong type",
+        "model_class missing",
+        "model_class unsupported",
+        "model_kwargs wrong type",
+        "num_classes misspelt",
+        "model_kwargs single correct 1",
+        "model_kwargs single correct 2",
+        "model_kwargs multiple correct",
     ],
 )
 def test_validate_config(config, expected_exception):
