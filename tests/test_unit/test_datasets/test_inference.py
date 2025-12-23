@@ -6,6 +6,7 @@ from PIL import Image
 from ethology.datasets.inference import (
     InferenceImageDataset,
     get_default_inference_transforms,
+    get_detector_collate_fn,
 )
 
 
@@ -24,6 +25,30 @@ def test_get_default_inference_transforms():
     assert isinstance(result, torch.Tensor)
     assert result.dtype == torch.float32
     assert result.min() >= 0.0 and result.max() <= 1.0  # scaled
+
+
+def test_get_detector_collate_fn():
+    """Test collate_fn for detectors returns batch in expected format."""
+    # Simulate output from a dataset
+    list_dataset_samples = [
+        (torch.zeros((3, 24, 24)), {}),  # C, H, W
+        (torch.zeros((3, 100, 200)), {}),
+        (torch.zeros((3, 12, 12)), {}),
+    ]
+
+    # Run thru detector collate_fn
+    collate_fn = get_detector_collate_fn()
+    batched_data = collate_fn(list_dataset_samples)
+
+    # Check output is a (image_tuple, annots_tuple)
+    assert isinstance(batched_data, tuple)
+    assert len(batched_data) == 2  # (images_tuple, annots_tuple)
+    assert isinstance(batched_data[0], tuple)
+    assert isinstance(batched_data[1], tuple)
+
+    # Check number of samples in batch
+    assert len(batched_data[0]) == len(list_dataset_samples)
+    assert len(batched_data[1]) == len(list_dataset_samples)
 
 
 class TestInferenceImageDataset:
