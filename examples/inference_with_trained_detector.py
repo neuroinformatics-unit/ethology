@@ -24,6 +24,7 @@ from torchvision.models.detection import FasterRCNN_ResNet50_FPN_V2_Weights
 from ethology.datasets.inference import (
     InferenceImageDataset,
     get_default_inference_transforms,
+    get_detector_collate_fn,
 )
 from ethology.detectors.models import ObjectDetector
 from ethology.io.annotations import save_bboxes
@@ -37,9 +38,6 @@ from ethology.io.annotations import save_bboxes
 # Download dataset
 # -----------------
 # Source of the dataset
-# African Wildlife Dataset
-# url: https://github.com/ultralytics/assets/releases/download/v0.0.0/african-wildlife.zip
-# AGPL license?
 data_source = {
     "url": "https://storage.googleapis.com/public-datasets-lila/uas-imagery-of-migratory-waterfowl/uas-imagery-of-migratory-waterfowl.20240220.zip",
     "hash": "c5b8dfc5a87ef625770ac8f22335dc9eb8a67688b610490a029dae81815a9896",
@@ -66,6 +64,7 @@ data_dir = ethology_cache / "uas-imagery-of-migratory-waterfowl"
 # -----------------------------
 
 # Create dataset
+
 images_dir = data_dir / "experts" / "images"
 dataset = InferenceImageDataset(
     images_dir,
@@ -73,43 +72,30 @@ dataset = InferenceImageDataset(
     transforms=get_default_inference_transforms(),
 )
 
+# %%
 # Create dataloader
+# ---------------------
+
+# The default collate function for the dataloader
+# stacks all images (torch.stack([img1, img2])),
+# which fails if images have different sizes.
+# We use a detector collate fn.
+
+# Create dataloader for detector
 dataloader = DataLoader(
     dataset,
     batch_size=12,  # 12,
     shuffle=False,
     num_workers=8,  # 4
+    collate_fn=get_detector_collate_fn(),
 )
 
 # %%
 # Prepare model and trainer
 # -------------------------
 
-# Pretreained options
-# ObjectDetector({"model_class": "fcos_resnet50_fpn"})
-# -- loads fcos_resnet50_fpn with coco2017 weights (91 classes)
-
-# ObjectDetector({"model_class": "fcos_resnet50_fpn",
-#   "model_kwargs":{"num_classes": 3}})
-# -- fcos_resnet50_fpn with coco2017 weights except for the last
-#    layers that are reinitialised with random weights for an output shape of
-#    3 classes
-
-# From checkpoint:
-# ObjectDetector({"model_class": "fcos_resnet50_fpn",
-#  "checkpoint": /path/to/ckpt})
-# -- will complain if checkpoint does not have 91 classes
-
-# Instantiate detector
-# Define model config
-# Faster-RCNN for 91 classes pretrained on COCO2017
-
-detector = ObjectDetector(
-    {
-        "model_class": "fasterrcnn_resnet50_fpn_v2",
-        # "model_kwargs": {"weights": "DEFAULT"}, # for pretrained
-    }
-)
+# Pretrained
+detector = ObjectDetector({"model_class": "fasterrcnn_resnet50_fpn_v2"})
 
 
 # Instantiate trainer
@@ -127,10 +113,11 @@ trainer = Trainer(
 # to be able to export the predictions as COCO
 
 # %%
-# Retrieve list of categories used in torch models trained on COCO2017
-weights = FasterRCNN_ResNet50_FPN_V2_Weights.DEFAULT
-list_category_str = weights.meta["categories"]
-
+# Retrieve list of categories used in torchvision models
+# trained on COCO2017
+list_category_str = FasterRCNN_ResNet50_FPN_V2_Weights.DEFAULT.meta[
+    "categories"
+]
 
 ds_attrs = {
     "images_dir": images_dir,
@@ -173,3 +160,5 @@ out_file = save_bboxes.to_COCO_file(
 # To remove the output files we have just created, we can run the following:
 
 os.remove(out_file)
+
+# %%
