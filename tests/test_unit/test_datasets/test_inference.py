@@ -29,7 +29,7 @@ def test_get_default_inference_transforms():
 
 def test_get_detector_collate_fn():
     """Test collate_fn for detectors returns batch in expected format."""
-    # Simulate output from a dataset
+    # Simulate output from a dataset with no annotations (empty dict)
     list_dataset_samples = [
         (torch.zeros((3, 24, 24)), {}),  # C, H, W
         (torch.zeros((3, 100, 200)), {}),
