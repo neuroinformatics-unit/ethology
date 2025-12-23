@@ -114,17 +114,20 @@ detector = ObjectDetector(
 
 # Instantiate trainer
 trainer = Trainer(
-    accelerator="gpu",  # recommended gpu if available
+    accelerator="cpu",  # recommended gpu if available
     devices=1,
     logger=False,
 )
 
 # %%
-# Define dataset attrs to add to predictions (optional)
-#  -----------
+# Define dataset attrs to add to predictions
+# -------------------------------------------
 
+# We need to add `map_category_to_str` as a dataset attribute
+# to be able to export the predictions as COCO
+
+# %%
 # Retrieve list of categories used in torch models trained on COCO2017
-
 weights = FasterRCNN_ResNet50_FPN_V2_Weights.DEFAULT
 list_category_str = weights.meta["categories"]
 
@@ -140,7 +143,7 @@ ds_attrs = {
 
 # %%
 # Run inference using model on dataloader
-# ---------------------------------------
+# ----------------------------------------
 # The predictions are formatted as an ``ethology`` detections dataset.
 
 # Run inference using model on dataloader
@@ -164,10 +167,9 @@ out_file = save_bboxes.to_COCO_file(
 #     format="COCO",
 # )
 
-
 # %%
 # Clean-up
-# --------
+# ---------
 # To remove the output files we have just created, we can run the following:
 
 os.remove(out_file)
