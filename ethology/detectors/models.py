@@ -55,7 +55,7 @@ class ObjectDetector(LightningModule):
 
         - **model_kwargs** (*dict*) --
           Keyword arguments to pass to the model constructor. See
-          the `torchvision.models.detection docs
+          the `torchvision detection models docs
           <https://docs.pytorch.org/vision/main/models.html#object-detection>`_
           for possible values for each supported model.
 
@@ -95,11 +95,15 @@ class ObjectDetector(LightningModule):
 
     Notes
     -----
-    For the Faster R-CNN ResNet architecture, we use the improved ``v2``
-    version from `torchvision <https://docs.pytorch.org/vision/0.24/models/faster_rcnn.html>`_.
+    For two of the models using a ResNet backbone (Faster-RCNN and RetinaNet),
+    we use the improved ``v2`` versions from ``torchvision`` (see for
+    `FasterRCNN \
+        <https://docs.pytorch.org/vision/0.24/models/faster_rcnn.html>`_
+    and for
+    `RetinaNet <https://docs.pytorch.org/vision/0.24/models/retinanet.html>`_).
 
     We cover the following cases for weights initialisation. If no checkpoint
-    is provided and:
+    is provided and...
 
     - ``num_classes`` is not specified (or is 91): pretrained COCO2017 weights
       are loaded for both backbone and detection head.
@@ -200,8 +204,16 @@ class ObjectDetector(LightningModule):
                     f"{type(config['model_kwargs']).__name__}"
                 )
 
-            # Check for keys similar to 'num_classes' but not exact
-            list_fuzzy_matches = ["num_classes"]
+            # Check for misspellings of the main model_kwargs passed
+            # to the torchvision constructors
+            # (torchvision does not report errors on this)
+            list_fuzzy_matches = [
+                "weights",
+                "progress",
+                "num_classes",
+                "weights_backbone",
+                "trainable_backbone_layers",
+            ]
             for key in config["model_kwargs"]:
                 if key not in list_fuzzy_matches:
                     close_matches = difflib.get_close_matches(

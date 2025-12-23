@@ -143,6 +143,19 @@ def valid_predictions_dataset():
         (
             {
                 "model_class": "fcos_resnet50_fpn",
+                "model_kwargs": {"trainable_backbone_layrs": 3},
+            },
+            pytest.raises(
+                ValueError,
+                match=(
+                    "Invalid key 'trainable_backbone_layrs' in model_kwargs. "
+                    "Did you mean 'trainable_backbone_layers'?"
+                ),
+            ),
+        ),
+        (
+            {
+                "model_class": "fcos_resnet50_fpn",
                 "model_kwargs": {"num_classes": 3},
             },
             does_not_raise(),
@@ -166,14 +179,15 @@ def valid_predictions_dataset():
         ),
     ],
     ids=[
-        "config wrong type",
-        "model_class missing",
-        "model_class unsupported",
-        "model_kwargs wrong type",
-        "num_classes misspelt",
-        "model_kwargs single correct 1",
-        "model_kwargs single correct 2",
-        "model_kwargs multiple correct",
+        "invalid config wrong type",
+        "invalid model_class missing",
+        "invalid model_class unsupported",
+        "invalid model_kwargs wrong type",
+        "invalid num_classes misspelt",
+        "invalid trainable_backbone_layers misspelt",
+        "valid model_kwargs single 1",
+        "valid model_kwargs single 2",
+        "valid model_kwargs multiple",
     ],
 )
 def test_validate_config(config, expected_exception):
