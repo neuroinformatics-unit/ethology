@@ -40,7 +40,6 @@ extensions = [
     "sphinx.ext.autosummary",
     "sphinx.ext.viewcode",
     "sphinx.ext.intersphinx",
-    "sphinx.ext.doctest",  # for lightning docstrings
     "myst_parser",
     "nbsphinx",
     "notfound.extension",
@@ -48,7 +47,6 @@ extensions = [
     "sphinx_gallery.gen_gallery",
     "sphinx_sitemap",
     "sphinx.ext.autosectionlabel",
-    "sphinx_paramlinks",  # for :paramref: Sphinx role, used by lightning
 ]
 
 # Configure the myst parser to enable cool markdown features
@@ -79,13 +77,13 @@ autosummary_generate_overwrite = False
 autodoc_default_options = {"show-inheritance": True}  # applies to all classes
 
 
-def is_own_method(method_name, obj, modulename):
+def is_own_method(method_name, obj, module_name):
     """Check if a method is defined in the class itself (not inherited).
 
     Returns the method reference string if it's defined in the class,
     empty string otherwise.
     """
-    module = import_module(modulename)
+    module = import_module(module_name)
     if hasattr(module, "__all__") and obj not in module.__all__:
         return ""
 
