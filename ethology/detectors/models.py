@@ -253,9 +253,9 @@ class ObjectDetector(LightningModule):
         Default weights are used when possible. If there is a shape mismatch
         in the layers, the weights are initialised with random weights.
         """
-        # Load selected model with pretreained weights in backbone and head
+        # Load selected model with pretrained weights in backbone and head
         model = MODEL_CONSTRUCTORS_REGISTRY[self._model_class](
-            weights="DEFAULT"
+            weights="COCO_V1"  # equivalent to weights="DEFAULT"
         )
 
         # Adapt model if there is a mismatch with the requested number of
