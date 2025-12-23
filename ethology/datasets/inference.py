@@ -20,9 +20,9 @@ class InferenceImageDataset(Dataset):
     images_dir
         Path to the root directory containing the images.
     file_pattern
-        Pattern to match the image filenames.
+           Glob pattern to match image filenames (e.g., "*.png", "*.jpg").
     transforms
-        Transforms to apply to the images. If None (default), the
+        Transforms to apply to the images. If `None` (default), the
         transforms from :func:`get_default_inference_transforms` are used.
 
     Attributes
