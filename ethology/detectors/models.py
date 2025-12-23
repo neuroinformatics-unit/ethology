@@ -55,7 +55,7 @@ class ObjectDetector(LightningModule):
 
         - **model_kwargs** (*dict*) --
           Keyword arguments to pass to the model constructor. See
-          the `torchvision.models.detection module
+          the `torchvision.models.detection docs
           <https://docs.pytorch.org/vision/main/models.html#object-detection>`_
           for possible values for each supported model.
 
@@ -67,11 +67,10 @@ class ObjectDetector(LightningModule):
 
         - **checkpoint** (*str, Path or None*) --
           Path to the trained model checkpoint. If provided, model weights
-          are loaded entirely from the checkpoint file (no pretrained weights
-          are used). The checkpoint must match the architecture specified by
-          ``model_class`` and the number of classes in ``model_kwargs``.
-          If ``None``, the model is initialised using pretrained COCO2017
-          weights.
+          are loaded entirely from the checkpoint file. The checkpoint must
+          match the architecture specified by ``model_class`` and the number
+          of classes in ``model_kwargs``. If ``None``, the model is
+          initialised using pretrained COCO2017 weights.
 
     Attributes
     ----------
@@ -80,13 +79,24 @@ class ObjectDetector(LightningModule):
     model : torch.nn.Module
         The object detector model.
     model_params : dict
-        The keyword arguments used to construct the model, with defaults
+        The parameters used to construct the selected model, with defaults
         applied.
+
+    Raises
+    ------
+    TypeError
+        If ``config`` is not a dictionary, or if ``model_kwargs`` is provided
+        but is not a dictionary.
+    ValueError
+        If ``model_class`` is not defined in the ``config``, or if it is not
+        supported. See the Parameters section for the supported model classes.
+        Also if ``model_kwargs`` contains a key that is a misspelt variant
+        of ``num_classes`` (e.g. ``n_classes``).
 
     Notes
     -----
     For the Faster R-CNN ResNet architecture, we use the improved ``v2``
-    version from ``torchvision``.
+    version from `torchvision <https://docs.pytorch.org/vision/0.24/models/faster_rcnn.html>`_.
 
     We cover the following cases for weights initialisation. If no checkpoint
     is provided and:
@@ -98,7 +108,7 @@ class ObjectDetector(LightningModule):
 
     For RetinaNet and FCOS, only the classification head is replaced when using
     a custom number of classes, since bounding box regression is
-    class-agnostic.For Faster R-CNN, the entire box predictor
+    class-agnostic. For Faster R-CNN, the entire box predictor
     (classification and regression) is replaced since bounding box regression
     is class-specific.
 
@@ -115,8 +125,9 @@ class ObjectDetector(LightningModule):
     >>> from ethology.detectors.models import ObjectDetector
     >>> model = ObjectDetector({"model_class": "fcos_resnet50_fpn"})
 
-    Initialise a FCOS model for three classes, reusing COCO2017 weights
-    wherever possible and randomly initialising class-dependent layers.
+    Initialise a FCOS model for three classes (background included),
+    reusing COCO2017 weights wherever possible and randomly initialising
+    class-dependent layers:
 
     >>> from ethology.detectors.models import ObjectDetector
     >>> model = ObjectDetector(
@@ -126,6 +137,16 @@ class ObjectDetector(LightningModule):
     ...     }
     ... )
 
+    Initialise a Faster R-CNN model with the default number of classes
+    (91) from a saved checkpoint:
+
+    >>> from ethology.detectors.models import ObjectDetector
+    >>> config = {
+    ...     "model_class": "fasterrcnn_resnet50_fpn_v2",
+    ...     "checkpoint": "/path/to/checkpoint.ckpt",
+    ... }
+    >>> model = ObjectDetector(config)
+
     Initialise a Faster R-CNN model with two classes (background included)
     from a saved checkpoint:
 
@@ -134,16 +155,6 @@ class ObjectDetector(LightningModule):
     ...     "model_class": "fasterrcnn_resnet50_fpn_v2",
     ...     "model_kwargs": {"num_classes": 2},
     ...     "checkpoint": "/path/to/checkpoint/two/classes.ckpt",
-    ... }
-    >>> model = ObjectDetector(config)
-
-    Initialise a Faster R-CNN model with the default number of classes
-    (91) from a saved checkpoint:
-
-    >>> from ethology.detectors.models import ObjectDetector
-    >>> config = {
-    ...     "model_class": "fasterrcnn_resnet50_fpn_v2",
-    ...     "checkpoint": "/path/to/checkpoint.ckpt",
     ... }
     >>> model = ObjectDetector(config)
 
@@ -333,7 +344,7 @@ class ObjectDetector(LightningModule):
         self,
         batch: tuple[torch.Tensor, dict],
         batch_idx: int,
-    ) -> dict:
+    ) -> list[dict[str, torch.Tensor]]:
         """Run an inference step on a batch of images.
 
         Parameters
@@ -346,8 +357,9 @@ class ObjectDetector(LightningModule):
 
         Returns
         -------
-        dict
-            The raw predictions as a dictionary with the keys:
+        list[dict[str, torch.Tensor]]
+            A list of raw predictions as a dictionary, one per image in the
+            batch and each with the following keys:
 
             - **"boxes"** (*torch.Tensor*) --
               Tensor of shape ``(n_boxes, 4)`` and floating-point dtype
@@ -376,23 +388,28 @@ class ObjectDetector(LightningModule):
     ) -> xr.Dataset:
         """Run inference on the input dataloader.
 
-        Convenience method that wraps ``trainer.predict()`` and
-        returns the formatted predictions as an
-        ``ethology`` bounding box detections dataset.
+        Convenience method that wraps
+        :meth:`Trainer.predict \
+            <lightning.pytorch.trainer.trainer.Trainer.predict>`
+        and returns the formatted predictions as an ``ethology`` bounding box
+        detections dataset.
 
         Parameters
         ----------
         trainer
-            The trainer to use for inference.
+            The Lightning trainer to use for inference. The trainer
+            object handles device placement, precision settings, and
+            orchestrating the prediction loop.
         dataloader
-            The dataloader to use for inference.
+            The dataloader providing the dataset for inference.
         attrs
             Attributes to add to the ``ethology`` detections dataset.
 
         Returns
         -------
         xarray.Dataset
-            The formatted predictions as an ``ethology`` detections dataset.
+            The predictions for each image in the dataloader, formatted
+            as an ``ethology`` detections dataset.
 
         """
         predictions = trainer.predict(self, dataloader)
