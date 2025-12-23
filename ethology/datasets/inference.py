@@ -1,5 +1,6 @@
 """Datasets and related utilities for inference without ground-truth."""
 
+from collections.abc import Callable
 from pathlib import Path
 
 import torch
@@ -119,7 +120,7 @@ def get_default_inference_transforms() -> transforms.Compose:
     )
 
 
-def get_detector_collate_fn():
+def get_detector_collate_fn() -> Callable:
     """Return collate function for a detector.
 
     It supports images and annotations of different sizes.
@@ -127,6 +128,12 @@ def get_detector_collate_fn():
     and batches them for the model to process it. Torch detectors
     expect a list/tuple of images and annotations, since they can
     be of different sizes across the dataset.
+
+    Returns
+    -------
+    Callable
+        A collate function for detector models.
+
     """
 
     def collate_fn(dataset_samples):
