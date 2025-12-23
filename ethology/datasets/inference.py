@@ -117,3 +117,20 @@ def get_default_inference_transforms() -> transforms.Compose:
             transforms.ToDtype(torch.float32, scale=True),
         ]
     )
+
+
+def get_detector_collate_fn():
+    """Return collate function for a detector.
+
+    It supports images and annotations of different sizes.
+    A collate function takes a list of samples from a dataset
+    and batches them for the model to process it. Torch detectors
+    expect a list/tuple of images and annotations, since they can
+    be of different sizes across the dataset.
+    """
+
+    def collate_fn(dataset_samples):
+        """Return a tuple of tuples: (images_tuple, annots_tuple)."""
+        return tuple(zip(*dataset_samples, strict=True))
+
+    return collate_fn
