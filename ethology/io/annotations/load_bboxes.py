@@ -41,7 +41,7 @@ def from_files(
     Returns
     -------
     xarray.Dataset
-    
+
         A valid bounding box annotations dataset with dimensions
         `image_id`, `space`, `id`, and the following arrays:
 

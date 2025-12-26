@@ -65,7 +65,7 @@ def split_dataset_group_by(
     tuple[xarray.Dataset, xarray.Dataset]
         The two subsets of the input dataset. The subsets are returned in the
         same order as the input list of fractions ``list_fractions``.
-        
+
     Raises
     ------
     ValueError
