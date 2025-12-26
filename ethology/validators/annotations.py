@@ -534,7 +534,7 @@ class ValidBboxAnnotationsCOCO(pa.DataFrameModel):
 
         Parameters
         ----------
-        df : pd.DataFrame
+        df
             The dataframe to check.
 
         Returns
