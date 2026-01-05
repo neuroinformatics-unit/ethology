@@ -56,6 +56,19 @@ dev = [
   "types-requests",
 ]
 
+docs = [
+  "linkify-it-py",
+  "myst-parser",
+  "nbsphinx",
+  "pydata-sphinx-theme",
+  "sphinx",
+  "sphinx-autodoc-typehints",
+  "sphinx-design",
+  "sphinx-gallery",
+  "sphinx-notfound-page",
+  "sphinx-sitemap",
+]
+
 # [project.scripts]
 # movement = "movement.cli_entrypoint:main"
 
