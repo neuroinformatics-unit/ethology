@@ -96,7 +96,6 @@ extracted_files = pooch.retrieve(
     fname="ACTD_COCO_files.zip",
     path=ethology_cache,
     processor=pooch.Unzip(extract_dir=ethology_cache / "ACTD_COCO_files"),
-    downloader=pooch.HTTPDownloader(headers={"User-Agent": "agent"}),
 )
 
 print(*extracted_files, sep="\n")
