@@ -1,0 +1,29 @@
+﻿ethology.validators.annotations
+===============================
+
+.. rubric:: Description
+
+.. automodule:: ethology.validators.annotations
+
+.. currentmodule:: ethology.validators.annotations
+
+
+.. rubric:: Classes
+
+.. autosummary::
+    :toctree: .
+    :nosignatures:
+    
+    ValidBboxAnnotationsCOCO
+    
+    ValidBboxAnnotationsDataFrame
+    
+    ValidBboxAnnotationsDataset
+    
+    ValidCOCO
+    
+    ValidVIA
+    
+
+
+
