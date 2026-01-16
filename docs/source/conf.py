@@ -162,7 +162,7 @@ linkcheck_anchors_ignore_for_url = [
 linkcheck_ignore = [
     # to avoid odd 403 client errors
     "https://opensource.org/license/bsd-3-clause/",
-    "https://figshare.com/ndownloader/files/53674187",
+	"https://figshare.com/articles/dataset/Australian_Camera_Trap_Data_ACTD_/27177912" 
 ]
 
 myst_url_schemes = {
