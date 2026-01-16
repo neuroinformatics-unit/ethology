@@ -1,0 +1,23 @@
+ValidVIA
+========
+
+.. currentmodule:: ethology.validators.annotations
+
+.. autoclass:: ValidVIA
+   :members:
+   :inherited-members:
+   
+
+   
+   
+
+   
+   
+   
+   
+
+   
+   
+
+.. minigallery:: ethology.validators.annotations.ValidVIA
+   :add-heading: Examples using ``ValidVIA``

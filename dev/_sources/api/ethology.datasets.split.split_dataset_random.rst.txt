@@ -1,0 +1,9 @@
+split\_dataset\_random
+======================
+
+.. currentmodule:: ethology.datasets.split
+
+.. autofunction:: split_dataset_random
+
+.. minigallery:: ethology.datasets.split.split_dataset_random
+   :add-heading: Examples using ``split_dataset_random``
