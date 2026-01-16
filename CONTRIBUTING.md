@@ -140,7 +140,8 @@ To edit the documentation, first clone the repository, and install `ethology` in
 
 Then, install a few additional dependencies in your development environment to be able to build the documentation locally. To do this, run the following command from the root of the repository:
 ```sh
-pip install -r ./docs/requirements.txt
+pip install -e .[docs]    # works on most shells
+pip install -e '.[docs]'  # works on zsh (default on macOS)
 ```
 
 Now create a new branch, edit the documentation source files (`.md` or `.rst` in the `docs` folder),
