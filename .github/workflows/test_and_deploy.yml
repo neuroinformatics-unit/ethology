@@ -72,7 +72,7 @@ jobs:
     if: github.event_name == 'push' && needs.check_tag.outputs.tag_on_main == 'true'
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/download-artifact@v6
+    - uses: actions/download-artifact@v7
       with:
         name: artifact
         path: dist

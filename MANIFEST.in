@@ -10,6 +10,7 @@ recursive-exclude docs *
 recursive-exclude tests *
 recursive-exclude examples *
 recursive-include docs *
+recursive-include .binder *
 
 # Include json schemas
 recursive-include ethology/validators/json_schemas/schemas *.json

@@ -19,13 +19,14 @@ classifiers = [
   "License :: OSI Approved :: BSD License",
 ]
 dependencies = [
-  "movement",
+  "movement>=0.13.0",
   "pandera[pandas]",
   "pycocotools",
   "scikit-learn",
   "torch",
   "torchvision",
   "loguru",
+  "tables>=3.10.1"     # wheels compatible with MacOS ARM
 ]
 
 [project.urls]

@@ -26,6 +26,10 @@ except LookupError:
     # with a dummy version
     release = "0.0.0"
 
+is_dev = "dev" in release
+doc_version = "dev" if is_dev else f"v{release}"
+binder_branch = "main" if is_dev else f"v{release}"
+
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
@@ -117,6 +121,11 @@ html_theme_options = {
             "type": "fontawesome",
         },
     ],
+    "switcher": {
+        "json_url": "https://ethology.neuroinformatics.dev/latest/_static/switcher.json",
+        "version_match": doc_version,
+    },
+    "navbar_end": ["version-switcher", "theme-switcher", "navbar-icon-links"],
     "logo": {
         "text": f"{project} v{release}",
     },
@@ -151,7 +160,9 @@ linkcheck_anchors_ignore_for_url = [
 ]
 # A list of regular expressions that match URIs that should not be checked
 linkcheck_ignore = [
-    "https://opensource.org/license/bsd-3-clause/",  # to avoid odd 403 error
+    # to avoid odd 403 client errors
+    "https://opensource.org/license/bsd-3-clause/",
+    "https://figshare.com/articles/dataset/Australian_Camera_Trap_Data_ACTD_/27177912",
 ]
 
 myst_url_schemes = {
@@ -227,9 +238,9 @@ sphinx_gallery_conf = {
     "binder": {
         "org": "neuroinformatics-unit",
         "repo": "ethology",
-        "branch": "gh-pages",
+        "branch": binder_branch,  # Can be any branch, tag, or commit
         "binderhub_url": "https://mybinder.org",
-        "dependencies": ["environment.yml"],
+        "dependencies": ["../../.binder/requirements.txt"],
     },
     "reference_url": {"ethology": None},
     "default_thumb_file": "source/_static/dark-logo-niu.png",
