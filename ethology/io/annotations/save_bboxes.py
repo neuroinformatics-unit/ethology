@@ -33,7 +33,7 @@ def to_COCO_file(dataset: xr.Dataset, output_filepath: str | Path):
 
     Returns
     -------
-    - str
+    str
         Path for the output COCO file.
 
     Examples
