@@ -7,6 +7,7 @@ import xarray as xr
 
 from ethology.validators.annotations import (
     ValidBboxAnnotationsDataset,
+    ValidKeypointsAnnotationsDataset,
     ValidCOCO,
     ValidVIA,
 )
@@ -398,4 +399,115 @@ def test_validator_bbox_annotations_dataset(
             "position": {"id", "image_id", "space"},
             "shape": {"id", "image_id", "space"},
             "category": {"id", "image_id"},
+        }
+
+
+@pytest.mark.parametrize(
+    "sample_dataset, expected_exception, expected_error_message",
+    [
+        (
+            "valid_keypoints_annotations_dataset",
+            does_not_raise(),
+            "",
+        ),
+        (
+            "valid_keypoints_annotations_dataset_extra_vars_and_dims",
+            does_not_raise(),
+            "",
+        ),
+        (
+            {"position": [1, 2, 3]},
+            pytest.raises(TypeError),
+            "Expected an xarray Dataset, but got <class 'dict'>.",
+        ),
+        (
+            xr.Dataset(
+                coords={
+                    "image_id": np.arange(3),
+                    "space": ["x", "y"],
+                    "keypoint": ["nose", "tail"],
+                    "id": np.arange(2),
+                },
+                data_vars={},
+            ),
+            pytest.raises(ValueError),
+            "Missing required data variables: ['position']",
+        ),
+        (
+            xr.Dataset(
+                coords={
+                    "image_id": np.arange(3),
+                    "space": ["x", "y"],
+                    "id": np.arange(2),
+                },
+                data_vars={
+                    "position": (
+                        ["image_id", "space", "id"],
+                        np.zeros((3, 2, 2)),
+                    ),
+                },
+            ),
+            pytest.raises(ValueError),
+            "Missing required dimensions: ['keypoint']",
+        ),
+        (
+            xr.Dataset(
+                coords={
+                    "image_id": np.arange(3),
+                    "space": ["x", "y"],
+                    "keypoint": ["nose", "tail"],
+                    "id": np.arange(2),
+                },
+                data_vars={
+                    "position": (
+                        ["image_id", "id", "keypoint"],
+                        np.zeros((3, 2, 2)),
+                    ),
+                },
+            ),
+            pytest.raises(ValueError),
+            (
+                "Some data variables are missing required dimensions:"
+                "\n  - data variable 'position' is missing dimensions "
+                "['space']"
+            ),
+        ),
+    ],
+    ids=[
+        "valid_keypoints_annotations",
+        "valid_keypoints_annotations_extra_vars_and_dims",
+        "invalid_keypoints_annotations_type",
+        "invalid_keypoints_annotations_missing_data_var",
+        "invalid_keypoints_annotations_missing_dimension",
+        "invalid_keypoints_annotations_missing_dimension_in_data_var",
+    ],
+)
+def test_validator_keypoints_annotations_dataset(
+    sample_dataset: str | dict,
+    expected_exception: pytest.raises,
+    expected_error_message: str,
+    request: pytest.FixtureRequest,
+):
+    """Test keypoints annotations dataset validation in various scenarios."""
+    if isinstance(sample_dataset, str):
+        dataset = request.getfixturevalue(sample_dataset)
+    else:
+        dataset = sample_dataset
+
+    with expected_exception as excinfo:
+        validator = ValidKeypointsAnnotationsDataset(dataset=dataset)
+
+    if excinfo:
+        error_msg = str(excinfo.value)
+        assert error_msg in expected_error_message
+    else:
+        assert validator.dataset is dataset
+        assert validator.required_dims == {
+            "image_id",
+            "space",
+            "keypoint",
+            "id",
+        }
+        assert validator.required_data_vars == {
+            "position": {"id", "image_id", "space", "keypoint"},
         }
