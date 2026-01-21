@@ -23,6 +23,7 @@ dependencies = [
   "pandera[pandas]",
   "pycocotools",
   "scikit-learn",
+  "sleap-io",
   "torch",
   "torchvision",
   "loguru",
