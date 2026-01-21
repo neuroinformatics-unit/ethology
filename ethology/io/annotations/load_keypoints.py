@@ -213,10 +213,18 @@ def _from_single_file(
 
     if not keypoint_names:
         # Fallback: infer number of keypoints from the first instance
-        first_instances = _get_instances(frame_records[0]["frame"])
-        if not first_instances:
+        # Find the first frame that actually has instances (frame 0 might be empty)
+        first_instance_to_infer = None
+        for record in frame_records:
+            insts = _get_instances(record["frame"])
+            if insts:
+                first_instance_to_infer = insts[0]
+                break
+
+        if first_instance_to_infer is None:
             raise ValueError("No instances found to infer keypoints.")
-        n_keypoints = _infer_keypoint_count(first_instances[0])
+
+        n_keypoints = _infer_keypoint_count(first_instance_to_infer)
         keypoint_names = [f"keypoint_{i}" for i in range(n_keypoints)]
 
     n_keypoints = len(keypoint_names)
@@ -253,6 +261,12 @@ def _from_single_file(
             map_image_id_to_video[image_id] = video_filename
         map_image_id_to_frame_idx[image_id] = frame_idx
 
+        # Note: We use list index as 'id'. If SLEAP 'Track' objects are present,
+        # we are currently ignoring their persistent track_id to match ethology's
+        # current design (no identity consistency across frames).
+        # The 'id' dimension stores an ID for each annotation in an image, but this
+        # is not consistent across frames (annotations with the same ID in different
+        # images do not refer to the same individual).
         for inst_idx, instance in enumerate(_get_instances(frame)):
             coords, conf, vis = _points_from_instance(instance, n_keypoints)
             if coords.shape[0] != n_keypoints:
