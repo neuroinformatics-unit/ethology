@@ -288,7 +288,8 @@ class ValidKeypointsAnnotationsDataset(ValidDataset):
         A dictionary mapping data variable names to their required minimum
         dimensions:
 
-        - ``position`` maps to ``image_id``, ``space``, ``keypoint`` and ``id``.
+        - ``position`` maps to ``image_id``, ``space``, ``keypoint`` and
+          ``id``.
 
     Raises
     ------

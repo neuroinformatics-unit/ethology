@@ -187,7 +187,7 @@ def _frame_label(video_filename: str | None, frame_idx: int) -> str:
     return f"frame_{frame_idx}"
 
 
-def _from_single_file(
+def _from_single_file(  # noqa: C901
     file_path: Path | str,
     format: Literal["SLEAP"],
     images_dirs: Path | str | list[Path | str] | None,
@@ -213,7 +213,8 @@ def _from_single_file(
 
     if not keypoint_names:
         # Fallback: infer number of keypoints from the first instance
-        # Find the first frame that actually has instances (frame 0 might be empty)
+        # Find the first frame that actually has instances
+        # (frame 0 might be empty)
         first_instance_to_infer = None
         for record in frame_records:
             insts = _get_instances(record["frame"])
@@ -261,12 +262,13 @@ def _from_single_file(
             map_image_id_to_video[image_id] = video_filename
         map_image_id_to_frame_idx[image_id] = frame_idx
 
-        # Note: We use list index as 'id'. If SLEAP 'Track' objects are present,
-        # we are currently ignoring their persistent track_id to match ethology's
-        # current design (no identity consistency across frames).
-        # The 'id' dimension stores an ID for each annotation in an image, but this
-        # is not consistent across frames (annotations with the same ID in different
-        # images do not refer to the same individual).
+        # Note: We use list index as 'id'. If SLEAP 'Track' objects are
+        # present, we are currently ignoring their persistent track_id to
+        # match ethology's current design (no identity consistency across
+        # frames). The 'id' dimension stores an ID for each annotation in an
+        # image, but this is not consistent across frames (annotations with
+        # the same ID in different images do not refer to the same
+        # individual).
         for inst_idx, instance in enumerate(_get_instances(frame)):
             coords, conf, vis = _points_from_instance(instance, n_keypoints)
             if coords.shape[0] != n_keypoints:
@@ -347,7 +349,9 @@ def from_files(
         map_keypoint_to_str = None
         image_id_offset = 0
         for path in file_paths:
-            ds = _from_single_file(path, format=format, images_dirs=images_dirs)
+            ds = _from_single_file(
+                path, format=format, images_dirs=images_dirs
+            )
             if map_keypoint_to_str is None:
                 map_keypoint_to_str = ds.attrs.get("map_keypoint_to_str")
             elif map_keypoint_to_str != ds.attrs.get("map_keypoint_to_str"):
@@ -356,14 +360,12 @@ def from_files(
                     "cannot merge datasets."
                 )
 
-            ds = ds.assign_coords(
-                image_id=ds.image_id + image_id_offset
-            )
+            ds = ds.assign_coords(image_id=ds.image_id + image_id_offset)
             # Update mapping attrs to new image_id range
             map_image_id_to_filename = {}
             map_image_id_to_video = {}
             map_image_id_to_frame_idx = {}
-            for old_id in ds.attrs["map_image_id_to_filename"].keys():
+            for old_id in ds.attrs["map_image_id_to_filename"]:
                 new_id = int(old_id) + image_id_offset
                 map_image_id_to_filename[new_id] = ds.attrs[
                     "map_image_id_to_filename"
@@ -391,7 +393,9 @@ def from_files(
             "map_image_id_to_filename": {
                 k: v
                 for ds in datasets
-                for k, v in ds.attrs.get("map_image_id_to_filename", {}).items()
+                for k, v in ds.attrs.get(
+                    "map_image_id_to_filename", {}
+                ).items()
             },
             "map_image_id_to_video": {
                 k: v
@@ -401,9 +405,13 @@ def from_files(
             "map_image_id_to_frame_idx": {
                 k: v
                 for ds in datasets
-                for k, v in ds.attrs.get("map_image_id_to_frame_idx", {}).items()
+                for k, v in ds.attrs.get(
+                    "map_image_id_to_frame_idx", {}
+                ).items()
             },
         }
         return ds_all
 
-    return _from_single_file(file_paths, format=format, images_dirs=images_dirs)
+    return _from_single_file(
+        file_paths, format=format, images_dirs=images_dirs
+    )

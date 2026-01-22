@@ -7,8 +7,8 @@ import xarray as xr
 
 from ethology.validators.annotations import (
     ValidBboxAnnotationsDataset,
-    ValidKeypointsAnnotationsDataset,
     ValidCOCO,
+    ValidKeypointsAnnotationsDataset,
     ValidVIA,
 )
 
