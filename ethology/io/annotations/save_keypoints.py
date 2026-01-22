@@ -37,10 +37,14 @@ def _get_image_id_maps(
     map_image_id_to_filename = ds.attrs.get("map_image_id_to_filename", {})
     map_image_id_to_video = ds.attrs.get("map_image_id_to_video", {})
     map_image_id_to_frame_idx = ds.attrs.get("map_image_id_to_frame_idx", {})
-    return map_image_id_to_filename, map_image_id_to_video, map_image_id_to_frame_idx
+    return (
+        map_image_id_to_filename,
+        map_image_id_to_video,
+        map_image_id_to_frame_idx,
+    )
 
 
-def _build_sleap_objects(ds: xr.Dataset) -> Any:
+def _build_sleap_objects(ds: xr.Dataset) -> Any:  # noqa: C901
     sio = _require_sleap_io()
     keypoint_names = _get_keypoint_names(ds)
 
@@ -51,12 +55,16 @@ def _build_sleap_objects(ds: xr.Dataset) -> Any:
     video_cls = getattr(sio, "Video", None)
     point_cls = getattr(sio, "Point", None)
 
-    if not all(
-        [skeleton_cls, labeled_frame_cls, instance_cls, video_cls]
-    ):
+    if not all([skeleton_cls, labeled_frame_cls, instance_cls, video_cls]):
         raise AttributeError(
             "sleap-io is missing required classes for saving Labels."
         )
+
+    # Type assertions after None check
+    assert skeleton_cls is not None
+    assert labeled_frame_cls is not None
+    assert instance_cls is not None
+    assert video_cls is not None
 
     nodes = (
         [node_cls(name=name) for name in keypoint_names]
@@ -68,9 +76,11 @@ def _build_sleap_objects(ds: xr.Dataset) -> Any:
     except TypeError:
         skeleton = skeleton_cls(nodes=nodes)
 
-    map_image_id_to_filename, map_image_id_to_video, map_image_id_to_frame_idx = (
-        _get_image_id_maps(ds)
-    )
+    (
+        map_image_id_to_filename,
+        map_image_id_to_video,
+        map_image_id_to_frame_idx,
+    ) = _get_image_id_maps(ds)  # noqa: E501
 
     videos: dict[str, Any] = {}
     labeled_frames = []
@@ -90,12 +100,12 @@ def _build_sleap_objects(ds: xr.Dataset) -> Any:
 
         if video_filename not in videos:
             try:
-                video = video_cls.from_filename(video_filename)
+                video = video_cls.from_filename(video_filename)  # type: ignore
             except AttributeError:
                 try:
-                    video = video_cls(filename=video_filename)
+                    video = video_cls(filename=video_filename)  # type: ignore
                 except TypeError:
-                    video = video_cls(video_filename)
+                    video = video_cls(video_filename)  # type: ignore
             videos[video_filename] = video
         else:
             video = videos[video_filename]
@@ -103,31 +113,35 @@ def _build_sleap_objects(ds: xr.Dataset) -> Any:
         frame_idx = map_image_id_to_frame_idx.get(image_id_int, image_id_int)
 
         try:
-            labeled_frame = labeled_frame_cls(video=video, frame_idx=frame_idx)
+            labeled_frame = labeled_frame_cls(video=video, frame_idx=frame_idx)  # type: ignore
         except TypeError:
-            labeled_frame = labeled_frame_cls(video, frame_idx)
+            labeled_frame = labeled_frame_cls(video, frame_idx)  # type: ignore
 
         instances = []
         for inst_id in ds.id.values:
             coords = ds.position.sel(image_id=image_id, id=inst_id).values
             if np.isnan(coords).all():
                 continue
-            points = []
-            for kp_idx, name in enumerate(keypoint_names):
+            points: list[Any] = []
+            for kp_idx, _name in enumerate(keypoint_names):
                 x, y = coords[:, kp_idx]
                 if np.isnan(x) or np.isnan(y):
                     points.append(None)
                     continue
-                score = (
-                    float(confidence.sel(image_id=image_id, id=inst_id).values[kp_idx])
-                    if confidence is not None
-                    else None
-                )
-                visible = (
-                    float(visibility.sel(image_id=image_id, id=inst_id).values[kp_idx])
-                    if visibility is not None
-                    else None
-                )
+                score = None
+                if confidence is not None:
+                    score = float(
+                        confidence.sel(image_id=image_id, id=inst_id).values[
+                            kp_idx
+                        ]
+                    )
+                visible = None
+                if visibility is not None:
+                    visible = float(
+                        visibility.sel(image_id=image_id, id=inst_id).values[
+                            kp_idx
+                        ]
+                    )
                 if point_cls is not None:
                     kwargs = {}
                     if score is not None and not np.isnan(score):
@@ -140,9 +154,9 @@ def _build_sleap_objects(ds: xr.Dataset) -> Any:
                     points.append([float(x), float(y)])
 
             try:
-                instance = instance_cls(points=points, skeleton=skeleton)
+                instance = instance_cls(points=points, skeleton=skeleton)  # type: ignore
             except TypeError:
-                instance = instance_cls(points, skeleton)
+                instance = instance_cls(points, skeleton)  # type: ignore
             instances.append(instance)
 
         if instances:
@@ -150,9 +164,11 @@ def _build_sleap_objects(ds: xr.Dataset) -> Any:
             labeled_frames.append(labeled_frame)
 
     try:
-        labels = sio.Labels(labeled_frames=labeled_frames, skeletons=[skeleton])
+        labels = sio.Labels(
+            labeled_frames=labeled_frames, skeletons=[skeleton]
+        )  # type: ignore
     except TypeError:
-        labels = sio.Labels(labeled_frames)
+        labels = sio.Labels(labeled_frames)  # type: ignore
         if hasattr(labels, "skeletons"):
             labels.skeletons = [skeleton]
     return labels
