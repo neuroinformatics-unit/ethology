@@ -1,14 +1,13 @@
 """Validators for annotation files and datasets."""
 
 import json
-import typing
 from pathlib import Path
+from typing import ClassVar
 
 import pandas as pd
-import pandera.errors
 import pandera.pandas as pa
-import pandera.typing
 from attrs import define, field
+from pandera.typing import Index
 
 from ethology.validators.json_schemas.utils import (
     _check_file_is_json,
@@ -53,8 +52,8 @@ class ValidVIA:
     path: Path = field(converter=Path)
 
     # class variables: should not be modified after initialization
-    schema: typing.ClassVar[dict] = _get_default_schema("VIA")
-    required_keys: typing.ClassVar[dict] = {
+    schema: ClassVar[dict] = _get_default_schema("VIA")
+    required_keys: ClassVar[dict] = {
         "main": ["_via_img_metadata", "_via_attributes"],
         "images": ["filename"],
         "regions": ["shape_attributes"],
@@ -139,8 +138,8 @@ class ValidCOCO:
     path: Path = field(converter=Path)
 
     # class variables: should not be modified after initialization
-    schema: typing.ClassVar[dict] = _get_default_schema("COCO")
-    required_keys: typing.ClassVar[dict] = {
+    schema: ClassVar[dict] = _get_default_schema("COCO")
+    required_keys: ClassVar[dict] = {
         "main": ["images", "annotations", "categories"],
         "images": ["id", "file_name", "width", "height"],
         "annotations": ["id", "image_id", "bbox", "category_id"],
@@ -258,8 +257,8 @@ class ValidBboxAnnotationsDataset(ValidDataset):
 
     # Minimum requirements for a bbox dataset holding detections
     # Should not be modified after initialization
-    required_dims: typing.ClassVar[set] = {"image_id", "space", "id"}
-    required_data_vars: typing.ClassVar[dict[str, set]] = {
+    required_dims: ClassVar[set] = {"image_id", "space", "id"}
+    required_data_vars: ClassVar[dict[str, set]] = {
         "position": {"image_id", "space", "id"},
         "shape": {"image_id", "space", "id"},
         "category": {"image_id", "id"},
@@ -306,7 +305,7 @@ class ValidBboxAnnotationsDataFrame(pa.DataFrameModel):
 
     Raises
     ------
-    pandera.errors.SchemaError
+    pa.errors.SchemaError
         If the input dataframe does not match the schema.
 
     See Also
@@ -447,7 +446,7 @@ class ValidBboxAnnotationsCOCO(pa.DataFrameModel):
     """
 
     # index
-    idx: pandera.typing.Index[int] = pa.Field(ge=0, check_name=False)
+    idx: Index[int] = pa.Field(ge=0, check_name=False)
 
     # annotation_id
     annotation_id: int = pa.Field(

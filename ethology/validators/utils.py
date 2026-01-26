@@ -1,9 +1,9 @@
 """Utils for validating `ethology` objects."""
 
-import typing
 from abc import ABC
 from collections.abc import Callable
 from functools import wraps
+from typing import ClassVar
 
 import xarray as xr
 from attrs import define, field
@@ -53,8 +53,8 @@ class ValidDataset(ABC):
     dataset: xr.Dataset = field()
 
     # class variables
-    required_dims: typing.ClassVar[set]
-    required_data_vars: typing.ClassVar[dict[str, set]]
+    required_dims: ClassVar[set]
+    required_data_vars: ClassVar[dict[str, set]]
 
     def __init_subclass__(cls, **kwargs):
         """Verify that subclasses define required class variables."""

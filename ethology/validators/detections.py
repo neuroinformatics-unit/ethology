@@ -1,6 +1,6 @@
 """Validators for detection datasets."""
 
-import typing
+from typing import ClassVar
 
 from attrs import define
 
@@ -56,8 +56,8 @@ class ValidBboxDetectionsDataset(ValidDataset):
 
     # Minimum requirements for a bbox dataset holding detections
     # Should not be modified after initialization
-    required_dims: typing.ClassVar[set] = {"image_id", "space", "id"}
-    required_data_vars: typing.ClassVar[dict[str, set]] = {
+    required_dims: ClassVar[set] = {"image_id", "space", "id"}
+    required_data_vars: ClassVar[dict[str, set]] = {
         "position": {"image_id", "space", "id"},
         "shape": {"image_id", "space", "id"},
         "category": {"image_id", "id"},
