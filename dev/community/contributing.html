@@ -44,7 +44,7 @@
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../_static/documentation_options.js?v=489193c6"></script>
+    <script src="../_static/documentation_options.js?v=7f6919ac"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/design-tabs.js?v=f930bc37"></script>
@@ -127,7 +127,7 @@
   
   
   
-    <p class="title logo__title">ethology v0.1.3.dev1</p>
+    <p class="title logo__title">ethology v0.1.3.dev2</p>
   
 </a></div>
     
@@ -480,7 +480,7 @@ pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </s
 pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span><span class="s1">&#39;.[dev]&#39;</span><span class="w">  </span><span class="c1"># works on zsh (the default shell on macOS)</span>
 </pre></div>
 </div>
-<p>This should install all the dependencies needed for development, such as <code class="docutils literal notranslate"><span class="pre">pytest</span></code> and <code class="docutils literal notranslate"><span class="pre">pre-commit</span></code>.</p>
+<p>This should install all the dependencies needed for development, such as <code class="docutils literal notranslate"><span class="pre">pytest</span></code> and <code class="docutils literal notranslate"><span class="pre">pre-commit</span></code>. If you also want to edit the documentation and preview the changes locally, you will additionally need the <code class="docutils literal notranslate"><span class="pre">docs</span></code> extra dependencies. See <a class="reference internal" href="#editing-the-documentation">Editing the documentation</a> for more details.</p>
 <p>Finally, install the <a class="reference external" href="https://pre-commit.com/">pre-commit hooks</a>:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pre-commit<span class="w"> </span>install
 </pre></div>
@@ -592,7 +592,8 @@ ensuring that the documentation is published in sync with each PyPI release.</p>
 <p>To edit the documentation, first clone the repository, and install <code class="docutils literal notranslate"><span class="pre">ethology</span></code> in a
 <a class="reference internal" href="#create-a-development-environment">development environment</a>.</p>
 <p>Then, install a few additional dependencies in your development environment to be able to build the documentation locally. To do this, run the following command from the root of the repository:</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>./docs/requirements.txt
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.<span class="o">[</span>docs<span class="o">]</span><span class="w">    </span><span class="c1"># works on most shells</span>
+pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span><span class="s1">&#39;.[docs]&#39;</span><span class="w">  </span><span class="c1"># works on zsh (default on macOS)</span>
 </pre></div>
 </div>
 <p>Now create a new branch, edit the documentation source files (<code class="docutils literal notranslate"><span class="pre">.md</span></code> or <code class="docutils literal notranslate"><span class="pre">.rst</span></code> in the <code class="docutils literal notranslate"><span class="pre">docs</span></code> folder),
