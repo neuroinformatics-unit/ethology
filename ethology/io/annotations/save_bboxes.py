@@ -1,13 +1,12 @@
 """Save ``ethology`` bounding box annotations datasets to various formats."""
 
+import datetime
 import json
-from datetime import datetime
 from pathlib import Path
 from typing import Any
 
 import pandas as pd
 import pandera.pandas as pa
-import pytz
 import xarray as xr
 from pandera.typing.pandas import DataFrame
 
@@ -305,7 +304,7 @@ def _create_COCO_dict(
 
     # Add info section to COCO_dict
     COCO_dict["info"] = {
-        "date_created": datetime.now(pytz.utc).strftime(
+        "date_created": datetime.datetime.now(datetime.UTC).strftime(
             "%a %b %d %Y %H:%M:%S GMT%z"
         ),
         "description": "Bounding boxes annotations exported from ethology",
