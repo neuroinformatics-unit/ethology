@@ -28,11 +28,11 @@ class ValidVIA:
 
     Attributes
     ----------
-    path : Path | str
+    path : pathlib.Path | str
         Path to the VIA JSON file, passed as an input.
-    schema : ClassVar[dict]
+    schema : typing.ClassVar[dict]
         The JSON schema is set to the default VIA schema.
-    required_keys : ClassVar[dict]
+    required_keys : typing.ClassVar[dict]
         The required keys for the VIA JSON file.
 
     Raises
@@ -114,11 +114,11 @@ class ValidCOCO:
 
     Attributes
     ----------
-    path : Path | str
+    path : pathlib.Path | str
         Path to the COCO JSON file, passed as an input.
-    schema : ClassVar[dict]
+    schema : typing.ClassVar[dict]
         The JSON schema is set to the default COCO schema.
-    required_keys : ClassVar[dict]
+    required_keys : typing.ClassVar[dict]
         The required keys for the COCO JSON file.
 
     Raises
@@ -229,10 +229,10 @@ class ValidBboxAnnotationsDataset(ValidDataset):
     ----------
     dataset : xarray.Dataset
         The xarray dataset to validate.
-    required_dims : ClassVar[set]
+    required_dims : typing.ClassVar[set]
         The set of required dimension names: ``image_id``, ``space`` and
         ``id``.
-    required_data_vars : ClassVar[dict[str, set]]
+    required_data_vars : typing.ClassVar[dict[str, set]]
         A dictionary mapping data variable names to their required minimum
         dimensions:
 
@@ -305,7 +305,7 @@ class ValidBboxAnnotationsDataFrame(pa.DataFrameModel):
 
     Raises
     ------
-    pa.errors.SchemaError
+    pandera.errors.SchemaError
         If the input dataframe does not match the schema.
 
     See Also
@@ -403,7 +403,7 @@ class ValidBboxAnnotationsCOCO(pa.DataFrameModel):
 
     Attributes
     ----------
-    idx : Index[int]
+    idx : pandera.typing.Index[int]
         Index of the dataframe. Should be greater than or equal to 0 and equal
         to the ``annotation_id`` column.
     annotation_id : int
@@ -431,7 +431,7 @@ class ValidBboxAnnotationsCOCO(pa.DataFrameModel):
 
     Raises
     ------
-    pa.errors.SchemaError
+    pandera.errors.SchemaError
         If the dataframe does not match the schema.
 
     Notes
