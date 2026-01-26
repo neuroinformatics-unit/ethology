@@ -43,9 +43,9 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../_static/documentation_options.js?v=5038b04a"></script>
-    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
-    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/documentation_options.js?v=489193c6"></script>
+    <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/ethology/datasets/split';</script>
@@ -124,7 +124,7 @@
   
   
   
-    <p class="title logo__title">ethology v0.1.2.dev8</p>
+    <p class="title logo__title">ethology v0.1.3.dev1</p>
   
 </a></div>
     
@@ -469,29 +469,29 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    dataset : xarray.Dataset</span>
+<span class="sd">    dataset</span>
 <span class="sd">        The annotations dataset to split.</span>
-<span class="sd">    group_by_var : str</span>
+<span class="sd">    group_by_var</span>
 <span class="sd">        The grouping variable to use for splitting the dataset. Must be</span>
 <span class="sd">        1-dimensional along the ``samples_coordinate``.</span>
-<span class="sd">    list_fractions : list[float, float]</span>
+<span class="sd">    list_fractions</span>
 <span class="sd">        The fractions of the input annotations dataset to allocate to</span>
 <span class="sd">        each subset. Must contain only two elements and sum to 1.</span>
-<span class="sd">    samples_coordinate : str, optional</span>
+<span class="sd">    samples_coordinate</span>
 <span class="sd">        The coordinate along which to split the dataset. Default is</span>
 <span class="sd">        ``image_id``.</span>
-<span class="sd">    method : str, optional</span>
+<span class="sd">    method</span>
 <span class="sd">        Method to use: ``auto``, ``kfold``, or ``apss``. When ``auto``,</span>
 <span class="sd">        it automatically selects between ``kfold`` or ``apss`` based on</span>
 <span class="sd">        the number of unique groups. See Notes for further details.</span>
 <span class="sd">        Default is ``auto``.</span>
-<span class="sd">    seed : int, optional</span>
+<span class="sd">    seed</span>
 <span class="sd">        Random seed for reproducibility used in the &quot;group k-fold&quot; approach.</span>
 <span class="sd">        Controls both the shuffling of the sample indices and the random</span>
 <span class="sd">        selection of the output split from all possible ones. Only used when</span>
 <span class="sd">        ``method`` is ``kfold`` or when ``auto`` selects ``kfold``.</span>
 <span class="sd">        Default is 42.</span>
-<span class="sd">    epsilon : float, optional</span>
+<span class="sd">    epsilon</span>
 <span class="sd">        The approximation tolerance for the &quot;approximate subset-sum&quot; approach,</span>
 <span class="sd">        expressed as a fraction of 1. The sum of samples in the smallest subset</span>
 <span class="sd">        is guaranteed to be at least ``(1 - epsilon)`` times the optimal sum</span>
@@ -685,18 +685,18 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    dataset : xarray.Dataset</span>
+<span class="sd">    dataset</span>
 <span class="sd">        The annotations dataset to split.</span>
-<span class="sd">    group_by_var : str</span>
+<span class="sd">    group_by_var</span>
 <span class="sd">        The grouping variable to use for splitting the dataset. Must be</span>
 <span class="sd">        1-dimensional along the ``samples_coordinate``.</span>
-<span class="sd">    list_fractions : list[float, float]</span>
+<span class="sd">    list_fractions</span>
 <span class="sd">        The fractions of the input annotations dataset to allocate to</span>
 <span class="sd">        each subset. Must contain only two elements and sum to 1.</span>
-<span class="sd">    samples_coordinate : str, optional</span>
+<span class="sd">    samples_coordinate</span>
 <span class="sd">        The coordinate along which to split the dataset. Default is</span>
 <span class="sd">        ``image_id``.</span>
-<span class="sd">    seed : int, optional</span>
+<span class="sd">    seed</span>
 <span class="sd">        Random seed for reproducibility. Controls both the GroupKFold</span>
 <span class="sd">        indices shuffling and the random selection of the output split from</span>
 <span class="sd">        all the possible ones. Default is 42.</span>
@@ -799,15 +799,15 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    dataset : xarray.Dataset</span>
+<span class="sd">    dataset</span>
 <span class="sd">        The annotations dataset to split.</span>
-<span class="sd">    group_by_var : str</span>
+<span class="sd">    group_by_var</span>
 <span class="sd">        The grouping variable to use for splitting the dataset. Must be</span>
 <span class="sd">        1-dimensional along the ``samples_coordinate``.</span>
-<span class="sd">    list_fractions : list[float, float]</span>
+<span class="sd">    list_fractions</span>
 <span class="sd">        The fractions of the input annotations dataset to allocate to</span>
 <span class="sd">        each subset. Must contain only two elements and sum to 1.</span>
-<span class="sd">    epsilon : float, optional</span>
+<span class="sd">    epsilon</span>
 <span class="sd">        The approximation tolerance for the subset sum as a fraction of 1.</span>
 <span class="sd">        The sum of samples in the smallest subset is guaranteed to be at</span>
 <span class="sd">        least ``(1 - epsilon)`` times the optimal sum for the requested</span>
@@ -815,7 +815,7 @@
 <span class="sd">        finds the exact optimal sum. Larger values result in faster</span>
 <span class="sd">        computation but may yield subsets with a total number of samples</span>
 <span class="sd">        further from optimal. Default is 0.</span>
-<span class="sd">    samples_coordinate : str, optional</span>
+<span class="sd">    samples_coordinate</span>
 <span class="sd">        The coordinate along which to split the dataset. Default is</span>
 <span class="sd">        ``image_id``.</span>
 
@@ -934,15 +934,15 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    dataset : xarray.Dataset</span>
+<span class="sd">    dataset</span>
 <span class="sd">        The annotations dataset to split.</span>
-<span class="sd">    list_fractions : list[float, ...]</span>
+<span class="sd">    list_fractions</span>
 <span class="sd">        The fractions of the input annotations dataset to allocate to</span>
 <span class="sd">        each subset. The list must contain at least two elements, all elements</span>
 <span class="sd">        must be between 0 and 1, and add up to 1.</span>
-<span class="sd">    seed : int, optional</span>
+<span class="sd">    seed</span>
 <span class="sd">        Seed to use for the random number generator. Default is 42.</span>
-<span class="sd">    samples_coordinate : str, optional</span>
+<span class="sd">    samples_coordinate</span>
 <span class="sd">        The coordinate along which to split the dataset. Default is</span>
 <span class="sd">        ``image_id``.</span>
 
@@ -1078,11 +1078,11 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    list_id_counts : list[tuple[int, int]]</span>
+<span class="sd">    list_id_counts</span>
 <span class="sd">        The list of pairs (``group IDs``, ``group count``).</span>
-<span class="sd">    target : int</span>
+<span class="sd">    target</span>
 <span class="sd">        The target value for the total ``group count`` of the subset.</span>
-<span class="sd">    epsilon : float</span>
+<span class="sd">    epsilon</span>
 <span class="sd">        The approximation tolerance for the subset sum as a fraction of 1.</span>
 <span class="sd">        When ``epsilon`` is 0, the algorithm finds the optimal subset for the</span>
 <span class="sd">        requested target value and input list. Larger values of ``epsilon``</span>
@@ -1181,10 +1181,10 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    list_subsets : list[_SubsetDict]</span>
+<span class="sd">    list_subsets</span>
 <span class="sd">        The list of candidate subsets. Each subset is a dictionary with a list</span>
 <span class="sd">        of ``group IDs`` (&quot;ids&quot;) and their total ``group count`` (&quot;sum&quot;).</span>
-<span class="sd">    delta : float</span>
+<span class="sd">    delta</span>
 <span class="sd">        If two subsets are within ``delta``% of each other, they are considered</span>
 <span class="sd">        near duplicates and the smaller one is removed.</span>
 
@@ -1246,7 +1246,7 @@
     <div class="footer-items__start">
       
         <div class="footer-item"><p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.1.0.
     <br/>
     </p>
     <p class="theme-version">
