@@ -26,7 +26,7 @@ git clone https://github.com/neuroinformatics-unit/ethology.git
 pip install -e .[dev]  # works on most shells
 pip install -e '.[dev]'  # works on zsh (the default shell on macOS)
 ```
-This should install all the dependencies needed for development, such as `pytest` and `pre-commit`.
+This should install all the dependencies needed for development, such as `pytest` and `pre-commit`. If you also want to edit the documentation and preview the changes locally, you will additionally need the `docs` extra dependencies. See [Editing the documentation](#editing-the-documentation) for more details.
 
 Finally, install the [pre-commit hooks](https://pre-commit.com/):
 
