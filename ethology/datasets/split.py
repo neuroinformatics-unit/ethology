@@ -28,29 +28,29 @@ def split_dataset_group_by(
 
     Parameters
     ----------
-    dataset : xarray.Dataset
+    dataset
         The annotations dataset to split.
-    group_by_var : str
+    group_by_var
         The grouping variable to use for splitting the dataset. Must be
         1-dimensional along the ``samples_coordinate``.
-    list_fractions : list[float, float]
+    list_fractions
         The fractions of the input annotations dataset to allocate to
         each subset. Must contain only two elements and sum to 1.
-    samples_coordinate : str, optional
+    samples_coordinate
         The coordinate along which to split the dataset. Default is
         ``image_id``.
-    method : str, optional
+    method
         Method to use: ``auto``, ``kfold``, or ``apss``. When ``auto``,
         it automatically selects between ``kfold`` or ``apss`` based on
         the number of unique groups. See Notes for further details.
         Default is ``auto``.
-    seed : int, optional
+    seed
         Random seed for reproducibility used in the "group k-fold" approach.
         Controls both the shuffling of the sample indices and the random
         selection of the output split from all possible ones. Only used when
         ``method`` is ``kfold`` or when ``auto`` selects ``kfold``.
         Default is 42.
-    epsilon : float, optional
+    epsilon
         The approximation tolerance for the "approximate subset-sum" approach,
         expressed as a fraction of 1. The sum of samples in the smallest subset
         is guaranteed to be at least ``(1 - epsilon)`` times the optimal sum
@@ -243,18 +243,18 @@ def _split_dataset_group_by_kfold(
 
     Parameters
     ----------
-    dataset : xarray.Dataset
+    dataset
         The annotations dataset to split.
-    group_by_var : str
+    group_by_var
         The grouping variable to use for splitting the dataset. Must be
         1-dimensional along the ``samples_coordinate``.
-    list_fractions : list[float, float]
+    list_fractions
         The fractions of the input annotations dataset to allocate to
         each subset. Must contain only two elements and sum to 1.
-    samples_coordinate : str, optional
+    samples_coordinate
         The coordinate along which to split the dataset. Default is
         ``image_id``.
-    seed : int, optional
+    seed
         Random seed for reproducibility. Controls both the GroupKFold
         indices shuffling and the random selection of the output split from
         all the possible ones. Default is 42.
@@ -357,15 +357,15 @@ def _split_dataset_group_by_apss(
 
     Parameters
     ----------
-    dataset : xarray.Dataset
+    dataset
         The annotations dataset to split.
-    group_by_var : str
+    group_by_var
         The grouping variable to use for splitting the dataset. Must be
         1-dimensional along the ``samples_coordinate``.
-    list_fractions : list[float, float]
+    list_fractions
         The fractions of the input annotations dataset to allocate to
         each subset. Must contain only two elements and sum to 1.
-    epsilon : float, optional
+    epsilon
         The approximation tolerance for the subset sum as a fraction of 1.
         The sum of samples in the smallest subset is guaranteed to be at
         least ``(1 - epsilon)`` times the optimal sum for the requested
@@ -373,7 +373,7 @@ def _split_dataset_group_by_apss(
         finds the exact optimal sum. Larger values result in faster
         computation but may yield subsets with a total number of samples
         further from optimal. Default is 0.
-    samples_coordinate : str, optional
+    samples_coordinate
         The coordinate along which to split the dataset. Default is
         ``image_id``.
 
@@ -490,15 +490,15 @@ def split_dataset_random(
 
     Parameters
     ----------
-    dataset : xarray.Dataset
+    dataset
         The annotations dataset to split.
-    list_fractions : list[float, ...]
+    list_fractions
         The fractions of the input annotations dataset to allocate to
         each subset. The list must contain at least two elements, all elements
         must be between 0 and 1, and add up to 1.
-    seed : int, optional
+    seed
         Seed to use for the random number generator. Default is 42.
-    samples_coordinate : str, optional
+    samples_coordinate
         The coordinate along which to split the dataset. Default is
         ``image_id``.
 
@@ -633,11 +633,11 @@ def _approximate_subset_sum(
 
     Parameters
     ----------
-    list_id_counts : list[tuple[int, int]]
+    list_id_counts
         The list of pairs (``group IDs``, ``group count``).
-    target : int
+    target
         The target value for the total ``group count`` of the subset.
-    epsilon : float
+    epsilon
         The approximation tolerance for the subset sum as a fraction of 1.
         When ``epsilon`` is 0, the algorithm finds the optimal subset for the
         requested target value and input list. Larger values of ``epsilon``
@@ -736,10 +736,10 @@ def _remove_near_duplicate_subsets(
 
     Parameters
     ----------
-    list_subsets : list[_SubsetDict]
+    list_subsets
         The list of candidate subsets. Each subset is a dictionary with a list
         of ``group IDs`` ("ids") and their total ``group count`` ("sum").
-    delta : float
+    delta
         If two subsets are within ``delta``% of each other, they are considered
         near duplicates and the smaller one is removed.
 

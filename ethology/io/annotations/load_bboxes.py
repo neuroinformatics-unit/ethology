@@ -29,11 +29,11 @@ def from_files(
 
     Parameters
     ----------
-    file_paths : pathlib.Path | str | list[pathlib.Path | str]
+    file_paths
         Path or list of paths to the input annotation files.
-    format : {"VIA", "COCO"}
+    format
         Format of the input annotation files.
-    images_dirs : pathlib.Path | str | list[pathlib.Path | str], optional
+    images_dirs
         Path or list of paths to the directories containing the images the
         annotations refer to. The paths are added to the dataset
         attributes.
@@ -144,7 +144,7 @@ def _get_map_attributes_from_df(
 
     Parameters
     ----------
-    df : DataFrame[ValidBboxesDataFrame]
+    df
         Bounding box annotations dataframe.
 
     Returns
@@ -184,9 +184,9 @@ def _df_from_multiple_files(
 
     Parameters
     ----------
-    list_filepaths : list[Path | str]
+    list_filepaths
         List of paths to the input annotation bounding boxes files
-    format : Literal["VIA", "COCO"]
+    format
         Format of the input annotation bounding boxes files.
         Currently supported formats are "VIA" and "COCO".
 
@@ -247,15 +247,15 @@ def _df_from_single_file(
 
     Parameters
     ----------
-    file_path : Path | str
+    file_path
         Path to the input annotation bounding boxes file.
-    format : Literal["VIA", "COCO"]
+    format
         Format of the input bounding boxes annotation file.
         Currently supported formats are "VIA" and "COCO".
 
     Returns
     -------
-    DataFrame[ValidBboxesDataFrame]
+    DataFrame[ValidBboxAnnotationsDataFrame]
         Intermediate dataframe for bounding boxes annotations. The dataframe
         is indexed by "annotation_id" and has the following columns:
         'image_filename', 'image_id', 'image_width', 'image_height',
@@ -305,7 +305,7 @@ def _df_rows_from_valid_VIA_file(file_path: Path) -> list[dict]:
 
     Parameters
     ----------
-    file_path : Path
+    file_path
         Path to the validated VIA JSON file.
 
     Returns
@@ -415,9 +415,9 @@ def _get_image_shape_attr_as_integer(
 
     Parameters
     ----------
-    file_attrs : dict
+    file_attrs
         File attributes dictionary extracted from a VIA input file.
-    attr_name : Literal["width", "height"]
+    attr_name
         Name of the image shape attribute.
 
     Returns
@@ -448,9 +448,9 @@ def _category_id_as_int(
 
     Parameters
     ----------
-    category_id_str : str
+    category_id_str
         Category ID as string.
-    list_categories : list[str]
+    list_categories
         List of categories.
 
     Returns
@@ -477,7 +477,7 @@ def _df_rows_from_valid_COCO_file(file_path: Path) -> list[dict]:
 
     Parameters
     ----------
-    file_path : Path
+    file_path
         Path to the validated COCO JSON file.
 
     Returns
@@ -564,7 +564,7 @@ def _df_to_xarray_ds(
 
     Parameters
     ----------
-    df : DataFrame[ValidBboxesDataFrame]
+    df
         A valid intermediate dataframe for bounding boxes annotations.
 
     Returns
@@ -635,7 +635,7 @@ def _prepare_array_dicts(
 
     Parameters
     ----------
-    df : pd.DataFrame
+    df
         A dataframe for bounding boxes annotations.
 
     Returns
@@ -690,13 +690,13 @@ def _extract_arrays_from_df(
 
     Parameters
     ----------
-    df : pd.DataFrame
+    df
         A dataframe for bounding boxes annotations.
-    arrays_metadata : dict[str, dict[str, Any]]
+    arrays_metadata
         A dictionary with the metadata for the arrays to extract.
-    indices_id_switch : np.ndarray
+    indices_id_switch
         Indices of the rows where the image ID switches.
-    max_annotations_per_image : int
+    max_annotations_per_image
         The maximum number of annotations per image.
 
     Returns

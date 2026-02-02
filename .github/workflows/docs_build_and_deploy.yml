@@ -41,6 +41,7 @@ jobs:
           use-make: true
           fetch-tags: true
           use-artifactci: lazy
+          use-requirements-txt: false
 
   check_tag:
     name: Check if trigger is tag and if it points to commit on main
