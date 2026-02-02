@@ -160,9 +160,9 @@ linkcheck_anchors_ignore_for_url = [
 ]
 # A list of regular expressions that match URIs that should not be checked
 linkcheck_ignore = [
-    # to avoid odd 403 client errors
-    "https://opensource.org/license/bsd-3-clause/",
-    "https://figshare.com/articles/dataset/Australian_Camera_Trap_Data_ACTD_/27177912",
+    # to avoid rate limiting or flaky responses
+    r"https://docs\.astral\.sh/.*",
+    r"https://storage\.googleapis\.com/.*",
 ]
 
 myst_url_schemes = {
