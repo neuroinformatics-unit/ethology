@@ -158,7 +158,7 @@ linkcheck_anchors_ignore_for_url = [
     "https://gin.g-node.org/G-Node/Info/wiki/",
     "https://cocodataset.org/",
 ]
-# A list of regular expressions that match URIs that should not be checked
+# A list of regular expressions that match URLs that should not be checked
 linkcheck_ignore = [
     # to avoid odd 403 client errors
     "https://opensource.org/license/bsd-3-clause/",
