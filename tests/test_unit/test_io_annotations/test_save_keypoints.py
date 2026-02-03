@@ -1,6 +1,5 @@
 """Test saving keypoints annotations to file formats."""
 
-from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import numpy as np

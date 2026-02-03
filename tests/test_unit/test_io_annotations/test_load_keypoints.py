@@ -1,7 +1,5 @@
 """Test loading keypoints annotations into ethology datasets."""
 
-from contextlib import nullcontext as does_not_raise
-from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import numpy as np
@@ -10,6 +8,7 @@ import xarray as xr
 
 from ethology.io.annotations.load_keypoints import (
     _frame_label,
+    _from_single_file,
     _get_frame_index,
     _get_instances,
     _get_labeled_frames,
@@ -21,9 +20,7 @@ from ethology.io.annotations.load_keypoints import (
     _prepare_frame_records,
     _require_sleap_io,
     from_files,
-    _from_single_file,
 )
-
 
 # ============================================================================
 # Tests for Helper Functions
@@ -85,7 +82,7 @@ def test_get_frame_index(attr_name, attr_value):
     # Use spec=[attr_name] to ensure the mock ONLY has this attribute.
     mock_frame = MagicMock(spec=[attr_name])
     setattr(mock_frame, attr_name, attr_value)
-    
+
     result = _get_frame_index(mock_frame)
     assert result == int(attr_value)
     assert isinstance(result, int)
@@ -104,7 +101,7 @@ def test_get_frame_index_error():
         ({"filename": "v.mp4"}, "v.mp4"),
         ({"path": "v.mp4", "filename": None}, "v.mp4"),
         (None, None),  # No video object
-        ({}, None),    # Video object with no path/filename
+        ({}, None),  # Video object with no path/filename
     ],
 )
 def test_get_video_filename(video_attr, expected_filename):
@@ -118,7 +115,7 @@ def test_get_video_filename(video_attr, expected_filename):
             setattr(mock_frame.video, k, v)
         # Handle case where attributes are missing from spec
         if not video_attr:
-             mock_frame.video = MagicMock(spec=[])
+            mock_frame.video = MagicMock(spec=[])
 
     assert _get_video_filename(mock_frame) == expected_filename
 
@@ -140,7 +137,7 @@ def test_get_instances(attr_config, expected_count):
     mock_frame.user_instances = None
     mock_frame.instances = None
     mock_frame.predicted_instances = None
-    
+
     for k, v in attr_config.items():
         setattr(mock_frame, k, v)
 
@@ -153,7 +150,7 @@ def test_points_from_point_objects():
     # Standard case
     p1 = MagicMock(x=10.0, y=20.0, visible=True, score=0.95)
     p2 = MagicMock(x=30.0, y=40.0, visible=True, score=0.85)
-    
+
     coords, conf, vis = _points_from_point_objects([p1, p2], n_keypoints=2)
     assert np.allclose(coords, [[10, 20], [30, 40]])
     assert np.allclose(conf, [0.95, 0.85])
@@ -162,7 +159,7 @@ def test_points_from_point_objects():
     # Invisible / Missing case
     p_inv = MagicMock(x=10.0, y=20.0, visible=False)
     coords, _, vis = _points_from_point_objects([p_inv, None], n_keypoints=2)
-    assert np.isnan(coords[0]).all() # Invisible points become NaN coordinates
+    assert np.isnan(coords[0]).all()  # Invisible points become NaN coordinates
     assert vis[0] == 0.0
     assert np.isnan(coords[1]).all()
 
@@ -171,22 +168,22 @@ def test_points_from_instance():
     """Test extraction of points from instance (numpy vs list)."""
     # Numpy Array Case
     mock_inst_np = MagicMock()
-    mock_inst_np.numpy = np.array([[10., 20.], [30., 40.]])
+    mock_inst_np.numpy = np.array([[10.0, 20.0], [30.0, 40.0]])
     c, _, _ = _points_from_instance(mock_inst_np, 2)
-    assert np.allclose(c, [[10., 20.], [30., 40.]])
+    assert np.allclose(c, [[10.0, 20.0], [30.0, 40.0]])
 
     # 3D Array Case (Reshape)
     mock_inst_3d = MagicMock()
-    mock_inst_3d.numpy = np.array([[[10., 20.]], [[30., 40.]]])
+    mock_inst_3d.numpy = np.array([[[10.0, 20.0]], [[30.0, 40.0]]])
     c, _, _ = _points_from_instance(mock_inst_3d, 2)
     assert c.shape == (2, 2)
 
     # List Case
     mock_inst_list = MagicMock()
-    mock_inst_list.points = [MagicMock(x=10., y=20., visible=True)]
+    mock_inst_list.points = [MagicMock(x=10.0, y=20.0, visible=True)]
     c, _, _ = _points_from_instance(mock_inst_list, 1)
     assert c.shape == (1, 2)
-    
+
     # Error Case
     with pytest.raises(ValueError, match="Unsupported instance points format"):
         _points_from_instance(MagicMock(spec=[]), 1)
@@ -198,7 +195,7 @@ def test_get_skeleton_keypoints():
     # MagicMock(name='n1') sets the debug name, NOT the attribute .name
     node = MagicMock()
     node.name = "n1"
-    
+
     # Skeletons list
     mock_labels = MagicMock()
     mock_labels.skeletons = [MagicMock(nodes=[node])]
@@ -271,27 +268,47 @@ def test_from_files_concatenation(mock_single):
     common_attrs = {
         "map_keypoint_to_str": {0: "n1"},
         "map_image_id_to_filename": {0: "f"},
-        "map_image_id_to_frame_idx": {0: 0} # FIX: Required for the loop
+        "map_image_id_to_frame_idx": {0: 0},  # FIX: Required for the loop
     }
-    
+
     ds1 = xr.Dataset(
-        {"position": (("image_id", "space", "keypoint", "id"), np.zeros((1, 2, 1, 1)))},
-        coords={"image_id": [0], "keypoint": ["n1"], "space": ["x", "y"], "id": [0]},
-        attrs=common_attrs.copy()
+        {
+            "position": (
+                ("image_id", "space", "keypoint", "id"),
+                np.zeros((1, 2, 1, 1)),
+            )
+        },
+        coords={
+            "image_id": [0],
+            "keypoint": ["n1"],
+            "space": ["x", "y"],
+            "id": [0],
+        },
+        attrs=common_attrs.copy(),
     )
     ds1.attrs["map_image_id_to_filename"] = {0: "f1"}
-    
+
     ds2 = xr.Dataset(
-        {"position": (("image_id", "space", "keypoint", "id"), np.zeros((1, 2, 1, 1)))},
-        coords={"image_id": [0], "keypoint": ["n1"], "space": ["x", "y"], "id": [0]},
-        attrs=common_attrs.copy()
+        {
+            "position": (
+                ("image_id", "space", "keypoint", "id"),
+                np.zeros((1, 2, 1, 1)),
+            )
+        },
+        coords={
+            "image_id": [0],
+            "keypoint": ["n1"],
+            "space": ["x", "y"],
+            "id": [0],
+        },
+        attrs=common_attrs.copy(),
     )
     ds2.attrs["map_image_id_to_filename"] = {0: "f2"}
-    
+
     mock_single.side_effect = [ds1, ds2]
 
     ds = from_files(["a", "b"], format="SLEAP")
-    
+
     assert ds.sizes["image_id"] == 2
     assert ds.attrs["map_image_id_to_filename"] == {0: "f1", 1: "f2"}
 
@@ -301,20 +318,20 @@ def test_from_files_mismatch_error(mock_single):
     """Test error when keypoints differ."""
     # FIX: Add missing attributes to prevent KeyError during iteration
     ds1 = xr.Dataset(
-        coords={"image_id": [0]}, 
+        coords={"image_id": [0]},
         attrs={
             "map_keypoint_to_str": {0: "A"},
             "map_image_id_to_filename": {0: "f"},
-            "map_image_id_to_frame_idx": {0: 0}
-        }
+            "map_image_id_to_frame_idx": {0: 0},
+        },
     )
     ds2 = xr.Dataset(
-        coords={"image_id": [0]}, 
+        coords={"image_id": [0]},
         attrs={
             "map_keypoint_to_str": {0: "B"},
             "map_image_id_to_filename": {0: "f"},
-            "map_image_id_to_frame_idx": {0: 0}
-        }
+            "map_image_id_to_frame_idx": {0: 0},
+        },
     )
     mock_single.side_effect = [ds1, ds2]
 
@@ -326,16 +343,18 @@ def test_from_files_mismatch_error(mock_single):
 def test_from_single_file_integration_mock(mock_require):
     """Test the full flow of _from_single_file using mocks."""
     mock_sio = mock_require.return_value
-    
+
     inst = MagicMock()
     inst.points = [MagicMock(x=10, y=20, visible=True, score=0.9)]
-    frame = MagicMock(frame_idx=0, video=MagicMock(filename="v.mp4"), user_instances=[inst])
-    
+    frame = MagicMock(
+        frame_idx=0, video=MagicMock(filename="v.mp4"), user_instances=[inst]
+    )
+
     # FIX: Explicitly set name
     node = MagicMock()
     node.name = "nose"
     skel = MagicMock(nodes=[node])
-    
+
     labels = MagicMock(labeled_frames=[frame], skeletons=[skel])
     mock_sio.load_file.return_value = labels
 
@@ -352,13 +371,13 @@ def test_from_single_file_integration_mock(mock_require):
 def test_from_single_file_inference_fallback(mock_require):
     """Test that keypoints are inferred when no skeleton is present."""
     mock_sio = mock_require.return_value
-    
+
     p1 = MagicMock(x=10, y=10, visible=True)
     p2 = MagicMock(x=20, y=20, visible=True)
     inst = MagicMock(points=[p1, p2])
-    
+
     frame = MagicMock(frame_idx=0, video=None, user_instances=[inst])
-    
+
     # No skeletons provided!
     labels = MagicMock(labeled_frames=[frame], skeletons=[])
     mock_sio.load_file.return_value = labels
@@ -373,7 +392,7 @@ def test_from_single_file_inference_fallback(mock_require):
 def test_from_single_file_errors(mock_require):
     """Test error conditions in single file loading."""
     mock_sio = mock_require.return_value
-    
+
     # Case: No Frames
     mock_sio.load_file.return_value = MagicMock(labeled_frames=[])
     with pytest.raises(ValueError, match="No labeled frames found"):
@@ -398,11 +417,11 @@ def test_from_single_file_mismatched_keypoints_error(mock_require):
         n = MagicMock()
         n.name = str(i)
         nodes.append(n)
-        
+
     skel = MagicMock(nodes=nodes)
     inst = MagicMock(points=[MagicMock(), MagicMock()])
     frame = MagicMock(frame_idx=0, video=None, user_instances=[inst])
-    
+
     mock_sio.load_file.return_value = MagicMock(
         labeled_frames=[frame], skeletons=[skel]
     )
@@ -415,16 +434,18 @@ def test_from_single_file_mismatched_keypoints_error(mock_require):
 def test_from_single_file_multiple_instances(mock_require):
     """Test that multiple instances are correctly stacked in the 'id' dimension."""
     mock_sio = mock_require.return_value
-    
+
     inst1 = MagicMock(points=[MagicMock(x=10, y=10, visible=True)])
     inst2 = MagicMock(points=[MagicMock(x=20, y=20, visible=True)])
-    
+
     frame = MagicMock(frame_idx=0, video=None, user_instances=[inst1, inst2])
-    
+
     # FIX: Explicitly set name
     node = MagicMock()
     node.name = "k1"
-    labels = MagicMock(labeled_frames=[frame], skeletons=[MagicMock(nodes=[node])])
+    labels = MagicMock(
+        labeled_frames=[frame], skeletons=[MagicMock(nodes=[node])]
+    )
     mock_sio.load_file.return_value = labels
 
     ds = _from_single_file("test.slp", "SLEAP", None)
