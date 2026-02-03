@@ -42,9 +42,12 @@ extensions = [
     "notfound.extension",
     "sphinx_design",
     "sphinx_gallery.gen_gallery",
-    "sphinx_sitemap",
     "sphinx.ext.autosectionlabel",
 ]
+
+# Only enable sphinx_sitemap if not running linkcheck
+if "linkcheck" not in sys.argv:
+    extensions.append("sphinx_sitemap")
 
 # Configure the myst parser to enable cool markdown features
 # See https://sphinx-design.readthedocs.io
