@@ -330,8 +330,8 @@ bin_size_x = np.diff(hist["xedges"])[0].item()
 bin_size_y = np.diff(hist["yedges"])[0].item()
 
 print(f"Bin size (pixels): ({bin_size_x}, {bin_size_y})")
-print(f"Maximum bin count: {hist['counts'].max().item()}")
-print(f"Minimum bin count: {hist['counts'].min().item()}")
+print(f"Maximum bin count: {hist['h'].max().item()}")
+print(f"Minimum bin count: {hist['h'].min().item()}")
 
 # %%
 # We can also confirm that the bins are approximately square as intended.

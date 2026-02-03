@@ -74,14 +74,16 @@ _ = logger.add(sys.stdout, level="INFO")
 # For this example, we will use the `Australian Camera Trap Dataset
 # <https://figshare.com/articles/dataset/Australian_Camera_Trap_Data_ACTD_/27177912>`_
 # which comprises images from camera traps across various sites in Victoria,
-# Australia.
+# Australia. This dataset is licensed under CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/)
+# and authored by  Sameeruddin Muhammad, Scott Mann, Callum Luke,
+# Chris Pocknee, Supriya Nair and Jay Nair.
 #
 # We use the `pooch <https://github.com/fatiando/pooch/>`_ library to download
 # the dataset to the ``.ethology`` cache directory.
 
 # %%
 data_source = {
-    "url": "https://figshare.com/ndownloader/files/53674187",
+    "url": "https://github.com/neuroinformatics-unit/ethology/releases/download/data-ACTD/ACTD_COCO_files.zip",
     "hash": "4019bb11cd360d66d13d9309928195638adf83e95ddec7b0b23e693ec8c7c26b",
 }
 

@@ -27,10 +27,10 @@ class ValidDataset(ABC):
     ----------
     dataset : xarray.Dataset
         The xarray dataset to validate.
-    required_dims : ClassVar[set[str]]
+    required_dims : typing.ClassVar[set[str]]
         A set of required dimension names. This class attribute must be
         defined by any subclass inheriting from this class.
-    required_data_vars : ClassVar[dict[str, set]]
+    required_data_vars : typing.ClassVar[dict[str, set]]
         A dictionary mapping data variable names to their required dimensions.
         This class attribute must be defined by any subclass inheriting from
         this class.

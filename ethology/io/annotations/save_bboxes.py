@@ -1,13 +1,12 @@
 """Save ``ethology`` bounding box annotations datasets to various formats."""
 
+import datetime
 import json
-from datetime import datetime
 from pathlib import Path
 from typing import Any
 
 import pandas as pd
 import pandera.pandas as pa
-import pytz
 import xarray as xr
 from pandera.typing.pandas import DataFrame
 
@@ -26,9 +25,9 @@ def to_COCO_file(dataset: xr.Dataset, output_filepath: str | Path):
 
     Parameters
     ----------
-    dataset : xarray.Dataset
+    dataset
         Bounding boxes annotations xarray dataset.
-    output_filepath : str or pathlib.Path
+    output_filepath
         Path for the output COCO file.
 
     Returns
@@ -66,12 +65,12 @@ def _to_COCO_exportable_df(
 
     Parameters
     ----------
-    ds : xr.Dataset
+    ds
         A valid dataset of bounding boxes annotations.
 
     Returns
     -------
-    df : pd.DataFrame
+    df
         A dataframe of bounding boxes annotations exportable to COCO.
 
     """
@@ -108,12 +107,12 @@ def _get_raw_df_from_ds(ds: xr.Dataset) -> pd.DataFrame:
 
     Parameters
     ----------
-    ds : xr.Dataset
+    ds
         A valid dataset of bounding boxes annotations.
 
     Returns
     -------
-    df : pd.DataFrame
+    df
         A preliminary dataframe of bounding boxes annotations.
 
     """
@@ -168,15 +167,15 @@ def _add_COCO_data_to_df(
 
     Parameters
     ----------
-    df : pd.DataFrame
+    df
         Preliminary dataframe of bounding boxes annotations derived
         from a dataset of bounding boxes annotations.
-    ds_attrs : dict
+    ds_attrs
         Attributes of the dataset of bounding boxes annotations.
 
     Returns
     -------
-    df : pd.DataFrame
+    df
         COCO-exportable dataframe of bounding boxes annotations.
         The dataframe has the following columns:
         'id', 'annotation_id',
@@ -274,12 +273,12 @@ def _create_COCO_dict(
 
     Parameters
     ----------
-    df : DataFrame[ValidBBoxesDataFrameCOCO]
+    df
         COCO exportable dataframe.
 
     Returns
     -------
-    COCO_dict : dict
+    COCO_dict
         COCO dictionary.
 
     """
@@ -305,7 +304,7 @@ def _create_COCO_dict(
 
     # Add info section to COCO_dict
     COCO_dict["info"] = {
-        "date_created": datetime.now(pytz.utc).strftime(
+        "date_created": datetime.datetime.now(datetime.UTC).strftime(
             "%a %b %d %Y %H:%M:%S GMT%z"
         ),
         "description": "Bounding boxes annotations exported from ethology",
