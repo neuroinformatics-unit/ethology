@@ -1,7 +1,8 @@
 import json
 from pathlib import Path
+
 from ethology.io.annotations.load_bboxes import from_files
-import xarray as xr
+
 
 def test_retain_image_id_coco(tmp_path: Path):
     # Create a small COCO-like json

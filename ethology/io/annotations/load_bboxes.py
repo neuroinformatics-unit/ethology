@@ -2,7 +2,7 @@
 
 import json
 from pathlib import Path
-from typing import Any, Literal
+from typing import Any, Dict, Literal, Tuple
 
 import numpy as np
 import pandas as pd
@@ -27,7 +27,7 @@ def from_files(
     *,
     retain_image_id: bool = False,
 ) -> xr.Dataset:
-    """Load an ``ethology`` bounding box annotations dataset from a file.
+    """Load an ``ethology`` bounding box annotations dataset.
 
     Parameters
     ----------
@@ -36,69 +36,16 @@ def from_files(
     format
         Format of the input annotation files.
     images_dirs
-        Path or list of paths to the directories containing the images the
-        annotations refer to. The paths are added to the dataset
-        attributes.
+        Paths to the directories containing the images the annotations
+        refer to. The paths are added to dataset attributes.
     retain_image_id
-        If True and supported by the input format, preserve the image IDs as
-        they appear in the input annotation file (for example, COCO's
-        `images[].id`). If False (default) keep the ethology default behavior
-        of numbering images as 0-based indices based on sorted filenames.
-
-    Returns
-    -------
-    xarray.Dataset
-
-        A valid bounding box annotations dataset with dimensions
-        `image_id`, `space`, `id`, and the following arrays:
-
-        - `position`, with dimensions (image_id, space, id),
-        - `shape`, with dimensions (image_id, space, id),
-        - `category`, with dimensions (image_id, id) - optional,
-        - `image_shape`, with dimensions (image_id, space) - optional.
-
-        The `category` array, if present, holds category IDs as 1-based
-        integers, matching the category IDs in the input file. The dataset
-        attributes include:
-
-        - `annotation_files`: a list of paths to the input annotation files
-        - `annotation_format`: the format of the input annotation files
-        - `map_category_to_str`: a map from category ID to category name
-        - `map_image_id_to_filename`: a map from image ID to image filename
-        - `images_directories`: directory paths for the images (optional)
-
-
-    Notes
-    -----
-    The `image_id` is assigned based on the alphabetically sorted list of
-    unique image filenames across all input files. So if two images have
-    the same filename but are in different input annotation files, they will
-    be assigned the same image ID and their annotations will be merged.
-
-    The `id` dimension corresponds to the annotation ID per image. It
-    ranges from 0 to the maximum number of annotations per image in
-    the dataset. Note that the annotation IDs are not necessarily
-    consistent across images. This means that the annotations with ID=3
-    in image `t` and image `t+1` will likely not correspond to the same
-    individual.
-
-    The `space` dimension holds the "x" and "y" coordinates.
-
-    Note that supercategories are not currently added to the xarray dataset,
-    even if specified in the input file.
-
-    Examples
-    --------
-    Load annotations from a single COCO file:
-
-    >>> from ethology.io.annotations import load_bboxes
-    >>> ds = load_bboxes.from_files(
-    ...     file_paths="path/to/annotation_file.json", format="COCO"
-    ... )
-
+        If True and supported by the input format, preserve the image IDs
+        as they appear in the input file (e.g., COCO images[].id).
+        If False (default) keep ethology's behaviour of renumbering
+        images as 0-based indices sorted by filename.
     """
-    # If requested, compute filename -> original image id mapping up front.
-    filename_to_original_id: dict[str, int] = {}
+    # Optionally build filename -> original id map (COCO or VIA)
+    filename_to_original_id: Dict[str, int] = {}
     if retain_image_id:
         list_files = (
             list(file_paths) if isinstance(file_paths, list) else [file_paths]
@@ -106,76 +53,27 @@ def from_files(
         filename_to_original_id = _compute_filename_to_original_id(
             list_files, format
         )
-        # compute mapping for each file
-        for fp in list_files:
-            p = Path(fp)
-            if not p.exists():
-                continue
-            try:
-                with p.open("r", encoding="utf-8") as fh:
-                    data = json.load(fh)
-            except Exception:
-                # not a JSON file or unreadable; skip
-                continue
 
-            if format == "COCO":
-                # COCO: map file_name -> id
-                for img in data.get("images", []):
-                    fname = img.get("file_name")
-                    if fname is not None:
-                        filename_to_original_id[fname] = img.get("id")
-            elif format == "VIA":
-                # VIA: keys in _via_img_metadata are arbitrary strings.
-                # Try to coerce the VIA metadata key (the dict key) to int.
-                md = data.get("_via_img_metadata", {})
-                for img_key, img_dict in md.items():
-                    fname = img_dict.get("filename")
-                    try:
-                        orig_id = int(img_key)
-                    except Exception:
-                        orig_id = None
-                    if fname is not None and orig_id is not None:
-                        filename_to_original_id[fname] = orig_id
-
-    # Compute intermediate dataframe df using the existing helpers (no signature changes)
+    # Load annotations into the intermediate dataframe using helpers.
     if isinstance(file_paths, list):
-        df_all = _df_from_multiple_files(file_paths, format=format)
+        df_all = _df_from_multiple_files(list(file_paths), format=format)
     else:
         df_all = _df_from_single_file(file_paths, format=format)
 
-    # If requested, apply original IDs where available and build a mapping
+    # If requested, apply original IDs where available. Also build a map
     # ethology_image_id -> original_image_id.
-    map_image_id_to_original: dict[int, int] = {}
+    map_image_id_to_original: Dict[int, int] = {}
     if retain_image_id and filename_to_original_id:
         df_all, map_image_id_to_original = _apply_original_ids(
             df_all, filename_to_original_id
         )
-        # build dict only for entries where original id exists
-        map_image_id_to_original = (
-            mapping_df.dropna(subset=["image_id_original"])
-            .set_index("image_id")["image_id_original"]
-            .astype(int)
-            .to_dict()
-        )
 
-        # Now overwrite df_all["image_id"] with original ids where possible,
-        # keeping ethology ids for filenames without a mapping.
-        df_all["image_id"] = (
-            df_all["image_filename"]
-            .map(filename_to_original_id)
-            .fillna(df_all["image_id"])
-            .astype(int)
-        )
-
-    # Get attribute maps (keeps original helper signature and behavior).
+    # Build attribute maps and convert to xarray dataset.
     map_image_id_to_filename, map_category_to_str = (
         _get_map_attributes_from_df(df_all)
     )
 
-    # Convert dataframe to xarray dataset
     ds = _df_to_xarray_ds(df_all)
-
-    # Add attributes to the xarray dataset
     ds.attrs = {
         "annotation_files": file_paths,
         "annotation_format": format,
@@ -187,15 +85,23 @@ def from_files(
 
     return ds
 
+
 def _compute_filename_to_original_id(
     list_files: list[Path | str], format: Literal["VIA", "COCO"]
-) -> dict[str, int]:
-    """Build a mapping from image filename -> original image id (input file).
+) -> Dict[str, int]:
+    """Dispatch to the format-specific filename->original-id builder."""
+    if format == "COCO":
+        return _compute_filename_to_original_id_coco(list_files)
+    if format == "VIA":
+        return _compute_filename_to_original_id_via(list_files)
+    return {}
 
-    Works for COCO (images[].id -> file_name) and VIA when VIA keys
-    are coercible to integers.
-    """
-    mapping: dict[str, int] = {}
+
+def _compute_filename_to_original_id_coco(
+    list_files: list[Path | str],
+) -> Dict[str, int]:
+    """Build filename -> COCO image id mapping from COCO files."""
+    mapping: Dict[str, int] = {}
     for fp in list_files:
         p = Path(fp)
         if not p.exists():
@@ -204,79 +110,86 @@ def _compute_filename_to_original_id(
             with p.open("r", encoding="utf-8") as fh:
                 data = json.load(fh)
         except Exception:
-            # unreadable file or not JSON; skip
+            # not JSON or unreadable; skip
             continue
+        for img in data.get("images", []):
+            fname = img.get("file_name")
+            if fname is not None:
+                # prefer the last-seen mapping across files
+                mapping[fname] = img.get("id")
+    return mapping
 
-        if format == "COCO":
-            for img in data.get("images", []):
-                fname = img.get("file_name")
-                if fname is not None:
-                    mapping[fname] = img.get("id")
-        elif format == "VIA":
-            md = data.get("_via_img_metadata", {})
-            for img_key, img_dict in md.items():
-                fname = img_dict.get("filename")
-                try:
-                    orig_id = int(img_key)
-                except Exception:
-                    orig_id = None
-                if fname is not None and orig_id is not None:
-                    mapping[fname] = orig_id
+
+def _compute_filename_to_original_id_via(
+    list_files: list[Path | str],
+) -> Dict[str, int]:
+    """Build filename -> VIA metadata-key-as-int mapping where possible."""
+    mapping: Dict[str, int] = {}
+    for fp in list_files:
+        p = Path(fp)
+        if not p.exists():
+            continue
+        try:
+            with p.open("r", encoding="utf-8") as fh:
+                data = json.load(fh)
+        except Exception:
+            continue
+        md = data.get("_via_img_metadata", {})
+        for img_key, img_dict in md.items():
+            fname = img_dict.get("filename")
+            try:
+                orig_id = int(img_key)
+            except Exception:
+                orig_id = None
+            if fname is not None and orig_id is not None:
+                mapping[fname] = orig_id
     return mapping
 
 
 def _apply_original_ids(
-    df_all: pd.DataFrame, filename_to_original_id: dict[str, int]
-) -> tuple[pd.DataFrame, dict[int, int]]:
-    """Apply filename->original-id mapping to dataframe and return a map of
-    ethology image_id -> original id.
+    df_all: pd.DataFrame, filename_to_original_id: Dict[str, int]
+) -> Tuple[pd.DataFrame, Dict[int, int]]:
+    """Apply filename->original-id mapping to dataframe.
+
+    Return updated dataframe and map ethology_image_id -> original id.
     """
-    # Build mapping dataframe: ethology image_id -> filename -> original id
-    mapping_df = df_all[["image_filename", "image_id"]].drop_duplicates()
+    mapping_df = df_all[["image_filename", "image_id"]].drop_duplicates().copy()
+    # ensure image_id is int for indexing
+    mapping_df["image_id"] = mapping_df["image_id"].astype(int)
     mapping_df["image_id_original"] = mapping_df["image_filename"].map(
         filename_to_original_id
     )
-    # Keep only entries where an original id exists.
-    map_image_id_to_original = (
+
+    # Keep only rows where original id exists.
+    map_image_id_to_original: Dict[int, int] = (
         mapping_df.dropna(subset=["image_id_original"])
         .set_index("image_id")["image_id_original"]
         .astype(int)
         .to_dict()
     )
 
-    # Overwrite df_all["image_id"] where we have a mapping; keep original ethology
-    # id for filenames without a mapping.
-    df_all["image_id"] = df_all["image_filename"].map(
-        filename_to_original_id
-    ).fillna(df_all["image_id"]).astype(int)
+    # Overwrite df_all["image_id"] where mapping exists; otherwise keep
+    # ethology-assigned id.
+    df_all["image_id"] = (
+        df_all["image_filename"]
+        .map(filename_to_original_id)
+        .fillna(df_all["image_id"])
+        .astype(int)
+    )
 
     return df_all, map_image_id_to_original
 
+
 def _get_map_attributes_from_df(
     df: DataFrame[ValidBboxAnnotationsDataFrame],
-) -> tuple[dict, dict]:
-    """Get the map attributes from the dataframe.
-
-    Parameters
-    ----------
-    df
-        Bounding box annotations dataframe.
-
-    Returns
-    -------
-    tuple[dict, dict]
-        Map from "image_id" to image_filename and
-        map from "category_id" to category name if present.
-
-    """
-    # Compute dataset attributes from a valid intermediate dataframe
-    # map from "image_id" to image_filename
+) -> Tuple[Dict[int, str], Dict[int, str]]:
+    """Get dataset attribute maps (image id -> filename, category id -> name)."""
     mapping_df = df[["image_filename", "image_id"]].drop_duplicates()
     map_image_id_to_filename = mapping_df.set_index("image_id").to_dict()[
         "image_filename"
     ]
-    # map from "category_id" to category name
-    map_category_to_str = {}
+
+    map_category_to_str: Dict[int, str] = {}
     if all(col in df.columns for col in ["category_id", "category"]):
         map_category_to_str = (
             df[["category_id", "category"]]
@@ -284,8 +197,6 @@ def _get_map_attributes_from_df(
             .set_index("category_id")
             .to_dict()["category"]
         )
-
-        # sort by category_id
         map_category_to_str = dict(sorted(map_category_to_str.items()))
 
     return (map_image_id_to_filename, map_category_to_str)
@@ -295,49 +206,20 @@ def _get_map_attributes_from_df(
 def _df_from_multiple_files(
     list_filepaths: list[Path | str], format: Literal["VIA", "COCO"]
 ) -> DataFrame[ValidBboxAnnotationsDataFrame]:
-    """Read annotations from multiple files as a valid intermediate dataframe.
-
-    Parameters
-    ----------
-    list_filepaths
-        List of paths to the input annotation bounding boxes files
-    format
-        Format of the input annotation bounding boxes files.
-        Currently supported formats are "VIA" and "COCO".
-
-    Returns
-    -------
-    DataFrame[ValidBboxesDataFrame]
-        Intermediate dataframe for bounding boxes annotations. The dataframe is
-        indexed by "annotation_id" and has the following columns:
-        "image_filename", "image_id", "image_width", "image_height", "x_min",
-        "y_min", "width", "height", "supercategory", "category", "category_id".
-
-    """
-    # Get list of dataframes
+    """Read annotations from multiple files as a dataframe."""
     df_list = [
-        _df_from_single_file(file_path=file, format=format)
-        for file in list_filepaths
+        _df_from_single_file(file, format=format) for file in list_filepaths
     ]
 
-    # Concatenate and reindex
-    # the resulting axis is labeled 0,1,…,n - 1.
-    # NOTE: after ignore_index=True the index name is no longer "annotation_id"
     df_all = pd.concat(df_list, ignore_index=True)
 
-    # Update "image_id" based on the alphabetically sorted list of unique image
-    # filenames across all input files
     list_image_filenames = sorted(list(df_all["image_filename"].unique()))
     df_all["image_id"] = df_all["image_filename"].apply(
         lambda x: list_image_filenames.index(x)
     )
 
-    # Sort by image_filename
     df_all = df_all.sort_values(by=["image_filename"])
 
-    # Remove duplicates that may exist across files and reindex
-    # NOTE: we exclude image_width and image_height from the set of columns
-    # to identify duplicates, as these may differ across files.
     df_all = df_all.drop_duplicates(
         subset=[
             col
@@ -348,7 +230,6 @@ def _df_from_multiple_files(
         inplace=False,
     )
 
-    # Set the index name back to "annotation_id"
     df_all.index.name = "annotation_id"
 
     return df_all
@@ -358,27 +239,7 @@ def _df_from_multiple_files(
 def _df_from_single_file(
     file_path: Path | str, format: Literal["VIA", "COCO"]
 ) -> DataFrame[ValidBboxAnnotationsDataFrame]:
-    """Read annotations from a single file as a valid intermediate dataframe.
-
-    Parameters
-    ----------
-    file_path
-        Path to the input annotation bounding boxes file.
-    format
-        Format of the input bounding boxes annotation file.
-        Currently supported formats are "VIA" and "COCO".
-
-    Returns
-    -------
-    DataFrame[ValidBboxAnnotationsDataFrame]
-        Intermediate dataframe for bounding boxes annotations. The dataframe
-        is indexed by "annotation_id" and has the following columns:
-        'image_filename', 'image_id', 'image_width', 'image_height',
-        'x_min', 'y_min', 'width', 'height', 'supercategory', 'category',
-        'category_id'.
-
-    """
-    # Choose the appropriate validator and row-extraction function
+    """Read annotations from a single file as a dataframe."""
     validator: type[ValidVIA | ValidCOCO]
     if format == "VIA":
         validator = ValidVIA
@@ -389,115 +250,77 @@ def _df_from_single_file(
     else:
         raise ValueError(f"Unsupported format: {format}")
 
-    # Build dataframe from extracted rows
     valid_file = validator(file_path)
     list_rows = get_rows_from_file(valid_file.path)
     df = pd.DataFrame(list_rows)
 
-    # Sort annotations by image_filename
     df = df.sort_values(by=["image_filename"])
 
-    # Drop duplicates and reindex
-    # The resulting axis is labeled 0,1,…,n-1.
     df = df.drop_duplicates(
         subset=[col for col in df.columns if col != "annotation_id"],
         ignore_index=True,
         inplace=False,
     )
 
-    # Cast bbox coordinates and shape as floats
     for col in ["x_min", "y_min", "width", "height"]:
         df[col] = df[col].astype(np.float64)
 
-    # Set the index name to "annotation_id"
     df = df.set_index("annotation_id")
 
     return df
 
 
 def _df_rows_from_valid_VIA_file(file_path: Path) -> list[dict]:
-    """Extract list of dataframe rows from a validated VIA JSON file.
-
-    Parameters
-    ----------
-    file_path
-        Path to the validated VIA JSON file.
-
-    Returns
-    -------
-    list[dict]
-        List of dataframe rows extracted from the validated VIA JSON file.
-
-    """
-    # Read validated json as dict
+    """Extract rows from a validated VIA JSON file."""
     with open(file_path) as file:
         data_dict = json.load(file)
 
-    # Get list of sorted image filenames
     image_metadata_dict = data_dict["_via_img_metadata"]
     list_sorted_filenames = sorted(
         [img_dict["filename"] for img_dict in image_metadata_dict.values()]
     )
 
-    # Get supercategories and categories
     via_attributes = data_dict["_via_attributes"]
     supercategories_dict = {}
     if "region" in via_attributes:
         supercategories_dict = via_attributes["region"]
 
-    # Compute list of rows in dataframe
-    list_rows = []
+    list_rows: list[dict] = []
     annotation_id = 0
-    # loop through images
     for _, img_dict in image_metadata_dict.items():
-        # Extract img width and height,
-        # set to default if invalid or not present
-        image_width, image_height = (
-            _get_image_shape_attr_as_integer(
-                img_dict["file_attributes"],
-                file_attr,  # type: ignore
-            )
-            for file_attr in ["width", "height"]
+        image_width = _get_image_shape_attr_as_integer(
+            img_dict["file_attributes"], "width"
+        )
+        image_height = _get_image_shape_attr_as_integer(
+            img_dict["file_attributes"], "height"
         )
 
-        # loop thru annotations in the image
         for region in img_dict["regions"]:
-            # Extract region data
             region_shape = region["shape_attributes"]
             region_attributes = region["region_attributes"]
 
-            # Extract category data if present
             if region_attributes and supercategories_dict:
-                # supercategory
-                # A region (bbox) can have multiple supercategories.
-                # We only consider the first supercategory in alphabetical
-                # order.
                 supercategory = sorted(list(region_attributes.keys()))[0]
-
-                # category name
-                # in VIA files, the category_id is a string
                 category_id_str = region_attributes[supercategory]
                 categories_dict = supercategories_dict[supercategory][
                     "options"
                 ]
                 category = categories_dict[category_id_str]
-
-                # category_id as int
                 category_id = _category_id_as_int(
                     category_id_str, categories_dict
                 )
-
             else:
                 supercategory, category, category_id = (
                     ValidBboxAnnotationsDataFrame.get_empty_values()[key]
                     for key in ["supercategory", "category", "category_id"]
                 )
 
-            # Add to row
             row = {
                 "annotation_id": annotation_id,
                 "image_filename": img_dict["filename"],
-                "image_id": list_sorted_filenames.index(img_dict["filename"]),
+                "image_id": list_sorted_filenames.index(
+                    img_dict["filename"]
+                ),
                 "image_width": image_width,
                 "image_height": image_height,
                 "x_min": region_shape["x"],
@@ -510,8 +333,6 @@ def _df_rows_from_valid_VIA_file(file_path: Path) -> list[dict]:
             }
 
             list_rows.append(row)
-
-            # update "annotation_id"
             annotation_id += 1
 
     return list_rows
@@ -520,29 +341,7 @@ def _df_rows_from_valid_VIA_file(file_path: Path) -> list[dict]:
 def _get_image_shape_attr_as_integer(
     file_attrs: dict, attr_name: Literal["width", "height"]
 ) -> int:
-    """Safely extract the image shape attribute as an integer.
-
-    If the attribute is not present or invalid, return the default value for
-    the image shape attribute defined in
-    ValidBboxesDataFrame.get_empty_values().
-
-    The file_attrs dictionary should come from a VIA input file.
-
-    Parameters
-    ----------
-    file_attrs
-        File attributes dictionary extracted from a VIA input file.
-    attr_name
-        Name of the image shape attribute.
-
-    Returns
-    -------
-    int
-        Attribute value as int. If the attribute is not present or invalid,
-        return the default value for the image shape attribute defined in
-        ValidBboxesDataFrame.get_empty_values().
-
-    """
+    """Safely extract the image shape attribute as an integer."""
     default_value = ValidBboxAnnotationsDataFrame.get_empty_values()[
         f"image_{attr_name}"
     ]
@@ -555,61 +354,21 @@ def _get_image_shape_attr_as_integer(
 def _category_id_as_int(
     category_id_str: str, list_categories: list[str]
 ) -> int:
-    """Convert category_id to int if possible, otherwise factorize it.
-
-    The category_id is a string in VIA files. If it cannot be converted to an
-    integer, it is factorized to a 1-based integer (0 is reserved for the
-    background class) based on the alphabetically sorted list of categories.
-
-    Parameters
-    ----------
-    category_id_str
-        Category ID as string.
-    list_categories
-        List of categories.
-
-    Returns
-    -------
-    int
-        Category ID as int.
-
-    """
-    # get category_id as int
+    """Convert category_id to int if possible, otherwise factorize it."""
     try:
         category_id = int(category_id_str)
     except ValueError:
-        # factorize to 0-based integers
         list_sorted_options = sorted(list_categories)
         category_id = list_sorted_options.index(category_id_str)
-        # Add 1 to the factorised values to make them 1-based
         category_id = category_id + 1
-
     return category_id
 
 
 def _df_rows_from_valid_COCO_file(file_path: Path) -> list[dict]:
-    """Extract list of dataframe rows from a validated COCO JSON file.
-
-    Parameters
-    ----------
-    file_path
-        Path to the validated COCO JSON file.
-
-    Returns
-    -------
-    list[dict]
-        List of dataframe rows extracted from the validated COCO JSON file.
-
-    """
-    # Read validated json as dict
+    """Extract rows from a validated COCO JSON file."""
     with open(file_path) as file:
         data_dict = json.load(file)
 
-    # Prepare data
-    # We define "image_id_ethology" as the 0-based index of the image
-    # following the alphabetically sorted list of unique image filenames.
-    # In the following we assume the list of images under "images" in the
-    # COCO JSON file is unique (i.e. it has no duplicate elements).
     map_img_id_coco_to_ethology = {
         img_dict["id"]: idx
         for idx, img_dict in enumerate(
@@ -623,30 +382,22 @@ def _df_rows_from_valid_COCO_file(file_path: Path) -> list[dict]:
     map_img_id_coco_to_width_height = {
         img_dict["id"]: (img_dict["width"], img_dict["height"])
         for img_dict in data_dict["images"]
-    }  # COCO files from VGG annotator always have
-    # image width and height (can be 0)
+    }
     map_category_id_to_category_data = {
         cat_dict["id"]: (cat_dict["name"], cat_dict.get("supercategory", ""))
         for cat_dict in data_dict["categories"]
-    }  # category data: category name, supercategory name
+    }
 
-    # Build standard dataframe
-    list_rows = []
+    list_rows: list[dict] = []
     for annot_id, annot_dict in enumerate(data_dict["annotations"]):
-        # image data
         img_id_coco = annot_dict["image_id"]
         image_filename = map_img_id_coco_to_filename[img_id_coco]
         image_width, image_height = map_img_id_coco_to_width_height[
             img_id_coco
         ]
-
-        # compute image ID following ethology convention
         img_id_ethology = map_img_id_coco_to_ethology[img_id_coco]
 
-        # bbox data
         x_min, y_min, width, height = annot_dict["bbox"]
-
-        # category data
         category_id = annot_dict["category_id"]
         category, supercategory = map_category_id_to_category_data[category_id]
 
@@ -660,12 +411,10 @@ def _df_rows_from_valid_COCO_file(file_path: Path) -> list[dict]:
             "y_min": y_min,
             "width": width,
             "height": height,
-            "supercategory": supercategory,  # if not defined, set to ""
+            "supercategory": supercategory,
             "category": category,
             "category_id": category_id,
-            # in COCO files, the category_id is always a 1-based integer
         }
-
         list_rows.append(row)
 
     return list_rows
@@ -675,34 +424,24 @@ def _df_rows_from_valid_COCO_file(file_path: Path) -> list[dict]:
 def _df_to_xarray_ds(
     df: DataFrame[ValidBboxAnnotationsDataFrame],
 ) -> xr.Dataset:
-    """Convert a bounding box annotations dataframe to an xarray dataset.
-
-    (unchanged - same as original)
-    """
-    # Drop columns if all values in that column are empty
+    """Convert bounding box dataframe to an xarray dataset."""
     default_values = ValidBboxAnnotationsDataFrame.get_empty_values()
     list_empty_cols = [
         col for col in default_values if all(df[col] == default_values[col])
     ]
     df = df.drop(columns=list_empty_cols)
 
-    # Compute max number of annotations per image
     max_annotations_per_image = df["image_id"].value_counts().max()
-
-    # Sort the dataframe by image_id
     df = df.sort_values(by=["image_id"])
 
-    # Compute indices of the rows where the image ID switches
     bool_id_diff_from_prev = df["image_id"].ne(df["image_id"].shift())
     indices_id_switch = np.argwhere(bool_id_diff_from_prev)[1:, 0]
 
-    # Extract arrays from the dataframe
     arrays_metadata = _prepare_array_dicts(df)
     array_dict = _extract_arrays_from_df(
         df, arrays_metadata, indices_id_switch, max_annotations_per_image
     )
 
-    # Build data vars dictionary
     data_vars = {
         array_key.split("_array")[0]: (
             arrays_metadata[array_key]["dims"],
@@ -724,10 +463,7 @@ def _df_to_xarray_ds(
 def _prepare_array_dicts(
     df: pd.DataFrame,
 ) -> dict[str, dict[str, Any]]:
-    """Prepare the metadata for the arrays in the xarray dataset.
-
-    (unchanged)
-    """
+    """Prepare the metadata for arrays in the xarray dataset."""
     arrays_metadata: dict[str, dict[str, Any]] = {
         "position_array": {
             "columns": ["x_min", "y_min"],
@@ -743,7 +479,6 @@ def _prepare_array_dicts(
         },
     }
 
-    # Add image shape data if present
     if all(col in df.columns for col in ["image_width", "image_height"]):
         arrays_metadata["image_shape_array"] = {
             "columns": ["image_width", "image_height"],
@@ -752,7 +487,6 @@ def _prepare_array_dicts(
             "dims": ("image_id", "space"),
         }
 
-    # Add category data if present
     if all(col in df.columns for col in ["category_id", "category"]):
         arrays_metadata["category_array"] = {
             "columns": ["category_id"],
@@ -770,28 +504,21 @@ def _extract_arrays_from_df(
     indices_id_switch: np.ndarray,
     max_annotations_per_image: int,
 ) -> dict[str, np.ndarray]:
-    """Extract arrays in metadata dict from a df of bounding boxes annotations.
-
-    (unchanged)
-    """
-    array_dict = {}
+    """Extract arrays from dataframe using arrays_metadata."""
+    array_dict: dict[str, np.ndarray] = {}
     for key in arrays_metadata:
-        # Extract annotations per image
         list_arrays = np.split(
             df[arrays_metadata[key]["columns"]].to_numpy(
                 dtype=arrays_metadata[key]["type"]
             ),
             indices_id_switch,
-        )  # each array: (n_annotations, N_DIM)
+        )
 
         if key == "image_shape_array":
             array_dict[key] = np.stack(
                 [np.unique(arr, axis=0) for arr in list_arrays], axis=0
-            ).squeeze(axis=1)  # (n_images, N_DIM)
-
+            ).squeeze(axis=1)
         else:
-            # Pad arrays with NaN values along the annotation ID axis
-            # and stack to (n_images, n_max_annotations, N_DIM)
             list_arrays_padded = [
                 np.pad(
                     arr,
@@ -801,14 +528,10 @@ def _extract_arrays_from_df(
                 for arr in list_arrays
             ]
             array_dict[key] = np.stack(list_arrays_padded, axis=0)
-
-            # Reorder dimensions to (n_images, N_DIM, n_max_annotations)
-            # (squeeze the N_DIM axis (N_DIM=1) for "category")
             array_dict[key] = np.moveaxis(array_dict[key], -1, 1)
             if key == "category_array":
                 array_dict[key] = array_dict[key].squeeze(axis=1)
 
-    # Modify x_min and y_min to represent the bbox centre
     array_dict["position_array"] += array_dict["shape_array"] / 2
 
     return array_dict
