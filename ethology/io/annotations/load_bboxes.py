@@ -2,7 +2,7 @@
 
 import json
 from pathlib import Path
-from typing import Any, Dict, Literal, Tuple
+from typing import Any, Literal
 
 import numpy as np
 import pandas as pd
@@ -43,9 +43,10 @@ def from_files(
         as they appear in the input file (e.g., COCO images[].id).
         If False (default) keep ethology's behaviour of renumbering
         images as 0-based indices sorted by filename.
+
     """
     # Optionally build filename -> original id map (COCO or VIA)
-    filename_to_original_id: Dict[str, int] = {}
+    filename_to_original_id: dict[str, int] = {}
     if retain_image_id:
         list_files = (
             list(file_paths) if isinstance(file_paths, list) else [file_paths]
@@ -60,9 +61,9 @@ def from_files(
     else:
         df_all = _df_from_single_file(file_paths, format=format)
 
-    # If requested, apply original IDs where available. Also build a map
+    # If requested, apply original IDs where available and get mapping:
     # ethology_image_id -> original_image_id.
-    map_image_id_to_original: Dict[int, int] = {}
+    map_image_id_to_original: dict[int, int] = {}
     if retain_image_id and filename_to_original_id:
         df_all, map_image_id_to_original = _apply_original_ids(
             df_all, filename_to_original_id
@@ -88,7 +89,7 @@ def from_files(
 
 def _compute_filename_to_original_id(
     list_files: list[Path | str], format: Literal["VIA", "COCO"]
-) -> Dict[str, int]:
+) -> dict[str, int]:
     """Dispatch to the format-specific filename->original-id builder."""
     if format == "COCO":
         return _compute_filename_to_original_id_coco(list_files)
@@ -99,9 +100,9 @@ def _compute_filename_to_original_id(
 
 def _compute_filename_to_original_id_coco(
     list_files: list[Path | str],
-) -> Dict[str, int]:
+) -> dict[str, int]:
     """Build filename -> COCO image id mapping from COCO files."""
-    mapping: Dict[str, int] = {}
+    mapping: dict[str, int] = {}
     for fp in list_files:
         p = Path(fp)
         if not p.exists():
@@ -122,9 +123,9 @@ def _compute_filename_to_original_id_coco(
 
 def _compute_filename_to_original_id_via(
     list_files: list[Path | str],
-) -> Dict[str, int]:
+) -> dict[str, int]:
     """Build filename -> VIA metadata-key-as-int mapping where possible."""
-    mapping: Dict[str, int] = {}
+    mapping: dict[str, int] = {}
     for fp in list_files:
         p = Path(fp)
         if not p.exists():
@@ -147,26 +148,36 @@ def _compute_filename_to_original_id_via(
 
 
 def _apply_original_ids(
-    df_all: pd.DataFrame, filename_to_original_id: Dict[str, int]
-) -> Tuple[pd.DataFrame, Dict[int, int]]:
+    df_all: pd.DataFrame, filename_to_original_id: dict[str, int]
+) -> tuple[pd.DataFrame, dict[int, int]]:
     """Apply filename->original-id mapping to dataframe.
 
     Return updated dataframe and map ethology_image_id -> original id.
     """
-    mapping_df = df_all[["image_filename", "image_id"]].drop_duplicates().copy()
-    # ensure image_id is int for indexing
+    # Build a small dataframe mapping ethology image_id -> filename
+    mapping_df = (
+        df_all[["image_filename", "image_id"]].drop_duplicates().copy()
+    )
+
+    # Ensure image_id column is plain Python int values (for indexing).
     mapping_df["image_id"] = mapping_df["image_id"].astype(int)
+
+    # Map filename -> original id (may yield NaN where no mapping exists).
     mapping_df["image_id_original"] = mapping_df["image_filename"].map(
         filename_to_original_id
     )
 
-    # Keep only rows where original id exists.
-    map_image_id_to_original: Dict[int, int] = (
+    # Keep only rows where an original id exists and produce a dict
+    # with plain Python ints for both keys and values.
+    mapping_series = (
         mapping_df.dropna(subset=["image_id_original"])
         .set_index("image_id")["image_id_original"]
         .astype(int)
-        .to_dict()
     )
+    raw_map: dict[Any, int] = mapping_series.to_dict()
+    map_image_id_to_original: dict[int, int] = {
+        int(k): int(v) for k, v in raw_map.items()
+    }
 
     # Overwrite df_all["image_id"] where mapping exists; otherwise keep
     # ethology-assigned id.
@@ -182,14 +193,14 @@ def _apply_original_ids(
 
 def _get_map_attributes_from_df(
     df: DataFrame[ValidBboxAnnotationsDataFrame],
-) -> Tuple[Dict[int, str], Dict[int, str]]:
-    """Get dataset attribute maps (image id -> filename, category id -> name)."""
+) -> tuple[dict[int, str], dict[int, str]]:
+    """Get dataset attribute maps (img_id->filename, cat_id->name)."""
     mapping_df = df[["image_filename", "image_id"]].drop_duplicates()
     map_image_id_to_filename = mapping_df.set_index("image_id").to_dict()[
         "image_filename"
     ]
 
-    map_category_to_str: Dict[int, str] = {}
+    map_category_to_str: dict[int, str] = {}
     if all(col in df.columns for col in ["category_id", "category"]):
         map_category_to_str = (
             df[["category_id", "category"]]
@@ -318,9 +329,7 @@ def _df_rows_from_valid_VIA_file(file_path: Path) -> list[dict]:
             row = {
                 "annotation_id": annotation_id,
                 "image_filename": img_dict["filename"],
-                "image_id": list_sorted_filenames.index(
-                    img_dict["filename"]
-                ),
+                "image_id": list_sorted_filenames.index(img_dict["filename"]),
                 "image_width": image_width,
                 "image_height": image_height,
                 "x_min": region_shape["x"],
