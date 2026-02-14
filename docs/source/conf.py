@@ -160,9 +160,11 @@ linkcheck_anchors_ignore_for_url = [
 ]
 # A list of regular expressions that match URIs that should not be checked
 linkcheck_ignore = [
-    # to avoid rate limiting or flaky responses
-    r"https://docs\.astral\.sh/.*",
-    r"https://storage\.googleapis\.com/.*",
+    # to avoid odd 403 client errors
+    "https://opensource.org/license/bsd-3-clause/",
+    "https://figshare.com/articles/dataset/Australian_Camera_Trap_Data_ACTD_/27177912",
+    # 403 error
+    "https://docutils.sourceforge.io/.*",
 ]
 
 myst_url_schemes = {
@@ -181,6 +183,8 @@ myst_url_schemes = {
     "mamba": "https://mamba.readthedocs.io/en/latest/",
     "myst-parser": "https://myst-parser.readthedocs.io/en/latest/{{path}}#{{fragment}}",
     "napari": "https://napari.org/dev/{{path}}",
+    "pip": "https://pip.pypa.io/en/stable/{{path}}{{fragment}}",
+    "uv": "https://docs.astral.sh/uv/{{path}}{{fragment}}",
 }
 
 intersphinx_mapping = {
