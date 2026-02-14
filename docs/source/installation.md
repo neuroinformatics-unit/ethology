@@ -1,26 +1,16 @@
 (target-installation)=
 # Installation
 
-(conda)=
-[conda](https://docs.conda.io/en/latest/)
+To avoid dependency conflicts with other packages, it is best practice to install Python packages within a virtual environment.
+We recommend using [conda](conda:) or [uv](uv:getting-started/installation/) to create and manage this environment, as they simplify the installation process.
 
-(pip)=
-[pip](https://pip.pypa.io/en/stable/)
-
-(uv)=
-[uv](https://docs.astral.sh/uv/)
-
-To install `ethology`, we recommend using a virtual environment to avoid
-dependency conflicts with other packages.
-You can use {ref}`conda`, {ref}`pip`, or {ref}`uv` to create and manage this environment.
+The following instructions assume that you have either conda or uv installed. If you don't please check their installation instructions (for [conda](conda:docs/getting-started/miniconda/main), for [uv](uv:getting-started/installation/)).
 
 ## Install the package
 
 `````{tab-set}
-````{tab-item} conda
-From conda-forge using conda
-
-First, create and activate a {ref}`conda` environment:
+````{tab-item} From conda-forge using conda
+First, create and activate a [conda](conda:) environment:
 ```sh
 conda create -n ethology-env python=3.13 -y
 conda activate ethology-env
@@ -32,9 +22,7 @@ pip install ethology
 ```
 ````
 
-````{tab-item} pip
-From PyPI using pip
-
+````{tab-item} From PyPI using pip
 First, create and activate a virtual environment:
 ```sh
 python -m venv ethology-env
@@ -56,9 +44,7 @@ pip install ethology
 ```
 ````
 
-````{tab-item} uv
-From PyPI using uv
-
+````{tab-item} From PyPI using uv
 First, create and activate a virtual environment:
 ```sh
 uv venv ethology-env
@@ -86,12 +72,14 @@ If you are a developer looking to contribute to ethology, please refer to our [c
 
 ## Update the package
 
+Always update using the same package manager used for installation (either via `pip` or via `uv`).
+
 To update to the latest version of `ethology`:
 ```sh
 pip install --upgrade ethology
 ```
 
-To uninstall `ethology`, the simplest option is to delete the virtual environment that contains it. For {ref}`conda` environments, run from a different conda environment (e.g., `base`):
+If the above fails, try installing `ethology` in a fresh new environment to avoid dependency conflicts. If you wish to use the same name for your new environment, you may wish to remove the existing environment first:
 ```sh
 conda env remove -n ethology-env
 ```
