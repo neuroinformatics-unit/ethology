@@ -1,18 +1,19 @@
-
-import os
 from abc import abstractmethod
 from pathlib import Path
+
 import cv2
 import gdown
 import numpy as np
 import torch
 from filelock import SoftFileLock
+
 from ethology.reid.core.registry import ReIDModelRegistry
+
 # from ethology.utils import logger as LOGGER  # If needed, implement or set LOGGER
 # from ethology.utils.checks import RequirementsChecker  # If needed, implement or set RequirementsChecker
 
-class BaseModelBackend:
 
+class BaseModelBackend:
     def __init__(self, weights, device, half):
         self.weights = weights[0] if isinstance(weights, list) else weights
         if isinstance(self.weights, str):
@@ -22,7 +23,7 @@ class BaseModelBackend:
         self.half = half
         self.model = None
         # Support both string and torch.device for device
-        if hasattr(self.device, 'type'):
+        if hasattr(self.device, "type"):
             self.cuda = torch.cuda.is_available() and self.device.type != "cpu"
         else:
             self.cuda = torch.cuda.is_available() and self.device != "cpu"
@@ -41,11 +42,19 @@ class BaseModelBackend:
 
         self.load_model(self.weights)
 
-        self.mean_array = torch.tensor([0.485, 0.456, 0.406], device=self.device).view(1, 3, 1, 1)
-        self.std_array = torch.tensor([0.229, 0.224, 0.225], device=self.device).view(1, 3, 1, 1)
+        self.mean_array = torch.tensor(
+            [0.485, 0.456, 0.406], device=self.device
+        ).view(1, 3, 1, 1)
+        self.std_array = torch.tensor(
+            [0.229, 0.224, 0.225], device=self.device
+        ).view(1, 3, 1, 1)
         if "clip" in self.model_name:
-            self.mean_array = torch.tensor([0.5, 0.5, 0.5], device=self.device).view(1, 3, 1, 1)
-            self.std_array = torch.tensor([0.5, 0.5, 0.5], device=self.device).view(1, 3, 1, 1)
+            self.mean_array = torch.tensor(
+                [0.5, 0.5, 0.5], device=self.device
+            ).view(1, 3, 1, 1)
+            self.std_array = torch.tensor(
+                [0.5, 0.5, 0.5], device=self.device
+            ).view(1, 3, 1, 1)
 
         if "vehicleid" in self.weights.name or "veri" in self.weights.name:
             input_shape = (256, 256)
@@ -56,7 +65,6 @@ class BaseModelBackend:
         else:
             input_shape = (256, 128)
         self.input_shape = input_shape
-
 
     def get_crops(self, xyxys, img):
         h, w = img.shape[:2]
@@ -85,7 +93,6 @@ class BaseModelBackend:
         crops = (crops - self.mean_array) / self.std_array
         return crops
 
-
     @torch.no_grad()
     def get_features(self, xyxys, img):
         if xyxys.size != 0:
@@ -98,7 +105,6 @@ class BaseModelBackend:
         features = features / np.linalg.norm(features, axis=-1, keepdims=True)
         return features
 
-
     def warmup(self, imgsz=[(256, 128, 3)]):
         if self.device.type != "cpu":
             im = np.random.randint(0, 255, *imgsz, dtype=np.uint8)
@@ -108,10 +114,8 @@ class BaseModelBackend:
             crops = self.inference_preprocess(crops)
             self.forward(crops)
 
-
     def to_numpy(self, x):
         return x.cpu().numpy() if isinstance(x, torch.Tensor) else x
-
 
     def inference_preprocess(self, x):
         if self.half:
@@ -121,32 +125,34 @@ class BaseModelBackend:
             elif isinstance(x, np.ndarray):
                 if x.dtype != np.float16:
                     x = x.astype(np.float16)
-        if hasattr(self, 'nhwc') and self.nhwc:
+        if hasattr(self, "nhwc") and self.nhwc:
             if isinstance(x, torch.Tensor):
                 x = x.permute(0, 2, 3, 1)
             elif isinstance(x, np.ndarray):
                 x = np.transpose(x, (0, 2, 3, 1))
         return x
 
-
     def inference_postprocess(self, features):
         if isinstance(features, (list, tuple)):
             return (
-                self.to_numpy(features[0]) if len(features) == 1 else [self.to_numpy(x) for x in features]
+                self.to_numpy(features[0])
+                if len(features) == 1
+                else [self.to_numpy(x) for x in features]
             )
         else:
             return self.to_numpy(features)
 
-
     @abstractmethod
     def forward(self, im_batch):
-        raise NotImplementedError("This method should be implemented by subclasses.")
-
+        raise NotImplementedError(
+            "This method should be implemented by subclasses."
+        )
 
     @abstractmethod
     def load_model(self, w):
-        raise NotImplementedError("This method should be implemented by subclasses.")
-
+        raise NotImplementedError(
+            "This method should be implemented by subclasses."
+        )
 
     def download_model(self, w):
         if isinstance(w, str):
