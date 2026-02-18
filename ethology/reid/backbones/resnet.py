@@ -1,16 +1,13 @@
-# Mikel Broström 🔥 BoxMOT 🧾 AGPL-3.0 license
-
 
 """
 Code source: https://github.com/pytorch/vision
 """
-from __future__ import absolute_import, division
 
+from __future__ import absolute_import, division
 import torch.utils.model_zoo as model_zoo
 from torch import nn
 
 __all__ = [
-<<<<<<< HEAD
     "resnet18",
     "resnet34",
     "resnet50",
@@ -29,26 +26,7 @@ model_urls = {
     "resnet152": "https://download.pytorch.org/models/resnet152-b121ed2d.pth",
     "resnext50_32x4d": "https://download.pytorch.org/models/resnext50_32x4d-7cdf4587.pth",
     "resnext101_32x8d": "https://download.pytorch.org/models/resnext101_32x8d-8ba56ff5.pth",
-=======
-	"resnet18",
-	"resnet34",
-	"resnet50",
-	"resnet101",
-	"resnet152",
-	"resnext50_32x4d",
-	"resnext101_32x8d",
-	"resnet50_fc512",
-]
-
-model_urls = {
-	"resnet18": "https://download.pytorch.org/models/resnet18-5c106cde.pth",
-	"resnet34": "https://download.pytorch.org/models/resnet34-333f7ec4.pth",
-	"resnet50": "https://download.pytorch.org/models/resnet50-19c8e357.pth",
-	"resnet101": "https://download.pytorch.org/models/resnet101-5d3b4d8f.pth",
-	"resnet152": "https://download.pytorch.org/models/resnet152-b121ed2d.pth",
-	"resnext50_32x4d": "https://download.pytorch.org/models/resnext50_32x4d-7cdf4587.pth",
-	"resnext101_32x8d": "https://download.pytorch.org/models/resnext101_32x8d-8ba56ff5.pth",
->>>>>>> a4dd694 (style(reid): fix ruff errors in hacnn.py and mlfn.py\n\n- Add missing docstrings\n- Use super() instead of super(Class, self)\n- Avoid mutable default arguments\n- Fix long lines and other ruff issues)
+}
 }
 
 # ...existing code for conv3x3, conv1x1, BasicBlock, Bottleneck, ResNet, init_pretrained_weights, and instantiation functions...

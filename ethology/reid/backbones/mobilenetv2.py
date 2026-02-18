@@ -37,12 +37,7 @@ class ConvBlock(nn.Module):
 		self.conv = nn.Conv2d(in_c, out_c, k, stride=s, padding=p, bias=False, groups=g)
 		self.bn = nn.BatchNorm2d(out_c)
 
-    def __init__(self, in_c, out_c, k, s=1, p=0, g=1):
-        super(ConvBlock, self).__init__()
-        self.conv = nn.Conv2d(
-            in_c, out_c, k, stride=s, padding=p, bias=False, groups=g
-        )
-        self.bn = nn.BatchNorm2d(out_c)
+    # Only keep the correct __init__
 
     def forward(self, x):
         return F.relu6(self.bn(self.conv(x)))
@@ -73,30 +68,30 @@ class Bottleneck(nn.Module):
 
 
 class MobileNetV2(nn.Module):
-    """MobileNetV2.
+    """
+    MobileNetV2 backbone for person re-identification.
 
     Reference:
-            Sandler et al. MobileNetV2: Inverted Residuals and
-            Linear Bottlenecks. CVPR 2018.
+        Sandler et al. MobileNetV2: Inverted Residuals and Linear Bottlenecks. CVPR 2018.
 
     Public keys:
-            - ``mobilenetv2_x1_0``: MobileNetV2 x1.0.
-            - ``mobilenetv2_x1_4``: MobileNetV2 x1.4.
+        - mobilenetv2_x1_0: MobileNetV2 x1.0.
+        - mobilenetv2_x1_4: MobileNetV2 x1.4.
     """
 
-	def __init__(
-		self,
-		num_classes,
-		width_mult=1,
-		loss="softmax",
-		fc_dims=None,
-		dropout_p=None,
-		**kwargs,
-	):
-		super().__init__()
-		self.loss = loss
-		self.in_channels = int(32 * width_mult)
-		self.feature_dim = int(1280 * width_mult) if width_mult > 1 else 1280
+    def __init__(
+        self,
+        num_classes,
+        width_mult=1,
+        loss="softmax",
+        fc_dims=None,
+        dropout_p=None,
+        **kwargs,
+    ):
+        super().__init__()
+        self.loss = loss
+        self.in_channels = int(32 * width_mult)
+        self.feature_dim = int(1280 * width_mult) if width_mult > 1 else 1280
 
         # construct layers
         self.conv1 = ConvBlock(3, self.in_channels, 3, s=2, p=1)

@@ -1,3 +1,4 @@
+
 """MLFN backbone for person re-identification."""
 
 import torch
@@ -5,10 +6,6 @@ import torch.utils.model_zoo as model_zoo
 from torch import nn
 from torch.nn import functional as F
 
-"""
-MLFN backbone for person re-identification.
-"""
- 
 __all__ = ["mlfn"]
 model_urls = {
     # training epoch = 5, top1 = 51.6
@@ -20,7 +17,7 @@ class MLFNBlock(nn.Module):
     def __init__(
         self, in_channels, out_channels, stride, fsm_channels, groups=32
     ):
-        super(MLFNBlock, self).__init__()
+        super().__init__()
         self.groups = groups
         mid_channels = out_channels // 2
 
@@ -113,11 +110,13 @@ class MLFN(nn.Module):
         num_classes,
         loss="softmax",
         groups=32,
-        channels=[64, 256, 512, 1024, 2048],
+        channels=None,
         embed_dim=1024,
         **kwargs,
     ):
-        super(MLFN, self).__init__()
+        super().__init__()
+        if channels is None:
+            channels = [64, 256, 512, 1024, 2048]
         channels=None,
         self.groups = groups
 
@@ -244,9 +243,9 @@ class MLFN(nn.Module):
 
 
 def init_pretrained_weights(model, model_url):
-    """Initializes model with pretrained weights.
+    """Initialize model with pretrained weights.
 
-    Layers that don't match with pretrained layers in name or size are kept unchanged.
+    Keep layers unchanged if they don't match pretrained layers in name or size.
     """
     pretrain_dict = model_zoo.load_url(model_url)
     model_dict = model.state_dict()
