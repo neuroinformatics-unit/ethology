@@ -1,0 +1,108 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "properties": {
+        "_via_settings": {
+            "type": "object",
+            "properties": {
+                "ui": {
+                    "type": "object"
+                },
+                "core": {
+                    "type": "object"
+                },
+                "project": {
+                    "type": "object"
+                }
+            }
+        },
+        "_via_img_metadata": {
+            "type": "object",
+            "additionalProperties": {
+                "type": "object",
+                "properties": {
+                    "filename": {
+                        "type": "string"
+                    },
+                    "size": {
+                        "type": "integer"
+                    },
+                    "regions": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "shape_attributes": {
+                                    "type": "object",
+                                    "properties": {
+                                        "name": {
+                                            "type": "string"
+                                        },
+                                        "x": {
+                                            "type": "number"
+                                        },
+                                        "y": {
+                                            "type": "number"
+                                        },
+                                        "width": {
+                                            "type": "number"
+                                        },
+                                        "height": {
+                                            "type": "number"
+                                        }
+                                    }
+                                },
+                                "region_attributes": {
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "file_attributes": {
+                        "type": "object"
+                    }
+                }
+            }
+        },
+        "_via_image_id_list": {
+            "type": "array",
+            "items": {
+                "type": [
+                    "integer",
+                    "string"
+                ]
+            }
+        },
+        "_via_attributes": {
+            "type": "object",
+            "properties": {
+                "region": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "object",
+                        "properties": {
+                            "default_options": {
+                                "type": "object"
+                            },
+                            "description": {
+                                "type": "string"
+                            },
+                            "options": {
+                                "type": "object"
+                            },
+                            "type": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                },
+                "file": {
+                    "type": "object"
+                }
+            }
+        },
+        "_via_data_format_version": {
+            "type": "string"
+        }
+    }
+}

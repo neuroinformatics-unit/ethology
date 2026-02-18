@@ -8,12 +8,10 @@ recursive-exclude * __pycache__
 recursive-exclude * *.py[co]
 recursive-exclude docs *
 recursive-exclude tests *
-recursive-include docs *.md *.rst *.py
+recursive-exclude examples *
+recursive-include docs *
+recursive-include .binder *
 
 # Include json schemas
-recursive-include ethology/annotations/json_schemas/schemas *.json
-recursive-include ethology/annotations/json_schemas/schemas *.md
-
-# Temporarily include notebooks
-include notebook_cotracker_online.py
-include notebook_cotracker_offline.py
+recursive-include ethology/validators/json_schemas/schemas *.json
+recursive-include ethology/validators/json_schemas/schemas *.md

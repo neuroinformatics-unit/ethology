@@ -11,7 +11,7 @@ development environment. In the following, we assume you have
 To install `ethology` for development, first create and activate a `conda` environment:
 
 ```sh
-conda create -n ethology-dev python=3.12
+conda create -n ethology-dev python=3.13
 conda activate ethology-dev
 ```
 
@@ -26,7 +26,7 @@ git clone https://github.com/neuroinformatics-unit/ethology.git
 pip install -e .[dev]  # works on most shells
 pip install -e '.[dev]'  # works on zsh (the default shell on macOS)
 ```
-This should install all the dependencies needed for development, such as `pytest` and `pre-commit`.
+This should install all the dependencies needed for development, such as `pytest` and `pre-commit`. If you also want to edit the documentation and preview the changes locally, you will additionally need the `docs` extra dependencies. See [Editing the documentation](#editing-the-documentation) for more details.
 
 Finally, install the [pre-commit hooks](https://pre-commit.com/):
 
@@ -140,7 +140,8 @@ To edit the documentation, first clone the repository, and install `ethology` in
 
 Then, install a few additional dependencies in your development environment to be able to build the documentation locally. To do this, run the following command from the root of the repository:
 ```sh
-pip install -r ./docs/requirements.txt
+pip install -e .[docs]    # works on most shells
+pip install -e '.[docs]'  # works on zsh (default on macOS)
 ```
 
 Now create a new branch, edit the documentation source files (`.md` or `.rst` in the `docs` folder),
@@ -179,6 +180,22 @@ Our `pre-commit` hooks include some checks (`ruff` rules) that ensure the docstr
 
 If your PR introduces new modules that should *not* be documented in the [API reference](target-api), or if there are changes to existing modules that necessitate their removal from the documentation, make sure to update the `exclude_modules` list within the `docs/make_api_index.py` script to reflect these exclusions.
 
+### Updating the examples
+We use [sphinx-gallery](sphinx-gallery:)
+to create the [examples](target-examples).
+To add new examples, you will need to create a new `.py` file in `examples/`,
+or in `examples/advanced/` if your example targets experienced users.
+The file should be structured as specified in the relevant
+[sphinx-gallery documentation](sphinx-gallery:syntax).
+
+We are using sphinx-gallery's [integration with binder](sphinx-gallery:configuration#binder-links)
+to provide interactive versions of the examples.
+If your examples rely on packages that are not among `movement`'s dependencies,
+you will need to add them to the `docs/source/environment.yml` file.
+That file is used by binder to create the conda environment in which the
+examples are run. See the relevant section of the
+[binder documentation](https://mybinder.readthedocs.io/en/latest/using/config_files.html).
+
 ### Cross-referencing Python objects
 :::{note}
 Docstrings in the `.py` files for the [API reference](target-api)  are converted into `.rst` files, so these should use reStructuredText syntax.
@@ -189,17 +206,17 @@ Docstrings in the `.py` files for the [API reference](target-api)  are converted
 :::{tab-item} Markdown
 For referencing ethology objects in `.md` files, use the `` {role}`target` `` syntax with the appropriate [Python object role](sphinx-doc:domains/python.html#cross-referencing-python-objects).
 
-For example, to reference the {mod}`ethology.annotations.io.load_bboxes` module, use:
+For example, to reference the {mod}`ethology.io.annotations.load_bboxes` module, use:
 ```markdown
-{mod}`ethology.annotations.io.load_bboxes`
+{mod}`ethology.io.annotations.load_bboxes`
 ```
 :::
 :::{tab-item} RestructuredText
 For referencing ethology objects in `.rst` files, use the `` :role:`target` `` syntax with the appropriate [Python object role](sphinx-doc:domains/python.html#cross-referencing-python-objects).
 
-For example, to reference the {mod}`ethology.io.load_bboxes` module, use:
+For example, to reference the {mod}`ethology.io.annotations.load_bboxes` module, use:
 ```rst
-:mod:`ethology.io.load_bboxes`
+:mod:`ethology.io.annotations.load_bboxes`
 ```
 :::
 ::::
@@ -283,6 +300,18 @@ For example, to re-build the documentation and check the links, run:
 make clean html linkcheck
 ```
 :::
+
+We use [sphinx-gallery](sphinx-gallery:)
+to create the [examples](target-examples).
+To add new examples, you will need to create a new `.py` file in `examples/`.
+The file should be structured as specified in the relevant
+[sphinx-gallery documentation](sphinx-gallery:syntax).
+
+We are using sphinx-gallery's [integration with binder](sphinx-gallery:configuration#binder-links), to provide interactive versions of the examples.
+This is configured in `docs/source/conf.py` under the `sphinx_gallery_conf` variable,
+and further customised for our repository by the `.binder/postBuild` script.
+If your examples rely on packages that are not among `movement`'s dependencies,
+you will need to add them to the `.binder/requirements.txt` file.
 
 ## Test data
 

@@ -1,0 +1,78 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "properties": {
+        "info": {
+            "type": "object"
+        },
+        "licenses": {
+            "type": ["array", "object"]
+        },
+        "images": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "file_name": {
+                        "type": "string"
+                    },
+                    "id": {
+                        "type": ["integer", "string"]
+                    },
+                    "width": {
+                        "type": "integer"
+                    },
+                    "height": {
+                        "type": "integer"
+                    }
+                }
+            }
+        },
+        "annotations": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": ["integer", "string"]
+                    },
+                    "image_id": {
+                        "type": ["integer", "string"]
+                    },
+                    "bbox": {
+                        "type": "array",
+                        "items": {
+                            "type": "number"
+                        }
+                    },
+                    "category_id": {
+                        "type": "integer"
+                    },
+                    "area": {
+                        "type": "number"
+                    },
+                    "iscrowd": {
+                        "type": "integer"
+                    }
+                }
+            }
+        },
+        "categories": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "supercategory": {
+                        "type": "string"
+                    }
+                }
+            }
+        }
+    }
+}

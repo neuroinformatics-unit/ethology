@@ -3,9 +3,9 @@
 .. currentmodule:: {{ module }}
 
 .. autoclass:: {{ objname }}
-   :members:
-   :show-inheritance:
-   :inherited-members:
+   {% if objname != 'ValidDataset' %}:members:{% endif %}
+   {% if objname != 'ValidDataset' %}:inherited-members:{% endif %}
+   {% if objname == 'ValidBboxAnnotationsDataFrame' %}:exclude-members: Config{% endif %}
 
    {% block methods %}
    {% set ns = namespace(has_public_methods=false) %}
@@ -29,3 +29,6 @@
    {%- endfor %}
    {% endif %}
    {% endblock %}
+
+.. minigallery:: {{ module }}.{{ objname }}
+   :add-heading: Examples using ``{{ objname }}``
