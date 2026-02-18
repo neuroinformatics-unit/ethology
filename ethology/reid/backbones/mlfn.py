@@ -1,4 +1,3 @@
-
 """MLFN backbone for person re-identification."""
 
 import torch
@@ -117,7 +116,7 @@ class MLFN(nn.Module):
         super().__init__()
         if channels is None:
             channels = [64, 256, 512, 1024, 2048]
-        channels=None,
+        channels = (None,)
         self.groups = groups
 
         # first convolutional layer
@@ -271,6 +270,3 @@ def mlfn(num_classes, loss="softmax", pretrained=True, **kwargs):
             stacklevel=2,
         )
     return model
-
-
-
