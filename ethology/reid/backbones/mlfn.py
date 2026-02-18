@@ -1,7 +1,5 @@
-
 """MLFN backbone for person re-identification."""
 
-from __future__ import absolute_import, division
 import torch
 import torch.utils.model_zoo as model_zoo
 from torch import nn
@@ -9,8 +7,8 @@ from torch.nn import functional as F
 
 __all__ = ["mlfn"]
 model_urls = {
-	# training epoch = 5, top1 = 51.6
-	"imagenet": "https://mega.nz/#!YHxAhaxC!yu9E6zWl0x5zscSouTdbZu8gdFFytDdl-RAdD2DEfpk",
+    # training epoch = 5, top1 = 51.6
+    "imagenet": "https://mega.nz/#!YHxAhaxC!yu9E6zWl0x5zscSouTdbZu8gdFFytDdl-RAdD2DEfpk",
 }
 
 

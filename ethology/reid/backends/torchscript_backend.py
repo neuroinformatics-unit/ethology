@@ -1,20 +1,21 @@
 import torch
 
 from ethology.reid.backends.base_backend import BaseModelBackend
+
 # Note: LOGGER can be replaced with print or a local logger if needed
 
+
 class TorchscriptBackend(BaseModelBackend):
+    def __init__(self, weights, device, half):
+        super().__init__(weights, device, half)
+        self.nhwc = False
+        self.half = half
 
-	def __init__(self, weights, device, half):
-		super().__init__(weights, device, half)
-		self.nhwc = False
-		self.half = half
+    def load_model(self, w):
+        print(f"Loading {w} for TorchScript inference...")
+        self.model = torch.jit.load(w)
+        self.model.half() if self.half else self.model.float()
 
-	def load_model(self, w):
-		print(f"Loading {w} for TorchScript inference...")
-		self.model = torch.jit.load(w)
-		self.model.half() if self.half else self.model.float()
-
-	def forward(self, im_batch):
-		features = self.model(im_batch)
-		return features
+    def forward(self, im_batch):
+        features = self.model(im_batch)
+        return features
