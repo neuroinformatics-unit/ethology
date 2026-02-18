@@ -1,13 +1,10 @@
 # Mikel Broström 🔥 BoxMOT 🧾 AGPL-3.0 license
 
-<<<<<<< HEAD
-"""Code source: https://github.com/pytorch/vision"""
-=======
+
 """
 Code source: https://github.com/pytorch/vision
 """
 from __future__ import absolute_import, division
->>>>>>> a4dd694 (style(reid): fix ruff errors in hacnn.py and mlfn.py\n\n- Add missing docstrings\n- Use super() instead of super(Class, self)\n- Avoid mutable default arguments\n- Fix long lines and other ruff issues)
 
 import torch.utils.model_zoo as model_zoo
 from torch import nn

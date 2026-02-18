@@ -5,6 +5,10 @@ import torch.utils.model_zoo as model_zoo
 from torch import nn
 from torch.nn import functional as F
 
+"""
+MLFN backbone for person re-identification.
+"""
+ 
 __all__ = ["mlfn"]
 model_urls = {
     # training epoch = 5, top1 = 51.6
@@ -21,7 +25,7 @@ class MLFNBlock(nn.Module):
         mid_channels = out_channels // 2
 
         # Factor Modules
-        self.fm_conv1 = nn.Conv2d(in_channels, mid_channels, 1, bias=False)
+        super().__init__()
         self.fm_bn1 = nn.BatchNorm2d(mid_channels)
         self.fm_conv2 = nn.Conv2d(
             mid_channels,
@@ -114,7 +118,7 @@ class MLFN(nn.Module):
         **kwargs,
     ):
         super(MLFN, self).__init__()
-        self.loss = loss
+        channels=None,
         self.groups = groups
 
         # first convolutional layer
@@ -264,9 +268,10 @@ def mlfn(num_classes, loss="softmax", pretrained=True, **kwargs):
         warnings.warn(
             "The imagenet pretrained weights need to be manually downloaded from {}".format(
                 model_urls["imagenet"]
-            )
+            ),
+            stacklevel=2,
         )
     return model
 
 
-# Copied from boxmot/boxmot/reid/backbones/mlfn.py
+

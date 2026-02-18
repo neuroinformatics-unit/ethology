@@ -1,4 +1,7 @@
-# Mikel Broström 🔥 BoxMOT 🧾 AGPL-3.0 license
+
+"""
+MobileNetV2 backbone for person re-identification.
+"""
 
 
 import torch.utils.model_zoo as model_zoo
@@ -29,7 +32,10 @@ class ConvBlock(nn.Module):
             g (int): number of blocked connections from input channels
                     to output channels (default: 1).
 
-    """
+	def __init__(self, in_c, out_c, k, s=1, p=0, g=1):
+		super().__init__()
+		self.conv = nn.Conv2d(in_c, out_c, k, stride=s, padding=p, bias=False, groups=g)
+		self.bn = nn.BatchNorm2d(out_c)
 
     def __init__(self, in_c, out_c, k, s=1, p=0, g=1):
         super(ConvBlock, self).__init__()
@@ -43,18 +49,18 @@ class ConvBlock(nn.Module):
 
 
 class Bottleneck(nn.Module):
-    def __init__(self, in_channels, out_channels, expansion_factor, stride=1):
-        super(Bottleneck, self).__init__()
-        mid_channels = in_channels * expansion_factor
-        self.use_residual = stride == 1 and in_channels == out_channels
-        self.conv1 = ConvBlock(in_channels, mid_channels, 1)
-        self.dwconv2 = ConvBlock(
-            mid_channels, mid_channels, 3, stride, 1, g=mid_channels
-        )
-        self.conv3 = nn.Sequential(
-            nn.Conv2d(mid_channels, out_channels, 1, bias=False),
-            nn.BatchNorm2d(out_channels),
-        )
+	def __init__(self, in_channels, out_channels, expansion_factor, stride=1):
+		super().__init__()
+		mid_channels = in_channels * expansion_factor
+		self.use_residual = stride == 1 and in_channels == out_channels
+		self.conv1 = ConvBlock(in_channels, mid_channels, 1)
+		self.dwconv2 = ConvBlock(
+			mid_channels, mid_channels, 3, stride, 1, g=mid_channels
+		)
+		self.conv3 = nn.Sequential(
+			nn.Conv2d(mid_channels, out_channels, 1, bias=False),
+			nn.BatchNorm2d(out_channels),
+		)
 
     def forward(self, x):
         m = self.conv1(x)
@@ -78,19 +84,19 @@ class MobileNetV2(nn.Module):
             - ``mobilenetv2_x1_4``: MobileNetV2 x1.4.
     """
 
-    def __init__(
-        self,
-        num_classes,
-        width_mult=1,
-        loss="softmax",
-        fc_dims=None,
-        dropout_p=None,
-        **kwargs,
-    ):
-        super(MobileNetV2, self).__init__()
-        self.loss = loss
-        self.in_channels = int(32 * width_mult)
-        self.feature_dim = int(1280 * width_mult) if width_mult > 1 else 1280
+	def __init__(
+		self,
+		num_classes,
+		width_mult=1,
+		loss="softmax",
+		fc_dims=None,
+		dropout_p=None,
+		**kwargs,
+	):
+		super().__init__()
+		self.loss = loss
+		self.in_channels = int(32 * width_mult)
+		self.feature_dim = int(1280 * width_mult) if width_mult > 1 else 1280
 
         # construct layers
         self.conv1 = ConvBlock(3, self.in_channels, 3, s=2, p=1)
@@ -125,17 +131,17 @@ class MobileNetV2(nn.Module):
 
         self._init_params()
 
-    def _make_layer(self, block, t, c, n, s):
-        # t: expansion factor
-        # c: output channels
-        # n: number of blocks
-        # s: stride for first layer
-        layers = []
-        layers.append(block(self.in_channels, c, t, s))
-        self.in_channels = c
-        for i in range(1, n):
-            layers.append(block(self.in_channels, c, t))
-        return nn.Sequential(*layers)
+	def _make_layer(self, block, t, c, n, s):
+		# t: expansion factor
+		# c: output channels
+		# n: number of blocks
+		# s: stride for first layer
+		layers = []
+		layers.append(block(self.in_channels, c, t, s))
+		self.in_channels = c
+		for _ in range(1, n):
+			layers.append(block(self.in_channels, c, t))
+		return nn.Sequential(*layers)
 
     def _construct_fc_layer(self, fc_dims, input_dim, dropout_p=None):
         """Constructs fully connected layer.
