@@ -12,6 +12,9 @@ import xarray as xr
 from ethology.validators.detections import ValidBboxTracksDataset
 from ethology.validators.utils import _check_output
 
+_REQUIRED_DIMS = {"time", "space", "individuals"}
+_REQUIRED_VARS = {"position", "shape"}
+
 
 def _require_dims(dataset: xr.Dataset, required_dims: Iterable[str]) -> None:
     """Check required dimensions exist; raise ValueError if not."""
@@ -74,8 +77,8 @@ def from_movement_bboxes(movement_ds: xr.Dataset) -> xr.Dataset:
     (``-1`` and ``NaN`` respectively).
 
     """
-    _require_dims(movement_ds, {"time", "space", "individuals"})
-    _require_vars(movement_ds, {"position", "shape"})
+    _require_dims(movement_ds, _REQUIRED_DIMS)
+    _require_vars(movement_ds, _REQUIRED_VARS)
 
     ds = movement_ds.rename({"time": "image_id", "individuals": "id"})
     out = xr.Dataset(

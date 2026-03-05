@@ -59,8 +59,9 @@ def test_from_movement_bboxes():
     )
     assert np.allclose(ds_tracks.position.values, movement_ds.position.values)
     assert np.allclose(ds_tracks.shape.values, movement_ds.shape.values)
-    assert ds_tracks.confidence.shape == (3, 2)
-    assert ds_tracks.category.shape == (3, 2)
+    n_time, n_ids = movement_ds.sizes["time"], movement_ds.sizes["individuals"]
+    assert ds_tracks.confidence.shape == (n_time, n_ids)
+    assert ds_tracks.category.shape == (n_time, n_ids)
 
 
 def test_from_movement_bboxes_forwards_category_confidence():
@@ -109,3 +110,15 @@ def test_from_movement_bboxes_error_missing_shape():
 
     assert "data variables" in str(excinfo.value)
     assert "shape" in str(excinfo.value)
+
+
+def test_from_movement_bboxes_error_missing_position():
+    """ValueError when input is missing position."""
+    movement_ds = _make_movement_bbox_dataset()
+    movement_ds = movement_ds.drop_vars("position")
+
+    with pytest.raises(ValueError) as excinfo:
+        from_movement_bboxes(movement_ds)
+
+    assert "data variables" in str(excinfo.value)
+    assert "position" in str(excinfo.value)

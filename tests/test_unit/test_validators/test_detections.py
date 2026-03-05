@@ -258,7 +258,7 @@ def test_validator_bbox_detections_dataset(
 
     if excinfo:
         error_msg = str(excinfo.value)
-        assert error_msg in expected_error_message
+        assert expected_error_message in error_msg
     else:
         assert validator.dataset is dataset
         assert validator.required_dims == {"image_id", "space", "id"}
@@ -395,7 +395,7 @@ def test_validator_bbox_tracks_dataset(
 
     if excinfo:
         error_msg = str(excinfo.value)
-        assert error_msg in expected_error_message
+        assert expected_error_message in error_msg
     else:
         assert validator.dataset is dataset
         assert validator.required_dims == {"image_id", "space", "id"}
