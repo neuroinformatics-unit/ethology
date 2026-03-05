@@ -1,7 +1,7 @@
 """Load tracked bounding box datasets into ``ethology`` format.
 
-This module provides utilities to construct an ``ethology`` bounding box
-tracks dataset from an existing ``movement`` bounding boxes dataset.
+Convert a ``movement`` bounding box dataset into an ``ethology`` tracks
+dataset (dimensions and variables renamed, output validated).
 """
 
 from collections.abc import Iterable
@@ -68,12 +68,10 @@ def from_movement_bboxes(movement_ds: xr.Dataset) -> xr.Dataset:
 
     Notes
     -----
-    The conversion is purely structural: the function renames the
-    ``movement`` dimensions ``time`` → ``image_id`` and
-    ``individuals`` → ``id`` and forwards the core variables and
-    attributes. If ``category`` or ``confidence`` are missing, they
-    are created with default values (``-1`` for category, indicating
-    unknown category, and ``NaN`` for confidence).
+    Renames ``movement`` dimensions ``time`` → ``image_id`` and
+    ``individuals`` → ``id``, forwards ``position``, ``shape`` and
+    attributes. Missing ``category`` or ``confidence`` are added
+    (``-1`` and ``NaN`` respectively).
 
     """
     _require_dims(movement_ds, {"time", "space", "individuals"})
@@ -86,11 +84,9 @@ def from_movement_bboxes(movement_ds: xr.Dataset) -> xr.Dataset:
             "shape": ds["shape"],
         },
         coords={
-            "image_id": ds.coords.get(
-                "image_id", ds["position"].coords["image_id"]
-            ),
-            "space": ds.coords.get("space", ds["position"].coords["space"]),
-            "id": ds.coords.get("id", ds["position"].coords["id"]),
+            "image_id": ds.coords["image_id"],
+            "space": ds.coords["space"],
+            "id": ds.coords["id"],
         },
         attrs=dict(ds.attrs),
     )

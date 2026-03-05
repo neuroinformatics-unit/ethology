@@ -43,8 +43,8 @@ def _make_movement_bbox_dataset(
     )
 
 
-def test_from_movement_bboxes_converts_to_valid_tracks_dataset():
-    """from_movement_bboxes output passes ValidBboxTracksDataset."""
+def test_from_movement_bboxes():
+    """Conversion produces a dataset that passes ValidBboxTracksDataset."""
     movement_ds = _make_movement_bbox_dataset()
 
     ds_tracks = from_movement_bboxes(movement_ds)
@@ -63,8 +63,8 @@ def test_from_movement_bboxes_converts_to_valid_tracks_dataset():
     assert ds_tracks.category.shape == (3, 2)
 
 
-def test_from_movement_bboxes_forwards_category_and_confidence_when_present():
-    """When movement dataset has category, it is forwarded; confidence same."""
+def test_from_movement_bboxes_forwards_category_confidence():
+    """Category and confidence forwarded when present in movement dataset."""
     movement_ds = _make_movement_bbox_dataset(has_category=True)
 
     ds_tracks = from_movement_bboxes(movement_ds)
@@ -75,7 +75,7 @@ def test_from_movement_bboxes_forwards_category_and_confidence_when_present():
     )
 
 
-def test_from_movement_bboxes_fills_missing_category_and_confidence():
+def test_from_movement_bboxes_fills_defaults():
     """Missing category/confidence are filled with -1 and NaN."""
     movement_ds = _make_movement_bbox_dataset(
         has_category=False, has_confidence=False
@@ -87,8 +87,8 @@ def test_from_movement_bboxes_fills_missing_category_and_confidence():
     assert np.isnan(ds_tracks.confidence.values).all()
 
 
-def test_from_movement_bboxes_raises_when_dim_missing():
-    """from_movement_bboxes raises ValueError when required dims missing."""
+def test_from_movement_bboxes_error_missing_dims():
+    """ValueError when input is missing required dimensions."""
     movement_ds = _make_movement_bbox_dataset()
     movement_ds = movement_ds.rename({"time": "frame"})
 
@@ -99,8 +99,8 @@ def test_from_movement_bboxes_raises_when_dim_missing():
     assert "time" in str(excinfo.value) or "individuals" in str(excinfo.value)
 
 
-def test_from_movement_bboxes_raises_when_data_var_missing():
-    """from_movement_bboxes raises ValueError when position/shape missing."""
+def test_from_movement_bboxes_error_missing_shape():
+    """ValueError when input is missing position or shape."""
     movement_ds = _make_movement_bbox_dataset()
     movement_ds = movement_ds.drop_vars("shape")
 
