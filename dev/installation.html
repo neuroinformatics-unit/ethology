@@ -44,7 +44,7 @@
   <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="_static/documentation_options.js?v=7f6919ac"></script>
+    <script src="_static/documentation_options.js?v=db119db5"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/design-tabs.js?v=f930bc37"></script>
@@ -127,7 +127,7 @@
   
   
   
-    <p class="title logo__title">ethology v0.1.3.dev2</p>
+    <p class="title logo__title">ethology v0.1.3.dev3</p>
   
 </a></div>
     
@@ -449,51 +449,119 @@
                   
   <section class="tex2jax_ignore mathjax_ignore" id="installation">
 <span id="target-installation"></span><h1>Installation<a class="headerlink" href="#installation" title="Link to this heading">#</a></h1>
+<p>The following instructions assume that you have either conda or uv installed. If you don’t please check their installation instructions (for <a class="reference external" href="https://docs.conda.io/en/latest/">conda</a>, for <a class="reference external" href="https://docs.astral.sh/uv/getting-started/installation/">uv</a>).</p>
+<section id="create-and-activate-a-virtual-environment">
+<h2>Create and activate a virtual environment<a class="headerlink" href="#create-and-activate-a-virtual-environment" title="Link to this heading">#</a></h2>
 <p>To avoid dependency conflicts with other packages, it is best practice to install Python packages within a virtual environment.
-We recommend using <a class="reference external" href="https://docs.conda.io/en/latest/">conda</a> to create and manage this environment, as they simplify the installation process.
-The following instructions assume that you have conda installed.</p>
+We recommend using <a class="reference external" href="https://docs.conda.io/en/latest/">conda</a> or <a class="reference external" href="https://docs.astral.sh/uv/getting-started/installation/">uv</a> to create and manage this environment, as they simplify the installation process.</p>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-0" name="sd-tab-set-0" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-0">
+conda</label><div class="sd-tab-content docutils">
+<p>Create and activate a new <a class="reference external" href="https://docs.conda.io/en/latest/">conda environment</a>:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create conda environment</span>
+conda<span class="w"> </span>create<span class="w"> </span>-y<span class="w"> </span>-n<span class="w"> </span>ethology-env<span class="w"> </span>-c<span class="w"> </span>conda-forge<span class="w"> </span><span class="nv">python</span><span class="o">=</span><span class="m">3</span>.13
+
+<span class="c1"># Activate it</span>
+conda<span class="w"> </span>activate<span class="w"> </span>ethology-env
+</pre></div>
+</div>
+<p>We used <code class="docutils literal notranslate"><span class="pre">ethology-env</span></code> as the environment name, but you can choose any name you prefer.</p>
+</div>
+<input id="sd-tab-item-1" name="sd-tab-set-0" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-1">
+uv</label><div class="sd-tab-content docutils">
+<p>Create and activate a new <a class="reference external" href="https://docs.astral.sh/uv/pip/environments/">virtual environment</a> inside your project directory:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create virtual environment</span>
+uv<span class="w"> </span>venv<span class="w"> </span>--python<span class="o">=</span><span class="m">3</span>.13
+
+<span class="c1"># On macOS and Linux, activate it with:</span>
+<span class="nb">source</span><span class="w"> </span>.venv/bin/activate
+
+<span class="c1"># On Windows PowerShell, activate it with:</span>
+.venv<span class="se">\S</span>cripts<span class="se">\a</span>ctivate
+</pre></div>
+</div>
+</div>
+</div>
+</section>
 <section id="install-the-package">
 <h2>Install the package<a class="headerlink" href="#install-the-package" title="Link to this heading">#</a></h2>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>🏗️ pip and conda installation available soon!</p>
-</div>
-<section id="users">
-<h3>Users<a class="headerlink" href="#users" title="Link to this heading">#</a></h3>
-<p>First clone the repository at the desired location:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/neuroinformatics-unit/ethology.git
+<p>With your environment activated, install <code class="docutils literal notranslate"><span class="pre">ethology</span></code> using one of the methods below.</p>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-2" name="sd-tab-set-1" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-2">
+From PyPI using pip</label><div class="sd-tab-content docutils">
+<p>Install the core package:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>ethology
 </pre></div>
 </div>
-<p>Then create a conda environment and install the package from source</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>conda<span class="w"> </span>create<span class="w"> </span>-n<span class="w"> </span>ethology-env<span class="w"> </span><span class="nv">python</span><span class="o">=</span><span class="m">3</span>.13<span class="w"> </span>-y
-conda<span class="w"> </span>activate<span class="w"> </span>ethology-env
-<span class="nb">cd</span><span class="w"> </span>ethology
-pip<span class="w"> </span>install<span class="w"> </span>.
+</div>
+<input id="sd-tab-item-3" name="sd-tab-set-1" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-3">
+From PyPI using uv</label><div class="sd-tab-content docutils">
+<p>Install the core package:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>uv<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>ethology
 </pre></div>
 </div>
-</section>
-<section id="developers">
-<h3>Developers<a class="headerlink" href="#developers" title="Link to this heading">#</a></h3>
-<p>If you are a developer looking to contribute to ethology, please refer to our <a class="reference internal" href="community/contributing.html"><span class="std std-doc">contributing guide</span></a> for detailed setup instructions and guidelines.</p>
-</section>
+</div>
+</div>
+<div class="tip admonition">
+<p class="admonition-title">For developers</p>
+<p>If you would like to contribute to <code class="docutils literal notranslate"><span class="pre">ethology</span></code>, see our <a class="reference internal" href="community/contributing.html"><span class="std std-doc">contributing guide</span></a>
+for detailed developer setup instructions and coding guidelines.</p>
+</div>
 </section>
 <section id="update-the-package">
 <h2>Update the package<a class="headerlink" href="#update-the-package" title="Link to this heading">#</a></h2>
+<p>Always update using the same package manager used for installation (either via <code class="docutils literal notranslate"><span class="pre">pip</span></code> or via <code class="docutils literal notranslate"><span class="pre">uv</span></code>).</p>
 <p>To update to the latest version of <code class="docutils literal notranslate"><span class="pre">ethology</span></code>:</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>ethology
-git<span class="w"> </span>checkout<span class="w"> </span>main<span class="w">      </span><span class="c1"># Ensure you&#39;re on the main branch</span>
-git<span class="w"> </span>fetch<span class="w">               </span><span class="c1"># Fetch latest changes</span>
-git<span class="w"> </span>pull
-pip<span class="w"> </span>install<span class="w"> </span>.
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-4" name="sd-tab-set-2" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-4">
+pip</label><div class="sd-tab-content docutils">
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>-U<span class="w"> </span>ethology
 </pre></div>
 </div>
-<p>To uninstall <code class="docutils literal notranslate"><span class="pre">ethology</span></code>, the simplest option is to delete the conda environment that contains it. To do so, run from a different conda environment (e.g., <code class="docutils literal notranslate"><span class="pre">base</span></code>):</p>
+</div>
+<input id="sd-tab-item-5" name="sd-tab-set-2" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-5">
+uv</label><div class="sd-tab-content docutils">
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>uv<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>-U<span class="w"> </span>ethology
+</pre></div>
+</div>
+</div>
+</div>
+<p>If the above fails, try installing <code class="docutils literal notranslate"><span class="pre">ethology</span></code> in a fresh new environment. To do this, first remove the existing environment:</p>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-6" name="sd-tab-set-3" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-6">
+conda</label><div class="sd-tab-content docutils">
 <div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>conda<span class="w"> </span>env<span class="w"> </span>remove<span class="w"> </span>-n<span class="w"> </span>ethology-env
 </pre></div>
 </div>
+</div>
+<input id="sd-tab-item-7" name="sd-tab-set-3" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-7">
+uv</label><div class="sd-tab-content docutils">
+<p>Delete the <code class="docutils literal notranslate"><span class="pre">.venv</span></code> folder in your project directory.</p>
+<div class="highlight-powershell notranslate"><div class="highlight"><pre><span></span><span class="c"># On macOS and Linux, run:</span>
+<span class="nb">rm </span><span class="n">-rf</span> <span class="p">.</span><span class="n">venv</span>
+
+<span class="c"># On Windows PowerShell, run:</span>
+<span class="nb">rmdir </span><span class="p">/</span><span class="n">s</span> <span class="p">/</span><span class="n">q</span> <span class="p">.</span><span class="n">venv</span>
+</pre></div>
+</div>
+<p>Optionally, you can clean the <code class="docutils literal notranslate"><span class="pre">uv</span></code> cache for unused packages:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>uv<span class="w"> </span>cache<span class="w"> </span>prune
+</pre></div>
+</div>
+</div>
+</div>
+<p>Then you can create a new environment following the <a class="reference internal" href="#create-and-activate-a-virtual-environment"><span class="std std-ref">instructions</span></a> above.</p>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
-<p>You can list all conda environments afterwards to verify removal:</p>
+<p>You can list all conda environments before and after the above command to verify removal:</p>
 <div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>conda<span class="w"> </span>env<span class="w"> </span>list
 </pre></div>
 </div>
@@ -548,11 +616,8 @@ pip<span class="w"> </span>install<span class="w"> </span>.
   </div>
   <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#install-the-package">Install the package</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#users">Users</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#developers">Developers</a></li>
-</ul>
-</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#create-and-activate-a-virtual-environment">Create and activate a virtual environment</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#install-the-package">Install the package</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#update-the-package">Update the package</a></li>
 </ul>
   </nav></div>
