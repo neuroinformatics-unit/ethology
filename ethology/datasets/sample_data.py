@@ -8,13 +8,14 @@ DATA_REGISTRY = pooch.create(
     },
 )
 
+
 def load_sample_tracking():
-    """
-    Fetch a sample tracking dataset.
+    """Fetch a sample tracking dataset.
 
     Returns
     -------
     str
         Path to downloaded dataset.
+
     """
     return DATA_REGISTRY.fetch("example_tracking.csv")
