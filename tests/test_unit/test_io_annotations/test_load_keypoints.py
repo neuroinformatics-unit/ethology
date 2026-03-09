@@ -22,10 +22,6 @@ from ethology.io.annotations.load_keypoints import (
     from_files,
 )
 
-# ============================================================================
-# Tests for Helper Functions
-# ============================================================================
-
 
 def test_require_sleap_io_import_success():
     """Test successful import of sleap_io when it exists."""
@@ -161,9 +157,26 @@ def test_points_from_point_objects():
     # Invisible / Missing case
     p_inv = MagicMock(x=10.0, y=20.0, visible=False)
     coords, _, vis = _points_from_point_objects([p_inv, None], n_keypoints=2)
-    assert np.isnan(coords[0]).all()  # Invisible points become NaN coordinates
+    assert np.isnan(coords[0]).all()
     assert vis[0] == 0.0
     assert np.isnan(coords[1]).all()
+
+    # Point with x=None
+    p_no_x = MagicMock(spec=["x", "y"])
+    p_no_x.x = None
+    p_no_x.y = 5.0
+    coords, _, _ = _points_from_point_objects([p_no_x], n_keypoints=1)
+    assert np.isnan(coords[0]).all()
+
+    # point using is_visible fallback..
+    p_isvis = MagicMock(spec=["x", "y", "is_visible", "score"])
+    p_isvis.x = 10.0
+    p_isvis.y = 20.0
+    p_isvis.is_visible = True
+    p_isvis.score = 0.5
+    coords, conf, vis = _points_from_point_objects([p_isvis], n_keypoints=1)
+    assert np.allclose(coords[0], [10.0, 20.0])
+    assert vis[0] == 1.0
 
 
 def test_points_from_instance():
@@ -173,6 +186,13 @@ def test_points_from_instance():
     mock_inst_np.numpy = np.array([[10.0, 20.0], [30.0, 40.0]])
     c, _, _ = _points_from_instance(mock_inst_np, 2)
     assert np.allclose(c, [[10.0, 20.0], [30.0, 40.0]])
+
+    # transposed 2D array: shape (2, 3) with n_keypoints=3
+    mock_inst_t = MagicMock()
+    mock_inst_t.numpy = np.array([[10.0, 20.0, 30.0], [40.0, 50.0, 60.0]])
+    c, _, _ = _points_from_instance(mock_inst_t, 3)
+    assert c.shape == (3, 2)
+    assert np.allclose(c[0], [10.0, 40.0])
 
     # 3D Array Case (Reshape)
     mock_inst_3d = MagicMock()
@@ -193,8 +213,6 @@ def test_points_from_instance():
 
 def test_get_skeleton_keypoints():
     """Test extraction of keypoint names from skeletons."""
-    # FIX: Explicitly set the name attribute.
-    # MagicMock(name='n1') sets the debug name, NOT the attribute .name
     node = MagicMock()
     node.name = "n1"
 
@@ -213,15 +231,34 @@ def test_get_skeleton_keypoints():
 
 def test_infer_keypoint_count():
     """Test inferring keypoint count from different formats."""
-    # Numpy
+    # Numpy (n, 2)
     mock_np = MagicMock()
     mock_np.numpy = np.zeros((3, 2))
     assert _infer_keypoint_count(mock_np) == 3
+
+    # Transposed numpy (2, n) where n != 2
+    mock_t = MagicMock()
+    mock_t.numpy = np.zeros((2, 4))
+    assert _infer_keypoint_count(mock_t) == 4
+
+    # Ambiguous 2D (neither dim is 2)
+    mock_a = MagicMock()
+    mock_a.numpy = np.zeros((5, 3))
+    assert _infer_keypoint_count(mock_a) == 5
+
+    # 3D array
+    mock_3d = MagicMock()
+    mock_3d.numpy = np.zeros((4, 1, 3))
+    assert _infer_keypoint_count(mock_3d) == 4
 
     # List
     mock_list = MagicMock()
     mock_list.points = [1, 2, 3]
     assert _infer_keypoint_count(mock_list) == 3
+
+    # Error case
+    with pytest.raises(ValueError, match="Could not infer keypoint count"):
+        _infer_keypoint_count(MagicMock(spec=[]))
 
 
 @pytest.mark.parametrize(
@@ -250,11 +287,6 @@ def test_prepare_frame_records_sorting():
     assert records[2]["frame_idx"] == 5
 
 
-# ============================================================================
-# Tests for Main Loading Function
-# ============================================================================
-
-
 def test_from_files_unsupported_format(tmp_path):
     """Test that ValueError is raised for unsupported formats."""
     p = tmp_path / "test.txt"
@@ -266,11 +298,11 @@ def test_from_files_unsupported_format(tmp_path):
 @patch("ethology.io.annotations.load_keypoints._from_single_file")
 def test_from_files_concatenation(mock_single):
     """Test concatenation of multiple file datasets."""
-    # FIX: Use correct dim names 'space' and 'keypoint'
     common_attrs = {
         "map_keypoint_to_str": {0: "n1"},
         "map_image_id_to_filename": {0: "f"},
-        "map_image_id_to_frame_idx": {0: 0},  # FIX: Required for the loop
+        "map_image_id_to_video": {0: "v.mp4"},
+        "map_image_id_to_frame_idx": {0: 0},
     }
 
     ds1 = xr.Dataset(
@@ -289,6 +321,7 @@ def test_from_files_concatenation(mock_single):
         attrs=common_attrs.copy(),
     )
     ds1.attrs["map_image_id_to_filename"] = {0: "f1"}
+    ds1.attrs["map_image_id_to_video"] = {0: "v1.mp4"}
 
     ds2 = xr.Dataset(
         {
@@ -306,6 +339,7 @@ def test_from_files_concatenation(mock_single):
         attrs=common_attrs.copy(),
     )
     ds2.attrs["map_image_id_to_filename"] = {0: "f2"}
+    ds2.attrs["map_image_id_to_video"] = {0: "v2.mp4"}
 
     mock_single.side_effect = [ds1, ds2]
 
@@ -313,12 +347,12 @@ def test_from_files_concatenation(mock_single):
 
     assert ds.sizes["image_id"] == 2
     assert ds.attrs["map_image_id_to_filename"] == {0: "f1", 1: "f2"}
+    assert ds.attrs["map_image_id_to_video"] == {0: "v1.mp4", 1: "v2.mp4"}
 
 
 @patch("ethology.io.annotations.load_keypoints._from_single_file")
 def test_from_files_mismatch_error(mock_single):
-    """Test error when keypoints differ."""
-    # FIX: Add missing attributes to prevent KeyError during iteration
+    """Test error when keypoint labels differ across files."""
     ds1 = xr.Dataset(
         coords={"image_id": [0]},
         attrs={
@@ -354,7 +388,6 @@ def test_from_single_file_integration_mock(mock_require):
         user_instances=[inst],
     )
 
-    # FIX: Explicitly set name
     node = MagicMock()
     node.name = "nose"
     skel = MagicMock(nodes=[node])
@@ -410,27 +443,23 @@ def test_from_single_file_errors(mock_require):
 
 
 @patch("ethology.io.annotations.load_keypoints._require_sleap_io")
-def test_from_single_file_mismatched_keypoints_error(mock_require):
-    """Test error when instance keypoints don't match skeleton."""
+def test_from_single_file_unsupported_instance_format(mock_require):
+    """Test error when instance points have an unsupported format."""
     mock_sio = mock_require.return_value
 
-    # Create mismatch: Skeleton has 3 nodes, instance has 2 points
-    # FIX: Ensure nodes act like objects with a string .name attribute
-    nodes = []
-    for i in range(3):
-        n = MagicMock()
-        n.name = str(i)
-        nodes.append(n)
+    node = MagicMock()
+    node.name = "nose"
+    skel = MagicMock(nodes=[node])
 
-    skel = MagicMock(nodes=nodes)
-    inst = MagicMock(points=[MagicMock(), MagicMock()])
+    # Instance with no recognized points attribute
+    inst = MagicMock(spec=[])
     frame = MagicMock(frame_idx=0, video=None, user_instances=[inst])
 
     mock_sio.load_file.return_value = MagicMock(
         labeled_frames=[frame], skeletons=[skel]
     )
 
-    with pytest.raises((ValueError, Exception)):
+    with pytest.raises(ValueError, match="Unsupported instance points format"):
         _from_single_file("d.slp", "SLEAP", None)
 
 
@@ -444,7 +473,6 @@ def test_from_single_file_multiple_instances(mock_require):
 
     frame = MagicMock(frame_idx=0, video=None, user_instances=[inst1, inst2])
 
-    # FIX: Explicitly set name
     node = MagicMock()
     node.name = "k1"
     labels = MagicMock(

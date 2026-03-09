@@ -76,11 +76,6 @@ def create_valid_keypoints_dataset(
     return ds
 
 
-# ============================================================================
-# Tests for Helper Functions
-# ============================================================================
-
-
 def test_require_sleap_io_import_success():
     """Test successful import of sleap_io when installed."""
     try:
@@ -204,11 +199,6 @@ def test_build_sleap_objects_handles_missing_keypoints(mock_sio):
     assert mock_sio.return_value.Point.call_count == 2
 
 
-# ============================================================================
-# Tests for Main Saving Function
-# ============================================================================
-
-
 def test_to_file_unsupported_format(tmp_path):
     """Test that ValueError is raised for unsupported formats."""
     ds = create_valid_keypoints_dataset()
@@ -270,3 +260,155 @@ def test_to_file_output_path_as_string(mock_build, mock_sio, tmp_path):
 
     # The code returns input path as-is, so we check equality, not type
     assert result == output_file
+
+
+@patch("ethology.io.annotations.save_keypoints._require_sleap_io")
+def test_build_sleap_objects_missing_classes(mock_sio):
+    """Test error when sleap-io is missing required classes."""
+    ds = create_valid_keypoints_dataset()
+    mock_module = mock_sio.return_value
+    mock_module.Instance = None
+
+    with pytest.raises(AttributeError, match="sleap-io is missing"):
+        _build_sleap_objects(ds)
+
+
+@patch("ethology.io.annotations.save_keypoints._require_sleap_io")
+def test_build_sleap_objects_skeleton_fallback(mock_sio):
+    """Test Skeleton creation falls back when edges kwarg not supported."""
+    ds = create_valid_keypoints_dataset(n_images=1, n_keypoints=1)
+    mock_module = mock_sio.return_value
+
+    # First call with edges=[] raises TypeError, second without works
+    mock_skeleton = MagicMock()
+    mock_module.Skeleton.side_effect = [TypeError, mock_skeleton]
+    mock_module.Labels.return_value = MagicMock()
+
+    labels = _build_sleap_objects(ds)
+    assert labels is not None
+    assert mock_module.Skeleton.call_count == 2
+
+
+@patch("ethology.io.annotations.save_keypoints._require_sleap_io")
+def test_build_sleap_objects_video_fallbacks(mock_sio):
+    """Test Video construction fallback chain."""
+    ds = create_valid_keypoints_dataset(n_images=1, n_keypoints=1)
+    mock_module = mock_sio.return_value
+    mock_module.Labels.return_value = MagicMock()
+
+    # from_filename raises AttributeError, then filename= raises TypeError
+    mock_video = MagicMock()
+    mock_module.Video.from_filename.side_effect = AttributeError
+    mock_module.Video.side_effect = [TypeError, mock_video]
+
+    _build_sleap_objects(ds)
+    assert mock_module.Video.call_count == 2
+
+
+@patch("ethology.io.annotations.save_keypoints._require_sleap_io")
+def test_build_sleap_objects_video_cache(mock_sio):
+    """Test that videos are reused across frames from the same source."""
+    ds = create_valid_keypoints_dataset(n_images=2, n_keypoints=1)
+    # Both images map to the same video
+    ds.attrs["map_image_id_to_video"] = {0: "shared.mp4", 1: "shared.mp4"}
+    mock_module = mock_sio.return_value
+    mock_module.Labels.return_value = MagicMock()
+
+    _build_sleap_objects(ds)
+    # Video constructor called only once for the shared filename
+    mock_module.Video.from_filename.assert_called_once()
+
+
+@patch("ethology.io.annotations.save_keypoints._require_sleap_io")
+def test_build_sleap_objects_labeled_frame_fallback(mock_sio):
+    """Test LabeledFrame creation falls back to positional args."""
+    ds = create_valid_keypoints_dataset(n_images=1, n_keypoints=1)
+    mock_module = mock_sio.return_value
+    mock_module.Labels.return_value = MagicMock()
+
+    mock_lf = MagicMock()
+    mock_module.LabeledFrame.side_effect = [TypeError, mock_lf]
+
+    _build_sleap_objects(ds)
+    assert mock_module.LabeledFrame.call_count == 2
+
+
+@patch("ethology.io.annotations.save_keypoints._require_sleap_io")
+def test_build_sleap_objects_with_confidence_and_visibility(mock_sio):
+    """Test point creation with confidence and visibility data."""
+    ds = create_valid_keypoints_dataset(
+        n_images=1,
+        n_keypoints=2,
+        n_instances=1,
+        include_confidence=True,
+        include_visibility=True,
+    )
+    mock_module = mock_sio.return_value
+    mock_module.Labels.return_value = MagicMock()
+
+    _build_sleap_objects(ds)
+
+    # Points should be created with score and visible kwargs
+    point_calls = mock_module.Point.call_args_list
+    assert len(point_calls) == 2
+    for call in point_calls:
+        assert "score" in call.kwargs or "x" in call.kwargs
+
+
+@patch("ethology.io.annotations.save_keypoints._require_sleap_io")
+def test_build_sleap_objects_no_point_cls(mock_sio):
+    """Test fallback when Point class is not available in sleap-io."""
+    ds = create_valid_keypoints_dataset(n_images=1, n_keypoints=1)
+    mock_module = mock_sio.return_value
+    mock_module.Point = None
+    mock_module.Labels.return_value = MagicMock()
+
+    _build_sleap_objects(ds)
+
+    # Instance should be created with list-of-lists points
+    inst_call = mock_module.Instance.call_args
+    points_arg = inst_call.kwargs.get("points") or inst_call.args[0]
+    assert isinstance(points_arg[0], list)
+
+
+@patch("ethology.io.annotations.save_keypoints._require_sleap_io")
+def test_build_sleap_objects_instance_fallback(mock_sio):
+    """Test Instance creation falls back to positional args."""
+    ds = create_valid_keypoints_dataset(n_images=1, n_keypoints=1)
+    mock_module = mock_sio.return_value
+    mock_module.Labels.return_value = MagicMock()
+
+    mock_inst = MagicMock()
+    mock_module.Instance.side_effect = [TypeError, mock_inst]
+
+    _build_sleap_objects(ds)
+    assert mock_module.Instance.call_count == 2
+
+
+@patch("ethology.io.annotations.save_keypoints._require_sleap_io")
+def test_build_sleap_objects_labels_fallback(mock_sio):
+    """Test Labels creation falls back when skeletons kwarg not supported."""
+    ds = create_valid_keypoints_dataset(n_images=1, n_keypoints=1)
+    mock_module = mock_sio.return_value
+
+    mock_labels = MagicMock()
+    mock_module.Labels.side_effect = [TypeError, mock_labels]
+
+    _build_sleap_objects(ds)
+    assert mock_module.Labels.call_count == 2
+
+
+@patch("ethology.io.annotations.save_keypoints._require_sleap_io")
+@patch("ethology.io.annotations.save_keypoints._build_sleap_objects")
+def test_to_file_save_fallback(mock_build, mock_sio, tmp_path):
+    """Test save_file falls back to swapped argument order."""
+    ds = create_valid_keypoints_dataset()
+    output_file = tmp_path / "output.sleap"
+
+    mock_build.return_value = MagicMock()
+    mock_module = mock_sio.return_value
+    mock_module.save_file.side_effect = [TypeError, None]
+
+    result = to_file(ds, output_file, format="SLEAP")
+    assert result == output_file
+    assert mock_module.save_file.call_count == 2
