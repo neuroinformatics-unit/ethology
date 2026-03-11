@@ -485,9 +485,9 @@ def test_df_from_single_file(
         expected_n_unique_images_with_annotations,
         expected_categories=expected_category_data[0],
         expected_supercategories=expected_category_data[1],
-        expected_annots_per_image=1
-        if expected_n_unique_images_with_annotations < 5
-        else None,
+        expected_annots_per_image=(
+            1 if expected_n_unique_images_with_annotations < 5 else None
+        ),
     )
 
     # Check image shape data is present if present in the input file
