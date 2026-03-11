@@ -262,7 +262,6 @@ def _from_single_file(  # noqa: C901
             map_image_id_to_video[image_id] = video_filename
         map_image_id_to_frame_idx[image_id] = frame_idx
 
-   
         for inst_idx, instance in enumerate(_get_instances(frame)):
             coords, conf, vis = _points_from_instance(instance, n_keypoints)
             if coords.shape[0] != n_keypoints:
