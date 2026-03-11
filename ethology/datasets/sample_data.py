@@ -1,11 +1,11 @@
-"""
-Utilities for downloading and loading example datasets for ethology.
+"""Utilities for downloading and loading example datasets for ethology.
 
 This module provides helper functions that use `pooch` to fetch
 small example datasets used in tutorials, tests, and documentation.
 """
 
 import pooch
+
 ...
 
 
