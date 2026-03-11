@@ -262,13 +262,7 @@ def _from_single_file(  # noqa: C901
             map_image_id_to_video[image_id] = video_filename
         map_image_id_to_frame_idx[image_id] = frame_idx
 
-        # Note: We use list index as 'id'. If SLEAP 'Track' objects are
-        # present, we are currently ignoring their persistent track_id to
-        # match ethology's current design (no identity consistency across
-        # frames). The 'id' dimension stores an ID for each annotation in an
-        # image, but this is not consistent across frames (annotations with
-        # the same ID in different images do not refer to the same
-        # individual).
+   
         for inst_idx, instance in enumerate(_get_instances(frame)):
             coords, conf, vis = _points_from_instance(instance, n_keypoints)
             if coords.shape[0] != n_keypoints:
