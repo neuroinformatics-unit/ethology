@@ -1,6 +1,13 @@
-"""Utilities for fetching example datasets used in ethology."""
+"""
+Utilities for downloading and loading example datasets for ethology.
+
+This module provides helper functions that use `pooch` to fetch
+small example datasets used in tutorials, tests, and documentation.
+"""
 
 import pooch
+...
+
 
 DATA_REGISTRY = pooch.create(
     path=pooch.os_cache("ethology"),
