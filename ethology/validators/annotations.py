@@ -316,9 +316,7 @@ class ValidBboxAnnotationsDataFrame(pa.DataFrameModel):
 
     # image columns
     image_filename: str = pa.Field(description="Name of the image file.")
-    image_id: int = pa.Field(
-        description="Unique identifier for each of the images."
-    )
+    image_id: int = pa.Field(description="Unique identifier for each of the images.")
     image_width: int = pa.Field(
         description="Width of each of the images, "
         "in the same units as the input file (usually pixels)."
@@ -344,14 +342,10 @@ class ValidBboxAnnotationsDataFrame(pa.DataFrameModel):
         )
     )
     width: float = pa.Field(
-        description=(
-            "Width of the bounding box, in the same units as the input file."
-        )
+        description=("Width of the bounding box, in the same units as the input file.")
     )
     height: float = pa.Field(
-        description=(
-            "Height of the bounding box, in the same units as the input file."
-        )
+        description=("Height of the bounding box, in the same units as the input file.")
     )
 
     # category columns
@@ -364,9 +358,7 @@ class ValidBboxAnnotationsDataFrame(pa.DataFrameModel):
             "is usually reserved for the background class."
         )
     )
-    category: str = pa.Field(
-        description="Category of the annotation as a string."
-    )
+    category: str = pa.Field(description="Category of the annotation as a string.")
     supercategory: str = pa.Field(
         description="Supercategory of the annotation as a string."
     )
@@ -460,12 +452,8 @@ class ValidBboxAnnotationsCOCO(pa.DataFrameModel):
     image_filename: str = pa.Field(
         description="Filename of the image",
     )
-    image_width: int = pa.Field(
-        description="Width of the image", ge=0, nullable=True
-    )
-    image_height: int = pa.Field(
-        description="Height of the image", ge=0, nullable=True
-    )
+    image_width: int = pa.Field(description="Width of the image", ge=0, nullable=True)
+    image_height: int = pa.Field(description="Height of the image", ge=0, nullable=True)
 
     # bbox data
     bbox: list[float] = pa.Field(

@@ -174,9 +174,7 @@ def test_check_required_keys_in_dict(
     values.
     """
     with expected_exception as excinfo:
-        _check_required_keys_in_dict(
-            list_required_keys, input_dict, additional_message
-        )
+        _check_required_keys_in_dict(list_required_keys, input_dict, additional_message)
 
     # Check error message
     if excinfo:

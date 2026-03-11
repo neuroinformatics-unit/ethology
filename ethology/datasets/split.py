@@ -216,9 +216,7 @@ def split_dataset_group_by(
             dataset, group_by_var, list_fractions, samples_coordinate, seed
         )
     elif method == "apss":
-        logger.info(
-            f"Using approximate subset-sum method with epsilon={epsilon}."
-        )
+        logger.info(f"Using approximate subset-sum method with epsilon={epsilon}.")
         return _split_dataset_group_by_apss(
             dataset, group_by_var, list_fractions, epsilon, samples_coordinate
         )
@@ -312,9 +310,7 @@ def _split_dataset_group_by_kfold(
     """
     # Initialise k-fold iterator
     n_folds_per_shuffle = int(np.rint(1 / min(list_fractions)))
-    gkf = GroupKFold(
-        n_splits=n_folds_per_shuffle, shuffle=True, random_state=seed
-    )
+    gkf = GroupKFold(n_splits=n_folds_per_shuffle, shuffle=True, random_state=seed)
 
     # Compute all possible shuffles
     # In each shuffle, one fold is the test set,
@@ -425,9 +421,7 @@ def _split_dataset_group_by_apss(
 
     # Get list of (id, count) tuples
     # Count number of samples per group and sort by count in ascending order
-    count_per_group_id = Counter(dataset[group_by_var].values).most_common()[
-        ::-1
-    ]
+    count_per_group_id = Counter(dataset[group_by_var].values).most_common()[::-1]
 
     # Cast group ids to integers and create mapping
     map_group_id_int_to_original = {}
@@ -450,9 +444,7 @@ def _split_dataset_group_by_apss(
     )
 
     # Get original group IDs (they are not necessarily integers)
-    subset_group_ids = [
-        map_group_id_int_to_original[x] for x in subset_dict["ids"]
-    ]
+    subset_group_ids = [map_group_id_int_to_original[x] for x in subset_dict["ids"]]
 
     # Extract datasets for target subset and not target subset
     ds_subset = dataset.isel(
@@ -556,9 +548,7 @@ def split_dataset_random(
     """
     # Checks
     if len(list_fractions) < 2:
-        raise ValueError(
-            "The list of fractions must have at least two elements."
-        )
+        raise ValueError("The list of fractions must have at least two elements.")
 
     if any(fraction < 0 or fraction > 1 for fraction in list_fractions):
         raise ValueError("The split fractions must be between 0 and 1.")
@@ -584,9 +574,7 @@ def split_dataset_random(
     for n_samples in list_n_samples:
         end_idx = start_idx + n_samples
         list_ds.append(
-            dataset.isel(
-                {samples_coordinate: shuffled_idcs[start_idx:end_idx]}
-            )
+            dataset.isel({samples_coordinate: shuffled_idcs[start_idx:end_idx]})
         )
         start_idx = end_idx
 

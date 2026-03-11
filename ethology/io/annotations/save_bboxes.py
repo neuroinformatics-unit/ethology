@@ -130,9 +130,7 @@ def _get_raw_df_from_ds(ds: xr.Dataset) -> pd.DataFrame:
     pivot_values = [
         c for c in ["position", "shape", "image_shape"] if c in df_raw.columns
     ]
-    index_cols = [
-        c for c in df_raw.columns if c not in {*pivot_values, "space"}
-    ]
+    index_cols = [c for c in df_raw.columns if c not in {*pivot_values, "space"}]
 
     df_raw = df_raw.pivot_table(
         index=index_cols,
@@ -147,9 +145,7 @@ def _get_raw_df_from_ds(ds: xr.Dataset) -> pd.DataFrame:
     ]
 
     # Reset type for image_shape columns if present
-    if all(
-        col in df_raw.columns for col in ["image_shape_x", "image_shape_y"]
-    ):
+    if all(col in df_raw.columns for col in ["image_shape_x", "image_shape_y"]):
         df_raw["image_shape_x"] = df_raw["image_shape_x"].astype(int)
         df_raw["image_shape_y"] = df_raw["image_shape_y"].astype(int)
 
@@ -290,9 +286,7 @@ def _create_COCO_dict(
         # Extract and rename required columns for this section
         list_required_columns = map_columns_to_COCO_fields[sections].keys()
         df_section = df[list_required_columns].copy()
-        df_section = df_section.rename(
-            columns=map_columns_to_COCO_fields[sections]
-        )
+        df_section = df_section.rename(columns=map_columns_to_COCO_fields[sections])
 
         # Extract rows as lists of dictionaries
         if sections == "annotations":

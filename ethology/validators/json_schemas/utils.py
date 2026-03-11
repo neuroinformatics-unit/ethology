@@ -8,9 +8,7 @@ import jsonschema
 
 def _get_default_schema(schema_name: str) -> dict:
     """Get the default VIA or COCO schema as a dictionary."""
-    schema_path = (
-        Path(__file__).parent / "schemas" / f"{schema_name}_schema.json"
-    )
+    schema_path = Path(__file__).parent / "schemas" / f"{schema_name}_schema.json"
     with open(schema_path) as file:
         schema_dict = json.load(file)
     return schema_dict
@@ -45,23 +43,17 @@ def _check_file_matches_schema(filepath: Path, schema: dict | None):
         jsonschema.validate(instance=data, schema=schema)
 
 
-def _check_required_properties_keys(
-    required_properties_keys: list, schema: dict
-):
+def _check_required_properties_keys(required_properties_keys: list, schema: dict):
     """Check the input schema includes the required "properties" keys."""
     # Get keys of "properties" dictionaries in schema
     properties_keys_in_schema = _extract_properties_keys(schema)
 
     # Get list of "properties" keys that are required but not in schema
-    missing_keys = set(required_properties_keys) - set(
-        properties_keys_in_schema
-    )
+    missing_keys = set(required_properties_keys) - set(properties_keys_in_schema)
 
     # Raise error if there are missing keys in the schema
     if missing_keys:
-        raise ValueError(
-            f"Required key(s) {sorted(missing_keys)} not found in schema."
-        )
+        raise ValueError(f"Required key(s) {sorted(missing_keys)} not found in schema.")
 
 
 def _check_required_keys_in_dict(
@@ -81,8 +73,7 @@ def _check_required_keys_in_dict(
     missing_keys = set(list_required_keys) - set(data.keys())
     if missing_keys:
         raise ValueError(
-            f"Required key(s) {sorted(missing_keys)} not "
-            f"found{additional_message}."
+            f"Required key(s) {sorted(missing_keys)} not " f"found{additional_message}."
         )
     else:
         keys_with_empty_values = [

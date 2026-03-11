@@ -6,7 +6,6 @@ and inspect them using ``ethology`` and
 `movement <https://movement.neuroinformatics.dev/>`_.
 """
 
-
 # %%
 # Imports
 # -------
@@ -75,9 +74,7 @@ data_dir = ethology_cache / "uas-imagery-of-migratory-waterfowl"
 # %%
 # For this example, we will focus on the annotations labelled by the experts.
 
-annotations_file = (
-    data_dir / "experts" / "20230331_dronesforducks_expert_refined.json"
-)
+annotations_file = data_dir / "experts" / "20230331_dronesforducks_expert_refined.json"
 
 
 # %%
