@@ -66,7 +66,8 @@ class ValidDataset(ABC):
             )
         if not hasattr(cls, "required_data_vars"):
             raise TypeError(
-                f"{cls.__name__} must define 'required_data_vars' " "class variable"
+                f"{cls.__name__} must define 'required_data_vars' "
+                "class variable"
             )
 
     # Validators
@@ -74,28 +75,36 @@ class ValidDataset(ABC):
     def _check_dataset_type(self, attribute, value):
         """Ensure the input is an xarray Dataset."""
         if not isinstance(value, xr.Dataset):
-            raise TypeError(f"Expected an xarray Dataset, but got {type(value)}.")
+            raise TypeError(
+                f"Expected an xarray Dataset, but got {type(value)}."
+            )
 
     @dataset.validator
     def _check_required_data_variables(self, attribute, value):
         """Ensure the dataset has all required data variables."""
         missing_vars = self.required_data_vars.keys() - set(value.data_vars)
         if missing_vars:
-            raise ValueError(f"Missing required data variables: {sorted(missing_vars)}")
+            raise ValueError(
+                f"Missing required data variables: {sorted(missing_vars)}"
+            )
 
     @dataset.validator
     def _check_required_dimensions(self, attribute, value):
         """Ensure the dataset has all required dimensions."""
         missing_dims = self.required_dims - set(value.dims)
         if missing_dims:
-            raise ValueError(f"Missing required dimensions: {sorted(missing_dims)}")
+            raise ValueError(
+                f"Missing required dimensions: {sorted(missing_dims)}"
+            )
 
     @dataset.validator
     def _check_dimensions_per_data_variable(self, attribute, value):
         """Ensure the dataset has all required dimensions."""
         error_messages = []
         for data_var, dims_per_data_var in self.required_data_vars.items():
-            missing_dims = dims_per_data_var - set(value.data_vars[data_var].coords)
+            missing_dims = dims_per_data_var - set(
+                value.data_vars[data_var].coords
+            )
             if missing_dims:
                 error_messages.append(
                     f"data variable '{data_var}' is missing "

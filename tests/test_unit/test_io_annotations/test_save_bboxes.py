@@ -171,7 +171,8 @@ def sample_bboxes_df() -> Callable:
         (
             pd.DataFrame(),
             pytest.raises(pa.errors.SchemaError),
-            "column 'annotation_id' not in dataframe. " "Columns in dataframe: []",
+            "column 'annotation_id' not in dataframe. "
+            "Columns in dataframe: []",
         ),
         (
             pd.DataFrame(
@@ -244,7 +245,9 @@ def test_get_raw_df_from_ds(
     """
     # Read input dataset
     input_file = annotations_test_data[input_file]
-    format: Literal["VIA", "COCO"] = "VIA" if "VIA" in str(input_file) else "COCO"
+    format: Literal["VIA", "COCO"] = (
+        "VIA" if "VIA" in str(input_file) else "COCO"
+    )
     ds = from_files(input_file, format=format)
 
     # Drop "image_shape" data array if required
@@ -320,9 +323,11 @@ def test_add_COCO_data_to_df(annotations_test_data: dict):
                     row["position_x"] + row["shape_x"] / 2,  # xmax
                     row["position_y"] - row["shape_y"] / 2,  # ymin, top-right
                     row["position_x"] + row["shape_x"] / 2,  # xmax
-                    row["position_y"] + row["shape_y"] / 2,  # ymax, bottom-right
+                    row["position_y"]
+                    + row["shape_y"] / 2,  # ymax, bottom-right
                     row["position_x"] - row["shape_x"] / 2,  # xmin
-                    row["position_y"] + row["shape_y"] / 2,  # ymax, bottom-left
+                    row["position_y"]
+                    + row["shape_y"] / 2,  # ymax, bottom-left
                 ]
             ],
             axis=1,
@@ -411,7 +416,11 @@ def test_create_COCO_dict(sample_bboxes_df: Callable):
     )
     for section, section_mapping in map_df_columns_to_coco.items():
         assert all(
-            [x in elem for elem in COCO_dict[section] for x in section_mapping.values()]
+            [
+                x in elem
+                for elem in COCO_dict[section]
+                for x in section_mapping.values()
+            ]
         )
 
 
@@ -426,7 +435,9 @@ def test_create_COCO_dict(sample_bboxes_df: Callable):
         # small COCO file, no supercategory data
     ],
 )
-def test_to_COCO_file(filename: str, annotations_test_data: dict, tmp_path: Path):
+def test_to_COCO_file(
+    filename: str, annotations_test_data: dict, tmp_path: Path
+):
     """Test the function that exports a bboxes dataset to a COCO JSON file."""
     # Read input file as bboxes dataset
     input_file = annotations_test_data[filename]

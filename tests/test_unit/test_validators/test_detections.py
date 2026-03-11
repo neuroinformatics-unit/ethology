@@ -15,7 +15,9 @@ def valid_bbox_detections_dataset():
     space_dims = ["x", "y"]
 
     # Create position, shape and confidence data all zeros
-    position_data = np.zeros((len(image_ids), len(space_dims), len(annotation_ids)))
+    position_data = np.zeros(
+        (len(image_ids), len(space_dims), len(annotation_ids))
+    )
     shape_data = np.copy(position_data)
     category_data = np.ones((len(image_ids), len(annotation_ids)))
     confidence_data = np.zeros((len(image_ids), len(annotation_ids)))

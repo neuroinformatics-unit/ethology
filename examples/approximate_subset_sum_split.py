@@ -187,7 +187,10 @@ def split_at_any_delimiter(text: str, delimiters: list[str]) -> list[str]:
 
 # Get species name per image
 species_per_image_id = np.array(
-    [ds_all.map_image_id_to_filename[i].split("\\")[-2] for i in ds_all.image_id.values]
+    [
+        ds_all.map_image_id_to_filename[i].split("\\")[-2]
+        for i in ds_all.image_id.values
+    ]
 )
 
 # Add the species array to the dataset
@@ -359,7 +362,9 @@ annotation_file_per_image_id = np.array(
 )
 
 # Add to dataset
-ds_all["json_file"] = xr.DataArray(annotation_file_per_image_id, dims="image_id")
+ds_all["json_file"] = xr.DataArray(
+    annotation_file_per_image_id, dims="image_id"
+)
 
 
 # %%

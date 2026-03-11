@@ -30,7 +30,9 @@ def check_if_file_includes_image_shape_data(
 
     if format == "VIA":
         return any(
-            all(ky in img_dict["file_attributes"] for ky in ["width", "height"])
+            all(
+                ky in img_dict["file_attributes"] for ky in ["width", "height"]
+            )
             and img_dict["file_attributes"]["width"] != 0
             and img_dict["file_attributes"]["height"] != 0
             for img_dict in data["_via_img_metadata"].values()
@@ -85,12 +87,16 @@ def count_imgs_and_annots_in_input_file(
 
     elif format == "COCO":
         n_annotations = len(data["annotations"])
-        list_img_id_per_annot = [annot["image_id"] for annot in data["annotations"]]
+        list_img_id_per_annot = [
+            annot["image_id"] for annot in data["annotations"]
+        ]
         n_max_annots_per_image = max(
             [len(list(g)) for _k, g in groupby(list_img_id_per_annot)]
         )
         if unique_images_with_annotations:
-            n_images = len(set([annot["image_id"] for annot in data["annotations"]]))
+            n_images = len(
+                set([annot["image_id"] for annot in data["annotations"]])
+            )
         else:
             n_images = len(data["images"])
             # includes duplicates and images without annotations
@@ -122,7 +128,9 @@ def get_list_images(
             for img in data["_via_img_metadata"].values()
         ]
     elif format == "COCO":
-        return [img["file_name"] for data in list_data for img in data["images"]]
+        return [
+            img["file_name"] for data in list_data for img in data["images"]
+        ]
     else:
         raise ValueError("Unsupported format")
 
@@ -221,7 +229,8 @@ def assert_dataframe(
     # Check number of annotations per image if provided
     if expected_annots_per_image:
         assert all(
-            df.groupby("image_id").count()["x_min"] == expected_annots_per_image
+            df.groupby("image_id").count()["x_min"]
+            == expected_annots_per_image
         )  # count number of "x_min" values when grouping by "image_id"
 
 
@@ -265,7 +274,8 @@ def assert_dataset(
 
     # Check total number of non-nan annotations
     assert (
-        np.sum(np.any(~np.isnan(ds.position.values), axis=1)) == expected_n_annotations
+        np.sum(np.any(~np.isnan(ds.position.values), axis=1))
+        == expected_n_annotations
     )
 
     # Check total number of non-null categories
@@ -361,7 +371,9 @@ def test_from_files(
         "COCO",
     ],
 )
-def test_df_from_multiple_files(format: Literal["VIA", "COCO"], multiple_files: dict):
+def test_df_from_multiple_files(
+    format: Literal["VIA", "COCO"], multiple_files: dict
+):
     """Test that the multiple files reader reads correctly multiple files
     of the supported formats (without any duplicates) as a valid intermediate
     dataframe.
@@ -661,7 +673,9 @@ def test_from_files_duplicates(
         input_files = multiple_files_duplicates[format]["files"]
         n_duplicates = multiple_files_duplicates[format]["duplicates"]
         n_unique_images = multiple_files_duplicates[format]["n_images"]
-        max_annots_per_image = multiple_files_duplicates[format]["max_annots_per_image"]
+        max_annots_per_image = multiple_files_duplicates[format][
+            "max_annots_per_image"
+        ]
 
         # Compute number of annotations, with and without duplicates
         n_total_annotations = sum(
@@ -676,8 +690,8 @@ def test_from_files_duplicates(
     else:
         input_files = annotations_test_data[input_file]
         n_duplicates = 1
-        n_unique_images, n_total_annotations, _ = count_imgs_and_annots_in_input_file(
-            input_files, format
+        n_unique_images, n_total_annotations, _ = (
+            count_imgs_and_annots_in_input_file(input_files, format)
         )
         n_unique_annotations = n_total_annotations - n_duplicates
         max_annots_per_image = 1
@@ -763,7 +777,8 @@ def test_df_to_xarray_ds(
 
     # Check image_shape array is present if non-default in the intermediate df
     check_image_shape = (
-        not (df["image_width"] == 0).all() and not (df["image_height"] == 0).all()
+        not (df["image_width"] == 0).all()
+        and not (df["image_height"] == 0).all()
     )
     if check_image_shape:
         assert "image_shape" in ds.data_vars
@@ -823,12 +838,16 @@ def test_image_id_assignment_in_ds(
         }
     elif format == "COCO":
         map_img_id_to_filename_in = {
-            img_dict["id"]: img_dict["file_name"] for img_dict in data["images"]
+            img_dict["id"]: img_dict["file_name"]
+            for img_dict in data["images"]
         }
     assert map_img_id_to_filename_in != map_img_id_to_filename_alphabetical
 
     # Check image_id in output dataset is assigned alphabetically
-    assert ds.attrs["map_image_id_to_filename"] == map_img_id_to_filename_alphabetical
+    assert (
+        ds.attrs["map_image_id_to_filename"]
+        == map_img_id_to_filename_alphabetical
+    )
 
 
 def test_equal_ds_from_equal_annotations(annotations_test_data: dict):
@@ -853,16 +872,26 @@ def test_equal_ds_from_equal_annotations(annotations_test_data: dict):
     assert ds_via.equals(ds_coco)
 
     # Check attributes that should be different
-    assert ds_via.attrs["annotation_files"] != ds_coco.attrs["annotation_files"]
-    assert ds_via.attrs["annotation_format"] != ds_coco.attrs["annotation_format"]
+    assert (
+        ds_via.attrs["annotation_files"] != ds_coco.attrs["annotation_files"]
+    )
+    assert (
+        ds_via.attrs["annotation_format"] != ds_coco.attrs["annotation_format"]
+    )
 
     # Check attributes that should be the same
-    assert ds_via.attrs["map_category_to_str"] == ds_coco.attrs["map_category_to_str"]
+    assert (
+        ds_via.attrs["map_category_to_str"]
+        == ds_coco.attrs["map_category_to_str"]
+    )
     assert (
         ds_via.attrs["map_image_id_to_filename"]
         == ds_coco.attrs["map_image_id_to_filename"]
     )
-    assert ds_via.attrs["images_directories"] == ds_coco.attrs["images_directories"]
+    assert (
+        ds_via.attrs["images_directories"]
+        == ds_coco.attrs["images_directories"]
+    )
 
 
 @pytest.mark.parametrize(
@@ -948,7 +977,9 @@ def test_annotations_sorted_by_image_filename_in_ds(
     """
     # Get input file(s)
     if input_file_type == "single":
-        input_filepaths = annotations_test_data[f"small_bboxes_image_id_{format}.json"]
+        input_filepaths = annotations_test_data[
+            f"small_bboxes_image_id_{format}.json"
+        ]
     elif input_file_type == "multiple":
         input_files = (
             ["VIA_JSON_sample_2.json", "VIA_JSON_sample_1.json"]
@@ -967,7 +998,9 @@ def test_annotations_sorted_by_image_filename_in_ds(
     # Check that the image_id to filename map in the dataset is sorted
     sorted_filenames = sorted(ds.attrs["map_image_id_to_filename"].values())
     map_img_id_to_filename_sorted = dict(enumerate(sorted_filenames))
-    assert ds.attrs["map_image_id_to_filename"] == map_img_id_to_filename_sorted
+    assert (
+        ds.attrs["map_image_id_to_filename"] == map_img_id_to_filename_sorted
+    )
 
 
 @pytest.mark.parametrize(
@@ -979,9 +1012,14 @@ def test_annotations_sorted_by_image_filename_in_ds(
         ({"image_width": 100}, "width", 0),  # attribute not present
     ],
 )
-def test_get_image_shape_attr_as_integer(file_attrs, attr_name, expected_value):
+def test_get_image_shape_attr_as_integer(
+    file_attrs, attr_name, expected_value
+):
     """Test the image shape attribute is extracted correctly as an integer.
 
     The file attributes should come from a VIA input file.
     """
-    assert _get_image_shape_attr_as_integer(file_attrs, attr_name) == expected_value
+    assert (
+        _get_image_shape_attr_as_integer(file_attrs, attr_name)
+        == expected_value
+    )

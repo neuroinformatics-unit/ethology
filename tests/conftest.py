@@ -11,7 +11,9 @@ pytest_plugins = [
     "tests.fixtures.annotations",
 ]
 
-GIN_TEST_DATA_REPO = "https://gin.g-node.org/neuroinformatics/ethology-test-data"
+GIN_TEST_DATA_REPO = (
+    "https://gin.g-node.org/neuroinformatics/ethology-test-data"
+)
 
 
 @pytest.fixture(scope="session")
@@ -67,7 +69,9 @@ def get_paths_test_data() -> Callable[[dict, str], dict]:
     given ``subdir_name``.
     """
 
-    def _get_paths_test_data(pooch_registry: pooch.Pooch, subdir_name: str) -> dict:
+    def _get_paths_test_data(
+        pooch_registry: pooch.Pooch, subdir_name: str
+    ) -> dict:
         """Return the paths of the test files under the specified subdirectory.
 
         Parameters

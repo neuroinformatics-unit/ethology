@@ -118,7 +118,9 @@ def from_files(
         df_all = _df_from_single_file(file_paths, format=format)
 
     # Get maps to set as dataset attributes
-    map_image_id_to_filename, map_category_to_str = _get_map_attributes_from_df(df_all)
+    map_image_id_to_filename, map_category_to_str = (
+        _get_map_attributes_from_df(df_all)
+    )
 
     # Convert dataframe to xarray dataset
     ds = _df_to_xarray_ds(df_all)
@@ -199,7 +201,8 @@ def _df_from_multiple_files(
     """
     # Get list of dataframes
     df_list = [
-        _df_from_single_file(file_path=file, format=format) for file in list_filepaths
+        _df_from_single_file(file_path=file, format=format)
+        for file in list_filepaths
     ]
 
     # Concatenate and reindex
@@ -222,7 +225,9 @@ def _df_from_multiple_files(
     # to identify duplicates, as these may differ across files.
     df_all = df_all.drop_duplicates(
         subset=[
-            col for col in df_all.columns if col not in ["image_width", "image_height"]
+            col
+            for col in df_all.columns
+            if col not in ["image_width", "image_height"]
         ],
         ignore_index=True,
         inplace=False,
@@ -357,11 +362,15 @@ def _df_rows_from_valid_VIA_file(file_path: Path) -> list[dict]:
                 # category name
                 # in VIA files, the category_id is a string
                 category_id_str = region_attributes[supercategory]
-                categories_dict = supercategories_dict[supercategory]["options"]
+                categories_dict = supercategories_dict[supercategory][
+                    "options"
+                ]
                 category = categories_dict[category_id_str]
 
                 # category_id as int
-                category_id = _category_id_as_int(category_id_str, categories_dict)
+                category_id = _category_id_as_int(
+                    category_id_str, categories_dict
+                )
 
             else:
                 supercategory, category, category_id = (
@@ -428,7 +437,9 @@ def _get_image_shape_attr_as_integer(
         return default_value
 
 
-def _category_id_as_int(category_id_str: str, list_categories: list[str]) -> int:
+def _category_id_as_int(
+    category_id_str: str, list_categories: list[str]
+) -> int:
     """Convert category_id to int if possible, otherwise factorize it.
 
     The category_id is a string in VIA files. If it cannot be converted to an
@@ -491,7 +502,8 @@ def _df_rows_from_valid_COCO_file(file_path: Path) -> list[dict]:
         )
     }
     map_img_id_coco_to_filename = {
-        img_dict["id"]: img_dict["file_name"] for img_dict in data_dict["images"]
+        img_dict["id"]: img_dict["file_name"]
+        for img_dict in data_dict["images"]
     }
     map_img_id_coco_to_width_height = {
         img_dict["id"]: (img_dict["width"], img_dict["height"])
@@ -509,7 +521,9 @@ def _df_rows_from_valid_COCO_file(file_path: Path) -> list[dict]:
         # image data
         img_id_coco = annot_dict["image_id"]
         image_filename = map_img_id_coco_to_filename[img_id_coco]
-        image_width, image_height = map_img_id_coco_to_width_height[img_id_coco]
+        image_width, image_height = map_img_id_coco_to_width_height[
+            img_id_coco
+        ]
 
         # compute image ID following ethology convention
         img_id_ethology = map_img_id_coco_to_ethology[img_id_coco]
@@ -704,9 +718,7 @@ def _extract_arrays_from_df(
         if key == "image_shape_array":
             array_dict[key] = np.stack(
                 [np.unique(arr, axis=0) for arr in list_arrays], axis=0
-            ).squeeze(
-                axis=1
-            )  # (n_images, N_DIM)
+            ).squeeze(axis=1)  # (n_images, N_DIM)
 
         else:
             # Pad arrays with NaN values along the annotation ID axis

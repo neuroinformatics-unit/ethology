@@ -57,12 +57,17 @@ def ACTD_dataset_to_split(annotations_test_data):
     from ethology.io.annotations import load_bboxes
 
     # load dataset
-    input_file_path = annotations_test_data["ACTD_1_Terrestrial_group_data_CCT.json"]
+    input_file_path = annotations_test_data[
+        "ACTD_1_Terrestrial_group_data_CCT.json"
+    ]
     ds = load_bboxes.from_files(input_file_path, format="COCO")
 
     # Get species per image
     species_per_image_id = np.array(
-        [ds.map_image_id_to_filename[i].split("\\")[-2] for i in ds.image_id.values]
+        [
+            ds.map_image_id_to_filename[i].split("\\")[-2]
+            for i in ds.image_id.values
+        ]
     )
     assert species_per_image_id.shape[0] == len(ds.image_id)
 
@@ -181,8 +186,12 @@ def test_split_dataset_group_by_apss(inputs, request):
     total_n_images = len(inputs["dataset"].image_id)
     fraction_subset_1 = len(ds_subset_1.image_id) / total_n_images
     fraction_subset_2 = len(ds_subset_2.image_id) / total_n_images
-    assert fraction_subset_1 == pytest.approx(list_input_fractions[0], abs=0.005)
-    assert fraction_subset_2 == pytest.approx(list_input_fractions[1], abs=0.005)
+    assert fraction_subset_1 == pytest.approx(
+        list_input_fractions[0], abs=0.005
+    )
+    assert fraction_subset_2 == pytest.approx(
+        list_input_fractions[1], abs=0.005
+    )
 
     # assert that the subsets are disjoint in the grouping variable
     assert (
@@ -232,8 +241,12 @@ def test_split_dataset_group_by_kfold(inputs, request):
     total_n_images = len(inputs["dataset"].image_id)
     fraction_subset_1 = len(ds_subset_1.image_id) / total_n_images
     fraction_subset_2 = len(ds_subset_2.image_id) / total_n_images
-    assert fraction_subset_1 == pytest.approx(list_input_fractions[0], abs=0.01)
-    assert fraction_subset_2 == pytest.approx(list_input_fractions[1], abs=0.01)
+    assert fraction_subset_1 == pytest.approx(
+        list_input_fractions[0], abs=0.01
+    )
+    assert fraction_subset_2 == pytest.approx(
+        list_input_fractions[1], abs=0.01
+    )
 
     # assert that the subsets are disjoint in the grouping variable
     assert (
@@ -405,17 +418,24 @@ def test_split_dataset_random(inputs, request):
     # assert dataset sizes
     list_expected_fractions = inputs["list_fractions"]
     total_n_images = len(inputs["dataset"].image_id)
-    list_output_fractions = [len(ds.image_id) / total_n_images for ds in ds_subsets]
+    list_output_fractions = [
+        len(ds.image_id) / total_n_images for ds in ds_subsets
+    ]
     assert all(
         fraction == pytest.approx(list_expected_fractions[i], abs=0.005)
         for i, fraction in enumerate(list_output_fractions)
     )
 
     # Indices per split should be exclusive
-    list_output_idcs_per_split = [ds.image_id.values.tolist() for ds in ds_subsets]
+    list_output_idcs_per_split = [
+        ds.image_id.values.tolist() for ds in ds_subsets
+    ]
     assert (
         set.intersection(
-            *[set(idcs_in_split) for idcs_in_split in list_output_idcs_per_split]
+            *[
+                set(idcs_in_split)
+                for idcs_in_split in list_output_idcs_per_split
+            ]
         )
         == set()
     )
@@ -548,7 +568,9 @@ def test_split_dataset_group_by_logger_info(
         {},
     ],
 )
-def test_split_dataset_group_by_error(inputs, extra_kwargs, expected_error_message):
+def test_split_dataset_group_by_error(
+    inputs, extra_kwargs, expected_error_message
+):
     with pytest.raises(ValueError) as e:
         _ds_subset_1, _ds_subset_2 = split_dataset_group_by(
             **inputs, group_by_var="foo", **extra_kwargs
@@ -614,7 +636,9 @@ def test_split_dataset_random_error(inputs, expected_error_message):
         ),
     ],
 )
-def test_split_dataset_warning_empty_subset(caplog, request, split_function, inputs):
+def test_split_dataset_warning_empty_subset(
+    caplog, request, split_function, inputs
+):
     """Test that a warning is thrown when at least one subset is empty."""
     # Get dataset to split
     ds = request.getfixturevalue("valid_bbox_annotations_ds_to_split_1")
