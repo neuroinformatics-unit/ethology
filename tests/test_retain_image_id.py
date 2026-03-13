@@ -3,8 +3,6 @@
 import json
 from pathlib import Path
 
-import pytest
-
 from ethology.io.annotations.load_bboxes import (
     _compute_filename_to_original_id,
     _compute_filename_to_original_id_coco,
@@ -12,10 +10,10 @@ from ethology.io.annotations.load_bboxes import (
     from_files,
 )
 
-
 # ---------------------------------------------------------------------------
 # helpers
 # ---------------------------------------------------------------------------
+
 
 def _write_coco(tmp_path: Path, name: str = "coco.json") -> Path:
     data = {
@@ -73,8 +71,8 @@ def _write_via(
     data = {
         "_via_img_metadata": metadata,
         "_via_attributes": {
-            "file":{},
-            "region":{
+            "file": {},
+            "region": {
                 "animal": {
                     "type": "dropdown",
                     "options": {"1": "cat"},
@@ -131,7 +129,9 @@ class TestRetainImageIdCOCO:
 class TestRetainImageIdVIA:
     def test_numeric_keys_preserved(self, tmp_path: Path) -> None:
         """VIA metadata keys that are numeric ints are preserved (lines 128-147)."""
-        p = _write_via(tmp_path, img_keys=[("10", "imgA.jpg"), ("20", "imgB.jpg")])
+        p = _write_via(
+            tmp_path, img_keys=[("10", "imgA.jpg"), ("20", "imgB.jpg")]
+        )
         ds = from_files(str(p), format="VIA", retain_image_id=True)
         mapping = ds.attrs["map_image_id_to_original"]
         assert set(mapping.values()) == {10, 20}
