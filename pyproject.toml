@@ -26,6 +26,7 @@ dependencies = [
   "torch",
   "torchvision",
   "loguru",
+  "lightning>=2.6.0",
   "tables>=3.10.1"     # wheels compatible with MacOS ARM
 ]
 

@@ -445,6 +445,12 @@ class ValidBboxAnnotationsCOCO(pa.DataFrameModel):
 
     """
 
+    class Config:
+        """Pandera configuration for this schema."""
+
+        # Allow automatic type coercion (e.g., float32 -> float64)
+        coerce = True
+
     # index
     idx: Index[int] = pa.Field(ge=0, check_name=False)
 
