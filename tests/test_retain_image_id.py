@@ -10,7 +10,6 @@ from ethology.io.annotations.load_bboxes import (
     from_files,
 )
 
-
 # ---------------------------------------------------------------------------
 # helpers
 # ---------------------------------------------------------------------------
@@ -46,9 +45,7 @@ def _write_coco(tmp_path: Path, name: str = "coco.json") -> Path:
                 "category_id": 1,
             },
         ],
-        "categories": [
-            {"id": 1, "name": "cat", "supercategory": "animal"}
-        ],
+        "categories": [{"id": 1, "name": "cat", "supercategory": "animal"}],
     }
     p = tmp_path / name
     p.write_text(json.dumps(data), encoding="utf-8")
@@ -197,6 +194,7 @@ class TestDispatcher:
     def test_unknown_format_returns_empty_dict(self) -> None:
         """The fallback return {} fires for an unknown format."""
         result = _compute_filename_to_original_id(
-            [], "UNKNOWN"  # type: ignore[arg-type]
+            [],
+            "UNKNOWN",  # type: ignore[arg-type]
         )
         assert result == {}
