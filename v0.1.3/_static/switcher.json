@@ -1,0 +1,16 @@
+[
+  {
+    "name": "dev",
+    "version": "dev",
+    "url": "https://ethology.neuroinformatics.dev/dev"
+  },
+  {
+    "name": "v0.1.3 (latest)",
+    "version": "v0.1.3",
+    "url": "https://ethology.neuroinformatics.dev/latest"
+  },
+  {
+    "version": "v0.1.2",
+    "url": "https://ethology.neuroinformatics.dev/v0.1.2"
+  }
+]

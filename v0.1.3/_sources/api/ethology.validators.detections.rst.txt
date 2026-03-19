@@ -1,0 +1,21 @@
+﻿ethology.validators.detections
+==============================
+
+.. rubric:: Description
+
+.. automodule:: ethology.validators.detections
+
+.. currentmodule:: ethology.validators.detections
+
+
+.. rubric:: Classes
+
+.. autosummary::
+    :toctree: .
+    :nosignatures:
+    
+    ValidBboxDetectionsDataset
+    
+
+
+

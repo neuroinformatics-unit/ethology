@@ -1,0 +1,23 @@
+ValidBboxAnnotationsDataset
+===========================
+
+.. currentmodule:: ethology.validators.annotations
+
+.. autoclass:: ValidBboxAnnotationsDataset
+   :members:
+   :inherited-members:
+   
+
+   
+   
+
+   
+   
+   
+   
+
+   
+   
+
+.. minigallery:: ethology.validators.annotations.ValidBboxAnnotationsDataset
+   :add-heading: Examples using ``ValidBboxAnnotationsDataset``
