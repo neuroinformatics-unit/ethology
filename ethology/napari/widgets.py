@@ -9,7 +9,7 @@ if TYPE_CHECKING:
     import napari
 
 
-def make_correction_widget(napari_viewer: "napari.Viewer"):
+def make_correction_widget(napari_viewer: napari.Viewer):
     """Return a widget for loading and saving bounding box annotations.
 
     The widget exposes two panels:
@@ -28,6 +28,7 @@ def make_correction_widget(napari_viewer: "napari.Viewer"):
     -------
     magicgui.widgets.Container
         A container holding the two sub-widgets.
+
     """
     from magicgui import magicgui
     from magicgui.widgets import Container

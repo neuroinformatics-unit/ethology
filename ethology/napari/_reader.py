@@ -24,6 +24,7 @@ def napari_get_reader(path: str | list[str]):
     callable or None
         A reader function if the path is a supported annotation file,
         otherwise None.
+
     """
     if isinstance(path, list):
         path = path[0]
@@ -61,6 +62,7 @@ def _detect_format(path: str | Path) -> str | None:
     -------
     str or None
         "COCO", "VIA", or None if the format cannot be determined.
+
     """
     try:
         with open(path) as f:
@@ -87,6 +89,7 @@ def _reader_function(path: str | list[str]) -> list[LayerData]:
     list of LayerData
         A list containing one tuple of (shapes_data, layer_kwargs, "shapes").
         Returns an empty list if the file cannot be read.
+
     """
     from ethology.io.annotations.load_bboxes import from_files
 
@@ -116,6 +119,7 @@ def _dataset_to_napari_shapes(ds: Any) -> list[LayerData]:
     -------
     list of LayerData
         A list with a single LayerData tuple for a napari Shapes layer.
+
     """
     shapes: list[np.ndarray] = []
     shape_types: list[str] = []
@@ -128,8 +132,8 @@ def _dataset_to_napari_shapes(ds: Any) -> list[LayerData]:
     x_idx = space_vals.index("x")
     y_idx = space_vals.index("y")
 
-    position_vals = ds.position.values   # (n_images, 2, n_annots)
-    shape_vals = ds.shape.values          # (n_images, 2, n_annots)
+    position_vals = ds.position.values  # (n_images, 2, n_annots)
+    shape_vals = ds.shape.values  # (n_images, 2, n_annots)
     category_vals = ds.category.values if has_category else None
 
     for img_i in range(ds.sizes["image_id"]):

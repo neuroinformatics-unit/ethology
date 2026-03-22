@@ -11,7 +11,6 @@ import xarray as xr
 
 from ethology.napari._writer import _shapes_to_dataset, write_shapes
 
-
 # ------------- helpers ---------------------------------------------------
 
 
@@ -32,8 +31,8 @@ def _make_rect(x_min: float, y_min: float, x_max: float, y_max: float):
 def two_image_shapes():
     """Two rectangles, one per image."""
     return [
-        _make_rect(10, 20, 70, 60),    # image 0: x in [20,60], y in [10,70]
-        _make_rect(100, 150, 250, 350), # image 1
+        _make_rect(10, 20, 70, 60),  # image 0: x in [20,60], y in [10,70]
+        _make_rect(100, 150, 250, 350),  # image 1
     ]
 
 
@@ -141,7 +140,9 @@ def test_shapes_to_dataset_builds_fallback_maps():
     assert 2 in ds.attrs["map_category_to_str"]
 
 
-def test_shapes_to_dataset_category_ids_stored(two_image_shapes, two_image_meta):
+def test_shapes_to_dataset_category_ids_stored(
+    two_image_shapes, two_image_meta
+):
     ds = _shapes_to_dataset(
         two_image_shapes,
         two_image_meta["shape_type"],
@@ -185,7 +186,9 @@ def test_write_shapes_annotation_count(
 # ------------- round-trip (reader → writer → re-load) --------------------
 
 
-def test_roundtrip_annotation_count(annotations_test_data: dict, tmp_path: Path):
+def test_roundtrip_annotation_count(
+    annotations_test_data: dict, tmp_path: Path
+):
     """Loading then saving must preserve the number of bounding boxes."""
     from ethology.io.annotations.load_bboxes import from_files
     from ethology.napari._reader import _dataset_to_napari_shapes
@@ -229,7 +232,7 @@ def test_roundtrip_bbox_geometry(annotations_test_data: dict, tmp_path: Path):
 
     # Compare non-NaN position values (order may differ per image)
     for img_i in range(ds.sizes["image_id"]):
-        orig_pos = ds.position.values[img_i]         # (2, n_annots)
+        orig_pos = ds.position.values[img_i]  # (2, n_annots)
         mask = ~np.isnan(orig_pos[0])
         orig_sorted = np.sort(orig_pos[:, mask], axis=1)
 

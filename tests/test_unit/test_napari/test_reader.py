@@ -17,7 +17,6 @@ from ethology.napari._reader import (
     napari_get_reader,
 )
 
-
 # ------------- helpers ---------------------------------------------------
 
 
@@ -39,9 +38,7 @@ def minimal_coco_file(tmp_path: Path) -> Path:
                 "iscrowd": 0,
             }
         ],
-        "categories": [
-            {"id": 1, "name": "crab", "supercategory": "animal"}
-        ],
+        "categories": [{"id": 1, "name": "crab", "supercategory": "animal"}],
     }
     path = tmp_path / "sample.json"
     path.write_text(json.dumps(data))
@@ -174,11 +171,17 @@ def test_shapes_are_rectangles(annotations_test_data: dict):
     assert layer_type == "shapes"
     assert all(st == "rectangle" for st in kwargs["shape_type"])
     for shape in shapes:
-        assert shape.shape == (4, 2), "Each rectangle must have 4 corner points"
+        assert shape.shape == (4, 2), (
+            "Each rectangle must have 4 corner points"
+        )
         unique_xs = np.unique(np.round(shape[:, 1], 8))
         unique_ys = np.unique(np.round(shape[:, 0], 8))
-        assert len(unique_xs) == 2, "Rectangle must have exactly 2 unique x values"
-        assert len(unique_ys) == 2, "Rectangle must have exactly 2 unique y values"
+        assert len(unique_xs) == 2, (
+            "Rectangle must have exactly 2 unique x values"
+        )
+        assert len(unique_ys) == 2, (
+            "Rectangle must have exactly 2 unique y values"
+        )
 
 
 def test_nan_padded_annotations_are_excluded(annotations_test_data: dict):

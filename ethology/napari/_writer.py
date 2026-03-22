@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from pathlib import Path
 from typing import Any
 
 import numpy as np
@@ -31,6 +30,7 @@ def write_shapes(path: str, data: list, meta: dict) -> list[str]:
     -------
     list of str
         List containing the path to the written file.
+
     """
     from ethology.io.annotations.save_bboxes import to_COCO_file
 
@@ -72,6 +72,7 @@ def _shapes_to_dataset(
     ------
     ValueError
         If no rectangle shapes are found in the input data.
+
     """
     raw_image_ids = np.asarray(
         properties.get("image_id", np.zeros(len(shapes), dtype=int)),
@@ -153,14 +154,14 @@ def _shapes_to_dataset(
     ) or {img_id: f"image_{img_id}.jpg" for img_id in unique_image_ids}
 
     unique_cat_ids = set(int(c) for c in category_data.flatten() if c != -1)
-    map_category_to_str: dict = layer_metadata.get(
-        "map_category_to_str"
-    ) or {cat_id: f"category_{cat_id}" for cat_id in sorted(unique_cat_ids)}
+    map_category_to_str: dict = layer_metadata.get("map_category_to_str") or {
+        cat_id: f"category_{cat_id}" for cat_id in sorted(unique_cat_ids)
+    }
 
     ds.attrs = {
         "annotation_files": layer_metadata.get("annotation_files", ""),
         "annotation_format": layer_metadata.get("annotation_format", "COCO"),
-        "images_directories": layer_metadata.get("images_directories", None),
+        "images_directories": layer_metadata.get("images_directories"),
         "map_category_to_str": map_category_to_str,
         "map_image_id_to_filename": map_image_id_to_filename,
     }
