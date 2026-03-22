@@ -84,7 +84,7 @@ def _shapes_to_dataset(
     )
 
     rows: list[dict[str, Any]] = []
-    for i, (shape, stype) in enumerate(zip(shapes, shape_types)):
+    for i, (shape, stype) in enumerate(zip(shapes, shape_types, strict=False)):
         if stype != "rectangle":
             continue
         ys = shape[:, 0]
