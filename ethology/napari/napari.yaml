@@ -1,0 +1,28 @@
+name: ethology
+display_name: Ethology
+contributions:
+  commands:
+    - id: ethology.get_reader
+      python_name: ethology.napari._reader:napari_get_reader
+      title: Open annotation file with ethology
+    - id: ethology.write_shapes
+      python_name: ethology.napari._writer:write_shapes
+      title: Save bounding boxes with ethology
+    - id: ethology.make_correction_widget
+      python_name: ethology.napari.widgets:make_correction_widget
+      title: Open Annotation Correction Widget
+  readers:
+    - command: ethology.get_reader
+      accepts_directories: false
+      filename_patterns:
+        - "*.json"
+  writers:
+    - command: ethology.write_shapes
+      filename_extensions:
+        - ".json"
+      layer_types:
+        - "shapes"
+  widgets:
+    - command: ethology.make_correction_widget
+      display_name: Annotation Correction
+      autogenerate: false

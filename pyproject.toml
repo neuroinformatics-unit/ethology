@@ -36,6 +36,8 @@ dependencies = [
 "Source Code" = "https://github.com/neuroinformatics-unit/ethology"
 "User Support" = "https://github.com/neuroinformatics-unit/ethology/issues"
 
+[project.entry-points."napari.manifest"]
+ethology = "ethology.napari:napari.yaml"
 
 [project.optional-dependencies]
 dev = [
@@ -54,6 +56,12 @@ dev = [
   "check-manifest",
   "types-PyYAML",
   "types-requests",
+]
+
+napari = [
+  "napari>=0.4.19",
+  "magicgui>=0.8.0",
+  "qtpy",
 ]
 
 docs = [
@@ -78,6 +86,9 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
 include-package-data = true
+
+[tool.setuptools.package-data]
+"ethology.napari" = ["napari.yaml"]
 
 [tool.setuptools.packages.find]
 include = ["ethology*"]
@@ -129,7 +140,7 @@ per-file-ignores = { "tests/*" = [
   "D400", # first line should end with a period.
   "D415", # first line should end with a period, question mark...
   "D205", # missing blank line between summary and description
-] }
+], "ethology/napari/*" = ["D401"] }
 
 [tool.ruff.format]
 docstring-code-format = true # Also format code in docstrings
