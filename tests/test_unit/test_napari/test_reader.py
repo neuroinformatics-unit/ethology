@@ -187,9 +187,13 @@ def test_shapes_are_rectangles(annotations_test_data: dict):
 def test_nan_padded_annotations_are_excluded(annotations_test_data: dict):
     from ethology.io.annotations.load_bboxes import from_files
 
+    # Use a file with variable annotations per image so the dataset
+    # has NaN-padded rows, which exercises the `continue` branch
+    # in _dataset_to_napari_shapes.
     ds = from_files(
-        annotations_test_data["small_bboxes_COCO.json"], format="COCO"
+        annotations_test_data["COCO_JSON_sample_1.json"], format="COCO"
     )
+    assert ds.sizes["id"] > 1, "Dataset must have NaN padding for this test"
     n_valid = int((~np.isnan(ds.position.values[:, 0, :])).sum())
     shapes, _kwargs, _layer_type = _dataset_to_napari_shapes(ds)[0]
     assert len(shapes) == n_valid

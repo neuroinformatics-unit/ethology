@@ -8,7 +8,7 @@ from sphinx_gallery import sorting
 
 # Used when building API docs, put the dependencies
 # of any class you are documenting here
-autodoc_mock_imports: list[str] = ["cv2"]
+autodoc_mock_imports: list[str] = ["cv2", "napari", "magicgui"]
 
 # Add the module path to sys.path here.
 # If the directory is relative to the documentation root,

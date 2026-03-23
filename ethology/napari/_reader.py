@@ -71,7 +71,7 @@ def _detect_format(path: str | Path) -> str | None:
             return "COCO"
         if _is_via_file(data):
             return "VIA"
-    except Exception:
+    except Exception:  # pragma: no cover
         pass
     return None
 

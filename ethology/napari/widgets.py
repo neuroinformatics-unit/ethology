@@ -9,7 +9,7 @@ if TYPE_CHECKING:
     import napari
 
 
-def make_correction_widget(napari_viewer: napari.Viewer):
+def make_correction_widget(napari_viewer: "napari.Viewer"):  # pragma: no cover
     """Return a widget for loading and saving bounding box annotations.
 
     The widget exposes two panels:
@@ -38,7 +38,7 @@ def make_correction_widget(napari_viewer: napari.Viewer):
         annotation_file={"label": "Annotation file", "mode": "r"},
         format={"label": "Format", "choices": ["COCO", "VIA"]},
     )
-    def load_widget(annotation_file: Path = Path("."), format: str = "COCO"):
+    def load_widget(annotation_file: Path = Path("."), format: str = "COCO"):  # pragma: no cover
         """Load bounding box annotations as a napari Shapes layer."""
         from ethology.io.annotations.load_bboxes import from_files
         from ethology.napari._reader import _dataset_to_napari_shapes
@@ -61,7 +61,7 @@ def make_correction_widget(napari_viewer: napari.Viewer):
         call_button="Save corrected annotations",
         output_file={"label": "Output COCO file", "mode": "w"},
     )
-    def save_widget(output_file: Path = Path("corrected.json")):
+    def save_widget(output_file: Path = Path("corrected.json")):  # pragma: no cover
         """Save the active Shapes layer to a COCO annotation file."""
         from ethology.napari._writer import write_shapes
 
