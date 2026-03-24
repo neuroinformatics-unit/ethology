@@ -232,6 +232,7 @@ sphinx_gallery_conf = {
         [
             "coco_bbox_ethology_and_movement.py",
             "approximate_subset_sum_split.py",
+            "convert_bboxes_to_masks.py",
             "*",
         ]
     ),

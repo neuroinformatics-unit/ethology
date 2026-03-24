@@ -1,265 +1,340 @@
-"""Compute
+"""Convert bounding boxes to masks using SAM2
+===============================================
 
-This example demos:
-- how to run SAM2 to compute masks for a given bbox dataset
-- how to store the output masks as zarr
-- how to read the zarr store as a masks dataarray that we can align with our
-  bboxes dataset
-- how to visualise images and masks in napari
+Use `SAM2 <https://github.com/facebookresearch/sam2>`_ to generate instance
+segmentation masks from bounding box annotations, save them to a
+`zarr <https://zarr.readthedocs.io/>`_ store, and read the masks back aligned
+with the original bounding boxes dataset.
 
-It also includes the ImageArray lazy loader and demos on how to
-plot the data.
-
-It uses a conditional fallback: run SAM2 if available, otherwise download pre-computed results
+.. note::
+   This example requires the ``sam2`` package and a CUDA or MPS device for
+   running SAM2 inference. If neither is available, pre-computed masks are
+   downloaded instead. Install ``sam2`` with ``pip install sam2``.
 """
 
+
 # %%
-from datetime import datetime
+# Imports
+# -------
+
+import shutil
+import tempfile
 from pathlib import Path
 
+import dask
 import dask.array as da
 import matplotlib.pyplot as plt
-import napari
 import numpy as np
+import pooch
+import torch
 import xarray as xr
 import zarr
-
-# from octron.sam_octron.helpers.sam2_zarr import (
-#     create_image_zarr,
-#     mark_frames_annotated,
-# )
 from PIL import Image
-from sam2.sam2_image_predictor import SAM2ImagePredictor
 
 from ethology.io.annotations import load_bboxes
 
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-# Input data
-
-# Predictor
-SAM_OCTRON_LOCAL_DIR = Path(
-    "/Users/sofia/swc/project_octron/OCTRON-GUI/octron/sam_octron"
-)
-SAM2_CKPT_PATH = (
-    SAM_OCTRON_LOCAL_DIR / "checkpoints" / "sam2.1_hiera_base_plus.pt"
-)
-SAM2_CONFIG_PATH = (
-    SAM_OCTRON_LOCAL_DIR / "configs" / "sam2.1" / "sam2.1_hiera_b+.yaml"
-)
-
-# input bbox groundtruth data
-DATA_DIR = Path("/Users/sofia/swc/CrabLabels/sep2023-full")
-IMAGES_DIR = DATA_DIR / "frames"
-ANNOTATIONS_FILE = DATA_DIR / "annotations" / "VIA_JSON_combined_coco_gen.json"
-
-# Output dir
-timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-OUTPUT_DIR = Path(
-    f"/Users/sofia/arc/project_Zoo_crabs/crabs-exploration/output_{timestamp}"
-)  # root output folder
-
-# %%%%%%%%%%%%%%%%%%%%%%%%%%
-# Helpers
+# For interactive plots: install ipympl with `pip install ipympl` and uncomment
+# the following line in your notebook
+# %matplotlib widget
 
 
-class ImageArrayLazy:
-    """A lazy array for images in a list."""
+# %%
+# Download dataset
+# ----------------
+#
+# For this example, we will use the dataset from the
+# `UAS Imagery of Migratory Waterfowl at New Mexico Wildlife Refuges <https://lila.science/datasets/uas-imagery-of-migratory-waterfowl-at-new-mexico-wildlife-refuges/>`_.
+# This dataset is part of the `Drones For Ducks project
+# <https://aspire.unm.edu/research/funded-research/ducks-and-drones.html>`_
+# that aims to develop an efficient method to count and identify species of
+# migratory waterfowl at wildlife refuges across New Mexico.
+#
+# The dataset is made up of a set of drone images and corresponding
+# bounding box annotations. Annotations are provided by both expert
+# annotators and volunteers.
+#
+# Since the dataset is not very large, we can download it as a zip file
+# directly from the URL provided in the dataset webpage.
+# We use the `pooch <https://github.com/fatiando/pooch/>`_ library
+# to download it to the ``.ethology`` cache directory.
 
-    def __init__(self, img_paths):
-        self.img_paths = sorted(img_paths)
-        # add image shape, assuming all have same as
-        # first sample
-        sample = np.array(Image.open(img_paths[0]))  # H, W, C
-        self.img_h, self.img_w, self.img_c = sample.shape
 
-    def __len__(self):
-        return len(self.img_paths)
+# Source of the dataset
+data_source = {
+    "url": "https://storage.googleapis.com/public-datasets-lila/uas-imagery-of-migratory-waterfowl/uas-imagery-of-migratory-waterfowl.20240220.zip",
+    "hash": "c5b8dfc5a87ef625770ac8f22335dc9eb8a67688b610490a029dae81815a9896",
+}
 
-    def __getitem__(self, idx):
-        return np.array(Image.open(self.img_paths[idx]))
+# Define cache directory
+ethology_cache = Path.home() / ".ethology"
+ethology_cache.mkdir(exist_ok=True)
 
-    @property
-    def shape(self):
-        return (len(self.img_paths), self.img_h, self.img_w, self.img_c)
-        # B, H, W, C
-
-
-# %%%%%%%%%%%%%%%%%%%%%%
-# Read groundtruth as ethology annotation dataset
-ds_bboxes = load_bboxes.from_files(
-    ANNOTATIONS_FILE,
-    format="COCO",
-    images_dirs=IMAGES_DIR,
+# Download the dataset to the cache directory
+extracted_files = pooch.retrieve(
+    url=data_source["url"],
+    known_hash=data_source["hash"],
+    fname="waterfowl_dataset.zip",
+    path=ethology_cache,
+    processor=pooch.Unzip(extract_dir=ethology_cache),
 )
 
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-# Load ground truth images as lazy array
-
-# build lazy image array
-png_files = sorted(ds_bboxes.attrs["images_directories"].glob("*.png"))
-image_array = ImageArrayLazy(png_files)
-print(image_array.shape)
-
-# add as attribute?
-# QUESTION: can I align it with xarray axes?
-ds_bboxes.attrs["image_array"] = image_array
+data_dir = ethology_cache / "uas-imagery-of-migratory-waterfowl"
 
 
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-# Load SAM2 predictor
-# select device based on availability
-# ....
+# %%
+# For this example, we will focus on the annotations labelled by the experts.
 
-# load impage predictor
-image_predictor = SAM2ImagePredictor.from_pretrained(
-    "facebook/sam2.1-hiera-base-plus", device="mps"
+annotations_file = (
+    data_dir / "experts" / "20230331_dronesforducks_expert_refined.json"
+)
+images_dir = data_dir / "experts" / "images"
+
+
+# %%
+# Load annotations as an ``ethology`` dataset
+# --------------------------------------------
+#
+# We can use the :func:`~ethology.io.annotations.load_bboxes.from_files`
+# function to load the COCO file with the
+# expert annotations as an ``ethology`` dataset.
+
+ds = load_bboxes.from_files(
+    annotations_file, format="COCO", images_dirs=images_dir
 )
 
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-# Define per-frame exemplar bboxes from groundtruth data
+print(ds)
+print(ds.sizes)
 
-# corner 1 is min x, min y
-# corner 2 is max x, max y
-x1y1 = ds_bboxes.position - ds_bboxes.shape / 2
-x2y2 = ds_bboxes.position + ds_bboxes.shape / 2
 
-# Each key is a frame index;
-# value is an (N, 4) float32 array [x1, y1, x2, y2].
-map_frame_idx_to_boxes = {
+# %%
+# Load images as a lazy dataset variable
+# ----------------------------------------
+#
+# We load the images as a dask-backed :class:`xarray.DataArray` variable
+# in the dataset. This means images are only loaded from disk when accessed,
+# keeping memory usage low. The image paths are derived from the dataset's
+# ``map_image_id_to_filename`` attribute, ensuring alignment with the
+# ``image_id`` dimension.
+
+# Get image paths aligned with image_id
+image_paths = [
+    images_dir / ds.map_image_id_to_filename[i]
+    for i in range(ds.sizes["image_id"])
+]
+
+# Sample first image for shape
+sample = Image.open(image_paths[0])
+img_w, img_h = sample.size
+img_c = len(sample.getbands())
+
+
+def _load_image(path):
+    """Load a single image as a numpy array."""
+    return np.array(Image.open(path))
+
+
+# Build dask array of lazily-loaded images
+lazy_images = [
+    da.from_delayed(
+        dask.delayed(_load_image)(path),
+        shape=(img_h, img_w, img_c),
+        dtype=np.uint8,
+    )
+    for path in image_paths
+]
+
+ds["image"] = xr.DataArray(
+    data=da.stack(lazy_images, axis=0),
+    dims=["image_id", "img_h", "img_w", "channel"],
+)
+
+print(ds)
+
+
+# %%
+# Convert bounding boxes to SAM2 format
+# ----------------------------------------
+#
+# The ``ethology`` dataset stores bounding boxes as centre coordinates
+# (``position``) and dimensions (``shape``). SAM2 expects bounding boxes
+# in corner format: ``[x1, y1, x2, y2]``, where ``(x1, y1)`` is the
+# top-left corner and ``(x2, y2)`` is the bottom-right corner.
+
+# Compute corners from centre + shape
+x1y1 = ds.position - ds.shape / 2
+x2y2 = ds.position + ds.shape / 2
+
+# Build a dict mapping image_id to (N, 4) arrays of [x1, y1, x2, y2]
+# dropping NaN-padded entries
+map_image_id_to_boxes = {
     idx: np.c_[
         x1y1.sel(image_id=idx).dropna(dim="id", how="all").values.T,
         x2y2.sel(image_id=idx).dropna(dim="id", how="all").values.T,
     ]
-    for idx in range(len(ds_bboxes.image_id))
+    for idx in range(ds.sizes["image_id"])
 }
 
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%
-# Initialise zarr store for output masks
-data_id_str = DATA_DIR.name
-output_masks_dir = OUTPUT_DIR / data_id_str
-output_masks_dir.mkdir(parents=True, exist_ok=True)
 
-# TODO: replace this OCTRON function by
-# zarr directly
-# TODO: zarr store to store arrays with dimensions
-# (n_frames, n_ids, image_height,image_width) and fill value=0
-mask_zarr = create_image_zarr(
-    zarr_path=output_masks_dir / "masks.zarr",
-    num_frames=ds_bboxes.attrs["image_array"].shape[0],
-    image_height=ds_bboxes.attrs["image_array"].shape[1],
-    image_width=ds_bboxes.attrs["image_array"].shape[2],
-    fill_value=-1,
-    dtype="int16",
-    video_hash_abbrev=data_id_str,
-)
+# %%
+# Generate masks with SAM2
+# -------------------------
+#
+# We check if a suitable device (CUDA or MPS) is available for running
+# SAM2 inference. If so, we run SAM2 to generate boolean masks for each
+# bounding box. Otherwise, we download pre-computed masks.
+#
+# The masks are stored as a 4D boolean zarr array with shape
+# ``(n_images, n_max_ids, img_h, img_w)``, where each slice
+# ``[image_id, id]`` is a binary mask for that bounding box.
+# Unoccupied id slots (images with fewer annotations than the maximum)
+# are filled with ``False``.
 
+if torch.cuda.is_available():
+    device = torch.device("cuda")
+elif torch.backends.mps.is_available():
+    device = torch.device("mps")
+else:
+    device = None
 
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-# Process images in batches, predict boolean masks, save to zarr store
-# TODO: save boolean mask in zarr store directly
+# Create a temporary directory for the zarr store
+tmp_dir = Path(tempfile.mkdtemp())
+zarr_path = tmp_dir / "masks.zarr"
 
-batch_size = 2  # samples
-n_frames = len(ds_bboxes.image_id)
-img_h, img_w = ds_bboxes.attrs["image_array"].shape[1:3]
+n_images = ds.sizes["image_id"]
+n_max_ids = ds.sizes["id"]
 
-# loop thru images
-for idx in range(0, n_frames, batch_size):
-    # Adjust batch size if required
-    actual_batch_size = min(batch_size, n_frames - idx)
+if device is not None:
+    from sam2.sam2_image_predictor import SAM2ImagePredictor
 
-    # Initialise id_mask for this batch
-    # an integer array (B, H, W) where each pixel stores which object "owns" it
-    # 0 = background, rest are 1-based object instance IDs
-    id_mask_batch = np.zeros((actual_batch_size, img_h, img_w), dtype=np.int16)
-
-    # Compute embeddings for image batch
-    image_batch = [image_array[idx + i] for i in range(actual_batch_size)]
-    image_predictor.set_image_batch(image_batch)
-
-    # Compute list of of bboxes — list of (N_i, 4) arrays, one per image
-    boxes_batch = [
-        map_frame_idx_to_boxes[f_i]
-        for f_i in range(idx, idx + actual_batch_size)
-    ]
-
-    # Predict batch of masks
-    # masks_batch is a list — one (N, 1, H, W) array per image
-    # where N is number of boxes
-    masks_batch, scores_batch, _ = image_predictor.predict_batch(
-        box_batch=boxes_batch,
-        multimask_output=False,
+    # Load SAM2 predictor
+    predictor = SAM2ImagePredictor.from_pretrained(
+        "facebook/sam2.1-hiera-base-plus", device=device
     )
 
-    # TODO: keep boolean masks directly and save to zarr store
-    # Convert boolean masks to ID-encoded masks OCTRON expects
-    # (higher ID wins in overlap)
-    for idx_rel_batch in range(actual_batch_size):
-        # Get masks for one frame
-        masks_one_frame = masks_batch[idx_rel_batch].squeeze(
-            axis=1
-        )  # (N, H, W)
+    # Create zarr store for boolean masks
+    mask_zarr = zarr.open(
+        str(zarr_path),
+        mode="w",
+        shape=(n_images, n_max_ids, img_h, img_w),
+        dtype="bool",
+        fill_value=False,
+        chunks=(1, n_max_ids, img_h, img_w),
+    )
 
-        # Convert boolean mask to 1-based integer mask per object ID
-        n_objects = masks_one_frame.shape[0]
-        obj_ids = np.arange(1, n_objects + 1, dtype=np.int16)[:, None, None]
-        id_mask_batch[idx_rel_batch] = (masks_one_frame * obj_ids).max(axis=0)
+    # Process images in batches
+    batch_size = 1
+    for idx in range(0, n_images, batch_size):
+        actual_batch_size = min(batch_size, n_images - idx)
 
-        print(
-            f"Frame {idx + idx_rel_batch}: "
-            f"{n_objects} masks / {boxes_batch[idx_rel_batch].shape[0]} boxes"
+        # Load image batch
+        image_batch = [
+            ds.image.sel(image_id=idx + i).values
+            for i in range(actual_batch_size)
+        ]
+        predictor.set_image_batch(image_batch)
+
+        # Build boxes batch
+        boxes_batch = [
+            map_image_id_to_boxes[idx + i] for i in range(actual_batch_size)
+        ]
+
+        # Predict masks
+        masks_batch, scores_batch, _ = predictor.predict_batch(
+            box_batch=boxes_batch,
+            multimask_output=False,
         )
 
-    # Save id_mask to zarr store
-    mask_zarr[idx : idx + actual_batch_size] = id_mask_batch
+        # Save boolean masks to zarr
+        for i in range(actual_batch_size):
+            masks_one_image = masks_batch[i].squeeze(axis=1)  # (N, H, W)
+            n_objects = masks_one_image.shape[0]
+            mask_zarr[idx + i, :n_objects] = masks_one_image
 
-    # # Mark frames as annotated in zarr store attributes
-    # for frame_idx in range(idx, idx + actual_batch_size):
-    #     mark_frames_annotated(mask_zarr, frame_idx)
+            print(
+                f"Image {idx + i}: "
+                f"{n_objects} masks / {boxes_batch[i].shape[0]} boxes"
+            )
 
-print(f"Saved ID-encoded mask zarr to {output_masks_dir / 'masks.zarr'}")
+        # Free MPS/CUDA memory between images
+        if device.type == "mps":
+            torch.mps.empty_cache()
+        elif device.type == "cuda":
+            torch.cuda.empty_cache()
 
-# %%%%%%%%%%%%%%%%%%%%%%%
-# Load masks from zarr store
-zarr_root = zarr.open(
-    output_masks_dir / "masks.zarr",
-    mode="r",
-)
+    print(f"Saved boolean masks to {zarr_path}")
+else:
+    # Download pre-computed masks
+    # TODO: Replace with the actual URL and hash after generating
+    # and hosting the pre-computed zarr store.
+    precomputed_source = {
+        "url": "https://example.com/waterfowl_masks.zarr.zip",
+        "hash": None,
+    }
 
-mask_da_array = da.from_zarr(zarr_root["masks"])
+    pooch.retrieve(
+        url=precomputed_source["url"],
+        known_hash=precomputed_source["hash"],
+        fname="waterfowl_masks.zarr.zip",
+        path=ethology_cache,
+        processor=pooch.Unzip(extract_dir=str(tmp_dir)),
+    )
+
+    print("Downloaded pre-computed masks")
 
 
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-# Add masks to bboxes ds with aligned ids
+# %%
+# Read masks and align with bounding boxes dataset
+# --------------------------------------------------
+#
+# We read the masks from the zarr store and add them as a new variable
+# in the bounding boxes dataset. Since the zarr array has shape
+# ``(n_images, n_max_ids, img_h, img_w)`` and we use the same
+# ``image_id`` and ``id`` dimensions, the masks are automatically
+# aligned with the bounding box annotations.
 
-# TODO: ZARR STORE now has these dimensions
-# (n_frames, n_ids, image_height,image_width), so we can
-# directly do:
+mask_data = zarr.open(str(zarr_path), mode="r")
 
-ds_bboxes["mask"] = xr.DataArray(
-    data=mask_da_array,
+ds["mask"] = xr.DataArray(
+    data=mask_data,
     dims=["image_id", "id", "img_h", "img_w"],
 )
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%
-# Demo usage
 
-# Select a sample image and a sample id
-image_id = 40
-id = 10
+print(ds)
+print(ds.sizes)
 
-fig, ax = plt.subplots(1, 1)
-# image
-ax.imshow(ds_bboxes.image_array[image_id])
+# %%
+# We can now access masks using the same selectors as the bounding boxes.
+# For example, ``ds.mask.sel(image_id=0, id=3)`` returns the boolean mask
+# for annotation ID 3 in image 0.
 
-# plot centre of selected bbox
+
+# %%
+# Visualise results
+# ------------------
+#
+# Let's visualise the masks for one image. We overlay all masks on top
+# of the image, and highlight one specific bounding box and its
+# corresponding mask.
+
+image_id = 0
+annotation_id = 10
+
+fig, ax = plt.subplots(1, 1, figsize=(10, 6))
+
+# Show the image
+ax.imshow(ds.image.sel(image_id=image_id).values)
+
+# Plot centre of the selected bounding box
 ax.scatter(
-    ds_bboxes.position.sel(image_id=image_id, id=id, space="x"),
-    ds_bboxes.position.sel(image_id=image_id, id=id, space="y"),
-    15,
+    ds.position.sel(image_id=image_id, id=annotation_id, space="x"),
+    ds.position.sel(image_id=image_id, id=annotation_id, space="y"),
+    s=15,
     marker="x",
     color="r",
 )
-# plot single mask
-single_mask = ds_bboxes.mask.sel(image_id=image_id, id=id)
+
+# Plot the single mask for the selected annotation
+single_mask = ds.mask.sel(image_id=image_id, id=annotation_id)
 ax.imshow(
     single_mask,
     cmap="Blues",
@@ -267,19 +342,43 @@ ax.imshow(
 )
 ax.contour(single_mask, levels=[0.5], colors="red", linewidths=0.5)
 
-# all masks in one frame (boolean masks, all will show in same color!)
-all_masks = ds_bboxes.mask.sel(image_id=image_id).any(dim="id")
+# Overlay all masks in the image
+all_masks = ds.mask.sel(image_id=image_id).any(dim="id")
 ax.imshow(
     all_masks,
     cmap="turbo",
     alpha=all_masks.astype(float) * 0.5,
 )
 
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-# Load frames and masks in napari viewer
+ax.set_title(f"Image {image_id} — all masks + annotation {annotation_id}")
+ax.set_xlabel("x (pixels)")
+ax.set_ylabel("y (pixels)")
+plt.tight_layout()
 
-# TODO: use mask array in ds_bboxes instead
 
-viewer = napari.Viewer()
-# viewer.add_image(np.asarray(image_array).moveaxis(0, -1, 1, 2), name="image")
-viewer.add_labels(np.asarray(mask_da_array), name=f"{LABEL_NAME} masks")
+# %%
+# .. tip::
+#    You can also visualise images and masks interactively in
+#    `napari <https://napari.org>`_::
+#
+#       import napari
+#
+#       viewer = napari.Viewer()
+#       viewer.add_image(
+#           ds.image.values,
+#           name="images",
+#       )
+#       viewer.add_labels(
+#           ds.mask.values.astype(int).max(axis=1),
+#           name="masks",
+#       )
+
+
+# %%
+# Clean-up
+# --------
+# Remove the temporary directory containing the zarr store.
+
+shutil.rmtree(tmp_dir)
+
+# %%
