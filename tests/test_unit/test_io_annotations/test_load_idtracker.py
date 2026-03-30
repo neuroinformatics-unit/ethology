@@ -12,6 +12,7 @@ from ethology.io.annotations.load_idtracker import (
     _arrays_from_trajectories,
     from_idtracker,
 )
+
 # Constants used across all tests
 _N_FRAMES = 10
 _N_ANIMALS = 3
@@ -58,8 +59,10 @@ class _BlobsCollection:
 
 
 @pytest.fixture
-def sample_blobs_collection(sample_trajectories: np.ndarray) -> _BlobsCollection:
-    """Return a picklable blobs collection whose bboxes match sample_trajectories.
+def sample_blobs_collection(
+    sample_trajectories: np.ndarray,
+) -> _BlobsCollection:
+    """Return a picklable blobs collection whose bboxes match trajectories.
 
     For every detected animal in each frame the blob bounding box is
     centred at the trajectory centroid with a fixed size of (40, 30)
@@ -126,7 +129,7 @@ class TestFromIdtrackerTrajectories:
             assert dim in ds.dims
 
     def test_position_array_shape(self, trajectories_file: Path):
-        """position shape: (n_selected_frames, 2, n_animals)."""
+        """Position shape: (n_selected_frames, 2, n_animals)."""
         frame_indices = [0, 2, 4]
         ds = from_idtracker(
             trajectories_path=trajectories_file,
@@ -136,7 +139,7 @@ class TestFromIdtrackerTrajectories:
         assert ds.position.shape == (len(frame_indices), 2, _N_ANIMALS)
 
     def test_shape_array_shape(self, trajectories_file: Path):
-        """shape array shape: (n_selected_frames, 2, n_animals)."""
+        """Shape array shape: (n_selected_frames, 2, n_animals)."""
         frame_indices = [0, 2, 4]
         ds = from_idtracker(
             trajectories_path=trajectories_file,
@@ -146,7 +149,7 @@ class TestFromIdtrackerTrajectories:
         assert ds.shape.shape == (len(frame_indices), 2, _N_ANIMALS)
 
     def test_category_array_shape(self, trajectories_file: Path):
-        """category shape: (n_selected_frames, n_animals)."""
+        """Category shape: (n_selected_frames, n_animals)."""
         frame_indices = [0, 2, 4]
         ds = from_idtracker(
             trajectories_path=trajectories_file,
@@ -156,7 +159,7 @@ class TestFromIdtrackerTrajectories:
         assert ds.category.shape == (len(frame_indices), _N_ANIMALS)
 
     def test_space_coordinate_values(self, trajectories_file: Path):
-        """space coordinate must be ['x', 'y']."""
+        """Space coordinate must be ['x', 'y']."""
         ds = from_idtracker(
             trajectories_path=trajectories_file,
             frame_indices=[0],
@@ -175,7 +178,7 @@ class TestFromIdtrackerTrajectories:
         assert len(ds.coords["image_id"]) == len(frame_indices)
 
     def test_id_coordinate_length(self, trajectories_file: Path):
-        """id coordinate length must equal n_animals."""
+        """Id coordinate length must equal n_animals."""
         ds = from_idtracker(
             trajectories_path=trajectories_file,
             frame_indices=[0],
@@ -215,7 +218,7 @@ class TestFromIdtrackerTrajectories:
         trajectories_file: Path,
         sample_trajectories: np.ndarray,
     ):
-        """For a detected animal position must equal the trajectory centroid."""
+        """Detected animal position must equal the trajectory centroid."""
         ds = from_idtracker(
             trajectories_path=trajectories_file,
             frame_indices=[0],
@@ -232,7 +235,7 @@ class TestFromIdtrackerTrajectories:
     def test_fixed_bbox_size_in_shape_array(
         self, trajectories_file: Path
     ):
-        """shape array values must match the supplied bbox_size."""
+        """Shape array values must match the supplied bbox_size."""
         ds = from_idtracker(
             trajectories_path=trajectories_file,
             frame_indices=[0],
@@ -385,7 +388,7 @@ class TestFromIdtrackerBlobsCollection:
         trajectories_file: Path,
         blobs_collection_file: Path,
     ):
-        """shape values must reflect the actual blob bbox dimensions."""
+        """Shape values must reflect the actual blob bbox dimensions."""
         ds = from_idtracker(
             trajectories_path=trajectories_file,
             frame_indices=[0],
@@ -469,7 +472,9 @@ class TestFromIdtrackerErrors:
 
     def test_empty_frame_indices(self, trajectories_file: Path):
         """ValueError when frame_indices is an empty list."""
-        with pytest.raises(ValueError, match="frame_indices must not be empty"):
+        with pytest.raises(
+            ValueError, match="frame_indices must not be empty"
+        ):
             from_idtracker(
                 trajectories_path=trajectories_file,
                 frame_indices=[],

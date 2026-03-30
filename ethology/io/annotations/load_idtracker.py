@@ -135,67 +135,18 @@ def from_idtracker(
     ... )
 
     """
- 
-    # Input validation
- 
+    # Input validation + load trajectories
     trajectories_path = Path(trajectories_path)
-    if not trajectories_path.exists():
-        raise FileNotFoundError(
-            f"Trajectories file not found: {trajectories_path}"
-        )
-
-    if not frame_indices:
-        raise ValueError("frame_indices must not be empty.")
-
-    negative = [i for i in frame_indices if i < 0]
-    if negative:
-        raise ValueError(
-            "All frame indices must be non-negative integers, "
-            f"got {negative}."
-        )
-
-    if blobs_collection_path is None and bbox_size is None:
-        raise ValueError(
-            "Either bbox_size or blobs_collection_path must be provided."
-        )
-
-    if bbox_size is not None:
-        if len(bbox_size) != 2:
-            raise ValueError(
-                "bbox_size must be a tuple of exactly two elements "
-                "(width, height)."
-            )
-        if any(v <= 0 for v in bbox_size):
-            raise ValueError(
-                "Both elements of bbox_size must be strictly positive, "
-                f"got {bbox_size}."
-            )
-
     if blobs_collection_path is not None:
         blobs_collection_path = Path(blobs_collection_path)
-        if not blobs_collection_path.exists():
-            raise FileNotFoundError(
-                f"Blobs collection file not found: {blobs_collection_path}"
-            )
 
- 
-    # Load and validate trajectories
- 
-    trajectories = np.load(trajectories_path, allow_pickle=False)
-    if trajectories.ndim != 3 or trajectories.shape[2] != 2:
-        raise ValueError(
-            "Expected trajectories array of shape (n_frames, n_animals, 2), "
-            f"got {trajectories.shape}."
-        )
-
+    trajectories = _validate_inputs(
+        trajectories_path=trajectories_path,
+        frame_indices=frame_indices,
+        bbox_size=bbox_size,
+        blobs_collection_path=blobs_collection_path,
+    )
     n_total_frames, n_animals, _ = trajectories.shape
-
-    out_of_range = [i for i in frame_indices if i >= n_total_frames]
-    if out_of_range:
-        raise ValueError(
-            f"Frame indices {out_of_range} are out of range for the "
-            f"trajectories array with {n_total_frames} frames."
-        )
 
  
     # Sort and deduplicate frame indices
@@ -269,7 +220,120 @@ def from_idtracker(
         },
     )
 
+def _validate_paths_and_bbox(
+    trajectories_path: Path,
+    frame_indices: list[int],
+    bbox_size: tuple[float, float] | None,
+    blobs_collection_path: Path | None,
+) -> None:
+    """Validate file paths, frame indices and bbox_size.
 
+    Parameters
+    ----------
+    trajectories_path
+        Path to the trajectories ``.npy`` file.
+    frame_indices
+        List of 0-based frame indices to process.
+    bbox_size
+        Fixed bounding box ``(width, height)``, or ``None``.
+    blobs_collection_path
+        Path to the blobs collection ``.pkl``, or ``None``.
+
+    Raises
+    ------
+    FileNotFoundError
+        If either file path does not exist.
+    ValueError
+        If any input constraint is violated.
+
+    """
+    if not trajectories_path.exists():
+        raise FileNotFoundError(
+            f"Trajectories file not found: {trajectories_path}"
+        )
+    if not frame_indices:
+        raise ValueError("frame_indices must not be empty.")
+    negative = [i for i in frame_indices if i < 0]
+    if negative:
+        raise ValueError(
+            "All frame indices must be non-negative integers, "
+            f"got {negative}."
+        )
+    if blobs_collection_path is None and bbox_size is None:
+        raise ValueError(
+            "Either bbox_size or blobs_collection_path must be provided."
+        )
+    if bbox_size is not None:
+        if len(bbox_size) != 2:
+            raise ValueError(
+                "bbox_size must be a tuple of exactly two elements "
+                "(width, height)."
+            )
+        if any(v <= 0 for v in bbox_size):
+            raise ValueError(
+                "Both elements of bbox_size must be strictly positive, "
+                f"got {bbox_size}."
+            )
+    blobs_missing = (
+        blobs_collection_path is not None
+        and not blobs_collection_path.exists()
+    )
+    if blobs_missing:
+        raise FileNotFoundError(
+            f"Blobs collection file not found: {blobs_collection_path}"
+        )
+
+
+def _validate_inputs(
+    trajectories_path: Path,
+    frame_indices: list[int],
+    bbox_size: tuple[float, float] | None,
+    blobs_collection_path: Path | None,
+) -> np.ndarray:
+    """Validate all inputs and return the loaded trajectories array.
+
+    Parameters
+    ----------
+    trajectories_path
+        Path to the trajectories ``.npy`` file.
+    frame_indices
+        List of 0-based frame indices to process.
+    bbox_size
+        Fixed bounding box ``(width, height)``, or ``None``.
+    blobs_collection_path
+        Path to the blobs collection ``.pkl``, or ``None``.
+
+    Returns
+    -------
+    np.ndarray
+        Loaded trajectories array of shape ``(n_frames, n_animals, 2)``.
+
+    Raises
+    ------
+    FileNotFoundError
+        If either file path does not exist.
+    ValueError
+        If any input constraint is violated.
+
+    """
+    _validate_paths_and_bbox(
+        trajectories_path, frame_indices, bbox_size, blobs_collection_path
+    )
+    trajectories = np.load(trajectories_path, allow_pickle=False)
+    if trajectories.ndim != 3 or trajectories.shape[2] != 2:
+        raise ValueError(
+            "Expected trajectories array of shape "
+            f"(n_frames, n_animals, 2), got {trajectories.shape}."
+        )
+    out_of_range = [
+        i for i in frame_indices if i >= trajectories.shape[0]
+    ]
+    if out_of_range:
+        raise ValueError(
+            f"Frame indices {out_of_range} are out of range for the "
+            f"trajectories array with {trajectories.shape[0]} frames."
+        )
+    return trajectories
 def _arrays_from_trajectories(
     trajectories: np.ndarray,
     frame_indices: list[int],
