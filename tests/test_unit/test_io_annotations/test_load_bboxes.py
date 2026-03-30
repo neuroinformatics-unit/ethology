@@ -19,6 +19,7 @@ from ethology.io.annotations.load_bboxes import (
     _get_image_shape_attr_as_integer,
     from_files,
 )
+from ethology.io.annotations.save_bboxes import to_COCO_file
 
 
 def check_if_file_includes_image_shape_data(
@@ -188,6 +189,7 @@ def assert_dataframe(
     expected_supercategories: str | list[str] | None = None,
     expected_categories: str | list[str] | None = None,
     expected_annots_per_image: int | None = None,
+    extra_columns: list[str] | None = None,
 ):
     """Check that the dataframe has the expected shape and content."""
     # Check shape of dataframe
@@ -201,22 +203,25 @@ def assert_dataframe(
     assert len(df["image_filename"].unique()) == expected_n_images
     assert len(df["image_id"].unique()) == expected_n_images
 
+    # expected columns list - base columns + any extras
+    expected_cols = [
+        "image_filename",
+        "image_id",
+        "x_min",
+        "y_min",
+        "width",
+        "height",
+        "supercategory",
+        "category",
+        "category_id",
+        "image_width",
+        "image_height",
+    ]
+    if extra_columns:
+        expected_cols = expected_cols + extra_columns
+
     # Check columns are as expected
-    assert sorted(df.columns.tolist()) == sorted(
-        [
-            "image_filename",
-            "image_id",
-            "x_min",
-            "y_min",
-            "width",
-            "height",
-            "supercategory",
-            "category",
-            "category_id",
-            "image_width",
-            "image_height",
-        ]
-    )
+    assert sorted(df.columns.tolist()) == sorted(expected_cols)
 
     # Check supercategories if all annotations have the same supercategory
     if expected_supercategories:
@@ -401,6 +406,7 @@ def test_df_from_multiple_files(
         expected_n_images=n_images,
         expected_supercategories="animal",
         expected_categories="crab",
+        extra_columns=["original_coco_image_id"] if format == "COCO" else None,
     )
 
 
@@ -488,6 +494,7 @@ def test_df_from_single_file(
         expected_annots_per_image=1
         if expected_n_unique_images_with_annotations < 5
         else None,
+        extra_columns=["original_coco_image_id"] if format == "COCO" else None,
     )
 
     # Check image shape data is present if present in the input file
@@ -536,6 +543,7 @@ def test_df_from_single_file_duplicates(
         expected_n_images=expected_n_images,
         expected_supercategories="animal",
         expected_categories="crab",
+        extra_columns=["original_coco_image_id"] if format == "COCO" else None,
     )
 
 
@@ -1023,3 +1031,59 @@ def test_get_image_shape_attr_as_integer(
         _get_image_shape_attr_as_integer(file_attrs, attr_name)
         == expected_value
     )
+
+
+def test_original_coco_image_ids_stored_in_attrs(
+    annotations_test_data: dict,
+):
+    """When loading a COCO file where image IDs are not 0-based
+    (e.g. 5, 23, 99), the Dataset attrs must store a
+    mapping from ethology 0-based IDs back to original COCO IDs.
+    """
+    # Use an existing small COCO test file
+    # image IDs in this file start at 1, not 0
+    filepath = annotations_test_data["small_bboxes_COCO.json"]
+    ds = from_files(filepath, format="COCO")
+
+    # The attr must exist
+    assert "map_image_id_to_original_coco_id" in ds.attrs
+
+    # must have one entry per image
+    n_images = ds.sizes["image_id"]
+    assert len(ds.attrs["map_image_id_to_original_coco_id"]) == n_images
+
+
+def test_round_trip_preserves_original_coco_image_ids(
+    annotations_test_data: dict,
+    tmp_path: Path,
+):
+    """Load COCO → save COCO → reload: the saved file must have the
+    same image IDs as the original file.
+    """
+    input_file = annotations_test_data["small_bboxes_COCO.json"]
+
+    # Read original image IDs from the input file directly
+    with open(input_file) as f:
+        original_coco = json.load(f)
+    original_image_ids = {img["id"] for img in original_coco["images"]}
+
+    # Load → save
+    ds = from_files(input_file, format="COCO")
+    output_file = to_COCO_file(ds, output_filepath=tmp_path / "output.json")
+
+    # Read saved file
+    with open(output_file) as f:
+        saved_coco = json.load(f)
+    saved_image_ids = {img["id"] for img in saved_coco["images"]}
+
+    # The saved image IDs must match the original
+    assert saved_image_ids == original_image_ids, (
+        f"Original COCO image IDs {original_image_ids} were not "
+        f"preserved in saved file. Got: {saved_image_ids}"
+    )
+
+    # Also check annotation image_ids are preserved
+    saved_ann_image_ids = {
+        ann["image_id"] for ann in saved_coco["annotations"]
+    }
+    assert saved_ann_image_ids.issubset(original_image_ids)
