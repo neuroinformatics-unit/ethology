@@ -192,9 +192,21 @@ def _add_COCO_data_to_df(
     whole dataset.
 
     """
+    # Make a copy to avoid mutating the caller's DataFrame.
+    # Without this modifying df["image_id"] below would change
+    # the original df_raw
+    df = df.copy()
+
     # image filename
     map_image_id_to_filename = ds_attrs["map_image_id_to_filename"]
     df["image_filename"] = df["image_id"].map(map_image_id_to_filename)
+
+    # Use original COCO image IDs
+    # If not available (e.g. dataset loaded from VIA format), fall back
+    # to ethology 0-based image IDs.
+    map_original_coco_id = ds_attrs.get("map_image_id_to_original_coco_id", {})
+    if map_original_coco_id:
+        df["image_id"] = df["image_id"].map(map_original_coco_id).astype(int)
 
     # image width and height
     if all(col in df.columns for col in ["image_shape_x", "image_shape_y"]):
@@ -261,6 +273,12 @@ def _add_COCO_data_to_df(
     df = df.loc[
         df.astype(str).drop_duplicates(ignore_index=True).index
     ]  # need to serialise lists first before dropping duplicates
+
+    # enforce schema dtypes
+    df["annotation_id"] = df["annotation_id"].astype(int)
+    df["image_id"] = df["image_id"].astype(int)
+    df["category_id"] = df["category_id"].astype(int)
+    df["iscrowd"] = df["iscrowd"].astype(int)
 
     return df
 
