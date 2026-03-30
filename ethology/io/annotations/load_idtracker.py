@@ -148,15 +148,13 @@ def from_idtracker(
     )
     n_total_frames, n_animals, _ = trajectories.shape
 
- 
     # Sort and deduplicate frame indices
- 
+
     frame_indices_sorted = sorted(set(frame_indices))
     n_selected_frames = len(frame_indices_sorted)
 
- 
     # Build position / shape / category arrays
- 
+
     if blobs_collection_path is not None:
         logger.info(
             "Loading bounding boxes from blobs collection: "
@@ -179,9 +177,8 @@ def from_idtracker(
             bbox_size,  # type: ignore[arg-type]  # cannot be None here
         )
 
- 
     # Build metadata maps
- 
+
     map_image_id_to_filename = {
         img_id: f"frame_{frame_idx:06d}.png"
         for img_id, frame_idx in enumerate(frame_indices_sorted)
@@ -191,9 +188,8 @@ def from_idtracker(
         for animal_id in range(n_animals)
     }
 
- 
     # Assemble xarray dataset
- 
+
     return xr.Dataset(
         data_vars={
             "position": (["image_id", "space", "id"], position_arr),
@@ -219,6 +215,7 @@ def from_idtracker(
             "map_image_id_to_filename": map_image_id_to_filename,
         },
     )
+
 
 def _validate_paths_and_bbox(
     trajectories_path: Path,
@@ -256,8 +253,7 @@ def _validate_paths_and_bbox(
     negative = [i for i in frame_indices if i < 0]
     if negative:
         raise ValueError(
-            "All frame indices must be non-negative integers, "
-            f"got {negative}."
+            f"All frame indices must be non-negative integers, got {negative}."
         )
     if blobs_collection_path is None and bbox_size is None:
         raise ValueError(
@@ -325,15 +321,15 @@ def _validate_inputs(
             "Expected trajectories array of shape "
             f"(n_frames, n_animals, 2), got {trajectories.shape}."
         )
-    out_of_range = [
-        i for i in frame_indices if i >= trajectories.shape[0]
-    ]
+    out_of_range = [i for i in frame_indices if i >= trajectories.shape[0]]
     if out_of_range:
         raise ValueError(
             f"Frame indices {out_of_range} are out of range for the "
             f"trajectories array with {trajectories.shape[0]} frames."
         )
     return trajectories
+
+
 def _arrays_from_trajectories(
     trajectories: np.ndarray,
     frame_indices: list[int],

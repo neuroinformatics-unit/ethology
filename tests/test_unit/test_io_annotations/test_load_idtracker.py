@@ -17,6 +17,8 @@ from ethology.io.annotations.load_idtracker import (
 _N_FRAMES = 10
 _N_ANIMALS = 3
 _BBOX_SIZE = (40.0, 30.0)
+
+
 # Fixtures
 @pytest.fixture
 def sample_trajectories() -> np.ndarray:
@@ -34,9 +36,7 @@ def sample_trajectories() -> np.ndarray:
 
 
 @pytest.fixture
-def trajectories_file(
-    tmp_path: Path, sample_trajectories: np.ndarray
-) -> Path:
+def trajectories_file(tmp_path: Path, sample_trajectories: np.ndarray) -> Path:
     """Save sample_trajectories to a .npy file and return its path."""
     path = tmp_path / "trajectories.npy"
     np.save(path, sample_trajectories)
@@ -95,6 +95,8 @@ def blobs_collection_file(
     with open(path, "wb") as fh:
         pickle.dump(sample_blobs_collection, fh)
     return path
+
+
 # Tests: from_idtracker – trajectories + fixed bbox_size
 class TestFromIdtrackerTrajectories:
     """Tests for from_idtracker when using trajectories + bbox_size."""
@@ -232,9 +234,7 @@ class TestFromIdtrackerTrajectories:
             sample_trajectories[0, 0, 1]
         )
 
-    def test_fixed_bbox_size_in_shape_array(
-        self, trajectories_file: Path
-    ):
+    def test_fixed_bbox_size_in_shape_array(self, trajectories_file: Path):
         """Shape array values must match the supplied bbox_size."""
         ds = from_idtracker(
             trajectories_path=trajectories_file,
@@ -245,9 +245,7 @@ class TestFromIdtrackerTrajectories:
         assert ds.shape.values[0, 0, 0] == pytest.approx(_BBOX_SIZE[0])
         assert ds.shape.values[0, 1, 0] == pytest.approx(_BBOX_SIZE[1])
 
-    def test_category_values_are_one_based(
-        self, trajectories_file: Path
-    ):
+    def test_category_values_are_one_based(self, trajectories_file: Path):
         """Detected animal categories must be 1-based integers."""
         ds = from_idtracker(
             trajectories_path=trajectories_file,
@@ -256,9 +254,7 @@ class TestFromIdtrackerTrajectories:
         )
         assert ds.category.values[0, 0] == 1  # animal_idx=0 -> category=1
 
-    def test_duplicate_frame_indices_removed(
-        self, trajectories_file: Path
-    ):
+    def test_duplicate_frame_indices_removed(self, trajectories_file: Path):
         """Duplicate frame indices must be silently deduplicated."""
         ds = from_idtracker(
             trajectories_path=trajectories_file,
@@ -267,9 +263,7 @@ class TestFromIdtrackerTrajectories:
         )
         assert len(ds.coords["image_id"]) == 3  # 0, 2, 4
 
-    def test_image_id_to_filename_map(
-        self, trajectories_file: Path
-    ):
+    def test_image_id_to_filename_map(self, trajectories_file: Path):
         """map_image_id_to_filename must use frame_<index:06d>.png format."""
         ds = from_idtracker(
             trajectories_path=trajectories_file,
@@ -281,9 +275,7 @@ class TestFromIdtrackerTrajectories:
             1: "frame_000007.png",
         }
 
-    def test_image_id_assigned_in_sorted_order(
-        self, trajectories_file: Path
-    ):
+    def test_image_id_assigned_in_sorted_order(self, trajectories_file: Path):
         """Frames must be sorted before assigning image_ids."""
         ds = from_idtracker(
             trajectories_path=trajectories_file,
@@ -336,9 +328,7 @@ class TestFromIdtrackerTrajectories:
         )
         assert ds.attrs["images_directory"] == str(tmp_path)
 
-    def test_images_dir_none_when_not_provided(
-        self, trajectories_file: Path
-    ):
+    def test_images_dir_none_when_not_provided(self, trajectories_file: Path):
         """images_directory attr must be None when images_dir not given."""
         ds = from_idtracker(
             trajectories_path=trajectories_file,
@@ -346,6 +336,8 @@ class TestFromIdtrackerTrajectories:
             bbox_size=_BBOX_SIZE,
         )
         assert ds.attrs["images_directory"] is None
+
+
 # Tests: from_idtracker – blobs collection
 class TestFromIdtrackerBlobsCollection:
     """Tests for from_idtracker when using a blobs collection."""
@@ -442,6 +434,8 @@ class TestFromIdtrackerBlobsCollection:
         assert np.isnan(ds.position.values[0, :, 2]).all()
         assert np.isnan(ds.shape.values[0, :, 2]).all()
         assert ds.category.values[0, 2] == -1
+
+
 # Tests: from_idtracker – error cases
 class TestFromIdtrackerErrors:
     """Tests that from_idtracker raises the correct errors."""
@@ -510,9 +504,7 @@ class TestFromIdtrackerErrors:
                 frame_indices=[0],
             )
 
-    def test_bbox_size_wrong_number_of_elements(
-        self, trajectories_file: Path
-    ):
+    def test_bbox_size_wrong_number_of_elements(self, trajectories_file: Path):
         """ValueError when bbox_size has the wrong number of elements."""
         with pytest.raises(ValueError, match="two elements"):
             from_idtracker(
@@ -574,6 +566,8 @@ class TestFromIdtrackerErrors:
                 frame_indices=[0],
                 blobs_collection_path=bad_path,
             )
+
+
 # Tests: _arrays_from_trajectories
 class TestArraysFromTrajectories:
     """Unit tests for the _arrays_from_trajectories private helper."""
@@ -628,9 +622,7 @@ class TestArraysFromTrajectories:
         )
         assert cat[0, 0] == 1
 
-    def test_partially_detected_animal(
-        self, sample_trajectories: np.ndarray
-    ):
+    def test_partially_detected_animal(self, sample_trajectories: np.ndarray):
         """Animal 1 must be detected on even frames and absent on odd ones."""
         # Even frame: detected
         _, _, cat_even = _arrays_from_trajectories(
@@ -643,7 +635,9 @@ class TestArraysFromTrajectories:
             sample_trajectories, [1], _N_ANIMALS, _BBOX_SIZE
         )
         assert np.isnan(pos_odd[0, :, 1]).all()
-        assert cat_odd[0, 1] == -1 
+        assert cat_odd[0, 1] == -1
+
+
 # Tests: _arrays_from_blobs
 class TestArraysFromBlobs:
     """Unit tests for the _arrays_from_blobs private helper."""
@@ -664,9 +658,7 @@ class TestArraysFromBlobs:
         sample_trajectories: np.ndarray,
     ):
         """Position must be the centre of the blob bounding box."""
-        pos, _, _ = _arrays_from_blobs(
-            blobs_collection_file, [0], _N_ANIMALS
-        )
+        pos, _, _ = _arrays_from_blobs(blobs_collection_file, [0], _N_ANIMALS)
         assert pos[0, 0, 0] == pytest.approx(sample_trajectories[0, 0, 0])
         assert pos[0, 1, 0] == pytest.approx(sample_trajectories[0, 0, 1])
 
@@ -674,9 +666,7 @@ class TestArraysFromBlobs:
         self, blobs_collection_file: Path
     ):
         """Shape values must equal the actual blob bbox width and height."""
-        _, shp, _ = _arrays_from_blobs(
-            blobs_collection_file, [0], _N_ANIMALS
-        )
+        _, shp, _ = _arrays_from_blobs(blobs_collection_file, [0], _N_ANIMALS)
         assert shp[0, 0, 0] == pytest.approx(40.0)  # width
         assert shp[0, 1, 0] == pytest.approx(30.0)  # height
 
