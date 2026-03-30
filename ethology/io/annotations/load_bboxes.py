@@ -118,9 +118,11 @@ def from_files(
         df_all = _df_from_single_file(file_paths, format=format)
 
     # Get maps to set as dataset attributes
-    map_image_id_to_filename, map_category_to_str = (
-        _get_map_attributes_from_df(df_all)
-    )
+    (
+        map_image_id_to_filename,
+        map_category_to_str,
+        map_image_id_to_original_coco_id,
+    ) = _get_map_attributes_from_df(df_all)
 
     # Convert dataframe to xarray dataset
     ds = _df_to_xarray_ds(df_all)
@@ -132,6 +134,7 @@ def from_files(
         "images_directories": images_dirs,
         "map_category_to_str": map_category_to_str,
         "map_image_id_to_filename": map_image_id_to_filename,
+        "map_image_id_to_original_coco_id": map_image_id_to_original_coco_id,
     }
 
     return ds
@@ -139,7 +142,7 @@ def from_files(
 
 def _get_map_attributes_from_df(
     df: DataFrame[ValidBboxAnnotationsDataFrame],
-) -> tuple[dict, dict]:
+) -> tuple[dict, dict, dict]:
     """Get the map attributes from the dataframe.
 
     Parameters
@@ -173,7 +176,22 @@ def _get_map_attributes_from_df(
         # sort by category_id
         map_category_to_str = dict(sorted(map_category_to_str.items()))
 
-    return (map_image_id_to_filename, map_category_to_str)
+        # extract original COCO image ID mapping
+        #  if present in the dataframe
+        map_image_id_to_original_coco_id = {}
+        if "original_coco_image_id" in df.columns:
+            coco_id_df = df[
+                ["image_id", "original_coco_image_id"]
+            ].drop_duplicates()
+            map_image_id_to_original_coco_id = coco_id_df.set_index(
+                "image_id"
+            ).to_dict()["original_coco_image_id"]
+
+    return (
+        map_image_id_to_filename,
+        map_category_to_str,
+        map_image_id_to_original_coco_id,
+    )
 
 
 @pa.check_types
@@ -501,6 +519,12 @@ def _df_rows_from_valid_COCO_file(file_path: Path) -> list[dict]:
             sorted(data_dict["images"], key=lambda x: x["file_name"])
         )
     }
+
+    # ethology 0-based id → original COCO image id
+    # This is needed so save_bboxes can restore original IDs on export
+    map_img_id_ethology_to_coco = {
+        v: k for k, v in map_img_id_coco_to_ethology.items()
+    }
     map_img_id_coco_to_filename = {
         img_dict["id"]: img_dict["file_name"]
         for img_dict in data_dict["images"]
@@ -548,6 +572,9 @@ def _df_rows_from_valid_COCO_file(file_path: Path) -> list[dict]:
             "supercategory": supercategory,  # if not defined, set to ""
             "category": category,
             "category_id": category_id,
+            "original_coco_image_id": map_img_id_ethology_to_coco[
+                img_id_ethology
+            ],
             # in COCO files, the category_id is always a 1-based integer
         }
 
