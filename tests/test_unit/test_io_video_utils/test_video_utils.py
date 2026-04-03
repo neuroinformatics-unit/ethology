@@ -1,13 +1,14 @@
 import json
+import subprocess
 from unittest.mock import MagicMock, patch
 
 import pytest
 
-from ethology.io.video_utils import get_video_specs
+from ethology.io.video_utils import compress_video, get_video_specs
 
 
 @pytest.fixture
-def mock_ffprobe_success():
+def valid_get_video_specs():
     """Mock successful ffprobe execution."""
     mock_data = {
         "format": {"duration": "123.456"},
@@ -45,11 +46,11 @@ def valid_video_file(tmp_path):
     return video_path
 
 
-def test_get_video_specs_valid_file(valid_video_file, mock_ffprobe_success):
+def test_get_video_specs_valid_file(valid_video_file, valid_get_video_specs):
     """Test function returns correct structure for valid video."""
     with patch(
         "ethology.io.video_utils.subprocess.run",
-        return_value=mock_ffprobe_success,
+        return_value=valid_get_video_specs,
     ):
         result = get_video_specs(str(valid_video_file))
 
@@ -87,12 +88,12 @@ def test_get_video_specs_ffprobe_failure(valid_video_file):
 
 
 def test_video_stream_has_required_fields(
-    valid_video_file, mock_ffprobe_success
+    valid_video_file, valid_get_video_specs
 ):
     """Test video streams contain expected metadata."""
     with patch(
         "ethology.io.video_utils.subprocess.run",
-        return_value=mock_ffprobe_success,
+        return_value=valid_get_video_specs,
     ):
         result = get_video_specs(str(valid_video_file))
 
@@ -107,12 +108,12 @@ def test_video_stream_has_required_fields(
 
 
 def test_audio_stream_has_required_fields(
-    valid_video_file, mock_ffprobe_success
+    valid_video_file, valid_get_video_specs
 ):
     """Test audio streams contain expected metadata."""
     with patch(
         "ethology.io.video_utils.subprocess.run",
-        return_value=mock_ffprobe_success,
+        return_value=valid_get_video_specs,
     ):
         result = get_video_specs(str(valid_video_file))
 
@@ -122,3 +123,75 @@ def test_audio_stream_has_required_fields(
     stream = audio_streams[0]
     assert stream["sample_rate"] == "48000"
     assert stream["channels"] == 2
+
+
+## Video Compression
+
+
+@pytest.fixture
+def valid_compression_run():
+    return subprocess.CompletedProcess(
+        returncode=0, cmd=["ffmpeg"], stderr=b"", stdout=""
+    )
+
+
+def test_compress_video_file_not_found(tmp_path):
+    """Test that FileNotFoundError is raised if input file does not exist."""
+    input_file = tmp_path / "non_existent.mp4"
+    output_file = tmp_path / "output.mp4"
+
+    with pytest.raises(
+        FileNotFoundError, match=f"Video file not found: {input_file}"
+    ):
+        compress_video(str(input_file), str(output_file))
+
+
+def test_compress_video_success(valid_video_file, tmp_path):
+    """Test successful compression when input file exists."""
+    output_file = tmp_path / "output.mp4"
+
+    with patch(
+        "ethology.io.video_utils.subprocess.run",
+        return_value=valid_compression_run,
+    ) as mock_run:
+        result = compress_video(str(valid_video_file), str(output_file))
+
+        assert result is True  # Check if compression worked
+
+        mock_run.assert_called_once()
+
+        # Checking if valid args were passed to mock_run
+        call_args = mock_run.call_args[0][0]
+        assert "ffmpeg" in call_args
+        assert str(valid_video_file) in call_args
+        assert str(output_file) in call_args
+
+
+def test_compress_video_failure(valid_video_file, tmp_path):
+    """Test handling of FFmpeg failure (CalledProcessError)."""
+    output_file = tmp_path / "output.mp4"
+
+    with patch("ethology.io.video_utils.subprocess.run") as mock_run:
+        mock_run.side_effect = subprocess.CalledProcessError(
+            returncode=1, cmd=["ffmpeg", "..."], stderr=b"Error: Invalid data"
+        )
+
+        result = compress_video(str(valid_video_file), str(output_file))
+
+        assert result is False
+
+
+def test_compress_video_overwrite_false(valid_video_file, tmp_path):
+    """Test that -y flag is omitted when overwrite=False."""
+    output_file = tmp_path / "output.mp4"
+
+    with patch(
+        "ethology.io.video_utils.subprocess.run",
+        return_value=valid_compression_run,
+    ) as mock_run:
+        compress_video(
+            str(valid_video_file), str(output_file), overwrite=False
+        )
+
+        call_args = mock_run.call_args[0][0]
+        assert "-y" not in call_args
