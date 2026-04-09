@@ -59,22 +59,22 @@ def to_netcdf(
     dataset: xr.Dataset,
     output_filepath: str | Path,
 ) -> Path:
-    """Save an ``ethology`` bounding box annotations dataset to netCDF4.
+    """Save an ethology bounding box annotations dataset to netCDF4.
 
-    This function wraps :func:`xarray.Dataset.to_netcdf` with automatic
+    This function wraps func:xarray.Dataset.to_netcdf with automatic
     serialisation of Python dict attributes. The netCDF4 format cannot
     store Python dicts, Path objects, or None values as attribute values
     natively. This function serialises them before saving and
-    :func:`ethology.io.annotations.load_bboxes.from_netcdf` reverses
+    func:ethology.io.annotations.load_bboxes.from_netcdf reverses
     the serialisation on load.
 
     Parameters
     ----------
     dataset
         A valid bounding box annotations dataset, as returned by
-        :func:`ethology.io.annotations.load_bboxes.from_files`.
+        func:ethology.io.annotations.load_bboxes.from_files.
     output_filepath
-        Path to the output netCDF4 file. By convention, use ``.nc``.
+        Path to the output netCDF4 file. By convention, use ".nc".
 
     Returns
     -------
@@ -90,13 +90,10 @@ def to_netcdf(
     >>> save_bboxes.to_netcdf(ds, "annotations.nc")
     PosixPath('annotations.nc')
     >>> ds_reloaded = load_bboxes.from_netcdf("annotations.nc")
-
     """
     output_filepath = Path(output_filepath)
 
     # Deep copy so the caller's Dataset attrs remain unchanged after this call.
-    # Without deep=True, modifying attrs in the copy would also modify
-    # the caller's attrs because shallow copy shares the same dict objects.
     ds_to_save = dataset.copy(deep=True)
 
     # netCDF4 cannot store Python dicts, Path objects, or None values
@@ -104,11 +101,11 @@ def to_netcdf(
     # from_netcdf() reverses this on load.
     #
     # Conversion rules:
-    #   dict  → JSON string  (e.g. {1: "Mallard"} → '{"1": "Mallard"}')
-    #   list  → JSON string  (e.g. [Path("a.json")] → '["a.json"]')
+    #   dict  → JSON string
+    #   list  → JSON string
     #   Path  → str
-    #   None  → dropped entirely (no netCDF4 equivalent)
-    #   str, int, float → kept as-is (already netCDF4-safe)
+    #   None  → dropped entirely
+    #   str, int, float → kept as-is
     clean_attrs = {}
     for k, v in ds_to_save.attrs.items():
         if v is None:

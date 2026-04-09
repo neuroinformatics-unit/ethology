@@ -1,12 +1,8 @@
 """
 Tests for save_bboxes.to_netcdf() and load_bboxes.from_netcdf().
 
-These functions complete the netCDF4 I/O round-trip for ethology
-bbox annotation datasets. They are tested together in a single module
-because the key test is the round-trip, which requires both functions.
-
-All tests use real annotation files from the test data fixtures,
-matching the pattern used in test_load_bboxes.py and test_save_bboxes.py.
+These functions complete the netCDF4 I/O round trip for ethology
+bbox annotation datasets.
 """
 from pathlib import Path
 from typing import Literal
@@ -19,8 +15,6 @@ from ethology.io.annotations.load_bboxes import from_files, from_netcdf
 from ethology.io.annotations.save_bboxes import to_netcdf
 
 
-# ── Fixtures ──────────────────────────────────────────────────────────
-
 @pytest.fixture(
     params=[
         "small_bboxes_COCO.json",
@@ -31,9 +25,6 @@ def sample_dataset(request, annotations_test_data: dict):
     """
     Parametrised fixture that provides a loaded ethology Dataset
     from both COCO and VIA formats.
-
-    Using real test files (not hand-crafted minimal ones) ensures
-    we test against the same data as the existing test suite.
     """
     filename = request.param
     fmt: Literal["VIA", "COCO"] = (
@@ -43,18 +34,20 @@ def sample_dataset(request, annotations_test_data: dict):
     return from_files(file_path, format=fmt)
 
 
-# ── to_netcdf tests ───────────────────────────────────────────────────
-
 class TestToNetcdf:
 
     def test_creates_output_file(self, sample_dataset, tmp_path):
-        """to_netcdf() must create a file at the specified path."""
+        """
+        to_netcdf() must create a file at the specified path.
+        """
         out = tmp_path / "output.nc"
         to_netcdf(sample_dataset, out)
         assert out.exists()
 
     def test_returns_path_object(self, sample_dataset, tmp_path):
-        """to_netcdf() must return the output path as a Path object."""
+        """
+        to_netcdf() must return the output path as a Path object.
+        """
         out = tmp_path / "output.nc"
         result = to_netcdf(sample_dataset, out)
         assert isinstance(result, Path)
@@ -88,7 +81,9 @@ class TestToNetcdf:
     ):
         """
         In the raw netCDF4 file, dict attrs must be stored as JSON
-        strings. This confirms the serialisation step happened.
+        strings.
+
+        This confirms the serialisation step happened.
         """
         out = tmp_path / "output.nc"
         to_netcdf(sample_dataset, out)
@@ -103,13 +98,13 @@ class TestToNetcdf:
         )
 
 
-# ── from_netcdf tests ─────────────────────────────────────────────────
-
 class TestFromNetcdf:
 
     @pytest.fixture
     def saved_nc(self, sample_dataset, tmp_path):
-        """Save sample_dataset to netCDF4 and return (path, original_ds)."""
+        """
+        Save sample_dataset to netCDF4 and return (path, original_ds).
+        """
         out = tmp_path / "saved.nc"
         to_netcdf(sample_dataset, out)
         return out, sample_dataset
@@ -122,11 +117,12 @@ class TestFromNetcdf:
     def test_dimensions_match_original(self, saved_nc):
         nc_path, original = saved_nc
         loaded = from_netcdf(nc_path)
-        assert dict(loaded.sizes) == dict(original.dims)
+        assert dict(loaded.dims) == dict(original.dims)
 
     def test_position_values_match_original(self, saved_nc):
         """
         position array must be numerically identical after round-trip.
+
         equal_nan=True so that NaN padding slots compare as equal.
         """
         nc_path, original = saved_nc
@@ -146,7 +142,9 @@ class TestFromNetcdf:
             )
 
     def test_map_category_to_str_is_dict_after_load(self, saved_nc):
-        """After from_netcdf(), map_category_to_str must be a dict."""
+        """
+        After from_netcdf(), map_category_to_str must be a dict.
+        """
         nc_path, _ = saved_nc
         loaded = from_netcdf(nc_path)
         assert isinstance(loaded.attrs["map_category_to_str"], dict)
@@ -211,8 +209,6 @@ class TestFromNetcdf:
         assert isinstance(loaded, xr.Dataset)
 
 
-# ── full round-trip tests ─────────────────────────────────────────────
-
 class TestFullRoundTrip:
 
     def test_all_data_variables_survive_round_trip(
@@ -239,7 +235,9 @@ class TestFullRoundTrip:
     def test_all_key_attrs_survive_round_trip(
         self, sample_dataset, tmp_path
     ):
-        """All dict attributes must be identical after round-trip."""
+        """
+        All dict attributes must be identical after round-trip.
+        """
         nc_path = tmp_path / "round_trip.nc"
         to_netcdf(sample_dataset, nc_path)
         reloaded = from_netcdf(nc_path)

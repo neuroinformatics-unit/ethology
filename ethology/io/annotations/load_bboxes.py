@@ -141,10 +141,10 @@ def from_files(
 def from_netcdf(
     file_path: Path | str,
 ) -> xr.Dataset:
-    """Load an ``ethology`` bounding box annotations dataset from netCDF4.
+    """Load an ethology bounding box annotations dataset from netCDF4.
 
     This is the counterpart to
-    :func:`ethology.io.annotations.save_bboxes.to_netcdf`.
+    func: ethology.io.annotations.save_bboxes.to_netcdf.
     It loads the file and restores all dict attributes to their
     original Python types.
 
@@ -152,7 +152,7 @@ def from_netcdf(
     ----------
     file_path
         Path to the netCDF4 file. Must have been saved with
-        :func:`ethology.io.annotations.save_bboxes.to_netcdf`.
+        func: ethology.io.annotations.save_bboxes.to_netcdf.
 
     Returns
     -------
@@ -163,10 +163,10 @@ def from_netcdf(
     Raises
     ------
     FileNotFoundError
-        If ``file_path`` does not exist.
+        If "file_path" does not exist.
     ValueError
         If the loaded dataset fails
-        :class:`~ethology.validators.annotations.ValidBboxAnnotationsDataset`
+        class: ethology.validators.annotations.ValidBboxAnnotationsDataset
         validation.
 
     Examples
@@ -177,7 +177,6 @@ def from_netcdf(
     >>> ds_reloaded = load_bboxes.from_netcdf("annotations.nc")
     >>> ds.equals(ds_reloaded)
     True
-
     """
     file_path = Path(file_path)
 
@@ -187,9 +186,8 @@ def from_netcdf(
             f"Check that the file path is correct."
         )
 
-    # .load() reads all data into memory and closes the file handle immediately.
-    # Without .load(), xarray keeps the file open for lazy access, which causes
-    # PermissionError on Windows when tests try to clean up temp files.
+    # .load() reads all data into memory and 
+    # closes the file handle immediately.
     ds = xr.open_dataset(file_path).load()
 
     # Deserialise JSON-string attributes back to Python types.
@@ -216,7 +214,9 @@ def from_netcdf(
             try:
                 parsed_af = json.loads(af)
                 if isinstance(parsed_af, list):
-                    ds.attrs["annotation_files"] = [Path(p) for p in parsed_af]
+                    ds.attrs["annotation_files"] = [
+                        Path(p) for p in parsed_af
+                    ]
                 else:
                     ds.attrs["annotation_files"] = Path(af)
             except (json.JSONDecodeError, ValueError):
