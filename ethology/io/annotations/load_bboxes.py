@@ -137,6 +137,94 @@ def from_files(
     return ds
 
 
+@_check_output(ValidBboxAnnotationsDataset)
+def from_netcdf(
+    file_path: Path | str,
+) -> xr.Dataset:
+    """Load an ``ethology`` bounding box annotations dataset from netCDF4.
+
+    This is the counterpart to
+    :func:`ethology.io.annotations.save_bboxes.to_netcdf`.
+    It loads the file and restores all dict attributes to their
+    original Python types.
+
+    Parameters
+    ----------
+    file_path
+        Path to the netCDF4 file. Must have been saved with
+        :func:`ethology.io.annotations.save_bboxes.to_netcdf`.
+
+    Returns
+    -------
+    xarray.Dataset
+        A valid bounding box annotations dataset, identical to
+        the one originally saved.
+
+    Raises
+    ------
+    FileNotFoundError
+        If ``file_path`` does not exist.
+    ValueError
+        If the loaded dataset fails
+        :class:`~ethology.validators.annotations.ValidBboxAnnotationsDataset`
+        validation.
+
+    Examples
+    --------
+    >>> from ethology.io.annotations import load_bboxes, save_bboxes
+    >>> ds = load_bboxes.from_files("annotations.json", format="COCO")
+    >>> save_bboxes.to_netcdf(ds, "annotations.nc")
+    >>> ds_reloaded = load_bboxes.from_netcdf("annotations.nc")
+    >>> ds.equals(ds_reloaded)
+    True
+
+    """
+    file_path = Path(file_path)
+
+    if not file_path.exists():
+        raise FileNotFoundError(
+            f"netCDF4 file not found: {file_path}\n"
+            f"Check that the file path is correct."
+        )
+
+    # .load() reads all data into memory and closes the file handle immediately.
+    # Without .load(), xarray keeps the file open for lazy access, which causes
+    # PermissionError on Windows when tests try to clean up temp files.
+    ds = xr.open_dataset(file_path).load()
+
+    # Deserialise JSON-string attributes back to Python types.
+    # to_netcdf() serialised dicts to JSON strings because netCDF4 cannot
+    # store Python dicts. json.loads() always produces string keys ("1", "3")
+    # but ethology convention is integer keys (1, 3) — convert them back.
+    _dict_attrs_with_int_keys = [
+        "map_category_to_str",
+        "map_image_id_to_filename",
+        "map_image_id_to_original_coco_id",
+    ]
+    for key in _dict_attrs_with_int_keys:
+        if key in ds.attrs and isinstance(ds.attrs[key], str):
+            parsed = json.loads(ds.attrs[key])
+            ds.attrs[key] = {
+                int(k) if k.lstrip("-").isdigit() else k: v
+                for k, v in parsed.items()
+            }
+
+    # Restore annotation_files — was serialised as JSON string of paths
+    if "annotation_files" in ds.attrs:
+        af = ds.attrs["annotation_files"]
+        if isinstance(af, str):
+            try:
+                parsed_af = json.loads(af)
+                if isinstance(parsed_af, list):
+                    ds.attrs["annotation_files"] = [Path(p) for p in parsed_af]
+                else:
+                    ds.attrs["annotation_files"] = Path(af)
+            except (json.JSONDecodeError, ValueError):
+                ds.attrs["annotation_files"] = Path(af)
+
+    return ds
+
+
 def _get_map_attributes_from_df(
     df: DataFrame[ValidBboxAnnotationsDataFrame],
 ) -> tuple[dict, dict]:
