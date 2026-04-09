@@ -90,6 +90,7 @@ def to_netcdf(
     >>> save_bboxes.to_netcdf(ds, "annotations.nc")
     PosixPath('annotations.nc')
     >>> ds_reloaded = load_bboxes.from_netcdf("annotations.nc")
+
     """
     output_filepath = Path(output_filepath)
 

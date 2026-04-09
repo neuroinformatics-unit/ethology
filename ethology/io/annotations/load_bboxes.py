@@ -177,6 +177,7 @@ def from_netcdf(
     >>> ds_reloaded = load_bboxes.from_netcdf("annotations.nc")
     >>> ds.equals(ds_reloaded)
     True
+
     """
     file_path = Path(file_path)
 
@@ -186,7 +187,7 @@ def from_netcdf(
             f"Check that the file path is correct."
         )
 
-    # .load() reads all data into memory and 
+    # .load() reads all data into memory and
     # closes the file handle immediately.
     ds = xr.open_dataset(file_path).load()
 
@@ -214,9 +215,7 @@ def from_netcdf(
             try:
                 parsed_af = json.loads(af)
                 if isinstance(parsed_af, list):
-                    ds.attrs["annotation_files"] = [
-                        Path(p) for p in parsed_af
-                    ]
+                    ds.attrs["annotation_files"] = [Path(p) for p in parsed_af]
                 else:
                     ds.attrs["annotation_files"] = Path(af)
             except (json.JSONDecodeError, ValueError):
