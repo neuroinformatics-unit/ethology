@@ -9,6 +9,7 @@ import pytest
 # load fixtures defined as modules
 pytest_plugins = [
     "tests.fixtures.annotations",
+    "tests.fixtures.video",
 ]
 
 GIN_TEST_DATA_REPO = (
