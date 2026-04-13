@@ -20,6 +20,7 @@ classifiers = [
 ]
 dependencies = [
   "movement>=0.13.0",
+  "opencv-python",
   "pandera[pandas]",
   "pycocotools",
   "scikit-learn",
