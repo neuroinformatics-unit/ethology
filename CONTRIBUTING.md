@@ -23,10 +23,15 @@ and pip-installing it in editable mode with the required dependencies:
 git clone https://github.com/neuroinformatics-unit/ethology.git
 
 # then run from within the repository root folder:
-pip install -e .[dev]  # works on most shells
-pip install -e '.[dev]'  # works on zsh (the default shell on macOS)
+pip install -e . --group dev
 ```
-This should install all the dependencies needed for development, such as `pytest` and `pre-commit`. If you also want to edit the documentation and preview the changes locally, you will additionally need the `docs` extra dependencies. See [Editing the documentation](#editing-the-documentation) for more details.
+This will install all the dependencies needed for development, such as `pytest` and `pre-commit`.
+If you also want to [edit the documentation](#editing-the-documentation) and preview the changes locally, you will additionally need the `docs` dependencies.
+To install both `dev` and `docs` dependencies at once, use `--all-groups`:
+
+```sh
+pip install -e . --all-groups
+```
 
 Finally, install the [pre-commit hooks](https://pre-commit.com/):
 
@@ -140,8 +145,7 @@ To edit the documentation, first clone the repository, and install `ethology` in
 
 Then, install a few additional dependencies in your development environment to be able to build the documentation locally. To do this, run the following command from the root of the repository:
 ```sh
-pip install -e .[docs]    # works on most shells
-pip install -e '.[docs]'  # works on zsh (default on macOS)
+pip install -e --group docs
 ```
 
 Now create a new branch, edit the documentation source files (`.md` or `.rst` in the `docs` folder),
