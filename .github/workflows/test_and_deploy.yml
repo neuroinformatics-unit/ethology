@@ -17,13 +17,13 @@ jobs:
   linting:
     runs-on: ubuntu-latest
     steps:
-      - uses: neuroinformatics-unit/actions/lint@v2
+      - uses: neuroinformatics-unit/actions/lint@v3
 
   manifest:
     name: Check Manifest
     runs-on: ubuntu-latest
     steps:
-      - uses: neuroinformatics-unit/actions/check_manifest@v2
+      - uses: neuroinformatics-unit/actions/check_manifest@v3
 
   test:
     needs: [linting, manifest]
@@ -43,7 +43,7 @@ jobs:
 
     steps:
       # Run tests
-      - uses: neuroinformatics-unit/actions/test@v2
+      - uses: neuroinformatics-unit/actions/test@v3
         with:
           python-version: ${{ matrix.python-version }}
           secret-codecov-token: ${{ secrets.CODECOV_TOKEN }}
@@ -54,7 +54,7 @@ jobs:
       tag_on_main: ${{ steps.check.outputs.tag_on_main }}
     runs-on: ubuntu-latest
     steps:
-      - uses: neuroinformatics-unit/actions/check_tag_on_main@v2
+      - uses: neuroinformatics-unit/actions/check_tag_on_main@v3
         id: check
 
   build_sdist_wheels:
@@ -63,7 +63,7 @@ jobs:
     if: github.event_name == 'push' && needs.check_tag.outputs.tag_on_main == 'true'
     runs-on: ubuntu-latest
     steps:
-    - uses: neuroinformatics-unit/actions/build_sdist_wheels@v2
+    - uses: neuroinformatics-unit/actions/build_sdist_wheels@v3
 
 
   upload_all:

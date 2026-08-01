@@ -29,13 +29,13 @@ jobs:
     if: (${{ github.event_name == 'schedule' }} && ${{ github.repository_owner == 'neuroinformatics-unit' }} && ${{ github.ref == 'refs/heads/main' }}) || (${{ github.event_name != 'schedule' }})
     runs-on: ubuntu-latest
     steps:
-      - uses: neuroinformatics-unit/actions/lint@v2
+      - uses: neuroinformatics-unit/actions/lint@v3
 
   build_sphinx_docs:
     name: Build Sphinx Docs
     runs-on: ubuntu-latest
     steps:
-      - uses: neuroinformatics-unit/actions/build_sphinx_docs@v2
+      - uses: neuroinformatics-unit/actions/build_sphinx_docs@v3
         with:
           python-version: 3.13 # default for the action is 3.x
           use-make: true
@@ -49,7 +49,7 @@ jobs:
     outputs:
       tag_on_main: ${{ steps.check.outputs.tag_on_main }}
     steps:
-      - uses: neuroinformatics-unit/actions/check_tag_on_main@v2
+      - uses: neuroinformatics-unit/actions/check_tag_on_main@v3
         id: check
 
   deploy_sphinx_docs:
@@ -60,7 +60,7 @@ jobs:
     if: (github.event_name == 'push' && (github.ref == 'refs/heads/main' || needs.check_tag.outputs.tag_on_main == 'true')) || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
-      - uses: neuroinformatics-unit/actions/deploy_sphinx_docs_multiversion@v2
+      - uses: neuroinformatics-unit/actions/deploy_sphinx_docs_multiversion@v3
         with:
           secret_input: ${{ secrets.GITHUB_TOKEN }}
           use-make: true
