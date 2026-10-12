@@ -244,16 +244,16 @@ print(f"Fraction of annotations in region: {fraction_in_region * 100:.2f}%")
 # To do this, we need to rename the dataset dimensions,
 # add a ``confidence`` array, and add a ``time_unit`` attribute.
 # Although it is not required, we also rename the
-# ``individuals`` coordinate values to follow the ``movement``
+# ``individual`` coordinate values to follow the ``movement``
 # naming convention.
 
 
 # Rename dimensions
-ds_as_movement = ds.rename({"image_id": "time", "id": "individuals"})
+ds_as_movement = ds.rename({"image_id": "time", "id": "individual"})
 
-# Rename 'individuals' values to follow ``movement`` convention
-ds_as_movement["individuals"] = [
-    f"id_{i.item()}" for i in ds_as_movement.individuals.values
+# Rename 'individual' values to follow ``movement`` convention
+ds_as_movement["individual"] = [
+    f"id_{i.item()}" for i in ds_as_movement.individual.values
 ]
 
 # Add confidence array with NaNs
@@ -261,11 +261,11 @@ ds_as_movement["confidence"] = xr.DataArray(
     np.full(
         (
             ds_as_movement.sizes["time"],
-            ds_as_movement.sizes["individuals"],
+            ds_as_movement.sizes["individual"],
         ),
         np.nan,
     ),
-    dims=["time", "individuals"],
+    dims=["time", "individual"],
 )
 
 # Add time_unit attribute

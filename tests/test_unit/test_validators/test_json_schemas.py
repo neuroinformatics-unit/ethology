@@ -201,7 +201,7 @@ def test_check_required_properties_keys(small_schema: dict):
 
 
 @pytest.mark.parametrize(
-    "input_file,",
+    "input_file",
     [
         "VIA_JSON_sample_1.json",
         "VIA_JSON_sample_2.json",
@@ -239,7 +239,7 @@ def test_required_keys_in_provided_VIA_schema(
 
 
 @pytest.mark.parametrize(
-    "input_file,",
+    "input_file",
     [
         "COCO_JSON_sample_1.json",
         "COCO_JSON_sample_2.json",
