@@ -12,7 +12,7 @@ pytest_plugins = [
 ]
 
 GIN_TEST_DATA_REPO = (
-    "https://gin.g-node.org/neuroinformatics/ethology-test-data"
+    "https://gin.swc.ucl.ac.uk/neuroinformatics/ethology-test-data"
 )
 
 

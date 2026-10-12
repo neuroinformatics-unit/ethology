@@ -163,8 +163,7 @@ def sample_bboxes_df() -> Callable:
     [
         (
             [],
-            # pandera < 0.34 raises BackendNotFoundError for a non-dataframe
-            # input; pandera >= 0.34 raises TypeError. Both name the type.
+            # pandera >= 0.34 raises TypeError and names the type.
             pytest.raises((pa.errors.BackendNotFoundError, TypeError)),
             "<class 'list'>",
         ),
