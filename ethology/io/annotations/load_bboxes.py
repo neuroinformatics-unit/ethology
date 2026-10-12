@@ -622,7 +622,10 @@ def _df_to_xarray_ds(
         data_vars=data_vars,
         coords=dict(
             image_id=df["image_id"].unique(),
-            space=["x", "y"],
+            # object dtype, so that zarr v3 stores it as variable-length
+            # strings: numpy's fixed-width strings ("<U1") have no stable
+            # zarr v3 specification and raise a warning on every write
+            space=np.array(["x", "y"], dtype=object),
             id=range(max_annotations_per_image),
         ),
     )
