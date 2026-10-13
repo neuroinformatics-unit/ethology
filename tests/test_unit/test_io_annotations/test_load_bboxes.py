@@ -244,6 +244,10 @@ def assert_dataset(
     expected_category_str: list[str] | None = None,
 ):
     """Check that the dataset has the expected shape and content."""
+    # Check space coordinate is stored as variable-length strings
+    assert ds.space.values.tolist() == ["x", "y"]
+    assert ds.space.dtype == object
+
     # Check size of position array
     assert ds.position.shape == (
         expected_n_images,
