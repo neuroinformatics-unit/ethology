@@ -51,6 +51,15 @@ ValidBboxAnnotationsCOCO
    
    
    
+   
+   
+   
+   
+   
+   
+   
+   
+   
 
    
    .. rubric:: Methods
@@ -71,6 +80,12 @@ ValidBboxAnnotationsCOCO
       ~ValidBboxAnnotationsCOCO.example
    
    
+      ~ValidBboxAnnotationsCOCO.from_json
+   
+   
+      ~ValidBboxAnnotationsCOCO.from_yaml
+   
+   
       ~ValidBboxAnnotationsCOCO.get_metadata
    
    
@@ -81,6 +96,9 @@ ValidBboxAnnotationsCOCO
    
    
       ~ValidBboxAnnotationsCOCO.strategy
+   
+   
+      ~ValidBboxAnnotationsCOCO.to_json
    
    
       ~ValidBboxAnnotationsCOCO.to_json_schema

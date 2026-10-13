@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 
 
@@ -26,57 +25,66 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
-<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+  <link href="../../../_static/styles/theme.css?digest=18bd87630a240e9c25be" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=18bd87630a240e9c25be" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=9c66c473" />
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=8f2a1f02" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=c83e6b79" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
   
   <!-- So that users can add custom icons -->
-  <script src="../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <script defer src="../../../_static/scripts/fontawesome.js?digest=18bd87630a240e9c25be"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
-<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=18bd87630a240e9c25be" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=18bd87630a240e9c25be" />
 
-    <script src="../../../_static/documentation_options.js?v=b4e08961"></script>
+    <script src="../../../_static/documentation_options.js?v=1546fae8"></script>
     <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../../_static/sg-tags.js?v=d80f6fa4"></script>
     <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/ethology/validators/annotations';</script>
     <script>
-        DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
+        DOCUMENTATION_OPTIONS.theme_version = '0.23.0';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://ethology.neuroinformatics.dev/latest/_static/switcher.json';
         DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'dev';
         DOCUMENTATION_OPTIONS.show_version_warning_banner =
             false;
         </script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
     <link rel="canonical" href="https://ethology.neuroinformatics.dev/_modules/ethology/validators/annotations.html" />
     <link rel="icon" href="../../../_static/light-logo-niu.png"/>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="" />
+  
+    
+    <script src="../../../_static/searchtools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
+    <script src="../../../searchindex.js"></script>
+  
   </head>
-  
-  
-  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
-
+  <body data-default-mode="">
   
   
   <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
   
   <div id="pst-scroll-pixel-helper"></div>
   
   <button type="button" class="btn rounded-pill" id="pst-back-to-top">
     <i class="fa-solid fa-arrow-up"></i>Back to top</button>
-
+  
+  
+  
   
   <dialog id="pst-search-dialog">
     
@@ -102,9 +110,9 @@
 </div>
 
   
-    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
 <div class="bd-header__inner bd-page-width">
-  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+  <button type="button" class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
     <span class="fa-solid fa-bars"></span>
   </button>
   
@@ -124,7 +132,7 @@
   
   
   
-    <p class="title logo__title">ethology v0.1.3.dev5</p>
+    <p class="title logo__title">ethology v0.1.4.dev2</p>
   
 </a></div>
     
@@ -176,7 +184,7 @@
         <div class="navbar-item navbar-persistent--container">
           
 
-<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
  <i class="fa-solid fa-magnifying-glass"></i>
  <span class="search-button__default-text">Search</span>
  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
@@ -206,11 +214,18 @@
       
         <div class="navbar-item">
 
-<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
-  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
-  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
-  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
-</button></div>
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
       
         <div class="navbar-item"><ul class="navbar-icon-links"
     aria-label="Icon Links">
@@ -223,8 +238,7 @@
           
           
           
-          <a href="https://github.com/neuroinformatics-unit/ethology" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">GitHub</span></a>
+          <a href="https://github.com/neuroinformatics-unit/ethology" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
         </li>
         <li class="nav-item">
           
@@ -235,8 +249,7 @@
           
           
           
-          <a href="https://neuroinformatics.zulipchat.com/#narrow/channel/483869-Ethology" title="Zulip (chat)" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-comments fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">Zulip (chat)</span></a>
+          <a href="https://neuroinformatics.zulipchat.com/#narrow/channel/483869-Ethology" title="Zulip (chat)" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-comments fa-lg" aria-hidden="true"></i><span class="visually-hidden">Zulip (chat)</span></a>
         </li>
 </ul></div>
       
@@ -247,7 +260,7 @@
   
     <div class="navbar-persistent--mobile">
 
-<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
  <i class="fa-solid fa-magnifying-glass"></i>
  <span class="search-button__default-text">Search</span>
  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
@@ -343,11 +356,18 @@
         
           <div class="navbar-item">
 
-<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
-  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
-  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
-  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
-</button></div>
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
         
           <div class="navbar-item"><ul class="navbar-icon-links"
     aria-label="Icon Links">
@@ -360,8 +380,7 @@
           
           
           
-          <a href="https://github.com/neuroinformatics-unit/ethology" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">GitHub</span></a>
+          <a href="https://github.com/neuroinformatics-unit/ethology" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
         </li>
         <li class="nav-item">
           
@@ -372,8 +391,7 @@
           
           
           
-          <a href="https://neuroinformatics.zulipchat.com/#narrow/channel/483869-Ethology" title="Zulip (chat)" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-comments fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">Zulip (chat)</span></a>
+          <a href="https://neuroinformatics.zulipchat.com/#narrow/channel/483869-Ethology" title="Zulip (chat)" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-comments fa-lg" aria-hidden="true"></i><span class="visually-hidden">Zulip (chat)</span></a>
         </li>
 </ul></div>
         
@@ -437,7 +455,7 @@
                 <article class="bd-article">
                   
   <h1>Source code for ethology.validators.annotations</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;Validators for annotation files and datasets.&quot;&quot;&quot;</span>
+<span></span><span class="sd">"""Validators for annotation files and datasets."""</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
@@ -461,7 +479,7 @@
 <a class="viewcode-back" href="../../../api/ethology.validators.annotations.ValidVIA.html#ethology.validators.annotations.ValidVIA">[docs]</a>
 <span class="nd">@define</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">ValidVIA</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Class for valid VIA JSON annotation files.</span>
+<span class="w">    </span><span class="sd">"""Class for valid VIA JSON annotation files.</span>
 
 <span class="sd">    It checks the input file is a valid JSON file, matches</span>
 <span class="sd">    the VIA schema and contains the required keys.</span>
@@ -488,17 +506,17 @@
 <span class="sd">    ValueError</span>
 <span class="sd">        If the VIA JSON file is missing any of the required keys.</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">path</span><span class="p">:</span> <span class="n">Path</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">converter</span><span class="o">=</span><span class="n">Path</span><span class="p">)</span>
 
     <span class="c1"># class variables: should not be modified after initialization</span>
-    <span class="n">schema</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="n">_get_default_schema</span><span class="p">(</span><span class="s2">&quot;VIA&quot;</span><span class="p">)</span>
+    <span class="n">schema</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="n">_get_default_schema</span><span class="p">(</span><span class="s2">"VIA"</span><span class="p">)</span>
     <span class="n">required_keys</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;main&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;_via_img_metadata&quot;</span><span class="p">,</span> <span class="s2">&quot;_via_attributes&quot;</span><span class="p">],</span>
-        <span class="s2">&quot;images&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;filename&quot;</span><span class="p">],</span>
-        <span class="s2">&quot;regions&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;shape_attributes&quot;</span><span class="p">],</span>
-        <span class="s2">&quot;shape_attributes&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="s2">&quot;width&quot;</span><span class="p">,</span> <span class="s2">&quot;height&quot;</span><span class="p">],</span>
+        <span class="s2">"main"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"_via_img_metadata"</span><span class="p">,</span> <span class="s2">"_via_attributes"</span><span class="p">],</span>
+        <span class="s2">"images"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"filename"</span><span class="p">],</span>
+        <span class="s2">"regions"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"shape_attributes"</span><span class="p">],</span>
+        <span class="s2">"shape_attributes"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"x"</span><span class="p">,</span> <span class="s2">"y"</span><span class="p">,</span> <span class="s2">"width"</span><span class="p">,</span> <span class="s2">"height"</span><span class="p">],</span>
     <span class="p">}</span>
 
     <span class="c1"># Note: the validators are applied in order</span>
@@ -512,37 +530,37 @@
 
     <span class="nd">@path</span><span class="o">.</span><span class="n">validator</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_file_contains_required_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attribute</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Ensure that the VIA JSON file contains the required keys.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Ensure that the VIA JSON file contains the required keys."""</span>
         <span class="c1"># Read data as dict</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
             <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
 
         <span class="c1"># Check first level keys</span>
-        <span class="n">_check_required_keys_in_dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">required_keys</span><span class="p">[</span><span class="s2">&quot;main&quot;</span><span class="p">],</span> <span class="n">data</span><span class="p">)</span>
+        <span class="n">_check_required_keys_in_dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">required_keys</span><span class="p">[</span><span class="s2">"main"</span><span class="p">],</span> <span class="n">data</span><span class="p">)</span>
 
         <span class="c1"># Check keys in nested dicts</span>
-        <span class="k">for</span> <span class="n">img_str</span><span class="p">,</span> <span class="n">img_dict</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;_via_img_metadata&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">img_str</span><span class="p">,</span> <span class="n">img_dict</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s2">"_via_img_metadata"</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="c1"># Check keys for each image dictionary</span>
             <span class="n">_check_required_keys_in_dict</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">required_keys</span><span class="p">[</span><span class="s2">&quot;images&quot;</span><span class="p">],</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">required_keys</span><span class="p">[</span><span class="s2">"images"</span><span class="p">],</span>
                 <span class="n">img_dict</span><span class="p">,</span>
-                <span class="n">additional_message</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot; for </span><span class="si">{</span><span class="n">img_str</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="n">additional_message</span><span class="o">=</span><span class="sa">f</span><span class="s2">" for </span><span class="si">{</span><span class="n">img_str</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
             <span class="p">)</span>
 
             <span class="c1"># Check keys for each region in an image</span>
-            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">region</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">img_dict</span><span class="p">[</span><span class="s2">&quot;regions&quot;</span><span class="p">]):</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">region</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">img_dict</span><span class="p">[</span><span class="s2">"regions"</span><span class="p">]):</span>
                 <span class="c1"># Check keys under first level per region</span>
                 <span class="n">_check_required_keys_in_dict</span><span class="p">(</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">required_keys</span><span class="p">[</span><span class="s2">&quot;regions&quot;</span><span class="p">],</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">required_keys</span><span class="p">[</span><span class="s2">"regions"</span><span class="p">],</span>
                     <span class="n">region</span><span class="p">,</span>
-                    <span class="n">additional_message</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot; for region </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2"> under </span><span class="si">{</span><span class="n">img_str</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                    <span class="n">additional_message</span><span class="o">=</span><span class="sa">f</span><span class="s2">" for region </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2"> under </span><span class="si">{</span><span class="n">img_str</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
                 <span class="p">)</span>
 
-                <span class="c1"># Check keys under &quot;shape_attributes&quot; per region</span>
+                <span class="c1"># Check keys under "shape_attributes" per region</span>
                 <span class="n">_check_required_keys_in_dict</span><span class="p">(</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">required_keys</span><span class="p">[</span><span class="s2">&quot;shape_attributes&quot;</span><span class="p">],</span>
-                    <span class="n">region</span><span class="p">[</span><span class="s2">&quot;shape_attributes&quot;</span><span class="p">],</span>
-                    <span class="n">additional_message</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot; for region </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2"> under </span><span class="si">{</span><span class="n">img_str</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">required_keys</span><span class="p">[</span><span class="s2">"shape_attributes"</span><span class="p">],</span>
+                    <span class="n">region</span><span class="p">[</span><span class="s2">"shape_attributes"</span><span class="p">],</span>
+                    <span class="n">additional_message</span><span class="o">=</span><span class="sa">f</span><span class="s2">" for region </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2"> under </span><span class="si">{</span><span class="n">img_str</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
                 <span class="p">)</span></div>
 
 
@@ -551,7 +569,7 @@
 <a class="viewcode-back" href="../../../api/ethology.validators.annotations.ValidCOCO.html#ethology.validators.annotations.ValidCOCO">[docs]</a>
 <span class="nd">@define</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">ValidCOCO</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Class for valid COCO JSON annotation files.</span>
+<span class="w">    </span><span class="sd">"""Class for valid COCO JSON annotation files.</span>
 
 <span class="sd">    It checks the input file is a valid JSON file, matches</span>
 <span class="sd">    the COCO schema and contains the required keys.</span>
@@ -577,17 +595,17 @@
 <span class="sd">    ValueError</span>
 <span class="sd">        If the COCO JSON file is missing any of the required keys.</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">path</span><span class="p">:</span> <span class="n">Path</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">converter</span><span class="o">=</span><span class="n">Path</span><span class="p">)</span>
 
     <span class="c1"># class variables: should not be modified after initialization</span>
-    <span class="n">schema</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="n">_get_default_schema</span><span class="p">(</span><span class="s2">&quot;COCO&quot;</span><span class="p">)</span>
+    <span class="n">schema</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="n">_get_default_schema</span><span class="p">(</span><span class="s2">"COCO"</span><span class="p">)</span>
     <span class="n">required_keys</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;main&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;images&quot;</span><span class="p">,</span> <span class="s2">&quot;annotations&quot;</span><span class="p">,</span> <span class="s2">&quot;categories&quot;</span><span class="p">],</span>
-        <span class="s2">&quot;images&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="s2">&quot;file_name&quot;</span><span class="p">,</span> <span class="s2">&quot;width&quot;</span><span class="p">,</span> <span class="s2">&quot;height&quot;</span><span class="p">],</span>
-        <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="s2">&quot;image_id&quot;</span><span class="p">,</span> <span class="s2">&quot;bbox&quot;</span><span class="p">,</span> <span class="s2">&quot;category_id&quot;</span><span class="p">],</span>
-        <span class="s2">&quot;categories&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">],</span>  <span class="c1"># exclude &quot;supercategory&quot;</span>
+        <span class="s2">"main"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"images"</span><span class="p">,</span> <span class="s2">"annotations"</span><span class="p">,</span> <span class="s2">"categories"</span><span class="p">],</span>
+        <span class="s2">"images"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"id"</span><span class="p">,</span> <span class="s2">"file_name"</span><span class="p">,</span> <span class="s2">"width"</span><span class="p">,</span> <span class="s2">"height"</span><span class="p">],</span>
+        <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"id"</span><span class="p">,</span> <span class="s2">"image_id"</span><span class="p">,</span> <span class="s2">"bbox"</span><span class="p">,</span> <span class="s2">"category_id"</span><span class="p">],</span>
+        <span class="s2">"categories"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"id"</span><span class="p">,</span> <span class="s2">"name"</span><span class="p">],</span>  <span class="c1"># exclude "supercategory"</span>
     <span class="p">}</span>  <span class="c1"># keys match the 1st level keys in a COCO JSON file</span>
 
     <span class="c1"># Note: the validators are applied in order</span>
@@ -601,57 +619,57 @@
 
     <span class="nd">@path</span><span class="o">.</span><span class="n">validator</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_file_contains_required_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attribute</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Ensure that the COCO JSON file contains the required keys.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Ensure that the COCO JSON file contains the required keys."""</span>
 
         <span class="c1"># Helper function to singularise the input key for the</span>
         <span class="c1"># error message</span>
         <span class="k">def</span><span class="w"> </span><span class="nf">_singularise_err_msg</span><span class="p">(</span><span class="n">key</span><span class="p">):</span>
-            <span class="k">return</span> <span class="n">key</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="n">key</span> <span class="o">!=</span> <span class="s2">&quot;categories&quot;</span> <span class="k">else</span> <span class="n">key</span><span class="p">[:</span><span class="o">-</span><span class="mi">3</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;y&quot;</span>
+            <span class="k">return</span> <span class="n">key</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="n">key</span> <span class="o">!=</span> <span class="s2">"categories"</span> <span class="k">else</span> <span class="n">key</span><span class="p">[:</span><span class="o">-</span><span class="mi">3</span><span class="p">]</span> <span class="o">+</span> <span class="s2">"y"</span>
 
         <span class="c1"># Read file as dict</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
             <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
 
         <span class="c1"># Check first level keys</span>
-        <span class="n">_check_required_keys_in_dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">required_keys</span><span class="p">[</span><span class="s2">&quot;main&quot;</span><span class="p">],</span> <span class="n">data</span><span class="p">)</span>
+        <span class="n">_check_required_keys_in_dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">required_keys</span><span class="p">[</span><span class="s2">"main"</span><span class="p">],</span> <span class="n">data</span><span class="p">)</span>
 
-        <span class="c1"># Check keys in every dict listed under the &quot;images&quot;, &quot;annotations&quot;</span>
-        <span class="c1"># and &quot;categories&quot; keys</span>
+        <span class="c1"># Check keys in every dict listed under the "images", "annotations"</span>
+        <span class="c1"># and "categories" keys</span>
         <span class="k">for</span> <span class="n">ky</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">required_keys</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="mi">1</span><span class="p">:]:</span>
             <span class="k">for</span> <span class="n">instance_dict</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="n">ky</span><span class="p">]:</span>
                 <span class="n">_check_required_keys_in_dict</span><span class="p">(</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">required_keys</span><span class="p">[</span><span class="n">ky</span><span class="p">],</span>
                     <span class="n">instance_dict</span><span class="p">,</span>
                     <span class="n">additional_message</span><span class="o">=</span><span class="p">(</span>
-                        <span class="sa">f</span><span class="s2">&quot; for </span><span class="si">{</span><span class="n">_singularise_err_msg</span><span class="p">(</span><span class="n">ky</span><span class="p">)</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">instance_dict</span><span class="si">}</span><span class="s2">&quot;</span>
+                        <span class="sa">f</span><span class="s2">" for </span><span class="si">{</span><span class="n">_singularise_err_msg</span><span class="p">(</span><span class="n">ky</span><span class="p">)</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">instance_dict</span><span class="si">}</span><span class="s2">"</span>
                     <span class="p">),</span>
                 <span class="p">)</span>
 
     <span class="nd">@path</span><span class="o">.</span><span class="n">validator</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_file_contains_unique_image_IDs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attribute</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Ensure that the COCO JSON file contains unique image IDs.</span>
+<span class="w">        </span><span class="sd">"""Ensure that the COCO JSON file contains unique image IDs.</span>
 
 <span class="sd">        When exporting to COCO format, the VIA tool attempts to extract the</span>
 <span class="sd">        image ID from the image filename using ``parseInt``. As a result, if</span>
 <span class="sd">        two or more images have the same number-based filename, the image IDs</span>
 <span class="sd">        can be non-unique (i.e., more image filenames than image IDs). This is</span>
 <span class="sd">        probably a bug in the VIA tool, but we need to check for this issue.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
             <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
 
-        <span class="c1"># Get number of elements in &quot;images&quot; list</span>
-        <span class="n">n_images</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;images&quot;</span><span class="p">])</span>
+        <span class="c1"># Get number of elements in "images" list</span>
+        <span class="n">n_images</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">"images"</span><span class="p">])</span>
 
         <span class="c1"># Get the image IDs</span>
-        <span class="n">unique_image_ids</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span><span class="n">img</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">img</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;images&quot;</span><span class="p">]])</span>
+        <span class="n">unique_image_ids</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span><span class="n">img</span><span class="p">[</span><span class="s2">"id"</span><span class="p">]</span> <span class="k">for</span> <span class="n">img</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s2">"images"</span><span class="p">]])</span>
 
         <span class="c1"># Check for duplicate image IDs</span>
         <span class="k">if</span> <span class="n">n_images</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">unique_image_ids</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s2">&quot;The image IDs in the input COCO file are not unique. &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;There are </span><span class="si">{</span><span class="n">n_images</span><span class="si">}</span><span class="s2"> image entries, but only &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">unique_image_ids</span><span class="p">)</span><span class="si">}</span><span class="s2"> unique image IDs.&quot;</span>
+                <span class="s2">"The image IDs in the input COCO file are not unique. "</span>
+                <span class="sa">f</span><span class="s2">"There are </span><span class="si">{</span><span class="n">n_images</span><span class="si">}</span><span class="s2"> image entries, but only "</span>
+                <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">unique_image_ids</span><span class="p">)</span><span class="si">}</span><span class="s2"> unique image IDs."</span>
             <span class="p">)</span></div>
 
 
@@ -660,7 +678,7 @@
 <a class="viewcode-back" href="../../../api/ethology.validators.annotations.ValidBboxAnnotationsDataset.html#ethology.validators.annotations.ValidBboxAnnotationsDataset">[docs]</a>
 <span class="nd">@define</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">ValidBboxAnnotationsDataset</span><span class="p">(</span><span class="n">ValidDataset</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Class for valid ``ethology`` bounding box annotations datasets.</span>
+<span class="w">    </span><span class="sd">"""Class for valid ``ethology`` bounding box annotations datasets.</span>
 
 <span class="sd">    This class validates that the input dataset:</span>
 
@@ -700,15 +718,15 @@
 <span class="sd">    The dataset can have other data variables and dimensions, but only the</span>
 <span class="sd">    required ones are checked.</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="c1"># Minimum requirements for a bbox dataset holding detections</span>
     <span class="c1"># Should not be modified after initialization</span>
-    <span class="n">required_dims</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">set</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;image_id&quot;</span><span class="p">,</span> <span class="s2">&quot;space&quot;</span><span class="p">,</span> <span class="s2">&quot;id&quot;</span><span class="p">}</span>
+    <span class="n">required_dims</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">set</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"image_id"</span><span class="p">,</span> <span class="s2">"space"</span><span class="p">,</span> <span class="s2">"id"</span><span class="p">}</span>
     <span class="n">required_data_vars</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">set</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;position&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;image_id&quot;</span><span class="p">,</span> <span class="s2">&quot;space&quot;</span><span class="p">,</span> <span class="s2">&quot;id&quot;</span><span class="p">},</span>
-        <span class="s2">&quot;shape&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;image_id&quot;</span><span class="p">,</span> <span class="s2">&quot;space&quot;</span><span class="p">,</span> <span class="s2">&quot;id&quot;</span><span class="p">},</span>
-        <span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;image_id&quot;</span><span class="p">,</span> <span class="s2">&quot;id&quot;</span><span class="p">},</span>
+        <span class="s2">"position"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"image_id"</span><span class="p">,</span> <span class="s2">"space"</span><span class="p">,</span> <span class="s2">"id"</span><span class="p">},</span>
+        <span class="s2">"shape"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"image_id"</span><span class="p">,</span> <span class="s2">"space"</span><span class="p">,</span> <span class="s2">"id"</span><span class="p">},</span>
+        <span class="s2">"category"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"image_id"</span><span class="p">,</span> <span class="s2">"id"</span><span class="p">},</span>
     <span class="p">}</span></div>
 
 
@@ -716,7 +734,7 @@
 <div class="viewcode-block" id="ValidBboxAnnotationsDataFrame">
 <a class="viewcode-back" href="../../../api/ethology.validators.annotations.ValidBboxAnnotationsDataFrame.html#ethology.validators.annotations.ValidBboxAnnotationsDataFrame">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">ValidBboxAnnotationsDataFrame</span><span class="p">(</span><span class="n">pa</span><span class="o">.</span><span class="n">DataFrameModel</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Class for valid bounding boxes intermediate dataframes.</span>
+<span class="w">    </span><span class="sd">"""Class for valid bounding boxes intermediate dataframes.</span>
 
 <span class="sd">    We use this dataframe internally as an intermediate step in the process of</span>
 <span class="sd">    converting an input bounding box annotations file (VIA or COCO) to</span>
@@ -762,45 +780,45 @@
 <span class="sd">    --------</span>
 <span class="sd">    :class:`pandera.api.pandas.model.DataFrameModel`</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="c1"># image columns</span>
-    <span class="n">image_filename</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">pa</span><span class="o">.</span><span class="n">Field</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;Name of the image file.&quot;</span><span class="p">)</span>
+    <span class="n">image_filename</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">pa</span><span class="o">.</span><span class="n">Field</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">"Name of the image file."</span><span class="p">)</span>
     <span class="n">image_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">pa</span><span class="o">.</span><span class="n">Field</span><span class="p">(</span>
-        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Unique identifier for each of the images.&quot;</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">"Unique identifier for each of the images."</span>
     <span class="p">)</span>
     <span class="n">image_width</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">pa</span><span class="o">.</span><span class="n">Field</span><span class="p">(</span>
-        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Width of each of the images, &quot;</span>
-        <span class="s2">&quot;in the same units as the input file (usually pixels).&quot;</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">"Width of each of the images, "</span>
+        <span class="s2">"in the same units as the input file (usually pixels)."</span>
         <span class="c1"># if not defined, it should be set to 0 in the df</span>
     <span class="p">)</span>
     <span class="n">image_height</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">pa</span><span class="o">.</span><span class="n">Field</span><span class="p">(</span>
-        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Height of each of the images, &quot;</span>
-        <span class="s2">&quot;in the same units as the input file (usually pixels).&quot;</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">"Height of each of the images, "</span>
+        <span class="s2">"in the same units as the input file (usually pixels)."</span>
         <span class="c1"># if not defined, it should be set to 0 in the df</span>
     <span class="p">)</span>
 
     <span class="c1"># bbox columns</span>
     <span class="n">x_min</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">pa</span><span class="o">.</span><span class="n">Field</span><span class="p">(</span>
         <span class="n">description</span><span class="o">=</span><span class="p">(</span>
-            <span class="s2">&quot;Minimum x-coordinate of the bounding box, &quot;</span>
-            <span class="s2">&quot;in the same units as the input file.&quot;</span>
+            <span class="s2">"Minimum x-coordinate of the bounding box, "</span>
+            <span class="s2">"in the same units as the input file."</span>
         <span class="p">)</span>
     <span class="p">)</span>
     <span class="n">y_min</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">pa</span><span class="o">.</span><span class="n">Field</span><span class="p">(</span>
         <span class="n">description</span><span class="o">=</span><span class="p">(</span>
-            <span class="s2">&quot;Minimum y-coordinate of the bounding box, &quot;</span>
-            <span class="s2">&quot;in the same units as the input file.&quot;</span>
+            <span class="s2">"Minimum y-coordinate of the bounding box, "</span>
+            <span class="s2">"in the same units as the input file."</span>
         <span class="p">)</span>
     <span class="p">)</span>
     <span class="n">width</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">pa</span><span class="o">.</span><span class="n">Field</span><span class="p">(</span>
         <span class="n">description</span><span class="o">=</span><span class="p">(</span>
-            <span class="s2">&quot;Width of the bounding box, in the same units as the input file.&quot;</span>
+            <span class="s2">"Width of the bounding box, in the same units as the input file."</span>
         <span class="p">)</span>
     <span class="p">)</span>
     <span class="n">height</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">pa</span><span class="o">.</span><span class="n">Field</span><span class="p">(</span>
         <span class="n">description</span><span class="o">=</span><span class="p">(</span>
-            <span class="s2">&quot;Height of the bounding box, in the same units as the input file.&quot;</span>
+            <span class="s2">"Height of the bounding box, in the same units as the input file."</span>
         <span class="p">)</span>
     <span class="p">)</span>
 
@@ -809,23 +827,23 @@
     <span class="c1"># - optionally defined in VIA files exported with VIA tool</span>
     <span class="n">category_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">pa</span><span class="o">.</span><span class="n">Field</span><span class="p">(</span>
         <span class="n">description</span><span class="o">=</span><span class="p">(</span>
-            <span class="s2">&quot;Unique identifier for the category, &quot;</span>
-            <span class="s2">&quot;as specified in the input file. A value of 0 &quot;</span>
-            <span class="s2">&quot;is usually reserved for the background class.&quot;</span>
+            <span class="s2">"Unique identifier for the category, "</span>
+            <span class="s2">"as specified in the input file. A value of 0 "</span>
+            <span class="s2">"is usually reserved for the background class."</span>
         <span class="p">)</span>
     <span class="p">)</span>
     <span class="n">category</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">pa</span><span class="o">.</span><span class="n">Field</span><span class="p">(</span>
-        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Category of the annotation as a string.&quot;</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">"Category of the annotation as a string."</span>
     <span class="p">)</span>
     <span class="n">supercategory</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">pa</span><span class="o">.</span><span class="n">Field</span><span class="p">(</span>
-        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Supercategory of the annotation as a string.&quot;</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">"Supercategory of the annotation as a string."</span>
     <span class="p">)</span>
 
 <div class="viewcode-block" id="ValidBboxAnnotationsDataFrame.get_empty_values">
 <a class="viewcode-back" href="../../../api/ethology.validators.annotations.ValidBboxAnnotationsDataFrame.html#ethology.validators.annotations.ValidBboxAnnotationsDataFrame.get_empty_values">[docs]</a>
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_empty_values</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the default empty values for selected dataframe columns.</span>
+<span class="w">        </span><span class="sd">"""Get the default empty values for selected dataframe columns.</span>
 
 <span class="sd">        The columns are those that can be undefined in VIA and COCO files:</span>
 <span class="sd">        ``category``, ``supercategory``, ``category_id``, ``image_width`` and</span>
@@ -836,13 +854,13 @@
 <span class="sd">        dict</span>
 <span class="sd">            A dictionary with the default empty values the specified columns.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="p">{</span>
-            <span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>  <span class="c1"># it can be undefined in VIA files</span>
-            <span class="s2">&quot;supercategory&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>  <span class="c1"># it can be undefined in VIA and COCO files</span>
-            <span class="s2">&quot;category_id&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>  <span class="c1"># it can be undefined in VIA files</span>
-            <span class="s2">&quot;image_width&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>  <span class="c1"># it can be undefined in VIA files</span>
-            <span class="s2">&quot;image_height&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>  <span class="c1"># it can be undefined in VIA files</span>
+            <span class="s2">"category"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>  <span class="c1"># it can be undefined in VIA files</span>
+            <span class="s2">"supercategory"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>  <span class="c1"># it can be undefined in VIA and COCO files</span>
+            <span class="s2">"category_id"</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>  <span class="c1"># it can be undefined in VIA files</span>
+            <span class="s2">"image_width"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>  <span class="c1"># it can be undefined in VIA files</span>
+            <span class="s2">"image_height"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>  <span class="c1"># it can be undefined in VIA files</span>
         <span class="p">}</span></div>
 </div>
 
@@ -851,7 +869,7 @@
 <div class="viewcode-block" id="ValidBboxAnnotationsCOCO">
 <a class="viewcode-back" href="../../../api/ethology.validators.annotations.ValidBboxAnnotationsCOCO.html#ethology.validators.annotations.ValidBboxAnnotationsCOCO">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">ValidBboxAnnotationsCOCO</span><span class="p">(</span><span class="n">pa</span><span class="o">.</span><span class="n">DataFrameModel</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Class for COCO-exportable bounding box annotations dataframes.</span>
+<span class="w">    </span><span class="sd">"""Class for COCO-exportable bounding box annotations dataframes.</span>
 
 <span class="sd">    The validation checks the required columns exist and their types are</span>
 <span class="sd">    correct. It additionally checks that the index and the</span>
@@ -899,53 +917,53 @@
 <span class="sd">    --------</span>
 <span class="sd">    :class:`pandera.api.pandas.model.DataFrameModel`</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="c1"># index</span>
     <span class="n">idx</span><span class="p">:</span> <span class="n">Index</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="n">pa</span><span class="o">.</span><span class="n">Field</span><span class="p">(</span><span class="n">ge</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">check_name</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
     <span class="c1"># annotation_id</span>
     <span class="n">annotation_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">pa</span><span class="o">.</span><span class="n">Field</span><span class="p">(</span>
-        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Unique identifier for the annotation (index)&quot;</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">"Unique identifier for the annotation (index)"</span><span class="p">,</span>
     <span class="p">)</span>
 
     <span class="c1"># image columns</span>
     <span class="n">image_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">pa</span><span class="o">.</span><span class="n">Field</span><span class="p">(</span>
-        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Unique identifier for the image&quot;</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">"Unique identifier for the image"</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">image_filename</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">pa</span><span class="o">.</span><span class="n">Field</span><span class="p">(</span>
-        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Filename of the image&quot;</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">"Filename of the image"</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">image_width</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">pa</span><span class="o">.</span><span class="n">Field</span><span class="p">(</span>
-        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Width of the image&quot;</span><span class="p">,</span> <span class="n">ge</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">True</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">"Width of the image"</span><span class="p">,</span> <span class="n">ge</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">True</span>
     <span class="p">)</span>
     <span class="n">image_height</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">pa</span><span class="o">.</span><span class="n">Field</span><span class="p">(</span>
-        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Height of the image&quot;</span><span class="p">,</span> <span class="n">ge</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">True</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">"Height of the image"</span><span class="p">,</span> <span class="n">ge</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">True</span>
     <span class="p">)</span>
 
     <span class="c1"># bbox data</span>
     <span class="n">bbox</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="n">pa</span><span class="o">.</span><span class="n">Field</span><span class="p">(</span>
-        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Bounding box coordinates as xmin, ymin, width, height&quot;</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">"Bounding box coordinates as xmin, ymin, width, height"</span>
     <span class="p">)</span>
     <span class="n">area</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">pa</span><span class="o">.</span><span class="n">Field</span><span class="p">(</span>
-        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Bounding box area&quot;</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">"Bounding box area"</span><span class="p">,</span>
         <span class="n">ge</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">segmentation</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="n">pa</span><span class="o">.</span><span class="n">Field</span><span class="p">(</span>
-        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Bounding box segmentation as list of lists of coordinates&quot;</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">"Bounding box segmentation as list of lists of coordinates"</span>
     <span class="p">)</span>
 
     <span class="c1"># category columns</span>
     <span class="c1"># we do not require supercategories to be present in the</span>
     <span class="c1"># dataframe since they are not currently added to the xarray dataset</span>
     <span class="n">category</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">pa</span><span class="o">.</span><span class="n">Field</span><span class="p">(</span>
-        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Category of the annotation&quot;</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">"Category of the annotation"</span><span class="p">,</span>
         <span class="n">nullable</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="p">)</span>
 
     <span class="c1"># other</span>
     <span class="n">iscrowd</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">pa</span><span class="o">.</span><span class="n">Field</span><span class="p">(</span>
-        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Whether the annotation is a crowd&quot;</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">"Whether the annotation is a crowd"</span><span class="p">,</span>
         <span class="n">isin</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
         <span class="n">nullable</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="p">)</span>
@@ -954,7 +972,7 @@
 <a class="viewcode-back" href="../../../api/ethology.validators.annotations.ValidBboxAnnotationsCOCO.html#ethology.validators.annotations.ValidBboxAnnotationsCOCO.map_df_columns_to_COCO_fields">[docs]</a>
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">map_df_columns_to_COCO_fields</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Map COCO-exportable dataframe columns to COCO fields.</span>
+<span class="w">        </span><span class="sd">"""Map COCO-exportable dataframe columns to COCO fields.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -962,27 +980,27 @@
 <span class="sd">            A dictionary mapping each column in the COCO-exportable dataframe</span>
 <span class="sd">            to the corresponding fields in the equivalent COCO file.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="p">{</span>
-            <span class="s2">&quot;images&quot;</span><span class="p">:</span> <span class="p">{</span>
-                <span class="s2">&quot;image_id&quot;</span><span class="p">:</span> <span class="s2">&quot;id&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;image_filename&quot;</span><span class="p">:</span> <span class="s2">&quot;file_name&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;image_width&quot;</span><span class="p">:</span> <span class="s2">&quot;width&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;image_height&quot;</span><span class="p">:</span> <span class="s2">&quot;height&quot;</span><span class="p">,</span>
+            <span class="s2">"images"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">"image_id"</span><span class="p">:</span> <span class="s2">"id"</span><span class="p">,</span>
+                <span class="s2">"image_filename"</span><span class="p">:</span> <span class="s2">"file_name"</span><span class="p">,</span>
+                <span class="s2">"image_width"</span><span class="p">:</span> <span class="s2">"width"</span><span class="p">,</span>
+                <span class="s2">"image_height"</span><span class="p">:</span> <span class="s2">"height"</span><span class="p">,</span>
             <span class="p">},</span>
-            <span class="s2">&quot;categories&quot;</span><span class="p">:</span> <span class="p">{</span>
-                <span class="s2">&quot;category_id&quot;</span><span class="p">:</span> <span class="s2">&quot;id&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="s2">&quot;name&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;supercategory&quot;</span><span class="p">:</span> <span class="s2">&quot;supercategory&quot;</span><span class="p">,</span>
+            <span class="s2">"categories"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">"category_id"</span><span class="p">:</span> <span class="s2">"id"</span><span class="p">,</span>
+                <span class="s2">"category"</span><span class="p">:</span> <span class="s2">"name"</span><span class="p">,</span>
+                <span class="s2">"supercategory"</span><span class="p">:</span> <span class="s2">"supercategory"</span><span class="p">,</span>
             <span class="p">},</span>
-            <span class="s2">&quot;annotations&quot;</span><span class="p">:</span> <span class="p">{</span>
-                <span class="s2">&quot;annotation_id&quot;</span><span class="p">:</span> <span class="s2">&quot;id&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;area&quot;</span><span class="p">:</span> <span class="s2">&quot;area&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;bbox&quot;</span><span class="p">:</span> <span class="s2">&quot;bbox&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;image_id&quot;</span><span class="p">:</span> <span class="s2">&quot;image_id&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;category_id&quot;</span><span class="p">:</span> <span class="s2">&quot;category_id&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;iscrowd&quot;</span><span class="p">:</span> <span class="s2">&quot;iscrowd&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;segmentation&quot;</span><span class="p">:</span> <span class="s2">&quot;segmentation&quot;</span><span class="p">,</span>
+            <span class="s2">"annotations"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">"annotation_id"</span><span class="p">:</span> <span class="s2">"id"</span><span class="p">,</span>
+                <span class="s2">"area"</span><span class="p">:</span> <span class="s2">"area"</span><span class="p">,</span>
+                <span class="s2">"bbox"</span><span class="p">:</span> <span class="s2">"bbox"</span><span class="p">,</span>
+                <span class="s2">"image_id"</span><span class="p">:</span> <span class="s2">"image_id"</span><span class="p">,</span>
+                <span class="s2">"category_id"</span><span class="p">:</span> <span class="s2">"category_id"</span><span class="p">,</span>
+                <span class="s2">"iscrowd"</span><span class="p">:</span> <span class="s2">"iscrowd"</span><span class="p">,</span>
+                <span class="s2">"segmentation"</span><span class="p">:</span> <span class="s2">"segmentation"</span><span class="p">,</span>
             <span class="p">},</span>
         <span class="p">}</span></div>
 
@@ -991,7 +1009,7 @@
 <a class="viewcode-back" href="../../../api/ethology.validators.annotations.ValidBboxAnnotationsCOCO.html#ethology.validators.annotations.ValidBboxAnnotationsCOCO.check_idx_and_annotation_id">[docs]</a>
     <span class="nd">@pa</span><span class="o">.</span><span class="n">dataframe_check</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">check_idx_and_annotation_id</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Check that the index and the ``annotation_id`` column are equal.</span>
+<span class="w">        </span><span class="sd">"""Check that the index and the ``annotation_id`` column are equal.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -1004,8 +1022,8 @@
 <span class="sd">            A boolean indicating whether the index and the</span>
 <span class="sd">            ``annotation_id`` column are equal for all rows.</span>
 
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="nb">all</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">index</span> <span class="o">==</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;annotation_id&quot;</span><span class="p">])</span></div>
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="nb">all</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">index</span> <span class="o">==</span> <span class="n">df</span><span class="p">[</span><span class="s2">"annotation_id"</span><span class="p">])</span></div>
 </div>
 
 </pre></div>
@@ -1037,8 +1055,8 @@
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
-<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=18bd87630a240e9c25be"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=18bd87630a240e9c25be"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -1052,7 +1070,7 @@
     <p class="theme-version">
     Built with the
     <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a>
-    0.16.1.
+    0.23.0.
     </p></div>
       
     </div>

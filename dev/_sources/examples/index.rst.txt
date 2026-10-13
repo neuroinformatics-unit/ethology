@@ -9,6 +9,10 @@ A gallery of examples that showcase ``ethology`` functionalities and how they ca
 other computer vision tools.
 
 
+.. raw:: html
+
+  <div id='sg-tag-list' class='sphx-glr-tag-list'></div>
+
 
 .. raw:: html
 

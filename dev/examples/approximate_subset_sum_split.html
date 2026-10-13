@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 
 
@@ -27,36 +26,38 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+  <link href="../_static/styles/theme.css?digest=18bd87630a240e9c25be" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=18bd87630a240e9c25be" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=9c66c473" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
-    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=c83e6b79" />
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css?v=f4aeca0c" />
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
   
   <!-- So that users can add custom icons -->
-  <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <script defer src="../_static/scripts/fontawesome.js?digest=18bd87630a240e9c25be"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=18bd87630a240e9c25be" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=18bd87630a240e9c25be" />
 
-    <script src="../_static/documentation_options.js?v=b4e08961"></script>
+    <script src="../_static/documentation_options.js?v=1546fae8"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/sg-tags.js?v=d80f6fa4"></script>
     <script src="../_static/design-tabs.js?v=f930bc37"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'examples/approximate_subset_sum_split';</script>
     <script>
-        DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
+        DOCUMENTATION_OPTIONS.theme_version = '0.23.0';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://ethology.neuroinformatics.dev/latest/_static/switcher.json';
         DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'dev';
         DOCUMENTATION_OPTIONS.show_version_warning_banner =
             false;
         </script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
     <link rel="canonical" href="https://ethology.neuroinformatics.dev/examples/approximate_subset_sum_split.html" />
     <link rel="icon" href="../_static/light-logo-niu.png"/>
     <link rel="index" title="Index" href="../genindex.html" />
@@ -64,22 +65,29 @@
     <link rel="next" title="API reference" href="../api_index.html" />
     <link rel="prev" title="Inspect COCO annotations using ethology and movement" href="coco_bbox_ethology_and_movement.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="" />
+  
+    
+    <script src="../_static/searchtools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script src="../searchindex.js"></script>
+  
   </head>
-  
-  
-  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
-
+  <body data-default-mode="">
   
   
   <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
   
   <div id="pst-scroll-pixel-helper"></div>
   
   <button type="button" class="btn rounded-pill" id="pst-back-to-top">
     <i class="fa-solid fa-arrow-up"></i>Back to top</button>
-
+  
+  
+  
   
   <dialog id="pst-search-dialog">
     
@@ -105,9 +113,9 @@
 </div>
 
   
-    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
 <div class="bd-header__inner bd-page-width">
-  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+  <button type="button" class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
     <span class="fa-solid fa-bars"></span>
   </button>
   
@@ -127,7 +135,7 @@
   
   
   
-    <p class="title logo__title">ethology v0.1.3.dev5</p>
+    <p class="title logo__title">ethology v0.1.4.dev2</p>
   
 </a></div>
     
@@ -179,7 +187,7 @@
         <div class="navbar-item navbar-persistent--container">
           
 
-<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
  <i class="fa-solid fa-magnifying-glass"></i>
  <span class="search-button__default-text">Search</span>
  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
@@ -209,11 +217,18 @@
       
         <div class="navbar-item">
 
-<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
-  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
-  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
-  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
-</button></div>
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
       
         <div class="navbar-item"><ul class="navbar-icon-links"
     aria-label="Icon Links">
@@ -226,8 +241,7 @@
           
           
           
-          <a href="https://github.com/neuroinformatics-unit/ethology" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">GitHub</span></a>
+          <a href="https://github.com/neuroinformatics-unit/ethology" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
         </li>
         <li class="nav-item">
           
@@ -238,8 +252,7 @@
           
           
           
-          <a href="https://neuroinformatics.zulipchat.com/#narrow/channel/483869-Ethology" title="Zulip (chat)" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-comments fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">Zulip (chat)</span></a>
+          <a href="https://neuroinformatics.zulipchat.com/#narrow/channel/483869-Ethology" title="Zulip (chat)" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-comments fa-lg" aria-hidden="true"></i><span class="visually-hidden">Zulip (chat)</span></a>
         </li>
 </ul></div>
       
@@ -250,7 +263,7 @@
   
     <div class="navbar-persistent--mobile">
 
-<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
  <i class="fa-solid fa-magnifying-glass"></i>
  <span class="search-button__default-text">Search</span>
  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
@@ -259,7 +272,7 @@
   
 
   
-    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+    <button type="button" class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
       <span class="fa-solid fa-outdent"></span>
     </button>
   
@@ -348,11 +361,18 @@
         
           <div class="navbar-item">
 
-<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
-  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
-  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
-  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
-</button></div>
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
         
           <div class="navbar-item"><ul class="navbar-icon-links"
     aria-label="Icon Links">
@@ -365,8 +385,7 @@
           
           
           
-          <a href="https://github.com/neuroinformatics-unit/ethology" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">GitHub</span></a>
+          <a href="https://github.com/neuroinformatics-unit/ethology" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
         </li>
         <li class="nav-item">
           
@@ -377,8 +396,7 @@
           
           
           
-          <a href="https://neuroinformatics.zulipchat.com/#narrow/channel/483869-Ethology" title="Zulip (chat)" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-comments fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">Zulip (chat)</span></a>
+          <a href="https://neuroinformatics.zulipchat.com/#narrow/channel/483869-Ethology" title="Zulip (chat)" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-comments fa-lg" aria-hidden="true"></i><span class="visually-hidden">Zulip (chat)</span></a>
         </li>
 </ul></div>
         
@@ -387,13 +405,21 @@
   </div>
   
     <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item pst-sidebar-collapse"><button type="button" id="pst-collapse-sidebar-button" aria-expanded="true" aria-controls="pst-primary-sidebar">
+  <svg class="pst-icon" role="img" aria-hidden="true" focusable="false" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+    <path fill="currentColor" d="M3 15.5C2.36232 15.5 1.74874 15.2564 1.28478 14.8189C0.820828 14.3815 0.541576 13.7832 0.504167 13.1467L0.5 13L0.5 3C0.499965 2.36232 0.743605 1.74874 1.18107 1.28478C1.61854 0.820828 2.21676 0.541576 2.85333 0.504167L3 0.5L13 0.5C13.6377 0.499965 14.2513 0.743605 14.7152 1.18107C15.1792 1.61854 15.4584 2.21676 15.4958 2.85333L15.5 3L15.5 13C15.5 13.6377 15.2564 14.2513 14.8189 14.7152C14.3815 15.1792 13.7832 15.4584 13.1467 15.4958L13 15.5L3 15.5ZM3 13.8333L10.5 13.8333L10.5 2.16667L3 2.16667C2.79589 2.16669 2.59889 2.24163 2.44636 2.37726C2.29383 2.5129 2.19638 2.69979 2.1725 2.9025L2.16667 3L2.16667 13C2.16669 13.2041 2.24163 13.4011 2.37726 13.5536C2.5129 13.7062 2.69979 13.8036 2.9025 13.8275L3 13.8333ZM6.65583 10.325L6.5775 10.2558L4.91083 8.58917C4.76735 8.44567 4.68116 8.25476 4.66843 8.05223C4.65569 7.84971 4.71729 7.6495 4.84167 7.48917L4.91083 7.41083L6.5775 5.74417C6.72747 5.59471 6.9287 5.50794 7.14032 5.50148C7.35194 5.49502 7.55809 5.56935 7.7169 5.70937C7.8757 5.8494 7.97525 6.04463 7.99533 6.25539C8.01541 6.46616 7.95451 6.67667 7.825 6.84417L7.75583 6.9225L6.67917 8L7.75583 9.0775C7.89931 9.22099 7.98551 9.41191 7.99824 9.61443C8.01097 9.81695 7.94938 10.0172 7.825 10.1775L7.75583 10.2558C7.61234 10.3993 7.42142 10.4855 7.2189 10.4982C7.01638 10.511 6.81617 10.4494 6.65583 10.325Z"/>
+  </svg>
+  <span class="pst-collapse-sidebar-label">Collapse Sidebar</span>
+  <span class="pst-expand-sidebar-label">Expand Sidebar</span>
+</button></div>
         <div class="sidebar-primary-item">
+
 <nav class="bd-docs-nav bd-links"
      aria-label="Section Navigation">
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="coco_bbox_ethology_and_movement.html">Inspect COCO annotations using <code class="docutils literal notranslate"><span class="pre">ethology</span></code> and <code class="docutils literal notranslate"><span class="pre">movement</span></code></a></li>
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">Split an annotations dataset</a></li>
+<li class="toctree-l1 current active"><a aria-current="page" class="current reference internal" href="#">Split an annotations dataset</a></li>
 </ul>
 </div>
 </nav></div>
@@ -491,36 +517,34 @@ cross-validation functionalities</a>,
 in particular the section on <a class="reference external" href="https://scikit-learn.org/stable/modules/cross_validation.html#cross-validation-iterators-for-grouped-data">grouped data</a>.</p>
 <section id="imports">
 <h2>Imports<a class="headerlink" href="#imports" title="Link to this heading">#</a></h2>
-<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <a href="https://docs.python.org/3/library/collections.html#collections.Counter" title="collections.Counter" class="sphx-glr-backref-module-collections sphx-glr-backref-type-py-class"><span class="n">Counter</span></a>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
-
-<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">pooch</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">xarray</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">xr</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">loguru</span><span class="w"> </span><span class="kn">import</span> <span class="n">logger</span>
-
-<span class="kn">from</span><span class="w"> </span><span class="nn">ethology.datasets.split</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
-    <a href="../api/ethology.datasets.split.split_dataset_group_by.html#ethology.datasets.split.split_dataset_group_by" title="ethology.datasets.split.split_dataset_group_by" class="sphx-glr-backref-module-ethology-datasets-split sphx-glr-backref-type-py-function"><span class="n">split_dataset_group_by</span></a><span class="p">,</span>
-    <a href="../api/ethology.datasets.split.split_dataset_random.html#ethology.datasets.split.split_dataset_random" title="ethology.datasets.split.split_dataset_random" class="sphx-glr-backref-module-ethology-datasets-split sphx-glr-backref-type-py-function"><span class="n">split_dataset_random</span></a><span class="p">,</span>
-<span class="p">)</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">ethology.io.annotations</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_bboxes</span>
-
-<span class="c1"># For interactive plots: install ipympl with `pip install ipympl` and uncomment</span>
-<span class="c1"># the following line in your notebook</span>
-<span class="c1"># %matplotlib widget</span>
-</pre></div>
-</div>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span class="kn">import</span><span class="w"> </span><span class="nn">sys</span><span class="w">
+</span><span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <a class="sphx-glr-backref-module-collections sphx-glr-backref-type-py-class reference external" href="https://docs.python.org/3/library/collections.html#collections.Counter" title="collections.Counter"><span class="n">Counter</span></a><span class="w">
+</span><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span><span class="w">
+</span><span class="w">
+</span><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib</span><span class="nn">.</span><span class="nn">pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span><span class="w">
+</span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span><span class="w">
+</span><span class="kn">import</span><span class="w"> </span><span class="nn">pooch</span><span class="w">
+</span><span class="kn">import</span><span class="w"> </span><span class="nn">xarray</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">xr</span><span class="w">
+</span><span class="kn">from</span><span class="w"> </span><span class="nn">loguru</span><span class="w"> </span><span class="kn">import</span> <span class="n">logger</span><span class="w">
+</span><span class="w">
+</span><span class="kn">from</span><span class="w"> </span><span class="nn">ethology</span><span class="nn">.</span><span class="nn">datasets</span><span class="nn">.</span><span class="nn">split</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="w">
+</span>    <a class="sphx-glr-backref-module-ethology-datasets-split sphx-glr-backref-type-py-function reference internal" href="../api/ethology.datasets.split.split_dataset_group_by.html#ethology.datasets.split.split_dataset_group_by" title="ethology.datasets.split.split_dataset_group_by"><span class="n">split_dataset_group_by</span></a><span class="p">,</span><span class="w">
+</span>    <a class="sphx-glr-backref-module-ethology-datasets-split sphx-glr-backref-type-py-function reference internal" href="../api/ethology.datasets.split.split_dataset_random.html#ethology.datasets.split.split_dataset_random" title="ethology.datasets.split.split_dataset_random"><span class="n">split_dataset_random</span></a><span class="p">,</span><span class="w">
+</span><span class="p">)</span><span class="w">
+</span><span class="kn">from</span><span class="w"> </span><span class="nn">ethology</span><span class="nn">.</span><span class="nn">io</span><span class="nn">.</span><span class="nn">annotations</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_bboxes</span><span class="w">
+</span><span class="w">
+</span><span class="c1"># For interactive plots: install ipympl with `pip install ipympl` and uncomment</span><span class="w">
+</span><span class="c1"># the following line in your notebook</span><span class="w">
+</span><span class="c1"># %matplotlib widget</span><span class="w">
+</span></pre></div></div>
 </section>
 <section id="configure-logging-for-this-example">
 <h2>Configure logging for this example<a class="headerlink" href="#configure-logging-for-this-example" title="Link to this heading">#</a></h2>
 <p>By default, <code class="docutils literal notranslate"><span class="pre">ethology</span></code> outputs log messages to <code class="docutils literal notranslate"><span class="pre">stderr</span></code>. Here,
 we configure the logger to output logs to <code class="docutils literal notranslate"><span class="pre">stdout</span></code> as well, so that
 we can display the log messages produced in this example.</p>
-<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">_</span></a> <span class="o">=</span> <a href="https://loguru.readthedocs.io/en/stable/api/logger.html#loguru._logger.Logger.add" title="loguru._logger.Logger.add" class="sphx-glr-backref-module-loguru-_logger sphx-glr-backref-type-py-method"><span class="n">logger</span><span class="o">.</span><span class="n">add</span></a><span class="p">(</span><a href="https://docs.python.org/3/library/sys.html#sys.stdout" title="sys.stdout" class="sphx-glr-backref-module-sys sphx-glr-backref-type-py-data"><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span></a><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s2">&quot;INFO&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="int"><span class="n">_</span></a> <span class="o">=</span> <a class="sphx-glr-backref-module-loguru-_logger sphx-glr-backref-type-py-method reference external" href="https://loguru.readthedocs.io/en/stable/api/logger.html#loguru._logger.Logger.add" title="loguru._logger.Logger.add"><span class="n">logger</span><span class="o">.</span><span class="n">add</span></a><span class="p">(</span><a class="sphx-glr-backref-module-sys sphx-glr-backref-type-py-data reference external" href="https://docs.python.org/3/library/sys.html#sys.stdout" title="sys.stdout"><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span></a><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">INFO</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span></pre></div></div>
 </section>
 <section id="download-dataset">
 <h2>Download dataset<a class="headerlink" href="#download-dataset" title="Link to this heading">#</a></h2>
@@ -531,30 +555,29 @@ and authored by  Sameeruddin Muhammad, Scott Mann, Callum Luke,
 Chris Pocknee, Supriya Nair and Jay Nair.</p>
 <p>We use the <a class="reference external" href="https://github.com/fatiando/pooch/">pooch</a> library to download
 the dataset to the <code class="docutils literal notranslate"><span class="pre">.ethology</span></code> cache directory.</p>
-<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">data_source</span></a> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="s2">&quot;https://github.com/neuroinformatics-unit/ethology/releases/download/data-ACTD/ACTD_COCO_files.zip&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;hash&quot;</span><span class="p">:</span> <span class="s2">&quot;4019bb11cd360d66d13d9309928195638adf83e95ddec7b0b23e693ec8c7c26b&quot;</span><span class="p">,</span>
-<span class="p">}</span>
-
-<span class="c1"># Define cache directory</span>
-<a href="https://docs.python.org/3/library/pathlib.html#pathlib.PosixPath" title="pathlib.PosixPath" class="sphx-glr-backref-module-pathlib sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ethology_cache</span></a> <span class="o">=</span> <a href="https://docs.python.org/3/library/pathlib.html#pathlib.Path.home" title="pathlib.Path.home" class="sphx-glr-backref-module-pathlib sphx-glr-backref-type-py-method"><span class="n">Path</span><span class="o">.</span><span class="n">home</span></a><span class="p">()</span> <span class="o">/</span> <span class="s2">&quot;.ethology&quot;</span>
-<a href="https://docs.python.org/3/library/pathlib.html#pathlib.Path.mkdir" title="pathlib.Path.mkdir" class="sphx-glr-backref-module-pathlib sphx-glr-backref-type-py-method"><span class="n">ethology_cache</span><span class="o">.</span><span class="n">mkdir</span></a><span class="p">(</span><span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
-<span class="c1"># Download the dataset to the cache directory</span>
-<a href="https://docs.python.org/3/library/stdtypes.html#list" title="builtins.list" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">extracted_files</span></a> <span class="o">=</span> <span class="n">pooch</span><span class="o">.</span><span class="n">retrieve</span><span class="p">(</span>
-    <span class="n">url</span><span class="o">=</span><a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">data_source</span></a><span class="p">[</span><span class="s2">&quot;url&quot;</span><span class="p">],</span>
-    <span class="n">known_hash</span><span class="o">=</span><a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">data_source</span></a><span class="p">[</span><span class="s2">&quot;hash&quot;</span><span class="p">],</span>
-    <span class="n">fname</span><span class="o">=</span><span class="s2">&quot;ACTD_COCO_files.zip&quot;</span><span class="p">,</span>
-    <span class="n">path</span><span class="o">=</span><a href="https://docs.python.org/3/library/pathlib.html#pathlib.PosixPath" title="pathlib.PosixPath" class="sphx-glr-backref-module-pathlib sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ethology_cache</span></a><span class="p">,</span>
-    <span class="n">processor</span><span class="o">=</span><a href="https://docs.python.org/3/library/abc.html#abc.ABC" title="abc.ABC" class="sphx-glr-backref-module-abc sphx-glr-backref-type-py-class"><span class="n">pooch</span><span class="o">.</span><span class="n">Unzip</span></a><span class="p">(</span><span class="n">extract_dir</span><span class="o">=</span><a href="https://docs.python.org/3/library/pathlib.html#pathlib.PosixPath" title="pathlib.PosixPath" class="sphx-glr-backref-module-pathlib sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ethology_cache</span></a> <span class="o">/</span> <span class="s2">&quot;ACTD_COCO_files&quot;</span><span class="p">),</span>
-<span class="p">)</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="o">*</span><a href="https://docs.python.org/3/library/stdtypes.html#list" title="builtins.list" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">extracted_files</span></a><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/home/runner/.ethology/ACTD_COCO_files/1_Terrestrial_group_data_CCT.json
+<div class="highlight-Python notranslate"><div class="highlight"><pre><a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="dict"><span class="n">data_source</span></a> <span class="o">=</span> <span class="p">{</span><span class="w">
+</span>    <span class="s2">&quot;</span><span class="s2">url</span><span class="s2">&quot;</span><span class="p">:</span> <span class="s2">&quot;</span><span class="s2">https://github.com/neuroinformatics-unit/ethology/releases/download/data-ACTD/ACTD_COCO_files.zip</span><span class="s2">&quot;</span><span class="p">,</span><span class="w">
+</span>    <span class="s2">&quot;</span><span class="s2">hash</span><span class="s2">&quot;</span><span class="p">:</span> <span class="s2">&quot;</span><span class="s2">4019bb11cd360d66d13d9309928195638adf83e95ddec7b0b23e693ec8c7c26b</span><span class="s2">&quot;</span><span class="p">,</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span><span class="w">
+</span><span class="c1"># Define cache directory</span><span class="w">
+</span><a class="sphx-glr-backref-module-pathlib sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.PosixPath" title="pathlib.PosixPath"><span class="n">ethology_cache</span></a> <span class="o">=</span> <a class="sphx-glr-backref-module-pathlib sphx-glr-backref-type-py-method reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path.home" title="pathlib.Path.home"><span class="n">Path</span><span class="o">.</span><span class="n">home</span></a><span class="p">(</span><span class="p">)</span> <span class="o">/</span> <span class="s2">&quot;</span><span class="s2">.ethology</span><span class="s2">&quot;</span><span class="w">
+</span><a class="sphx-glr-backref-module-pathlib sphx-glr-backref-type-py-method reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path.mkdir" title="pathlib.Path.mkdir"><span class="n">ethology_cache</span><span class="o">.</span><span class="n">mkdir</span></a><span class="p">(</span><span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="w">
+</span><span class="w">
+</span><span class="c1"># Download the dataset to the cache directory</span><span class="w">
+</span><a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="list"><span class="n">extracted_files</span></a> <span class="o">=</span> <span class="n">pooch</span><span class="o">.</span><span class="n">retrieve</span><span class="p">(</span><span class="w">
+</span>    <span class="n">url</span><span class="o">=</span><a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="dict"><span class="n">data_source</span></a><span class="p">[</span><span class="s2">&quot;</span><span class="s2">url</span><span class="s2">&quot;</span><span class="p">]</span><span class="p">,</span><span class="w">
+</span>    <span class="n">known_hash</span><span class="o">=</span><a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="dict"><span class="n">data_source</span></a><span class="p">[</span><span class="s2">&quot;</span><span class="s2">hash</span><span class="s2">&quot;</span><span class="p">]</span><span class="p">,</span><span class="w">
+</span>    <span class="n">fname</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">ACTD_COCO_files.zip</span><span class="s2">&quot;</span><span class="p">,</span><span class="w">
+</span>    <span class="n">path</span><span class="o">=</span><a class="sphx-glr-backref-module-pathlib sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.PosixPath" title="pathlib.PosixPath"><span class="n">ethology_cache</span></a><span class="p">,</span><span class="w">
+</span>    <span class="n">processor</span><span class="o">=</span><a class="sphx-glr-backref-module-abc sphx-glr-backref-type-py-class reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="abc.ABC"><span class="n">pooch</span><span class="o">.</span><span class="n">Unzip</span></a><span class="p">(</span><span class="n">extract_dir</span><span class="o">=</span><a class="sphx-glr-backref-module-pathlib sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.PosixPath" title="pathlib.PosixPath"><span class="n">ethology_cache</span></a> <span class="o">/</span> <span class="s2">&quot;</span><span class="s2">ACTD_COCO_files</span><span class="s2">&quot;</span><span class="p">)</span><span class="p">,</span><span class="w">
+</span><span class="p">)</span><span class="w">
+</span><span class="w">
+</span><span class="nb">print</span><span class="p">(</span><span class="o">*</span><a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="list"><span class="n">extracted_files</span></a><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span></pre></div></div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/home/runner/.ethology/ACTD_COCO_files/2_Region_specific_data_CCT.json
+/home/runner/.ethology/ACTD_COCO_files/1_Terrestrial_group_data_CCT.json
 /home/runner/.ethology/ACTD_COCO_files/3_Feral_animals_data_CCT.json
-/home/runner/.ethology/ACTD_COCO_files/2_Region_specific_data_CCT.json
 </pre></div>
 </div>
 </section>
@@ -564,17 +587,16 @@ the dataset to the <code class="docutils literal notranslate"><span class="pre">
 as a single dataset using the
 <a class="reference internal" href="../api/ethology.io.annotations.load_bboxes.from_files.html#ethology.io.annotations.load_bboxes.from_files" title="ethology.io.annotations.load_bboxes.from_files"><code class="xref py py-func docutils literal notranslate"><span class="pre">ethology.io.annotations.load_bboxes.from_files()</span></code></a>
 function.</p>
-<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><a href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="xarray.core.dataset.Dataset" class="sphx-glr-backref-module-xarray-core-dataset sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ds_all</span></a> <span class="o">=</span> <a href="../api/ethology.io.annotations.load_bboxes.from_files.html#ethology.io.annotations.load_bboxes.from_files" title="ethology.io.annotations.load_bboxes.from_files" class="sphx-glr-backref-module-ethology-io-annotations-load_bboxes sphx-glr-backref-type-py-function"><span class="n">load_bboxes</span><span class="o">.</span><span class="n">from_files</span></a><span class="p">(</span><a href="https://docs.python.org/3/library/stdtypes.html#list" title="builtins.list" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">extracted_files</span></a><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;COCO&quot;</span><span class="p">)</span>
-
-<span class="nb">print</span><span class="p">(</span><a href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="xarray.core.dataset.Dataset" class="sphx-glr-backref-module-xarray-core-dataset sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ds_all</span></a><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="o">*</span><a href="https://docs.python.org/3/library/stdtypes.html#list" title="builtins.list" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ds_all</span><span class="o">.</span><span class="n">annotation_files</span></a><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><a class="sphx-glr-backref-module-xarray-core-dataset sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="xarray.core.dataset.Dataset"><span class="n">ds_all</span></a> <span class="o">=</span> <a class="sphx-glr-backref-module-ethology-io-annotations-load_bboxes sphx-glr-backref-type-py-function reference internal" href="../api/ethology.io.annotations.load_bboxes.from_files.html#ethology.io.annotations.load_bboxes.from_files" title="ethology.io.annotations.load_bboxes.from_files"><span class="n">load_bboxes</span><span class="o">.</span><span class="n">from_files</span></a><span class="p">(</span><a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="list"><span class="n">extracted_files</span></a><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">COCO</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><span class="w">
+</span><span class="nb">print</span><span class="p">(</span><a class="sphx-glr-backref-module-xarray-core-dataset sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="xarray.core.dataset.Dataset"><span class="n">ds_all</span></a><span class="p">)</span><span class="w">
+</span><span class="nb">print</span><span class="p">(</span><span class="o">*</span><a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="list"><span class="n">ds_all</span><span class="o">.</span><span class="n">annotation_files</span></a><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span></pre></div></div>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;xarray.Dataset&gt; Size: 10MB
 Dimensions:      (image_id: 39426, space: 2, id: 6)
 Coordinates:
   * image_id     (image_id) int64 315kB 0 1 2 3 4 ... 39422 39423 39424 39425
-  * space        (space) &lt;U1 8B &#39;x&#39; &#39;y&#39;
+  * space        (space) object 16B 'x' 'y'
   * id           (id) int64 48B 0 1 2 3 4 5
 Data variables:
     position     (image_id, space, id) float64 4MB 0.07955 nan nan ... nan nan
@@ -582,9 +604,9 @@ Data variables:
     image_shape  (image_id, space) int64 631kB 2048 1440 2048 ... 1152 2048 1152
     category     (image_id, id) int64 2MB 1 -1 -1 -1 -1 -1 ... 1 -1 -1 -1 -1 -1
 Attributes: (5)
+/home/runner/.ethology/ACTD_COCO_files/2_Region_specific_data_CCT.json
 /home/runner/.ethology/ACTD_COCO_files/1_Terrestrial_group_data_CCT.json
 /home/runner/.ethology/ACTD_COCO_files/3_Feral_animals_data_CCT.json
-/home/runner/.ethology/ACTD_COCO_files/2_Region_specific_data_CCT.json
 </pre></div>
 </div>
 </section>
@@ -594,25 +616,24 @@ Attributes: (5)
 with each image having a maximum of 6 annotations. We can further inspect
 the different categories considered, the image sizes and the format of the
 image filenames.</p>
-<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Categories</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Categories:&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><a href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="xarray.core.dataset.Dataset" class="sphx-glr-backref-module-xarray-core-dataset sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ds_all</span></a><span class="o">.</span><span class="n">map_category_to_str</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;--------------------------------&quot;</span><span class="p">)</span>
-
-<span class="c1"># Image sizes</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Image sizes:&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.unique.html#numpy.unique" title="numpy.unique" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">unique</span></a><span class="p">(</span><a href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.values.html#xarray.DataArray.values" title="xarray.DataArray.values" class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-property"><span class="n">ds_all</span><span class="o">.</span><span class="n">image_shape</span><span class="o">.</span><span class="n">values</span></a><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;--------------------------------&quot;</span><span class="p">)</span>
-
-<span class="c1"># Print a few image filenames</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Sample image filenames:&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ds_all</span><span class="o">.</span><span class="n">map_image_id_to_filename</span></a><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="mi">0</span><span class="p">])</span>
-<span class="nb">print</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ds_all</span><span class="o">.</span><span class="n">map_image_id_to_filename</span></a><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="mi">30000</span><span class="p">])</span>
-<span class="nb">print</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ds_all</span><span class="o">.</span><span class="n">map_image_id_to_filename</span></a><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
-</pre></div>
-</div>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span class="c1"># Categories</span><span class="w">
+</span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="s2">Categories:</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><span class="nb">print</span><span class="p">(</span><a class="sphx-glr-backref-module-xarray-core-dataset sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="xarray.core.dataset.Dataset"><span class="n">ds_all</span></a><span class="o">.</span><span class="n">map_category_to_str</span><span class="o">.</span><span class="n">values</span><span class="p">(</span><span class="p">)</span><span class="p">)</span><span class="w">
+</span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="s2">--------------------------------</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><span class="w">
+</span><span class="c1"># Image sizes</span><span class="w">
+</span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="s2">Image sizes:</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><span class="nb">print</span><span class="p">(</span><a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.unique.html#numpy.unique" title="numpy.unique"><span class="n">np</span><span class="o">.</span><span class="n">unique</span></a><span class="p">(</span><a class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-property reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.values.html#xarray.DataArray.values" title="xarray.DataArray.values"><span class="n">ds_all</span><span class="o">.</span><span class="n">image_shape</span><span class="o">.</span><span class="n">values</span></a><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="p">)</span><span class="w">
+</span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="s2">--------------------------------</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><span class="w">
+</span><span class="c1"># Print a few image filenames</span><span class="w">
+</span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="s2">Sample image filenames:</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><span class="nb">print</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="dict"><span class="n">ds_all</span><span class="o">.</span><span class="n">map_image_id_to_filename</span></a><span class="o">.</span><span class="n">values</span><span class="p">(</span><span class="p">)</span><span class="p">)</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="p">)</span><span class="w">
+</span><span class="nb">print</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="dict"><span class="n">ds_all</span><span class="o">.</span><span class="n">map_image_id_to_filename</span></a><span class="o">.</span><span class="n">values</span><span class="p">(</span><span class="p">)</span><span class="p">)</span><span class="p">[</span><span class="mi">30000</span><span class="p">]</span><span class="p">)</span><span class="w">
+</span><span class="nb">print</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="dict"><span class="n">ds_all</span><span class="o">.</span><span class="n">map_image_id_to_filename</span></a><span class="o">.</span><span class="n">values</span><span class="p">(</span><span class="p">)</span><span class="p">)</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="p">)</span><span class="w">
+</span></pre></div></div>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Categories:
-dict_values([&#39;animal&#39;, &#39;person&#39;])
+dict_values(['animal', 'person'])
 --------------------------------
 Image sizes:
 [[1920 1080]
@@ -649,66 +670,63 @@ the species they contain. Note that only one specie is defined per
 image.</p>
 <p>We use a helper function to extract the information of interest
 from the image filenames.</p>
-<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Helper function</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">split_at_any_delimiter</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">delimiters</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Split a string at any of the specified delimiters if present.&quot;&quot;&quot;</span>
-    <span class="k">for</span> <span class="n">delimiter</span> <span class="ow">in</span> <span class="n">delimiters</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">delimiter</span> <span class="ow">in</span> <span class="n">text</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">text</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">delimiter</span><span class="p">)</span>
-    <span class="k">return</span> <span class="p">[</span><span class="n">text</span><span class="p">]</span>
-
-
-<span class="c1"># Get species name per image</span>
-<a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">species_per_image_id</span></a> <span class="o">=</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.array.html#numpy.array" title="numpy.array" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">array</span></a><span class="p">(</span>
-    <span class="p">[</span>
-        <a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ds_all</span><span class="o">.</span><span class="n">map_image_id_to_filename</span></a><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\\</span><span class="s2">&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <a href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.values.html#xarray.DataArray.values" title="xarray.DataArray.values" class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-property"><span class="n">ds_all</span><span class="o">.</span><span class="n">image_id</span><span class="o">.</span><span class="n">values</span></a>
-    <span class="p">]</span>
-<span class="p">)</span>
-
-<span class="c1"># Add the species array to the dataset</span>
-<a href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="xarray.core.dataset.Dataset" class="sphx-glr-backref-module-xarray-core-dataset sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ds_all</span></a><span class="p">[</span><span class="s2">&quot;specie&quot;</span><span class="p">]</span> <span class="o">=</span> <a href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.html#xarray.DataArray" title="xarray.core.dataarray.DataArray" class="sphx-glr-backref-module-xarray-core-dataarray sphx-glr-backref-type-py-class"><span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span></a><span class="p">(</span>
-    <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">species_per_image_id</span></a><span class="p">,</span>
-    <span class="n">dims</span><span class="o">=</span><span class="s2">&quot;image_id&quot;</span><span class="p">,</span>
-<span class="p">)</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Total species: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.unique.html#numpy.unique" title="numpy.unique" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">unique</span></a><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">species_per_image_id</span></a><span class="p">))</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span class="c1"># Helper function</span><span class="w">
+</span><span class="k">def</span><span class="w"> </span><span class="nf">split_at_any_delimiter</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">delimiters</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="p">)</span> <span class="o">-</span><span class="o">&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="p">:</span><span class="w">
+</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Split a string at any of the specified delimiters if present.&quot;&quot;&quot;</span><span class="w">
+</span>    <span class="k">for</span> <span class="n">delimiter</span> <span class="ow">in</span> <span class="n">delimiters</span><span class="p">:</span><span class="w">
+</span>        <span class="k">if</span> <span class="n">delimiter</span> <span class="ow">in</span> <span class="n">text</span><span class="p">:</span><span class="w">
+</span>            <span class="k">return</span> <span class="n">text</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">delimiter</span><span class="p">)</span><span class="w">
+</span>    <span class="k">return</span> <span class="p">[</span><span class="n">text</span><span class="p">]</span><span class="w">
+</span><span class="w">
+</span><span class="w">
+</span><span class="c1"># Get species name per image</span><span class="w">
+</span><a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray"><span class="n">species_per_image_id</span></a> <span class="o">=</span> <a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.array.html#numpy.array" title="numpy.array"><span class="n">np</span><span class="o">.</span><span class="n">array</span></a><span class="p">(</span><span class="w">
+</span>    <span class="p">[</span><span class="w">
+</span>        <a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="dict"><span class="n">ds_all</span><span class="o">.</span><span class="n">map_image_id_to_filename</span></a><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\\</span><span class="s2">&quot;</span><span class="p">)</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span><span class="w">
+</span>        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <a class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-property reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.values.html#xarray.DataArray.values" title="xarray.DataArray.values"><span class="n">ds_all</span><span class="o">.</span><span class="n">image_id</span><span class="o">.</span><span class="n">values</span></a><span class="w">
+</span>    <span class="p">]</span><span class="w">
+</span><span class="p">)</span><span class="w">
+</span><span class="w">
+</span><span class="c1"># Add the species array to the dataset</span><span class="w">
+</span><a class="sphx-glr-backref-module-xarray-core-dataset sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="xarray.core.dataset.Dataset"><span class="n">ds_all</span></a><span class="p">[</span><span class="s2">&quot;</span><span class="s2">specie</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">=</span> <a class="sphx-glr-backref-module-xarray-core-dataarray sphx-glr-backref-type-py-class reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.html#xarray.DataArray" title="xarray.core.dataarray.DataArray"><span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span></a><span class="p">(</span><span class="w">
+</span>    <a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray"><span class="n">species_per_image_id</span></a><span class="p">,</span><span class="w">
+</span>    <span class="n">dims</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">image_id</span><span class="s2">&quot;</span><span class="p">,</span><span class="w">
+</span><span class="p">)</span><span class="w">
+</span><span class="w">
+</span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="s2">Total species: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.unique.html#numpy.unique" title="numpy.unique"><span class="n">np</span><span class="o">.</span><span class="n">unique</span></a><span class="p">(</span><a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray"><span class="n">species_per_image_id</span></a><span class="p">)</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span></pre></div></div>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Total species: 15
 </pre></div>
 </div>
 <p>We have 15 different species in the dataset. With a bar plot we can visualise
 their distribution in the dataset.</p>
-<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">count_per_specie</span></a> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><a href="https://docs.python.org/3/library/collections.html#collections.Counter" title="collections.Counter" class="sphx-glr-backref-module-collections sphx-glr-backref-type-py-class"><span class="n">Counter</span></a><span class="p">(</span><a href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="xarray.core.dataset.Dataset" class="sphx-glr-backref-module-xarray-core-dataset sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ds_all</span></a><span class="p">[</span><span class="s2">&quot;specie&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">)</span><span class="o">.</span><span class="n">most_common</span><span class="p">())</span>
-
-<a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.figure.Figure.html#matplotlib.figure.Figure" title="matplotlib.figure.Figure" class="sphx-glr-backref-module-matplotlib-figure sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">fig</span></a><span class="p">,</span> <a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes" title="matplotlib.axes.Axes" class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ax</span></a> <span class="o">=</span> <a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.subplots.html#matplotlib.pyplot.subplots" title="matplotlib.pyplot.subplots" class="sphx-glr-backref-module-matplotlib-pyplot sphx-glr-backref-type-py-function"><span class="n">plt</span><span class="o">.</span><span class="n">subplots</span></a><span class="p">()</span>
-<a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.bar.html#matplotlib.axes.Axes.bar" title="matplotlib.axes.Axes.bar" class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-method"><span class="n">ax</span><span class="o">.</span><span class="n">bar</span></a><span class="p">(</span>
-    <a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">count_per_specie</span></a><span class="o">.</span><span class="n">keys</span><span class="p">(),</span>
-    <a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">count_per_specie</span></a><span class="o">.</span><span class="n">values</span><span class="p">(),</span>
-<span class="p">)</span>
-<a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.set_xticks.html#matplotlib.axes.Axes.set_xticks" title="matplotlib.axes.Axes.set_xticks" class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-method"><span class="n">ax</span><span class="o">.</span><span class="n">set_xticks</span></a><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">count_per_specie</span></a><span class="p">)))</span>
-<a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.set_xticklabels.html#matplotlib.axes.Axes.set_xticklabels" title="matplotlib.axes.Axes.set_xticklabels" class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-method"><span class="n">ax</span><span class="o">.</span><span class="n">set_xticklabels</span></a><span class="p">(</span><a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">count_per_specie</span></a><span class="o">.</span><span class="n">keys</span><span class="p">(),</span> <span class="n">rotation</span><span class="o">=</span><span class="mi">90</span><span class="p">)</span>
-<a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.set_ylabel.html#matplotlib.axes.Axes.set_ylabel" title="matplotlib.axes.Axes.set_ylabel" class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-method"><span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span></a><span class="p">(</span><span class="s2">&quot;# images&quot;</span><span class="p">)</span>
-<a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.set_title.html#matplotlib.axes.Axes.set_title" title="matplotlib.axes.Axes.set_title" class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-method"><span class="n">ax</span><span class="o">.</span><span class="n">set_title</span></a><span class="p">(</span><span class="s2">&quot;Image count per specie&quot;</span><span class="p">)</span>
-<a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.tight_layout.html#matplotlib.pyplot.tight_layout" title="matplotlib.pyplot.tight_layout" class="sphx-glr-backref-module-matplotlib-pyplot sphx-glr-backref-type-py-function"><span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span></a><span class="p">()</span>
-</pre></div>
-</div>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="dict"><span class="n">count_per_specie</span></a> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><a class="sphx-glr-backref-module-collections sphx-glr-backref-type-py-class reference external" href="https://docs.python.org/3/library/collections.html#collections.Counter" title="collections.Counter"><span class="n">Counter</span></a><span class="p">(</span><a class="sphx-glr-backref-module-xarray-core-dataset sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="xarray.core.dataset.Dataset"><span class="n">ds_all</span></a><span class="p">[</span><span class="s2">&quot;</span><span class="s2">specie</span><span class="s2">&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">)</span><span class="o">.</span><span class="n">most_common</span><span class="p">(</span><span class="p">)</span><span class="p">)</span><span class="w">
+</span><span class="w">
+</span><a class="sphx-glr-backref-module-matplotlib-figure sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.figure.Figure.html#matplotlib.figure.Figure" title="matplotlib.figure.Figure"><span class="n">fig</span></a><span class="p">,</span> <a class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes" title="matplotlib.axes.Axes"><span class="n">ax</span></a> <span class="o">=</span> <a class="sphx-glr-backref-module-matplotlib-pyplot sphx-glr-backref-type-py-function reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.subplots.html#matplotlib.pyplot.subplots" title="matplotlib.pyplot.subplots"><span class="n">plt</span><span class="o">.</span><span class="n">subplots</span></a><span class="p">(</span><span class="p">)</span><span class="w">
+</span><a class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-method reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.bar.html#matplotlib.axes.Axes.bar" title="matplotlib.axes.Axes.bar"><span class="n">ax</span><span class="o">.</span><span class="n">bar</span></a><span class="p">(</span><span class="w">
+</span>    <a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="dict"><span class="n">count_per_specie</span></a><span class="o">.</span><span class="n">keys</span><span class="p">(</span><span class="p">)</span><span class="p">,</span><span class="w">
+</span>    <a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="dict"><span class="n">count_per_specie</span></a><span class="o">.</span><span class="n">values</span><span class="p">(</span><span class="p">)</span><span class="p">,</span><span class="w">
+</span><span class="p">)</span><span class="w">
+</span><a class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-method reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.set_xticks.html#matplotlib.axes.Axes.set_xticks" title="matplotlib.axes.Axes.set_xticks"><span class="n">ax</span><span class="o">.</span><span class="n">set_xticks</span></a><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="dict"><span class="n">count_per_specie</span></a><span class="p">)</span><span class="p">)</span><span class="p">)</span><span class="w">
+</span><a class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-method reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.set_xticklabels.html#matplotlib.axes.Axes.set_xticklabels" title="matplotlib.axes.Axes.set_xticklabels"><span class="n">ax</span><span class="o">.</span><span class="n">set_xticklabels</span></a><span class="p">(</span><a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="dict"><span class="n">count_per_specie</span></a><span class="o">.</span><span class="n">keys</span><span class="p">(</span><span class="p">)</span><span class="p">,</span> <span class="n">rotation</span><span class="o">=</span><span class="mi">90</span><span class="p">)</span><span class="w">
+</span><a class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-method reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.set_ylabel.html#matplotlib.axes.Axes.set_ylabel" title="matplotlib.axes.Axes.set_ylabel"><span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span></a><span class="p">(</span><span class="s2">&quot;</span><span class="s2"># images</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><a class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-method reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.set_title.html#matplotlib.axes.Axes.set_title" title="matplotlib.axes.Axes.set_title"><span class="n">ax</span><span class="o">.</span><span class="n">set_title</span></a><span class="p">(</span><span class="s2">&quot;</span><span class="s2">Image count per specie</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><a class="sphx-glr-backref-module-matplotlib-pyplot sphx-glr-backref-type-py-function reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.tight_layout.html#matplotlib.pyplot.tight_layout" title="matplotlib.pyplot.tight_layout"><span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span></a><span class="p">(</span><span class="p">)</span><span class="w">
+</span></pre></div></div>
 <img src="../_images/sphx_glr_approximate_subset_sum_split_001.png" srcset="../_images/sphx_glr_approximate_subset_sum_split_001.png" alt="Image count per specie" class = "sphx-glr-single-img"/><p>We can now split the dataset by species using the
 <a class="reference internal" href="../api/ethology.datasets.split.split_dataset_group_by.html#ethology.datasets.split.split_dataset_group_by" title="ethology.datasets.split.split_dataset_group_by"><code class="xref py py-func docutils literal notranslate"><span class="pre">ethology.datasets.split.split_dataset_group_by()</span></code></a>
 function. For example, for a very specific 30/70 split,
 we would do:</p>
-<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><a href="https://docs.python.org/3/library/functions.html#float" title="builtins.float" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">fraction_1</span></a> <span class="o">=</span> <span class="mf">0.3</span>
-<a href="https://docs.python.org/3/library/functions.html#float" title="builtins.float" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">fraction_2</span></a> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <a href="https://docs.python.org/3/library/functions.html#float" title="builtins.float" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">fraction_1</span></a>
-
-<a href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="xarray.core.dataset.Dataset" class="sphx-glr-backref-module-xarray-core-dataset sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ds_species_1</span></a><span class="p">,</span> <a href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="xarray.core.dataset.Dataset" class="sphx-glr-backref-module-xarray-core-dataset sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ds_species_2</span></a> <span class="o">=</span> <a href="../api/ethology.datasets.split.split_dataset_group_by.html#ethology.datasets.split.split_dataset_group_by" title="ethology.datasets.split.split_dataset_group_by" class="sphx-glr-backref-module-ethology-datasets-split sphx-glr-backref-type-py-function"><span class="n">split_dataset_group_by</span></a><span class="p">(</span>
-    <a href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="xarray.core.dataset.Dataset" class="sphx-glr-backref-module-xarray-core-dataset sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ds_all</span></a><span class="p">,</span>
-    <span class="n">group_by_var</span><span class="o">=</span><span class="s2">&quot;specie&quot;</span><span class="p">,</span>
-    <span class="n">list_fractions</span><span class="o">=</span><span class="p">[</span><a href="https://docs.python.org/3/library/functions.html#float" title="builtins.float" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">fraction_1</span></a><span class="p">,</span> <a href="https://docs.python.org/3/library/functions.html#float" title="builtins.float" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">fraction_2</span></a><span class="p">],</span>
-<span class="p">)</span>
-</pre></div>
-</div>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>2026-03-08 12:29:34.345 | INFO     | ethology.datasets.split:split_dataset_group_by:211 - Using group k-fold method with 3 folds and seed=42.
+<div class="highlight-Python notranslate"><div class="highlight"><pre><a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="float"><span class="n">fraction_1</span></a> <span class="o">=</span> <span class="mf">0.3</span><span class="w">
+</span><a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="float"><span class="n">fraction_2</span></a> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="float"><span class="n">fraction_1</span></a><span class="w">
+</span><span class="w">
+</span><a class="sphx-glr-backref-module-xarray-core-dataset sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="xarray.core.dataset.Dataset"><span class="n">ds_species_1</span></a><span class="p">,</span> <a class="sphx-glr-backref-module-xarray-core-dataset sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="xarray.core.dataset.Dataset"><span class="n">ds_species_2</span></a> <span class="o">=</span> <a class="sphx-glr-backref-module-ethology-datasets-split sphx-glr-backref-type-py-function reference internal" href="../api/ethology.datasets.split.split_dataset_group_by.html#ethology.datasets.split.split_dataset_group_by" title="ethology.datasets.split.split_dataset_group_by"><span class="n">split_dataset_group_by</span></a><span class="p">(</span><span class="w">
+</span>    <a class="sphx-glr-backref-module-xarray-core-dataset sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="xarray.core.dataset.Dataset"><span class="n">ds_all</span></a><span class="p">,</span><span class="w">
+</span>    <span class="n">group_by_var</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">specie</span><span class="s2">&quot;</span><span class="p">,</span><span class="w">
+</span>    <span class="n">list_fractions</span><span class="o">=</span><span class="p">[</span><a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="float"><span class="n">fraction_1</span></a><span class="p">,</span> <a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="float"><span class="n">fraction_2</span></a><span class="p">]</span><span class="p">,</span><span class="w">
+</span><span class="p">)</span><span class="w">
+</span></pre></div></div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>2026-10-13 13:06:42.915 | INFO     | ethology.datasets.split:split_dataset_group_by:211 - Using group k-fold method with 3 folds and seed=42.
 </pre></div>
 </div>
 <p>By default, the <code class="docutils literal notranslate"><span class="pre">method</span></code> parameter of the function is set to <code class="docutils literal notranslate"><span class="pre">auto</span></code>,
@@ -719,77 +737,74 @@ method was the “group k-fold” method. To force the use of this method, we
 can explicitly set the <code class="docutils literal notranslate"><span class="pre">method</span></code> parameter of the function to <code class="docutils literal notranslate"><span class="pre">kfold</span></code>.</p>
 <p>We can check how close is the resulting split to the
 requested fractions, and verify that the subsets contain distinct species.</p>
-<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;User specified fractions:</span><span class="si">{</span><span class="p">[</span><a href="https://docs.python.org/3/library/functions.html#float" title="builtins.float" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">fraction_1</span></a><span class="p">,</span><span class="w"> </span><a href="https://docs.python.org/3/library/functions.html#float" title="builtins.float" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">fraction_2</span></a><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-
-<span class="nb">print</span><span class="p">(</span>
-    <span class="s2">&quot;Output split fractions: [&quot;</span>
-    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><a href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.values.html#xarray.DataArray.values" title="xarray.DataArray.values" class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-property"><span class="n">ds_species_1</span><span class="o">.</span><span class="n">image_id</span><span class="o">.</span><span class="n">values</span></a><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><a href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.values.html#xarray.DataArray.values" title="xarray.DataArray.values" class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-property"><span class="n">ds_all</span><span class="o">.</span><span class="n">image_id</span><span class="o">.</span><span class="n">values</span></a><span class="p">)</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">, &quot;</span>
-    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><a href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.values.html#xarray.DataArray.values" title="xarray.DataArray.values" class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-property"><span class="n">ds_species_2</span><span class="o">.</span><span class="n">image_id</span><span class="o">.</span><span class="n">values</span></a><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><a href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.values.html#xarray.DataArray.values" title="xarray.DataArray.values" class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-property"><span class="n">ds_all</span><span class="o">.</span><span class="n">image_id</span><span class="o">.</span><span class="n">values</span></a><span class="p">)</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">]&quot;</span>
-<span class="p">)</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;--------------------------------&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Subset 1 species: </span><span class="si">{</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.unique.html#numpy.unique" title="numpy.unique" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">unique</span></a><span class="p">(</span><a href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.values.html#xarray.DataArray.values" title="xarray.DataArray.values" class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-property"><span class="n">ds_species_1</span><span class="o">.</span><span class="n">specie</span><span class="o">.</span><span class="n">values</span></a><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Subset 2 species: </span><span class="si">{</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.unique.html#numpy.unique" title="numpy.unique" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">unique</span></a><span class="p">(</span><a href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.values.html#xarray.DataArray.values" title="xarray.DataArray.values" class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-property"><span class="n">ds_species_2</span><span class="o">.</span><span class="n">specie</span><span class="o">.</span><span class="n">values</span></a><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="s2">User specified fractions:</span><span class="si">{</span><span class="p">[</span><a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="float"><span class="n">fraction_1</span></a><span class="p">,</span><span class="w"> </span><a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="float"><span class="n">fraction_2</span></a><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><span class="w">
+</span><span class="nb">print</span><span class="p">(</span><span class="w">
+</span>    <span class="s2">&quot;</span><span class="s2">Output split fractions: [</span><span class="s2">&quot;</span><span class="w">
+</span>    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><a class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-property reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.values.html#xarray.DataArray.values" title="xarray.DataArray.values"><span class="n">ds_species_1</span><span class="o">.</span><span class="n">image_id</span><span class="o">.</span><span class="n">values</span></a><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><a class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-property reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.values.html#xarray.DataArray.values" title="xarray.DataArray.values"><span class="n">ds_all</span><span class="o">.</span><span class="n">image_id</span><span class="o">.</span><span class="n">values</span></a><span class="p">)</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">, </span><span class="s2">&quot;</span><span class="w">
+</span>    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><a class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-property reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.values.html#xarray.DataArray.values" title="xarray.DataArray.values"><span class="n">ds_species_2</span><span class="o">.</span><span class="n">image_id</span><span class="o">.</span><span class="n">values</span></a><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><a class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-property reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.values.html#xarray.DataArray.values" title="xarray.DataArray.values"><span class="n">ds_all</span><span class="o">.</span><span class="n">image_id</span><span class="o">.</span><span class="n">values</span></a><span class="p">)</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">]</span><span class="s2">&quot;</span><span class="w">
+</span><span class="p">)</span><span class="w">
+</span><span class="w">
+</span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="s2">--------------------------------</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="s2">Subset 1 species: </span><span class="si">{</span><a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.unique.html#numpy.unique" title="numpy.unique"><span class="n">np</span><span class="o">.</span><span class="n">unique</span></a><span class="p">(</span><a class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-property reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.values.html#xarray.DataArray.values" title="xarray.DataArray.values"><span class="n">ds_species_1</span><span class="o">.</span><span class="n">specie</span><span class="o">.</span><span class="n">values</span></a><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="s2">Subset 2 species: </span><span class="si">{</span><a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.unique.html#numpy.unique" title="numpy.unique"><span class="n">np</span><span class="o">.</span><span class="n">unique</span></a><span class="p">(</span><a class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-property reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.values.html#xarray.DataArray.values" title="xarray.DataArray.values"><span class="n">ds_species_2</span><span class="o">.</span><span class="n">specie</span><span class="o">.</span><span class="n">values</span></a><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span></pre></div></div>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>User specified fractions:[0.3, 0.7]
 Output split fractions: [0.336, 0.664]
 --------------------------------
-Subset 1 species: [&#39;Bandicoot&#39; &#39;Kangaroo&#39; &#39;Possum&#39; &#39;Rabbit&#39; &#39;Wallaby&#39;]
-Subset 2 species: [&#39;Bird&#39; &#39;Bushrat&#39; &#39;Cat&#39; &#39;Fox&#39; &#39;Large animals&#39; &#39;Mid-sized animals&#39; &#39;Others&#39;
- &#39;Potoroo&#39; &#39;Small animals&#39; &#39;Wombat&#39;]
+Subset 1 species: ['Bandicoot' 'Kangaroo' 'Possum' 'Rabbit' 'Wallaby']
+Subset 2 species: ['Bird' 'Bushrat' 'Cat' 'Fox' 'Large animals' 'Mid-sized animals' 'Others'
+ 'Potoroo' 'Small animals' 'Wombat']
 </pre></div>
 </div>
 <p>When using the “group k-fold” method, we can also generate different splits
 by setting a different value for the <code class="docutils literal notranslate"><span class="pre">seed</span></code> parameter. In the example
 below, we set the <code class="docutils literal notranslate"><span class="pre">method</span></code> parameter to <code class="docutils literal notranslate"><span class="pre">kfold</span></code> and use two different
 seed values, to generate two different splits.</p>
-<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Split A with seed 42</span>
-<a href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="xarray.core.dataset.Dataset" class="sphx-glr-backref-module-xarray-core-dataset sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ds_species_1a</span></a><span class="p">,</span> <a href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="xarray.core.dataset.Dataset" class="sphx-glr-backref-module-xarray-core-dataset sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ds_species_2a</span></a> <span class="o">=</span> <a href="../api/ethology.datasets.split.split_dataset_group_by.html#ethology.datasets.split.split_dataset_group_by" title="ethology.datasets.split.split_dataset_group_by" class="sphx-glr-backref-module-ethology-datasets-split sphx-glr-backref-type-py-function"><span class="n">split_dataset_group_by</span></a><span class="p">(</span>
-    <a href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="xarray.core.dataset.Dataset" class="sphx-glr-backref-module-xarray-core-dataset sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ds_all</span></a><span class="p">,</span>
-    <span class="n">group_by_var</span><span class="o">=</span><span class="s2">&quot;specie&quot;</span><span class="p">,</span>
-    <span class="n">list_fractions</span><span class="o">=</span><span class="p">[</span><a href="https://docs.python.org/3/library/functions.html#float" title="builtins.float" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">fraction_1</span></a><span class="p">,</span> <a href="https://docs.python.org/3/library/functions.html#float" title="builtins.float" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">fraction_2</span></a><span class="p">],</span>
-    <span class="n">method</span><span class="o">=</span><span class="s2">&quot;kfold&quot;</span><span class="p">,</span>
-    <span class="n">seed</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span>
-<span class="p">)</span>
-
-<span class="c1"># Split B with seed 43</span>
-<a href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="xarray.core.dataset.Dataset" class="sphx-glr-backref-module-xarray-core-dataset sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ds_species_1b</span></a><span class="p">,</span> <a href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="xarray.core.dataset.Dataset" class="sphx-glr-backref-module-xarray-core-dataset sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ds_species_2b</span></a> <span class="o">=</span> <a href="../api/ethology.datasets.split.split_dataset_group_by.html#ethology.datasets.split.split_dataset_group_by" title="ethology.datasets.split.split_dataset_group_by" class="sphx-glr-backref-module-ethology-datasets-split sphx-glr-backref-type-py-function"><span class="n">split_dataset_group_by</span></a><span class="p">(</span>
-    <a href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="xarray.core.dataset.Dataset" class="sphx-glr-backref-module-xarray-core-dataset sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ds_all</span></a><span class="p">,</span>
-    <span class="n">group_by_var</span><span class="o">=</span><span class="s2">&quot;specie&quot;</span><span class="p">,</span>
-    <span class="n">list_fractions</span><span class="o">=</span><span class="p">[</span><a href="https://docs.python.org/3/library/functions.html#float" title="builtins.float" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">fraction_1</span></a><span class="p">,</span> <a href="https://docs.python.org/3/library/functions.html#float" title="builtins.float" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">fraction_2</span></a><span class="p">],</span>
-    <span class="n">method</span><span class="o">=</span><span class="s2">&quot;kfold&quot;</span><span class="p">,</span>
-    <span class="n">seed</span><span class="o">=</span><span class="mi">43</span><span class="p">,</span>
-<span class="p">)</span>
-</pre></div>
-</div>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>2026-03-08 12:29:34.368 | INFO     | ethology.datasets.split:split_dataset_group_by:211 - Using group k-fold method with 3 folds and seed=42.
-2026-03-08 12:29:34.384 | INFO     | ethology.datasets.split:split_dataset_group_by:211 - Using group k-fold method with 3 folds and seed=43.
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span class="c1"># Split A with seed 42</span><span class="w">
+</span><a class="sphx-glr-backref-module-xarray-core-dataset sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="xarray.core.dataset.Dataset"><span class="n">ds_species_1a</span></a><span class="p">,</span> <a class="sphx-glr-backref-module-xarray-core-dataset sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="xarray.core.dataset.Dataset"><span class="n">ds_species_2a</span></a> <span class="o">=</span> <a class="sphx-glr-backref-module-ethology-datasets-split sphx-glr-backref-type-py-function reference internal" href="../api/ethology.datasets.split.split_dataset_group_by.html#ethology.datasets.split.split_dataset_group_by" title="ethology.datasets.split.split_dataset_group_by"><span class="n">split_dataset_group_by</span></a><span class="p">(</span><span class="w">
+</span>    <a class="sphx-glr-backref-module-xarray-core-dataset sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="xarray.core.dataset.Dataset"><span class="n">ds_all</span></a><span class="p">,</span><span class="w">
+</span>    <span class="n">group_by_var</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">specie</span><span class="s2">&quot;</span><span class="p">,</span><span class="w">
+</span>    <span class="n">list_fractions</span><span class="o">=</span><span class="p">[</span><a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="float"><span class="n">fraction_1</span></a><span class="p">,</span> <a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="float"><span class="n">fraction_2</span></a><span class="p">]</span><span class="p">,</span><span class="w">
+</span>    <span class="n">method</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">kfold</span><span class="s2">&quot;</span><span class="p">,</span><span class="w">
+</span>    <span class="n">seed</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span><span class="w">
+</span><span class="p">)</span><span class="w">
+</span><span class="w">
+</span><span class="c1"># Split B with seed 43</span><span class="w">
+</span><a class="sphx-glr-backref-module-xarray-core-dataset sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="xarray.core.dataset.Dataset"><span class="n">ds_species_1b</span></a><span class="p">,</span> <a class="sphx-glr-backref-module-xarray-core-dataset sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="xarray.core.dataset.Dataset"><span class="n">ds_species_2b</span></a> <span class="o">=</span> <a class="sphx-glr-backref-module-ethology-datasets-split sphx-glr-backref-type-py-function reference internal" href="../api/ethology.datasets.split.split_dataset_group_by.html#ethology.datasets.split.split_dataset_group_by" title="ethology.datasets.split.split_dataset_group_by"><span class="n">split_dataset_group_by</span></a><span class="p">(</span><span class="w">
+</span>    <a class="sphx-glr-backref-module-xarray-core-dataset sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="xarray.core.dataset.Dataset"><span class="n">ds_all</span></a><span class="p">,</span><span class="w">
+</span>    <span class="n">group_by_var</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">specie</span><span class="s2">&quot;</span><span class="p">,</span><span class="w">
+</span>    <span class="n">list_fractions</span><span class="o">=</span><span class="p">[</span><a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="float"><span class="n">fraction_1</span></a><span class="p">,</span> <a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="float"><span class="n">fraction_2</span></a><span class="p">]</span><span class="p">,</span><span class="w">
+</span>    <span class="n">method</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">kfold</span><span class="s2">&quot;</span><span class="p">,</span><span class="w">
+</span>    <span class="n">seed</span><span class="o">=</span><span class="mi">43</span><span class="p">,</span><span class="w">
+</span><span class="p">)</span><span class="w">
+</span></pre></div></div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>2026-10-13 13:06:42.939 | INFO     | ethology.datasets.split:split_dataset_group_by:211 - Using group k-fold method with 3 folds and seed=42.
+2026-10-13 13:06:42.953 | INFO     | ethology.datasets.split:split_dataset_group_by:211 - Using group k-fold method with 3 folds and seed=43.
 </pre></div>
 </div>
 <p>We can verify that the split using the default value of the <code class="docutils literal notranslate"><span class="pre">seed</span></code>
 parameter (42) is the same as the first split computed above, but different
 from the split obtained with a different seed value (43). The output
 fractions in both cases are approximately the requested fractions.</p>
-<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span>
-    <span class="s2">&quot;Output split fractions for seed 42: [&quot;</span>
-    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><a href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.values.html#xarray.DataArray.values" title="xarray.DataArray.values" class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-property"><span class="n">ds_species_1a</span><span class="o">.</span><span class="n">image_id</span><span class="o">.</span><span class="n">values</span></a><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><a href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.values.html#xarray.DataArray.values" title="xarray.DataArray.values" class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-property"><span class="n">ds_all</span><span class="o">.</span><span class="n">image_id</span><span class="o">.</span><span class="n">values</span></a><span class="p">)</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">, &quot;</span>
-    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><a href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.values.html#xarray.DataArray.values" title="xarray.DataArray.values" class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-property"><span class="n">ds_species_2a</span><span class="o">.</span><span class="n">image_id</span><span class="o">.</span><span class="n">values</span></a><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><a href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.values.html#xarray.DataArray.values" title="xarray.DataArray.values" class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-property"><span class="n">ds_all</span><span class="o">.</span><span class="n">image_id</span><span class="o">.</span><span class="n">values</span></a><span class="p">)</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">]&quot;</span>
-<span class="p">)</span>
-
-<span class="nb">print</span><span class="p">(</span>
-    <span class="s2">&quot;Output split fractions for seed 43: [&quot;</span>
-    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><a href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.values.html#xarray.DataArray.values" title="xarray.DataArray.values" class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-property"><span class="n">ds_species_1b</span><span class="o">.</span><span class="n">image_id</span><span class="o">.</span><span class="n">values</span></a><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><a href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.values.html#xarray.DataArray.values" title="xarray.DataArray.values" class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-property"><span class="n">ds_all</span><span class="o">.</span><span class="n">image_id</span><span class="o">.</span><span class="n">values</span></a><span class="p">)</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">, &quot;</span>
-    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><a href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.values.html#xarray.DataArray.values" title="xarray.DataArray.values" class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-property"><span class="n">ds_species_2b</span><span class="o">.</span><span class="n">image_id</span><span class="o">.</span><span class="n">values</span></a><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><a href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.values.html#xarray.DataArray.values" title="xarray.DataArray.values" class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-property"><span class="n">ds_all</span><span class="o">.</span><span class="n">image_id</span><span class="o">.</span><span class="n">values</span></a><span class="p">)</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">]&quot;</span>
-<span class="p">)</span>
-
-
-<span class="k">assert</span> <a href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.equals.html#xarray.Dataset.equals" title="xarray.Dataset.equals" class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-method"><span class="n">ds_species_1a</span><span class="o">.</span><span class="n">equals</span></a><span class="p">(</span><a href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="xarray.core.dataset.Dataset" class="sphx-glr-backref-module-xarray-core-dataset sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ds_species_1</span></a><span class="p">)</span>
-<span class="k">assert</span> <a href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.equals.html#xarray.Dataset.equals" title="xarray.Dataset.equals" class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-method"><span class="n">ds_species_2a</span><span class="o">.</span><span class="n">equals</span></a><span class="p">(</span><a href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="xarray.core.dataset.Dataset" class="sphx-glr-backref-module-xarray-core-dataset sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ds_species_2</span></a><span class="p">)</span>
-<span class="k">assert</span> <span class="ow">not</span> <a href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.equals.html#xarray.Dataset.equals" title="xarray.Dataset.equals" class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-method"><span class="n">ds_species_1a</span><span class="o">.</span><span class="n">equals</span></a><span class="p">(</span><a href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="xarray.core.dataset.Dataset" class="sphx-glr-backref-module-xarray-core-dataset sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ds_species_1b</span></a><span class="p">)</span>
-<span class="k">assert</span> <span class="ow">not</span> <a href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.equals.html#xarray.Dataset.equals" title="xarray.Dataset.equals" class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-method"><span class="n">ds_species_2a</span><span class="o">.</span><span class="n">equals</span></a><span class="p">(</span><a href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="xarray.core.dataset.Dataset" class="sphx-glr-backref-module-xarray-core-dataset sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ds_species_2b</span></a><span class="p">)</span>
-</pre></div>
-</div>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span class="nb">print</span><span class="p">(</span><span class="w">
+</span>    <span class="s2">&quot;</span><span class="s2">Output split fractions for seed 42: [</span><span class="s2">&quot;</span><span class="w">
+</span>    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><a class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-property reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.values.html#xarray.DataArray.values" title="xarray.DataArray.values"><span class="n">ds_species_1a</span><span class="o">.</span><span class="n">image_id</span><span class="o">.</span><span class="n">values</span></a><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><a class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-property reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.values.html#xarray.DataArray.values" title="xarray.DataArray.values"><span class="n">ds_all</span><span class="o">.</span><span class="n">image_id</span><span class="o">.</span><span class="n">values</span></a><span class="p">)</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">, </span><span class="s2">&quot;</span><span class="w">
+</span>    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><a class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-property reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.values.html#xarray.DataArray.values" title="xarray.DataArray.values"><span class="n">ds_species_2a</span><span class="o">.</span><span class="n">image_id</span><span class="o">.</span><span class="n">values</span></a><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><a class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-property reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.values.html#xarray.DataArray.values" title="xarray.DataArray.values"><span class="n">ds_all</span><span class="o">.</span><span class="n">image_id</span><span class="o">.</span><span class="n">values</span></a><span class="p">)</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">]</span><span class="s2">&quot;</span><span class="w">
+</span><span class="p">)</span><span class="w">
+</span><span class="w">
+</span><span class="nb">print</span><span class="p">(</span><span class="w">
+</span>    <span class="s2">&quot;</span><span class="s2">Output split fractions for seed 43: [</span><span class="s2">&quot;</span><span class="w">
+</span>    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><a class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-property reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.values.html#xarray.DataArray.values" title="xarray.DataArray.values"><span class="n">ds_species_1b</span><span class="o">.</span><span class="n">image_id</span><span class="o">.</span><span class="n">values</span></a><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><a class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-property reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.values.html#xarray.DataArray.values" title="xarray.DataArray.values"><span class="n">ds_all</span><span class="o">.</span><span class="n">image_id</span><span class="o">.</span><span class="n">values</span></a><span class="p">)</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">, </span><span class="s2">&quot;</span><span class="w">
+</span>    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><a class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-property reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.values.html#xarray.DataArray.values" title="xarray.DataArray.values"><span class="n">ds_species_2b</span><span class="o">.</span><span class="n">image_id</span><span class="o">.</span><span class="n">values</span></a><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><a class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-property reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.values.html#xarray.DataArray.values" title="xarray.DataArray.values"><span class="n">ds_all</span><span class="o">.</span><span class="n">image_id</span><span class="o">.</span><span class="n">values</span></a><span class="p">)</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">]</span><span class="s2">&quot;</span><span class="w">
+</span><span class="p">)</span><span class="w">
+</span><span class="w">
+</span><span class="w">
+</span><span class="k">assert</span> <a class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-method reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.equals.html#xarray.Dataset.equals" title="xarray.Dataset.equals"><span class="n">ds_species_1a</span><span class="o">.</span><span class="n">equals</span></a><span class="p">(</span><a class="sphx-glr-backref-module-xarray-core-dataset sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="xarray.core.dataset.Dataset"><span class="n">ds_species_1</span></a><span class="p">)</span><span class="w">
+</span><span class="k">assert</span> <a class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-method reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.equals.html#xarray.Dataset.equals" title="xarray.Dataset.equals"><span class="n">ds_species_2a</span><span class="o">.</span><span class="n">equals</span></a><span class="p">(</span><a class="sphx-glr-backref-module-xarray-core-dataset sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="xarray.core.dataset.Dataset"><span class="n">ds_species_2</span></a><span class="p">)</span><span class="w">
+</span><span class="k">assert</span> <span class="ow">not</span> <a class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-method reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.equals.html#xarray.Dataset.equals" title="xarray.Dataset.equals"><span class="n">ds_species_1a</span><span class="o">.</span><span class="n">equals</span></a><span class="p">(</span><a class="sphx-glr-backref-module-xarray-core-dataset sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="xarray.core.dataset.Dataset"><span class="n">ds_species_1b</span></a><span class="p">)</span><span class="w">
+</span><span class="k">assert</span> <span class="ow">not</span> <a class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-method reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.equals.html#xarray.Dataset.equals" title="xarray.Dataset.equals"><span class="n">ds_species_2a</span><span class="o">.</span><span class="n">equals</span></a><span class="p">(</span><a class="sphx-glr-backref-module-xarray-core-dataset sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="xarray.core.dataset.Dataset"><span class="n">ds_species_2b</span></a><span class="p">)</span><span class="w">
+</span></pre></div></div>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Output split fractions for seed 42: [0.336, 0.664]
 Output split fractions for seed 43: [0.365, 0.635]
 </pre></div>
@@ -817,36 +832,34 @@ the dataset by the annotation file they come from.</p>
 <p>As before, we first compute the annotation file per image, which we
 derive from the image filename. Then we add the annotation file array to
 the dataset.</p>
-<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Get annotation file per image</span>
-<a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">annotation_file_per_image_id</span></a> <span class="o">=</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.array.html#numpy.array" title="numpy.array" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">array</span></a><span class="p">(</span>
-    <span class="p">[</span>
-        <span class="n">split_at_any_delimiter</span><span class="p">(</span>
-            <a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ds_all</span><span class="o">.</span><span class="n">map_image_id_to_filename</span></a><span class="p">[</span><span class="n">i</span><span class="p">],</span>
-            <span class="p">[</span><span class="s2">&quot;</span><span class="se">\\</span><span class="s2">&quot;</span><span class="p">],</span>
-        <span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <a href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.values.html#xarray.DataArray.values" title="xarray.DataArray.values" class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-property"><span class="n">ds_all</span><span class="o">.</span><span class="n">image_id</span><span class="o">.</span><span class="n">values</span></a>
-    <span class="p">]</span>
-<span class="p">)</span>
-
-<span class="c1"># Add to dataset</span>
-<a href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="xarray.core.dataset.Dataset" class="sphx-glr-backref-module-xarray-core-dataset sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ds_all</span></a><span class="p">[</span><span class="s2">&quot;json_file&quot;</span><span class="p">]</span> <span class="o">=</span> <a href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.html#xarray.DataArray" title="xarray.core.dataarray.DataArray" class="sphx-glr-backref-module-xarray-core-dataarray sphx-glr-backref-type-py-class"><span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span></a><span class="p">(</span>
-    <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">annotation_file_per_image_id</span></a><span class="p">,</span> <span class="n">dims</span><span class="o">=</span><span class="s2">&quot;image_id&quot;</span>
-<span class="p">)</span>
-</pre></div>
-</div>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span class="c1"># Get annotation file per image</span><span class="w">
+</span><a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray"><span class="n">annotation_file_per_image_id</span></a> <span class="o">=</span> <a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.array.html#numpy.array" title="numpy.array"><span class="n">np</span><span class="o">.</span><span class="n">array</span></a><span class="p">(</span><span class="w">
+</span>    <span class="p">[</span><span class="w">
+</span>        <span class="n">split_at_any_delimiter</span><span class="p">(</span><span class="w">
+</span>            <a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="dict"><span class="n">ds_all</span><span class="o">.</span><span class="n">map_image_id_to_filename</span></a><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="p">,</span><span class="w">
+</span>            <span class="p">[</span><span class="s2">&quot;</span><span class="se">\\</span><span class="s2">&quot;</span><span class="p">]</span><span class="p">,</span><span class="w">
+</span>        <span class="p">)</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w">
+</span>        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <a class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-property reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.values.html#xarray.DataArray.values" title="xarray.DataArray.values"><span class="n">ds_all</span><span class="o">.</span><span class="n">image_id</span><span class="o">.</span><span class="n">values</span></a><span class="w">
+</span>    <span class="p">]</span><span class="w">
+</span><span class="p">)</span><span class="w">
+</span><span class="w">
+</span><span class="c1"># Add to dataset</span><span class="w">
+</span><a class="sphx-glr-backref-module-xarray-core-dataset sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="xarray.core.dataset.Dataset"><span class="n">ds_all</span></a><span class="p">[</span><span class="s2">&quot;</span><span class="s2">json_file</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">=</span> <a class="sphx-glr-backref-module-xarray-core-dataarray sphx-glr-backref-type-py-class reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.html#xarray.DataArray" title="xarray.core.dataarray.DataArray"><span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span></a><span class="p">(</span><span class="w">
+</span>    <a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray"><span class="n">annotation_file_per_image_id</span></a><span class="p">,</span> <span class="n">dims</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">image_id</span><span class="s2">&quot;</span><span class="w">
+</span><span class="p">)</span><span class="w">
+</span></pre></div></div>
 <p>We can now split the dataset by annotation file using the
 <a class="reference internal" href="../api/ethology.datasets.split.split_dataset_group_by.html#ethology.datasets.split.split_dataset_group_by" title="ethology.datasets.split.split_dataset_group_by"><code class="xref py py-func docutils literal notranslate"><span class="pre">ethology.datasets.split.split_dataset_group_by()</span></code></a>
 function with the <code class="docutils literal notranslate"><span class="pre">method</span></code> parameter set to <code class="docutils literal notranslate"><span class="pre">apss</span></code>
 (approximate subset-sum).</p>
-<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><a href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="xarray.core.dataset.Dataset" class="sphx-glr-backref-module-xarray-core-dataset sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ds_annotations_1</span></a><span class="p">,</span> <a href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="xarray.core.dataset.Dataset" class="sphx-glr-backref-module-xarray-core-dataset sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ds_annotations_2</span></a> <span class="o">=</span> <a href="../api/ethology.datasets.split.split_dataset_group_by.html#ethology.datasets.split.split_dataset_group_by" title="ethology.datasets.split.split_dataset_group_by" class="sphx-glr-backref-module-ethology-datasets-split sphx-glr-backref-type-py-function"><span class="n">split_dataset_group_by</span></a><span class="p">(</span>
-    <a href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="xarray.core.dataset.Dataset" class="sphx-glr-backref-module-xarray-core-dataset sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ds_all</span></a><span class="p">,</span>
-    <span class="n">group_by_var</span><span class="o">=</span><span class="s2">&quot;json_file&quot;</span><span class="p">,</span>
-    <span class="n">list_fractions</span><span class="o">=</span><span class="p">[</span><a href="https://docs.python.org/3/library/functions.html#float" title="builtins.float" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">fraction_1</span></a><span class="p">,</span> <a href="https://docs.python.org/3/library/functions.html#float" title="builtins.float" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">fraction_2</span></a><span class="p">],</span>
-    <span class="n">method</span><span class="o">=</span><span class="s2">&quot;apss&quot;</span><span class="p">,</span>
-<span class="p">)</span>
-</pre></div>
-</div>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>2026-03-08 12:29:35.582 | INFO     | ethology.datasets.split:split_dataset_group_by:219 - Using approximate subset-sum method with epsilon=0.
+<div class="highlight-Python notranslate"><div class="highlight"><pre><a class="sphx-glr-backref-module-xarray-core-dataset sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="xarray.core.dataset.Dataset"><span class="n">ds_annotations_1</span></a><span class="p">,</span> <a class="sphx-glr-backref-module-xarray-core-dataset sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="xarray.core.dataset.Dataset"><span class="n">ds_annotations_2</span></a> <span class="o">=</span> <a class="sphx-glr-backref-module-ethology-datasets-split sphx-glr-backref-type-py-function reference internal" href="../api/ethology.datasets.split.split_dataset_group_by.html#ethology.datasets.split.split_dataset_group_by" title="ethology.datasets.split.split_dataset_group_by"><span class="n">split_dataset_group_by</span></a><span class="p">(</span><span class="w">
+</span>    <a class="sphx-glr-backref-module-xarray-core-dataset sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="xarray.core.dataset.Dataset"><span class="n">ds_all</span></a><span class="p">,</span><span class="w">
+</span>    <span class="n">group_by_var</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">json_file</span><span class="s2">&quot;</span><span class="p">,</span><span class="w">
+</span>    <span class="n">list_fractions</span><span class="o">=</span><span class="p">[</span><a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="float"><span class="n">fraction_1</span></a><span class="p">,</span> <a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="float"><span class="n">fraction_2</span></a><span class="p">]</span><span class="p">,</span><span class="w">
+</span>    <span class="n">method</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">apss</span><span class="s2">&quot;</span><span class="p">,</span><span class="w">
+</span><span class="p">)</span><span class="w">
+</span></pre></div></div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>2026-10-13 13:06:43.534 | INFO     | ethology.datasets.split:split_dataset_group_by:219 - Using approximate subset-sum method with epsilon=0.
 </pre></div>
 </div>
 <p>The log message confirms we have used the “approximate subset-sum” method.
@@ -856,22 +869,21 @@ within. If <code class="docutils literal notranslate"><span class="pre">epsilon<
 (optimal) for the requested fraction and grouping variable.</p>
 <p>The algorithm computes the smallest subset to be less than
 or equal to the smallest requested fraction.</p>
-<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;User specified fractions:</span><span class="si">{</span><span class="p">[</span><a href="https://docs.python.org/3/library/functions.html#float" title="builtins.float" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">fraction_1</span></a><span class="p">,</span><span class="w"> </span><a href="https://docs.python.org/3/library/functions.html#float" title="builtins.float" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">fraction_2</span></a><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-
-<a href="https://docs.python.org/3/library/stdtypes.html#list" title="builtins.list" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">output_fractions</span></a> <span class="o">=</span> <span class="p">[</span>
-    <span class="nb">len</span><span class="p">(</span><a href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.values.html#xarray.DataArray.values" title="xarray.DataArray.values" class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-property"><span class="n">ds_annotations_1</span><span class="o">.</span><span class="n">image_id</span><span class="o">.</span><span class="n">values</span></a><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><a href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.values.html#xarray.DataArray.values" title="xarray.DataArray.values" class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-property"><span class="n">ds_all</span><span class="o">.</span><span class="n">image_id</span><span class="o">.</span><span class="n">values</span></a><span class="p">),</span>
-    <span class="nb">len</span><span class="p">(</span><a href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.values.html#xarray.DataArray.values" title="xarray.DataArray.values" class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-property"><span class="n">ds_annotations_2</span><span class="o">.</span><span class="n">image_id</span><span class="o">.</span><span class="n">values</span></a><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><a href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.values.html#xarray.DataArray.values" title="xarray.DataArray.values" class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-property"><span class="n">ds_all</span><span class="o">.</span><span class="n">image_id</span><span class="o">.</span><span class="n">values</span></a><span class="p">),</span>
-<span class="p">]</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Output split fractions for epsilon 0: </span><span class="si">{</span><a href="https://docs.python.org/3/library/stdtypes.html#list" title="builtins.list" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">output_fractions</span></a><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Subset 1 files: </span><span class="si">{</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.unique.html#numpy.unique" title="numpy.unique" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">unique</span></a><span class="p">(</span><a href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.values.html#xarray.DataArray.values" title="xarray.DataArray.values" class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-property"><span class="n">ds_annotations_1</span><span class="o">.</span><span class="n">json_file</span><span class="o">.</span><span class="n">values</span></a><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Subset 2 files: </span><span class="si">{</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.unique.html#numpy.unique" title="numpy.unique" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">unique</span></a><span class="p">(</span><a href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.values.html#xarray.DataArray.values" title="xarray.DataArray.values" class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-property"><span class="n">ds_annotations_2</span><span class="o">.</span><span class="n">json_file</span><span class="o">.</span><span class="n">values</span></a><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="s2">User specified fractions:</span><span class="si">{</span><span class="p">[</span><a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="float"><span class="n">fraction_1</span></a><span class="p">,</span><span class="w"> </span><a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="float"><span class="n">fraction_2</span></a><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><span class="w">
+</span><a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="list"><span class="n">output_fractions</span></a> <span class="o">=</span> <span class="p">[</span><span class="w">
+</span>    <span class="nb">len</span><span class="p">(</span><a class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-property reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.values.html#xarray.DataArray.values" title="xarray.DataArray.values"><span class="n">ds_annotations_1</span><span class="o">.</span><span class="n">image_id</span><span class="o">.</span><span class="n">values</span></a><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><a class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-property reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.values.html#xarray.DataArray.values" title="xarray.DataArray.values"><span class="n">ds_all</span><span class="o">.</span><span class="n">image_id</span><span class="o">.</span><span class="n">values</span></a><span class="p">)</span><span class="p">,</span><span class="w">
+</span>    <span class="nb">len</span><span class="p">(</span><a class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-property reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.values.html#xarray.DataArray.values" title="xarray.DataArray.values"><span class="n">ds_annotations_2</span><span class="o">.</span><span class="n">image_id</span><span class="o">.</span><span class="n">values</span></a><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><a class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-property reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.values.html#xarray.DataArray.values" title="xarray.DataArray.values"><span class="n">ds_all</span><span class="o">.</span><span class="n">image_id</span><span class="o">.</span><span class="n">values</span></a><span class="p">)</span><span class="p">,</span><span class="w">
+</span><span class="p">]</span><span class="w">
+</span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="s2">Output split fractions for epsilon 0: </span><span class="si">{</span><a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="list"><span class="n">output_fractions</span></a><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><span class="w">
+</span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="s2">Subset 1 files: </span><span class="si">{</span><a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.unique.html#numpy.unique" title="numpy.unique"><span class="n">np</span><span class="o">.</span><span class="n">unique</span></a><span class="p">(</span><a class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-property reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.values.html#xarray.DataArray.values" title="xarray.DataArray.values"><span class="n">ds_annotations_1</span><span class="o">.</span><span class="n">json_file</span><span class="o">.</span><span class="n">values</span></a><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="s2">Subset 2 files: </span><span class="si">{</span><a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.unique.html#numpy.unique" title="numpy.unique"><span class="n">np</span><span class="o">.</span><span class="n">unique</span></a><span class="p">(</span><a class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-property reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.values.html#xarray.DataArray.values" title="xarray.DataArray.values"><span class="n">ds_annotations_2</span><span class="o">.</span><span class="n">json_file</span><span class="o">.</span><span class="n">values</span></a><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span></pre></div></div>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>User specified fractions:[0.3, 0.7]
 Output split fractions for epsilon 0: [0.18130167909501343, 0.8186983209049865]
-Subset 1 files: [&#39;2_Region_specific_data&#39;]
-Subset 2 files: [&#39;1_Terrestrial_group_classifier&#39; &#39;3_Feral_animals_data&#39;]
+Subset 1 files: ['2_Region_specific_data']
+Subset 2 files: ['1_Terrestrial_group_classifier' '3_Feral_animals_data']
 </pre></div>
 </div>
 <p>We can verify that the subsets contain distinct annotation files.
@@ -896,27 +908,26 @@ This function shuffles the dataset and then partitions it
 according to the specified fractions. By setting a different value for the
 <code class="docutils literal notranslate"><span class="pre">seed</span></code>, we can again get different splits for the same requested
 fractions.</p>
-<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><a href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="xarray.core.dataset.Dataset" class="sphx-glr-backref-module-xarray-core-dataset sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ds_species_1</span></a><span class="p">,</span> <a href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="xarray.core.dataset.Dataset" class="sphx-glr-backref-module-xarray-core-dataset sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ds_species_2</span></a> <span class="o">=</span> <a href="../api/ethology.datasets.split.split_dataset_random.html#ethology.datasets.split.split_dataset_random" title="ethology.datasets.split.split_dataset_random" class="sphx-glr-backref-module-ethology-datasets-split sphx-glr-backref-type-py-function"><span class="n">split_dataset_random</span></a><span class="p">(</span>
-    <a href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="xarray.core.dataset.Dataset" class="sphx-glr-backref-module-xarray-core-dataset sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ds_all</span></a><span class="p">,</span>
-    <span class="n">list_fractions</span><span class="o">=</span><span class="p">[</span><a href="https://docs.python.org/3/library/functions.html#float" title="builtins.float" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">fraction_1</span></a><span class="p">,</span> <a href="https://docs.python.org/3/library/functions.html#float" title="builtins.float" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">fraction_2</span></a><span class="p">],</span>
-    <span class="n">seed</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span>
-<span class="p">)</span>
-
-
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;User specified fractions:</span><span class="si">{</span><span class="p">[</span><a href="https://docs.python.org/3/library/functions.html#float" title="builtins.float" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">fraction_1</span></a><span class="p">,</span><span class="w"> </span><a href="https://docs.python.org/3/library/functions.html#float" title="builtins.float" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">fraction_2</span></a><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Split fractions:&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><a href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.values.html#xarray.DataArray.values" title="xarray.DataArray.values" class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-property"><span class="n">ds_species_1</span><span class="o">.</span><span class="n">image_id</span><span class="o">.</span><span class="n">values</span></a><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><a href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.values.html#xarray.DataArray.values" title="xarray.DataArray.values" class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-property"><span class="n">ds_all</span><span class="o">.</span><span class="n">image_id</span><span class="o">.</span><span class="n">values</span></a><span class="p">))</span>
-<span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><a href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.values.html#xarray.DataArray.values" title="xarray.DataArray.values" class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-property"><span class="n">ds_species_2</span><span class="o">.</span><span class="n">image_id</span><span class="o">.</span><span class="n">values</span></a><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><a href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.values.html#xarray.DataArray.values" title="xarray.DataArray.values" class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-property"><span class="n">ds_all</span><span class="o">.</span><span class="n">image_id</span><span class="o">.</span><span class="n">values</span></a><span class="p">))</span>
-</pre></div>
-</div>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><a class="sphx-glr-backref-module-xarray-core-dataset sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="xarray.core.dataset.Dataset"><span class="n">ds_species_1</span></a><span class="p">,</span> <a class="sphx-glr-backref-module-xarray-core-dataset sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="xarray.core.dataset.Dataset"><span class="n">ds_species_2</span></a> <span class="o">=</span> <a class="sphx-glr-backref-module-ethology-datasets-split sphx-glr-backref-type-py-function reference internal" href="../api/ethology.datasets.split.split_dataset_random.html#ethology.datasets.split.split_dataset_random" title="ethology.datasets.split.split_dataset_random"><span class="n">split_dataset_random</span></a><span class="p">(</span><span class="w">
+</span>    <a class="sphx-glr-backref-module-xarray-core-dataset sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="xarray.core.dataset.Dataset"><span class="n">ds_all</span></a><span class="p">,</span><span class="w">
+</span>    <span class="n">list_fractions</span><span class="o">=</span><span class="p">[</span><a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="float"><span class="n">fraction_1</span></a><span class="p">,</span> <a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="float"><span class="n">fraction_2</span></a><span class="p">]</span><span class="p">,</span><span class="w">
+</span>    <span class="n">seed</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span><span class="w">
+</span><span class="p">)</span><span class="w">
+</span><span class="w">
+</span><span class="w">
+</span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="s2">User specified fractions:</span><span class="si">{</span><span class="p">[</span><a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="float"><span class="n">fraction_1</span></a><span class="p">,</span><span class="w"> </span><a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="float"><span class="n">fraction_2</span></a><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><span class="w">
+</span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="s2">Split fractions:</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><a class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-property reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.values.html#xarray.DataArray.values" title="xarray.DataArray.values"><span class="n">ds_species_1</span><span class="o">.</span><span class="n">image_id</span><span class="o">.</span><span class="n">values</span></a><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><a class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-property reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.values.html#xarray.DataArray.values" title="xarray.DataArray.values"><span class="n">ds_all</span><span class="o">.</span><span class="n">image_id</span><span class="o">.</span><span class="n">values</span></a><span class="p">)</span><span class="p">)</span><span class="w">
+</span><span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><a class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-property reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.values.html#xarray.DataArray.values" title="xarray.DataArray.values"><span class="n">ds_species_2</span><span class="o">.</span><span class="n">image_id</span><span class="o">.</span><span class="n">values</span></a><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><a class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-property reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.values.html#xarray.DataArray.values" title="xarray.DataArray.values"><span class="n">ds_all</span><span class="o">.</span><span class="n">image_id</span><span class="o">.</span><span class="n">values</span></a><span class="p">)</span><span class="p">)</span><span class="w">
+</span></pre></div></div>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>User specified fractions:[0.3, 0.7]
 Split fractions:
 0.2999797088215898
 0.7000202911784101
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 22.670 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 12.321 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-approximate-subset-sum-split-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/neuroinformatics-unit/ethology/main?filepath=notebooks/examples/approximate_subset_sum_split.ipynb"><img alt="Launch binder" src="../_images/binder_badge_logo.svg" style="width: 150px;" />
@@ -981,8 +992,8 @@ Split fractions:
     class="page-toc tocsection onthispage">
     <i class="fa-solid fa-list"></i> On this page
   </div>
-  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
-    <ul class="visible nav section-nav flex-column">
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#imports">Imports</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#configure-logging-for-this-example">Configure logging for this example</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#download-dataset">Download dataset</a></li>
@@ -995,13 +1006,13 @@ Split fractions:
   </nav></div>
 
   <div class="sidebar-secondary-item">
-  <div role="note" aria-label="source link">
-    <h3>This Page</h3>
-    <ul class="this-page-menu">
-      <li><a href="../_sources/examples/approximate_subset_sum_split.rst.txt"
-            rel="nofollow">Show Source</a></li>
-    </ul>
-   </div></div>
+
+  <div class="tocsection sourcelink">
+    <a href="../_sources/examples/approximate_subset_sum_split.rst.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
 
 </div></div>
               
@@ -1016,8 +1027,8 @@ Split fractions:
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
-<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+  <script defer src="../_static/scripts/bootstrap.js?digest=18bd87630a240e9c25be"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=18bd87630a240e9c25be"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -1031,7 +1042,7 @@ Split fractions:
     <p class="theme-version">
     Built with the
     <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a>
-    0.16.1.
+    0.23.0.
     </p></div>
       
     </div>

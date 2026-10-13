@@ -48,6 +48,15 @@ ValidBboxAnnotationsDataFrame
    
    
    
+   
+   
+   
+   
+   
+   
+   
+   
+   
 
    
    .. rubric:: Methods
@@ -65,6 +74,12 @@ ValidBboxAnnotationsDataFrame
       ~ValidBboxAnnotationsDataFrame.example
    
    
+      ~ValidBboxAnnotationsDataFrame.from_json
+   
+   
+      ~ValidBboxAnnotationsDataFrame.from_yaml
+   
+   
       ~ValidBboxAnnotationsDataFrame.get_empty_values
    
    
@@ -75,6 +90,9 @@ ValidBboxAnnotationsDataFrame
    
    
       ~ValidBboxAnnotationsDataFrame.strategy
+   
+   
+      ~ValidBboxAnnotationsDataFrame.to_json
    
    
       ~ValidBboxAnnotationsDataFrame.to_json_schema

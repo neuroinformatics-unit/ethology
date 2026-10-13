@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 
 
@@ -27,36 +26,38 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+  <link href="../_static/styles/theme.css?digest=18bd87630a240e9c25be" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=18bd87630a240e9c25be" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=9c66c473" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
-    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=c83e6b79" />
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css?v=f4aeca0c" />
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
   
   <!-- So that users can add custom icons -->
-  <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <script defer src="../_static/scripts/fontawesome.js?digest=18bd87630a240e9c25be"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=18bd87630a240e9c25be" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=18bd87630a240e9c25be" />
 
-    <script src="../_static/documentation_options.js?v=b4e08961"></script>
+    <script src="../_static/documentation_options.js?v=1546fae8"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/sg-tags.js?v=d80f6fa4"></script>
     <script src="../_static/design-tabs.js?v=f930bc37"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'api/ethology.validators.annotations.ValidBboxAnnotationsCOCO';</script>
     <script>
-        DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
+        DOCUMENTATION_OPTIONS.theme_version = '0.23.0';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://ethology.neuroinformatics.dev/latest/_static/switcher.json';
         DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'dev';
         DOCUMENTATION_OPTIONS.show_version_warning_banner =
             false;
         </script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
     <link rel="canonical" href="https://ethology.neuroinformatics.dev/api/ethology.validators.annotations.ValidBboxAnnotationsCOCO.html" />
     <link rel="icon" href="../_static/light-logo-niu.png"/>
     <link rel="index" title="Index" href="../genindex.html" />
@@ -64,22 +65,29 @@
     <link rel="next" title="ValidBboxAnnotationsDataFrame" href="ethology.validators.annotations.ValidBboxAnnotationsDataFrame.html" />
     <link rel="prev" title="ethology.validators.annotations" href="ethology.validators.annotations.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="" />
+  
+    
+    <script src="../_static/searchtools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script src="../searchindex.js"></script>
+  
   </head>
-  
-  
-  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
-
+  <body data-default-mode="">
   
   
   <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
   
   <div id="pst-scroll-pixel-helper"></div>
   
   <button type="button" class="btn rounded-pill" id="pst-back-to-top">
     <i class="fa-solid fa-arrow-up"></i>Back to top</button>
-
+  
+  
+  
   
   <dialog id="pst-search-dialog">
     
@@ -105,9 +113,9 @@
 </div>
 
   
-    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
 <div class="bd-header__inner bd-page-width">
-  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+  <button type="button" class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
     <span class="fa-solid fa-bars"></span>
   </button>
   
@@ -127,7 +135,7 @@
   
   
   
-    <p class="title logo__title">ethology v0.1.3.dev5</p>
+    <p class="title logo__title">ethology v0.1.4.dev2</p>
   
 </a></div>
     
@@ -179,7 +187,7 @@
         <div class="navbar-item navbar-persistent--container">
           
 
-<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
  <i class="fa-solid fa-magnifying-glass"></i>
  <span class="search-button__default-text">Search</span>
  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
@@ -209,11 +217,18 @@
       
         <div class="navbar-item">
 
-<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
-  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
-  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
-  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
-</button></div>
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
       
         <div class="navbar-item"><ul class="navbar-icon-links"
     aria-label="Icon Links">
@@ -226,8 +241,7 @@
           
           
           
-          <a href="https://github.com/neuroinformatics-unit/ethology" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">GitHub</span></a>
+          <a href="https://github.com/neuroinformatics-unit/ethology" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
         </li>
         <li class="nav-item">
           
@@ -238,8 +252,7 @@
           
           
           
-          <a href="https://neuroinformatics.zulipchat.com/#narrow/channel/483869-Ethology" title="Zulip (chat)" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-comments fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">Zulip (chat)</span></a>
+          <a href="https://neuroinformatics.zulipchat.com/#narrow/channel/483869-Ethology" title="Zulip (chat)" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-comments fa-lg" aria-hidden="true"></i><span class="visually-hidden">Zulip (chat)</span></a>
         </li>
 </ul></div>
       
@@ -250,7 +263,7 @@
   
     <div class="navbar-persistent--mobile">
 
-<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
  <i class="fa-solid fa-magnifying-glass"></i>
  <span class="search-button__default-text">Search</span>
  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
@@ -259,7 +272,7 @@
   
 
   
-    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+    <button type="button" class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
       <span class="fa-solid fa-outdent"></span>
     </button>
   
@@ -348,11 +361,18 @@
         
           <div class="navbar-item">
 
-<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
-  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
-  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
-  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
-</button></div>
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
         
           <div class="navbar-item"><ul class="navbar-icon-links"
     aria-label="Icon Links">
@@ -365,8 +385,7 @@
           
           
           
-          <a href="https://github.com/neuroinformatics-unit/ethology" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">GitHub</span></a>
+          <a href="https://github.com/neuroinformatics-unit/ethology" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
         </li>
         <li class="nav-item">
           
@@ -377,8 +396,7 @@
           
           
           
-          <a href="https://neuroinformatics.zulipchat.com/#narrow/channel/483869-Ethology" title="Zulip (chat)" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-comments fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">Zulip (chat)</span></a>
+          <a href="https://neuroinformatics.zulipchat.com/#narrow/channel/483869-Ethology" title="Zulip (chat)" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-comments fa-lg" aria-hidden="true"></i><span class="visually-hidden">Zulip (chat)</span></a>
         </li>
 </ul></div>
         
@@ -387,7 +405,15 @@
   </div>
   
     <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item pst-sidebar-collapse"><button type="button" id="pst-collapse-sidebar-button" aria-expanded="true" aria-controls="pst-primary-sidebar">
+  <svg class="pst-icon" role="img" aria-hidden="true" focusable="false" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+    <path fill="currentColor" d="M3 15.5C2.36232 15.5 1.74874 15.2564 1.28478 14.8189C0.820828 14.3815 0.541576 13.7832 0.504167 13.1467L0.5 13L0.5 3C0.499965 2.36232 0.743605 1.74874 1.18107 1.28478C1.61854 0.820828 2.21676 0.541576 2.85333 0.504167L3 0.5L13 0.5C13.6377 0.499965 14.2513 0.743605 14.7152 1.18107C15.1792 1.61854 15.4584 2.21676 15.4958 2.85333L15.5 3L15.5 13C15.5 13.6377 15.2564 14.2513 14.8189 14.7152C14.3815 15.1792 13.7832 15.4584 13.1467 15.4958L13 15.5L3 15.5ZM3 13.8333L10.5 13.8333L10.5 2.16667L3 2.16667C2.79589 2.16669 2.59889 2.24163 2.44636 2.37726C2.29383 2.5129 2.19638 2.69979 2.1725 2.9025L2.16667 3L2.16667 13C2.16669 13.2041 2.24163 13.4011 2.37726 13.5536C2.5129 13.7062 2.69979 13.8036 2.9025 13.8275L3 13.8333ZM6.65583 10.325L6.5775 10.2558L4.91083 8.58917C4.76735 8.44567 4.68116 8.25476 4.66843 8.05223C4.65569 7.84971 4.71729 7.6495 4.84167 7.48917L4.91083 7.41083L6.5775 5.74417C6.72747 5.59471 6.9287 5.50794 7.14032 5.50148C7.35194 5.49502 7.55809 5.56935 7.7169 5.70937C7.8757 5.8494 7.97525 6.04463 7.99533 6.25539C8.01541 6.46616 7.95451 6.67667 7.825 6.84417L7.75583 6.9225L6.67917 8L7.75583 9.0775C7.89931 9.22099 7.98551 9.41191 7.99824 9.61443C8.01097 9.81695 7.94938 10.0172 7.825 10.1775L7.75583 10.2558C7.61234 10.3993 7.42142 10.4855 7.2189 10.4982C7.01638 10.511 6.81617 10.4494 6.65583 10.325Z"/>
+  </svg>
+  <span class="pst-collapse-sidebar-label">Collapse Sidebar</span>
+  <span class="pst-expand-sidebar-label">Expand Sidebar</span>
+</button></div>
         <div class="sidebar-primary-item">
+
 <nav class="bd-docs-nav bd-links"
      aria-label="Section Navigation">
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
@@ -406,7 +432,7 @@
 </ul>
 </details></li>
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="ethology.validators.annotations.html">ethology.validators.annotations</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
-<li class="toctree-l2 current active"><a class="current reference internal" href="#">ValidBboxAnnotationsCOCO</a></li>
+<li class="toctree-l2 current active"><a aria-current="page" class="current reference internal" href="#">ValidBboxAnnotationsCOCO</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ethology.validators.annotations.ValidBboxAnnotationsDataFrame.html">ValidBboxAnnotationsDataFrame</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ethology.validators.annotations.ValidBboxAnnotationsDataset.html">ValidBboxAnnotationsDataset</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ethology.validators.annotations.ValidCOCO.html">ValidCOCO</a></li>
@@ -501,7 +527,7 @@ correct. It additionally checks that the index and the
 to the <code class="docutils literal notranslate"><span class="pre">annotation_id</span></code> column.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://pandera.readthedocs.io/en/stable/reference/generated/pandera.typing.Index.html#pandera.typing.Index" title="(in pandera)">pandera.typing.Index</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)">int</a>]</p>
+<dd class="field-odd"><p><a class="reference external" href="https://pandera.readthedocs.io/en/stable/reference/generated/pandera.typing.Index.html#pandera.typing.Index" title="(in pandera)">pandera.typing.Index</a>[<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)">int</a>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -512,7 +538,7 @@ to the <code class="docutils literal notranslate"><span class="pre">annotation_i
 <dd><p>Unique identifier for the annotation. Should be equal to the index.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)">int</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)">int</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -523,7 +549,7 @@ to the <code class="docutils literal notranslate"><span class="pre">annotation_i
 <dd><p>Unique identifier for each of the images.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)">int</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)">int</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -534,7 +560,7 @@ to the <code class="docutils literal notranslate"><span class="pre">annotation_i
 <dd><p>Filename of the image.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)">str</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -545,7 +571,7 @@ to the <code class="docutils literal notranslate"><span class="pre">annotation_i
 <dd><p>Width of each of the images.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)">int</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)">int</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -556,7 +582,7 @@ to the <code class="docutils literal notranslate"><span class="pre">annotation_i
 <dd><p>Height of each of the images.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)">int</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)">int</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -567,7 +593,7 @@ to the <code class="docutils literal notranslate"><span class="pre">annotation_i
 <dd><p>Bounding box coordinates as xmin, ymin, width, height.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)">list</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)">float</a>]</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)">list</a>[<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)">float</a>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -578,7 +604,7 @@ to the <code class="docutils literal notranslate"><span class="pre">annotation_i
 <dd><p>Bounding box area.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)">float</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)">float</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -589,7 +615,7 @@ to the <code class="docutils literal notranslate"><span class="pre">annotation_i
 <dd><p>Bounding box segmentation masks as list of lists of coordinates.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)">list</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)">list</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)">float</a>]]</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)">list</a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)">list</a>[<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)">float</a>]]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -600,7 +626,7 @@ to the <code class="docutils literal notranslate"><span class="pre">annotation_i
 <dd><p>Category of the annotation.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)">str</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -611,7 +637,7 @@ to the <code class="docutils literal notranslate"><span class="pre">annotation_i
 <dd><p>Supercategory of the annotation.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)">str</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -622,7 +648,7 @@ to the <code class="docutils literal notranslate"><span class="pre">annotation_i
 <dd><p>Whether the annotation is a crowd. Should be 0 or 1.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)">int</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)">int</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -652,7 +678,13 @@ for more details.</p>
 <td><p>Create an empty DataFrame with the schema of this model.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.example" title="ethology.validators.annotations.ValidBboxAnnotationsCOCO.example"><code class="xref py py-obj docutils literal notranslate"><span class="pre">example</span></code></a>(cls, **kwargs)</p></td>
-<td><p>Generate an example of a particular size.</p></td>
+<td><p>Generate an example of this data model specification.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.from_json" title="ethology.validators.annotations.ValidBboxAnnotationsCOCO.from_json"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_json</span></code></a>(source)</p></td>
+<td><p>Load a schema from JSON.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.from_yaml" title="ethology.validators.annotations.ValidBboxAnnotationsCOCO.from_yaml"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_yaml</span></code></a>(yaml_schema)</p></td>
+<td><p>Load a schema from YAML.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.get_metadata" title="ethology.validators.annotations.ValidBboxAnnotationsCOCO.get_metadata"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_metadata</span></code></a>()</p></td>
 <td><p>Provide metadata for columns and schema level</p></td>
@@ -664,18 +696,21 @@ for more details.</p>
 <td><p>Verify that the input is a compatible dataframe model.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.strategy" title="ethology.validators.annotations.ValidBboxAnnotationsCOCO.strategy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">strategy</span></code></a>(cls, **kwargs)</p></td>
-<td><p>Create a <code class="docutils literal notranslate"><span class="pre">hypothesis</span></code> strategy for generating a DataFrame.</p></td>
+<td><p>Create a data synthesis strategy.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.to_json_schema" title="ethology.validators.annotations.ValidBboxAnnotationsCOCO.to_json_schema"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_json_schema</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.to_json" title="ethology.validators.annotations.ValidBboxAnnotationsCOCO.to_json"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_json</span></code></a>([target])</p></td>
+<td><p>Convert this model's schema to JSON.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.to_json_schema" title="ethology.validators.annotations.ValidBboxAnnotationsCOCO.to_json_schema"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_json_schema</span></code></a>()</p></td>
 <td><p>Serialize schema metadata into json-schema format.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.to_schema" title="ethology.validators.annotations.ValidBboxAnnotationsCOCO.to_schema"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_schema</span></code></a>()</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.to_schema" title="ethology.validators.annotations.ValidBboxAnnotationsCOCO.to_schema"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_schema</span></code></a>()</p></td>
 <td><p>Create <code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrameSchema</span></code> from the <code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrameModel</span></code>.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.to_yaml" title="ethology.validators.annotations.ValidBboxAnnotationsCOCO.to_yaml"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_yaml</span></code></a>([stream])</p></td>
-<td><p>Convert <cite>Schema</cite> to yaml using <cite>io.to_yaml</cite>.</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.to_yaml" title="ethology.validators.annotations.ValidBboxAnnotationsCOCO.to_yaml"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_yaml</span></code></a>([stream])</p></td>
+<td><p>Convert this model's schema to YAML.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.validate" title="ethology.validators.annotations.ValidBboxAnnotationsCOCO.validate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">validate</span></code></a>(check_obj[, head, tail, sample, ...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.validate" title="ethology.validators.annotations.ValidBboxAnnotationsCOCO.validate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">validate</span></code></a>(check_obj[, head, tail, sample, ...])</p></td>
 <td><p>Validate a DataFrame based on the schema specification.</p></td>
 </tr>
 </tbody>
@@ -687,38 +722,38 @@ for more details.</p>
 <dd><p>Bases: <a class="reference external" href="https://pandera.readthedocs.io/en/stable/reference/generated/pandera.api.pandas.model_config.BaseConfig.html#pandera.api.pandas.model_config.BaseConfig" title="(in pandera)"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseConfig</span></code></a></p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.add_missing_columns">
-<span class="sig-name descname"><span class="pre">add_missing_columns</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></span><a class="headerlink" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.add_missing_columns" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">add_missing_columns</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></span><a class="headerlink" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.add_missing_columns" title="Link to this definition">#</a></dt>
 <dd><p>add columns to dataframe if they are missing</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.coerce">
-<span class="sig-name descname"><span class="pre">coerce</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></span><a class="headerlink" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.coerce" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">coerce</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></span><a class="headerlink" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.coerce" title="Link to this definition">#</a></dt>
 <dd><p>coerce types of all schema components</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.description">
-<span class="sig-name descname"><span class="pre">description</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.description" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">description</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.description" title="Link to this definition">#</a></dt>
 <dd><p>arbitrary textual description</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.drop_invalid_rows">
-<span class="sig-name descname"><span class="pre">drop_invalid_rows</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></span><a class="headerlink" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.drop_invalid_rows" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">drop_invalid_rows</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></span><a class="headerlink" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.drop_invalid_rows" title="Link to this definition">#</a></dt>
 <dd><p>drop invalid rows on validation</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.dtype">
-<span class="sig-name descname"><span class="pre">dtype</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#type" title="(in Python v3.14)"><span class="pre">type</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://pandera.readthedocs.io/en/stable/reference/generated/pandera.dtypes.DataType.html#pandera.dtypes.DataType" title="(in pandera)"><span class="pre">DataType</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ExtensionDtype</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.dtype.html#numpy.dtype" title="(in NumPy v2.4)"><span class="pre">dtype</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.dtype" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">dtype</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#type" title="(in Python v3.15)"><span class="pre">type</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://pandera.readthedocs.io/en/stable/reference/generated/pandera.dtypes.DataType.html#pandera.dtypes.DataType" title="(in pandera)"><span class="pre">DataType</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.api.extensions.ExtensionDtype.html#pandas.api.extensions.ExtensionDtype" title="(in pandas v3.0.6)"><span class="pre">ExtensionDtype</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.dtype.html#numpy.dtype" title="(in NumPy v2.5)"><span class="pre">dtype</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.dtype" title="Link to this definition">#</a></dt>
 <dd><p>datatype of the dataframe. This overrides the data types specified in
 any of the fields.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.from_format">
-<span class="sig-name descname"><span class="pre">from_format</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.14)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="pre">Formats.csv</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.14)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="pre">Formats.dict</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.14)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="pre">Formats.json</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.14)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="pre">Formats.feather</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.14)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="pre">Formats.parquet</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.14)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="pre">Formats.pickle</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.14)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="pre">Formats.json_normalize</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable" title="(in Python v3.14)"><span class="pre">Callable</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.from_format" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">from_format</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.15)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="pre">Formats.csv</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.15)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="pre">Formats.dict</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.15)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="pre">Formats.json</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.15)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="pre">Formats.feather</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.15)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="pre">Formats.parquet</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.15)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="pre">Formats.pickle</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.15)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="pre">Formats.json_normalize</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable" title="(in Python v3.15)"><span class="pre">Callable</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.from_format" title="Link to this definition">#</a></dt>
 <dd><p>data format before validation. This option only applies to
 schemas used in the context of the pandera type constructor
 <code class="docutils literal notranslate"><span class="pre">pa.typing.DataFrame[Schema](data)</span></code>. If None, assumes a data structure
@@ -727,7 +762,7 @@ compatible with the <code class="docutils literal notranslate"><span class="pre"
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.from_format_kwargs">
-<span class="sig-name descname"><span class="pre">from_format_kwargs</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.from_format_kwargs" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">from_format_kwargs</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.from_format_kwargs" title="Link to this definition">#</a></dt>
 <dd><p>a dictionary keyword arguments to pass into the reader function that
 converts the object of type <code class="docutils literal notranslate"><span class="pre">from_format</span></code> to a pandera-validate-able
 data structure. The reader function is implemented in the pandera.typing
@@ -736,31 +771,31 @@ generic types via the <code class="docutils literal notranslate"><span class="pr
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.metadata">
-<span class="sig-name descname"><span class="pre">metadata</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.metadata" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">metadata</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><span class="pre">dict</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.metadata" title="Link to this definition">#</a></dt>
 <dd><p>a dictionary object to store key-value data at schema level</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.multiindex_coerce">
-<span class="sig-name descname"><span class="pre">multiindex_coerce</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></span><a class="headerlink" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.multiindex_coerce" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">multiindex_coerce</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></span><a class="headerlink" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.multiindex_coerce" title="Link to this definition">#</a></dt>
 <dd><p>coerce types of all MultiIndex components</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.multiindex_name">
-<span class="sig-name descname"><span class="pre">multiindex_name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.multiindex_name" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">multiindex_name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.multiindex_name" title="Link to this definition">#</a></dt>
 <dd><p>name of multiindex</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.multiindex_ordered">
-<span class="sig-name descname"><span class="pre">multiindex_ordered</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></span><a class="headerlink" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.multiindex_ordered" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">multiindex_ordered</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></span><a class="headerlink" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.multiindex_ordered" title="Link to this definition">#</a></dt>
 <dd><p>validate MultiIndex in order</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.multiindex_strict">
-<span class="sig-name descname"><span class="pre">multiindex_strict</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.14)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'filter'</span></span><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></span><a class="headerlink" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.multiindex_strict" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">multiindex_strict</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.15)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'filter'</span></span><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></span><a class="headerlink" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.multiindex_strict" title="Link to this definition">#</a></dt>
 <dd><p>make sure all specified columns are in validated MultiIndex -
 if <code class="docutils literal notranslate"><span class="pre">&quot;filter&quot;</span></code>, removes indexes not specified in the schema</p>
 </dd></dl>
@@ -773,32 +808,41 @@ if <code class="docutils literal notranslate"><span class="pre">&quot;filter&quo
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.name">
-<span class="sig-name descname"><span class="pre">name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'ValidBboxAnnotationsCOCO'</span></span><a class="headerlink" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.name" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'ValidBboxAnnotationsCOCO'</span></span><a class="headerlink" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.name" title="Link to this definition">#</a></dt>
 <dd><p>name of schema</p>
 </dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.on_missing_columns">
+<span class="sig-name descname"><span class="pre">on_missing_columns</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.on_missing_columns" title="Link to this definition">#</a></dt>
+<dd><p>action to take when an optional column is missing from the dataframe.
+<code class="docutils literal notranslate"><span class="pre">None</span></code> (default) passes silently, <code class="docutils literal notranslate"><span class="pre">&quot;warn&quot;</span></code> emits a
+<code class="xref py py-class docutils literal notranslate"><span class="pre">SchemaWarning</span></code>. Overridable per field via
+<code class="docutils literal notranslate"><span class="pre">Field(on_missing=...)</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.ordered">
-<span class="sig-name descname"><span class="pre">ordered</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></span><a class="headerlink" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.ordered" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">ordered</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></span><a class="headerlink" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.ordered" title="Link to this definition">#</a></dt>
 <dd><p>validate columns order</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.strict">
-<span class="sig-name descname"><span class="pre">strict</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.14)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'filter'</span></span><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></span><a class="headerlink" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.strict" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">strict</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.15)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'filter'</span></span><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></span><a class="headerlink" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.strict" title="Link to this definition">#</a></dt>
 <dd><p>make sure all specified columns are in the validated dataframe -
 if <code class="docutils literal notranslate"><span class="pre">&quot;filter&quot;</span></code>, removes columns not specified in the schema</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.title">
-<span class="sig-name descname"><span class="pre">title</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.title" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">title</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.title" title="Link to this definition">#</a></dt>
 <dd><p>human-readable label for schema</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.to_format">
-<span class="sig-name descname"><span class="pre">to_format</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.14)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="pre">Formats.csv</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.14)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="pre">Formats.dict</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.14)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="pre">Formats.json</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.14)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="pre">Formats.feather</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.14)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="pre">Formats.parquet</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.14)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="pre">Formats.pickle</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.14)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="pre">Formats.json_normalize</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable" title="(in Python v3.14)"><span class="pre">Callable</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.to_format" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">to_format</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.15)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="pre">Formats.csv</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.15)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="pre">Formats.dict</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.15)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="pre">Formats.json</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.15)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="pre">Formats.feather</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.15)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="pre">Formats.parquet</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.15)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="pre">Formats.pickle</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.15)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="pre">Formats.json_normalize</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable" title="(in Python v3.15)"><span class="pre">Callable</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.to_format" title="Link to this definition">#</a></dt>
 <dd><p>data format to serialize into after validation. This option only applies
 to  schemas used in the context of the pandera type constructor
 <code class="docutils literal notranslate"><span class="pre">pa.typing.DataFrame[Schema](data)</span></code>. If None, returns a dataframe.</p>
@@ -806,14 +850,14 @@ to  schemas used in the context of the pandera type constructor
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.to_format_buffer">
-<span class="sig-name descname"><span class="pre">to_format_buffer</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable" title="(in Python v3.14)"><span class="pre">Callable</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.to_format_buffer" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">to_format_buffer</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable" title="(in Python v3.15)"><span class="pre">Callable</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.to_format_buffer" title="Link to this definition">#</a></dt>
 <dd><p>Buffer to be provided when to_format is a custom callable. See docs for
 example of how to implement an example of a to format function.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.to_format_kwargs">
-<span class="sig-name descname"><span class="pre">to_format_kwargs</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.to_format_kwargs" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">to_format_kwargs</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.to_format_kwargs" title="Link to this definition">#</a></dt>
 <dd><p>a dictionary keyword arguments to pass into the writer function that
 converts the pandera-validate-able object to type <code class="docutils literal notranslate"><span class="pre">to_format</span></code>.
 The writer function is implemented in the pandera.typing
@@ -822,13 +866,13 @@ generic types via the <code class="docutils literal notranslate"><span class="pr
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.unique">
-<span class="sig-name descname"><span class="pre">unique</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.unique" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">unique</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.unique" title="Link to this definition">#</a></dt>
 <dd><p>make sure certain column combinations are unique</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.unique_column_names">
-<span class="sig-name descname"><span class="pre">unique_column_names</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></span><a class="headerlink" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.unique_column_names" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">unique_column_names</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></span><a class="headerlink" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.unique_column_names" title="Link to this definition">#</a></dt>
 <dd><p>make sure dataframe column names are unique</p>
 </dd></dl>
 
@@ -840,14 +884,14 @@ generic types via the <code class="docutils literal notranslate"><span class="pr
 <dd><p>Check that the index and the <code class="docutils literal notranslate"><span class="pre">annotation_id</span></code> column are equal.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>df</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code></a></span>) – The dataframe to check.</p>
+<dd class="field-odd"><p><strong>df</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code></a></span>) – The dataframe to check.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>A boolean indicating whether the index and the
 <code class="docutils literal notranslate"><span class="pre">annotation_id</span></code> column are equal for all rows.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span></p>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -866,16 +910,38 @@ generic types via the <code class="docutils literal notranslate"><span class="pr
 <dl class="py method">
 <dt class="sig sig-object py" id="ethology.validators.annotations.ValidBboxAnnotationsCOCO.example">
 <span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">example</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.example" title="Link to this definition">#</a></dt>
-<dd><p>Generate an example of a particular size.</p>
+<dd><p>Generate an example of this data model specification.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrameBase</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Self</span></code>]</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ethology.validators.annotations.ValidBboxAnnotationsCOCO.from_json">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">from_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.from_json" title="Link to this definition">#</a></dt>
+<dd><p>Load a schema from JSON.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>size</strong> – number of elements in the generated DataFrame.</p>
+<dd class="field-odd"><p><strong>source</strong> – str, Path, or file stream with JSON content.</p>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrameBase</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Self</span></code>]</span></p>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the backend-specific schema object.</p>
 </dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>DataFrame object.</p>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ethology.validators.annotations.ValidBboxAnnotationsCOCO.from_yaml">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">from_yaml</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">yaml_schema</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.from_yaml" title="Link to this definition">#</a></dt>
+<dd><p>Load a schema from YAML.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>yaml_schema</strong> – str, Path, or file stream with YAML content.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the backend-specific schema object.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -886,7 +952,7 @@ generic types via the <code class="docutils literal notranslate"><span class="pr
 <dd><p>Provide metadata for columns and schema level</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span></p>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -901,7 +967,7 @@ generic types via the <code class="docutils literal notranslate"><span class="pr
 to the corresponding fields in the equivalent COCO file.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a></span></p>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a></span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -920,18 +986,13 @@ to the corresponding fields in the equivalent COCO file.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="ethology.validators.annotations.ValidBboxAnnotationsCOCO.strategy">
 <span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">strategy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.strategy" title="Link to this definition">#</a></dt>
-<dd><p>Create a <code class="docutils literal notranslate"><span class="pre">hypothesis</span></code> strategy for generating a DataFrame.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>size</strong> – number of elements to generate</p></li>
-<li><p><strong>n_regex_columns</strong> – number of regex columns to generate.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>a strategy that generates DataFrame objects.</p>
-</dd>
-</dl>
+<dd><p>Create a data synthesis strategy.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="ethology.validators.annotations.ValidBboxAnnotationsCOCO.to_json">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">to_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.to_json" title="Link to this definition">#</a></dt>
+<dd><p>Convert this model’s schema to JSON.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -957,7 +1018,7 @@ FastAPI integration.</p>
 <dd><p>Create <code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrameSchema</span></code> from the <code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrameModel</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">TSchema</span></code>, bound= <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSchema</span></code>)</span></p>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">TSchema</span></code>, bound= <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSchema</span></code>)</span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -965,7 +1026,7 @@ FastAPI integration.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="ethology.validators.annotations.ValidBboxAnnotationsCOCO.to_yaml">
 <span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">to_yaml</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stream</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.to_yaml" title="Link to this definition">#</a></dt>
-<dd><p>Convert <cite>Schema</cite> to yaml using <cite>io.to_yaml</cite>.</p>
+<dd><p>Convert this model’s schema to YAML.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -975,18 +1036,18 @@ FastAPI integration.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>check_obj</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code></a></span>) – the dataframe to be validated.</p></li>
-<li><p><strong>head</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – validate the first n rows. Rows overlapping with <cite>tail</cite> or
+<li><p><strong>check_obj</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code></a></span>) – the dataframe to be validated.</p></li>
+<li><p><strong>head</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – validate the first n rows. Rows overlapping with <cite>tail</cite> or
 <cite>sample</cite> are de-duplicated.</p></li>
-<li><p><strong>tail</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – validate the last n rows. Rows overlapping with <cite>head</cite> or
+<li><p><strong>tail</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – validate the last n rows. Rows overlapping with <cite>head</cite> or
 <cite>sample</cite> are de-duplicated.</p></li>
-<li><p><strong>sample</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – validate a random sample of n rows. Rows overlapping
+<li><p><strong>sample</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – validate a random sample of n rows. Rows overlapping
 with <cite>head</cite> or <cite>tail</cite> are de-duplicated.</p></li>
-<li><p><strong>random_state</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – random seed for the <code class="docutils literal notranslate"><span class="pre">sample</span></code> argument.</p></li>
-<li><p><strong>lazy</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – if True, lazily evaluates dataframe against all validation
+<li><p><strong>random_state</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – random seed for the <code class="docutils literal notranslate"><span class="pre">sample</span></code> argument.</p></li>
+<li><p><strong>lazy</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – if True, lazily evaluates dataframe against all validation
 checks and raises a <code class="docutils literal notranslate"><span class="pre">SchemaErrors</span></code>. Otherwise, raise
 <code class="docutils literal notranslate"><span class="pre">SchemaError</span></code> as soon as one occurs.</p></li>
-<li><p><strong>inplace</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – if True, applies coercion to the object of validation,
+<li><p><strong>inplace</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – if True, applies coercion to the object of validation,
 otherwise creates a copy of the data.</p></li>
 </ul>
 </dd>
@@ -1052,8 +1113,8 @@ checks.</p>
     class="page-toc tocsection onthispage">
     <i class="fa-solid fa-list"></i> On this page
   </div>
-  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
-    <ul class="visible nav section-nav flex-column">
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO"><code class="docutils literal notranslate"><span class="pre">ValidBboxAnnotationsCOCO</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.idx"><code class="docutils literal notranslate"><span class="pre">ValidBboxAnnotationsCOCO.idx</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.annotation_id"><code class="docutils literal notranslate"><span class="pre">ValidBboxAnnotationsCOCO.annotation_id</span></code></a></li>
@@ -1082,6 +1143,7 @@ checks.</p>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.multiindex_strict"><code class="docutils literal notranslate"><span class="pre">ValidBboxAnnotationsCOCO.Config.multiindex_strict</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.multiindex_unique"><code class="docutils literal notranslate"><span class="pre">ValidBboxAnnotationsCOCO.Config.multiindex_unique</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.name"><code class="docutils literal notranslate"><span class="pre">ValidBboxAnnotationsCOCO.Config.name</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.on_missing_columns"><code class="docutils literal notranslate"><span class="pre">ValidBboxAnnotationsCOCO.Config.on_missing_columns</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.ordered"><code class="docutils literal notranslate"><span class="pre">ValidBboxAnnotationsCOCO.Config.ordered</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.strict"><code class="docutils literal notranslate"><span class="pre">ValidBboxAnnotationsCOCO.Config.strict</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.Config.title"><code class="docutils literal notranslate"><span class="pre">ValidBboxAnnotationsCOCO.Config.title</span></code></a></li>
@@ -1095,10 +1157,13 @@ checks.</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.check_idx_and_annotation_id"><code class="docutils literal notranslate"><span class="pre">ValidBboxAnnotationsCOCO.check_idx_and_annotation_id()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.empty"><code class="docutils literal notranslate"><span class="pre">ValidBboxAnnotationsCOCO.empty()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.example"><code class="docutils literal notranslate"><span class="pre">ValidBboxAnnotationsCOCO.example()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.from_json"><code class="docutils literal notranslate"><span class="pre">ValidBboxAnnotationsCOCO.from_json()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.from_yaml"><code class="docutils literal notranslate"><span class="pre">ValidBboxAnnotationsCOCO.from_yaml()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.get_metadata"><code class="docutils literal notranslate"><span class="pre">ValidBboxAnnotationsCOCO.get_metadata()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.map_df_columns_to_COCO_fields"><code class="docutils literal notranslate"><span class="pre">ValidBboxAnnotationsCOCO.map_df_columns_to_COCO_fields()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.pydantic_validate"><code class="docutils literal notranslate"><span class="pre">ValidBboxAnnotationsCOCO.pydantic_validate()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.strategy"><code class="docutils literal notranslate"><span class="pre">ValidBboxAnnotationsCOCO.strategy()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.to_json"><code class="docutils literal notranslate"><span class="pre">ValidBboxAnnotationsCOCO.to_json()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.to_json_schema"><code class="docutils literal notranslate"><span class="pre">ValidBboxAnnotationsCOCO.to_json_schema()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.to_schema"><code class="docutils literal notranslate"><span class="pre">ValidBboxAnnotationsCOCO.to_schema()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ethology.validators.annotations.ValidBboxAnnotationsCOCO.to_yaml"><code class="docutils literal notranslate"><span class="pre">ValidBboxAnnotationsCOCO.to_yaml()</span></code></a></li>
@@ -1109,13 +1174,13 @@ checks.</p>
   </nav></div>
 
   <div class="sidebar-secondary-item">
-  <div role="note" aria-label="source link">
-    <h3>This Page</h3>
-    <ul class="this-page-menu">
-      <li><a href="../_sources/api/ethology.validators.annotations.ValidBboxAnnotationsCOCO.rst.txt"
-            rel="nofollow">Show Source</a></li>
-    </ul>
-   </div></div>
+
+  <div class="tocsection sourcelink">
+    <a href="../_sources/api/ethology.validators.annotations.ValidBboxAnnotationsCOCO.rst.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
 
 </div></div>
               
@@ -1130,8 +1195,8 @@ checks.</p>
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
-<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+  <script defer src="../_static/scripts/bootstrap.js?digest=18bd87630a240e9c25be"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=18bd87630a240e9c25be"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -1145,7 +1210,7 @@ checks.</p>
     <p class="theme-version">
     Built with the
     <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a>
-    0.16.1.
+    0.23.0.
     </p></div>
       
     </div>

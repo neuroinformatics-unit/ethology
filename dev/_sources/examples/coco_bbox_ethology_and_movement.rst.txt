@@ -167,7 +167,7 @@ expert annotations as an ``ethology`` dataset.
     Dimensions:      (image_id: 12, space: 2, id: 722)
     Coordinates:
       * image_id     (image_id) int64 96B 0 1 2 3 4 5 6 7 8 9 10 11
-      * space        (space) <U1 8B 'x' 'y'
+      * space        (space) object 16B 'x' 'y'
       * id           (id) int64 6kB 0 1 2 3 4 5 6 7 ... 715 716 717 718 719 720 721
     Data variables:
         position     (image_id, space, id) float64 139kB 4.493e+03 3.49e+03 ... nan
@@ -371,6 +371,13 @@ by species.
    :class: sphx-glr-single-img
 
 
+.. rst-class:: sphx-glr-script-out
+
+ .. code-block:: none
+
+    /home/runner/work/ethology/ethology/examples/coco_bbox_ethology_and_movement.py:173: UserWarning: Mismatched number of handles and labels: len(handles) = 10 len(labels) = 9
+      plt.legend(
+
 
 
 
@@ -463,7 +470,7 @@ our annotations dataset to a ``movement``-like dataset.
 To do this, we need to rename the dataset dimensions,
 add a ``confidence`` array, and add a ``time_unit`` attribute.
 Although it is not required, we also rename the
-``individuals`` coordinate values to follow the ``movement``
+``individual`` coordinate values to follow the ``movement``
 naming convention.
 
 .. GENERATED FROM PYTHON SOURCE LINES 249-278
@@ -473,11 +480,11 @@ naming convention.
 
 
     # Rename dimensions
-    ds_as_movement = ds.rename({"image_id": "time", "id": "individuals"})
+    ds_as_movement = ds.rename({"image_id": "time", "id": "individual"})
 
-    # Rename 'individuals' values to follow ``movement`` convention
-    ds_as_movement["individuals"] = [
-        f"id_{i.item()}" for i in ds_as_movement.individuals.values
+    # Rename 'individual' values to follow ``movement`` convention
+    ds_as_movement["individual"] = [
+        f"id_{i.item()}" for i in ds_as_movement.individual.values
     ]
 
     # Add confidence array with NaNs
@@ -485,11 +492,11 @@ naming convention.
         np.full(
             (
                 ds_as_movement.sizes["time"],
-                ds_as_movement.sizes["individuals"],
+                ds_as_movement.sizes["individual"],
             ),
             np.nan,
         ),
-        dims=["time", "individuals"],
+        dims=["time", "individual"],
     )
 
     # Add time_unit attribute
@@ -507,20 +514,20 @@ naming convention.
 
  .. code-block:: none
 
-    <xarray.Dataset> Size: 433kB
-    Dimensions:      (time: 12, space: 2, individuals: 722)
+    <xarray.Dataset> Size: 434kB
+    Dimensions:      (time: 12, space: 2, individual: 722)
     Coordinates:
       * time         (time) int64 96B 0 1 2 3 4 5 6 7 8 9 10 11
-      * space        (space) <U1 8B 'x' 'y'
-      * individuals  (individuals) <U6 17kB 'id_0' 'id_1' ... 'id_720' 'id_721'
+      * space        (space) object 16B 'x' 'y'
+      * individual   (individual) <U6 17kB 'id_0' 'id_1' ... 'id_720' 'id_721'
     Data variables:
-        position     (time, space, individuals) float64 139kB 4.493e+03 ... nan
-        shape        (time, space, individuals) float64 139kB 95.0 43.0 ... nan nan
+        position     (time, space, individual) float64 139kB 4.493e+03 ... nan
+        shape        (time, space, individual) float64 139kB 95.0 43.0 ... nan nan
         image_shape  (time, space) int64 192B 5472 3648 5472 3648 ... 3648 5472 3648
-        category     (time, individuals) int64 69kB 1 4 3 3 3 3 ... -1 -1 -1 -1 -1
-        confidence   (time, individuals) float64 69kB nan nan nan ... nan nan nan
+        category     (time, individual) int64 69kB 1 4 3 3 3 3 ... -1 -1 -1 -1 -1 -1
+        confidence   (time, individual) float64 69kB nan nan nan nan ... nan nan nan
     Attributes: (6)
-    Frozen({'time': 12, 'space': 2, 'individuals': 722})
+    Frozen({'time': 12, 'space': 2, 'individual': 722})
 
 
 
@@ -726,7 +733,7 @@ following code.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 5.551 seconds)
+   **Total running time of the script:** (0 minutes 2.587 seconds)
 
 
 .. _sphx_glr_download_examples_coco_bbox_ethology_and_movement.py:

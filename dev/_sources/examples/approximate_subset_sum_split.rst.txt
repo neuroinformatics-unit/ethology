@@ -160,9 +160,9 @@ the dataset to the ``.ethology`` cache directory.
 
  .. code-block:: none
 
+    /home/runner/.ethology/ACTD_COCO_files/2_Region_specific_data_CCT.json
     /home/runner/.ethology/ACTD_COCO_files/1_Terrestrial_group_data_CCT.json
     /home/runner/.ethology/ACTD_COCO_files/3_Feral_animals_data_CCT.json
-    /home/runner/.ethology/ACTD_COCO_files/2_Region_specific_data_CCT.json
 
 
 
@@ -199,7 +199,7 @@ function.
     Dimensions:      (image_id: 39426, space: 2, id: 6)
     Coordinates:
       * image_id     (image_id) int64 315kB 0 1 2 3 4 ... 39422 39423 39424 39425
-      * space        (space) <U1 8B 'x' 'y'
+      * space        (space) object 16B 'x' 'y'
       * id           (id) int64 48B 0 1 2 3 4 5
     Data variables:
         position     (image_id, space, id) float64 4MB 0.07955 nan nan ... nan nan
@@ -207,9 +207,9 @@ function.
         image_shape  (image_id, space) int64 631kB 2048 1440 2048 ... 1152 2048 1152
         category     (image_id, id) int64 2MB 1 -1 -1 -1 -1 -1 ... 1 -1 -1 -1 -1 -1
     Attributes: (5)
+    /home/runner/.ethology/ACTD_COCO_files/2_Region_specific_data_CCT.json
     /home/runner/.ethology/ACTD_COCO_files/1_Terrestrial_group_data_CCT.json
     /home/runner/.ethology/ACTD_COCO_files/3_Feral_animals_data_CCT.json
-    /home/runner/.ethology/ACTD_COCO_files/2_Region_specific_data_CCT.json
 
 
 
@@ -408,7 +408,7 @@ we would do:
 
  .. code-block:: none
 
-    2026-03-08 12:29:34.345 | INFO     | ethology.datasets.split:split_dataset_group_by:211 - Using group k-fold method with 3 folds and seed=42.
+    2026-10-13 13:06:42.915 | INFO     | ethology.datasets.split:split_dataset_group_by:211 - Using group k-fold method with 3 folds and seed=42.
 
 
 
@@ -500,8 +500,8 @@ seed values, to generate two different splits.
 
  .. code-block:: none
 
-    2026-03-08 12:29:34.368 | INFO     | ethology.datasets.split:split_dataset_group_by:211 - Using group k-fold method with 3 folds and seed=42.
-    2026-03-08 12:29:34.384 | INFO     | ethology.datasets.split:split_dataset_group_by:211 - Using group k-fold method with 3 folds and seed=43.
+    2026-10-13 13:06:42.939 | INFO     | ethology.datasets.split:split_dataset_group_by:211 - Using group k-fold method with 3 folds and seed=42.
+    2026-10-13 13:06:42.953 | INFO     | ethology.datasets.split:split_dataset_group_by:211 - Using group k-fold method with 3 folds and seed=43.
 
 
 
@@ -641,7 +641,7 @@ function with the ``method`` parameter set to ``apss``
 
  .. code-block:: none
 
-    2026-03-08 12:29:35.582 | INFO     | ethology.datasets.split:split_dataset_group_by:219 - Using approximate subset-sum method with epsilon=0.
+    2026-10-13 13:06:43.534 | INFO     | ethology.datasets.split:split_dataset_group_by:219 - Using approximate subset-sum method with epsilon=0.
 
 
 
@@ -755,7 +755,7 @@ fractions.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 22.670 seconds)
+   **Total running time of the script:** (0 minutes 12.321 seconds)
 
 
 .. _sphx_glr_download_examples_approximate_subset_sum_split.py:

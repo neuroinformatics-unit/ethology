@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 
 
@@ -27,36 +26,38 @@
   </noscript>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+  <link href="../_static/styles/theme.css?digest=18bd87630a240e9c25be" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=18bd87630a240e9c25be" rel="stylesheet" />
 
     <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=9c66c473" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
-    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=c83e6b79" />
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css?v=f4aeca0c" />
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
     <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
   
   <!-- So that users can add custom icons -->
-  <script src="../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <script defer src="../_static/scripts/fontawesome.js?digest=18bd87630a240e9c25be"></script>
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=18bd87630a240e9c25be" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=18bd87630a240e9c25be" />
 
-    <script src="../_static/documentation_options.js?v=b4e08961"></script>
+    <script src="../_static/documentation_options.js?v=1546fae8"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/sg-tags.js?v=d80f6fa4"></script>
     <script src="../_static/design-tabs.js?v=f930bc37"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'examples/coco_bbox_ethology_and_movement';</script>
     <script>
-        DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
+        DOCUMENTATION_OPTIONS.theme_version = '0.23.0';
         DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://ethology.neuroinformatics.dev/latest/_static/switcher.json';
         DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'dev';
         DOCUMENTATION_OPTIONS.show_version_warning_banner =
             false;
         </script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
     <link rel="canonical" href="https://ethology.neuroinformatics.dev/examples/coco_bbox_ethology_and_movement.html" />
     <link rel="icon" href="../_static/light-logo-niu.png"/>
     <link rel="index" title="Index" href="../genindex.html" />
@@ -64,22 +65,29 @@
     <link rel="next" title="Split an annotations dataset" href="approximate_subset_sum_split.html" />
     <link rel="prev" title="Examples" href="index.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="color-scheme" content="light dark"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="" />
+  
+    
+    <script src="../_static/searchtools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script src="../searchindex.js"></script>
+  
   </head>
-  
-  
-  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
-
+  <body data-default-mode="">
   
   
   <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
   
   <div id="pst-scroll-pixel-helper"></div>
   
   <button type="button" class="btn rounded-pill" id="pst-back-to-top">
     <i class="fa-solid fa-arrow-up"></i>Back to top</button>
-
+  
+  
+  
   
   <dialog id="pst-search-dialog">
     
@@ -105,9 +113,9 @@
 </div>
 
   
-    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
 <div class="bd-header__inner bd-page-width">
-  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+  <button type="button" class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
     <span class="fa-solid fa-bars"></span>
   </button>
   
@@ -127,7 +135,7 @@
   
   
   
-    <p class="title logo__title">ethology v0.1.3.dev5</p>
+    <p class="title logo__title">ethology v0.1.4.dev2</p>
   
 </a></div>
     
@@ -179,7 +187,7 @@
         <div class="navbar-item navbar-persistent--container">
           
 
-<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
  <i class="fa-solid fa-magnifying-glass"></i>
  <span class="search-button__default-text">Search</span>
  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
@@ -209,11 +217,18 @@
       
         <div class="navbar-item">
 
-<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
-  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
-  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
-  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
-</button></div>
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
       
         <div class="navbar-item"><ul class="navbar-icon-links"
     aria-label="Icon Links">
@@ -226,8 +241,7 @@
           
           
           
-          <a href="https://github.com/neuroinformatics-unit/ethology" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">GitHub</span></a>
+          <a href="https://github.com/neuroinformatics-unit/ethology" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
         </li>
         <li class="nav-item">
           
@@ -238,8 +252,7 @@
           
           
           
-          <a href="https://neuroinformatics.zulipchat.com/#narrow/channel/483869-Ethology" title="Zulip (chat)" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-comments fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">Zulip (chat)</span></a>
+          <a href="https://neuroinformatics.zulipchat.com/#narrow/channel/483869-Ethology" title="Zulip (chat)" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-comments fa-lg" aria-hidden="true"></i><span class="visually-hidden">Zulip (chat)</span></a>
         </li>
 </ul></div>
       
@@ -250,7 +263,7 @@
   
     <div class="navbar-persistent--mobile">
 
-<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+<button type="button" class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
  <i class="fa-solid fa-magnifying-glass"></i>
  <span class="search-button__default-text">Search</span>
  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
@@ -259,7 +272,7 @@
   
 
   
-    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+    <button type="button" class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
       <span class="fa-solid fa-outdent"></span>
     </button>
   
@@ -348,11 +361,18 @@
         
           <div class="navbar-item">
 
-<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
-  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
-  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
-  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
-</button></div>
+<div class="theme-switch-container dropdown pst-js-only" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Color mode">
+  <button type="button" class="btn btn-sm nav-link pst-navbar-icon theme-switch-button dropdown-toggle" aria-label="Color mode" data-bs-toggle="dropdown">
+    <i class="theme-switch fa-solid fa-sun fa-lg fa-fw" data-mode="light" title="Light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg fa-fw" data-mode="dark" title="Dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg fa-fw" data-mode="auto" title="System Settings"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end">
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg fa-fw me-1"></i>System Settings</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="light"><i class="fa-solid fa-sun fa-lg fa-fw me-1"></i>Light</button></li>
+    <li><button type="button" class="dropdown-item d-flex align-items-center theme-change-button" data-mode="dark"><i class="fa-solid fa-moon fa-lg fa-fw me-1"></i>Dark</button></li>
+  </ul>
+</div></div>
         
           <div class="navbar-item"><ul class="navbar-icon-links"
     aria-label="Icon Links">
@@ -365,8 +385,7 @@
           
           
           
-          <a href="https://github.com/neuroinformatics-unit/ethology" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">GitHub</span></a>
+          <a href="https://github.com/neuroinformatics-unit/ethology" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-github fa-lg" aria-hidden="true"></i><span class="visually-hidden">GitHub</span></a>
         </li>
         <li class="nav-item">
           
@@ -377,8 +396,7 @@
           
           
           
-          <a href="https://neuroinformatics.zulipchat.com/#narrow/channel/483869-Ethology" title="Zulip (chat)" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-comments fa-lg" aria-hidden="true"></i>
-            <span class="sr-only">Zulip (chat)</span></a>
+          <a href="https://neuroinformatics.zulipchat.com/#narrow/channel/483869-Ethology" title="Zulip (chat)" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-solid fa-comments fa-lg" aria-hidden="true"></i><span class="visually-hidden">Zulip (chat)</span></a>
         </li>
 </ul></div>
         
@@ -387,12 +405,20 @@
   </div>
   
     <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item pst-sidebar-collapse"><button type="button" id="pst-collapse-sidebar-button" aria-expanded="true" aria-controls="pst-primary-sidebar">
+  <svg class="pst-icon" role="img" aria-hidden="true" focusable="false" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+    <path fill="currentColor" d="M3 15.5C2.36232 15.5 1.74874 15.2564 1.28478 14.8189C0.820828 14.3815 0.541576 13.7832 0.504167 13.1467L0.5 13L0.5 3C0.499965 2.36232 0.743605 1.74874 1.18107 1.28478C1.61854 0.820828 2.21676 0.541576 2.85333 0.504167L3 0.5L13 0.5C13.6377 0.499965 14.2513 0.743605 14.7152 1.18107C15.1792 1.61854 15.4584 2.21676 15.4958 2.85333L15.5 3L15.5 13C15.5 13.6377 15.2564 14.2513 14.8189 14.7152C14.3815 15.1792 13.7832 15.4584 13.1467 15.4958L13 15.5L3 15.5ZM3 13.8333L10.5 13.8333L10.5 2.16667L3 2.16667C2.79589 2.16669 2.59889 2.24163 2.44636 2.37726C2.29383 2.5129 2.19638 2.69979 2.1725 2.9025L2.16667 3L2.16667 13C2.16669 13.2041 2.24163 13.4011 2.37726 13.5536C2.5129 13.7062 2.69979 13.8036 2.9025 13.8275L3 13.8333ZM6.65583 10.325L6.5775 10.2558L4.91083 8.58917C4.76735 8.44567 4.68116 8.25476 4.66843 8.05223C4.65569 7.84971 4.71729 7.6495 4.84167 7.48917L4.91083 7.41083L6.5775 5.74417C6.72747 5.59471 6.9287 5.50794 7.14032 5.50148C7.35194 5.49502 7.55809 5.56935 7.7169 5.70937C7.8757 5.8494 7.97525 6.04463 7.99533 6.25539C8.01541 6.46616 7.95451 6.67667 7.825 6.84417L7.75583 6.9225L6.67917 8L7.75583 9.0775C7.89931 9.22099 7.98551 9.41191 7.99824 9.61443C8.01097 9.81695 7.94938 10.0172 7.825 10.1775L7.75583 10.2558C7.61234 10.3993 7.42142 10.4855 7.2189 10.4982C7.01638 10.511 6.81617 10.4494 6.65583 10.325Z"/>
+  </svg>
+  <span class="pst-collapse-sidebar-label">Collapse Sidebar</span>
+  <span class="pst-expand-sidebar-label">Expand Sidebar</span>
+</button></div>
         <div class="sidebar-primary-item">
+
 <nav class="bd-docs-nav bd-links"
      aria-label="Section Navigation">
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">Inspect COCO annotations using <code class="docutils literal notranslate"><span class="pre">ethology</span></code> and <code class="docutils literal notranslate"><span class="pre">movement</span></code></a></li>
+<li class="toctree-l1 current active"><a aria-current="page" class="current reference internal" href="#">Inspect COCO annotations using <code class="docutils literal notranslate"><span class="pre">ethology</span></code> and <code class="docutils literal notranslate"><span class="pre">movement</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="approximate_subset_sum_split.html">Split an annotations dataset</a></li>
 </ul>
 </div>
@@ -466,24 +492,23 @@ and inspect them using <code class="docutils literal notranslate"><span class="p
 <a class="reference external" href="https://movement.neuroinformatics.dev/">movement</a>.</p>
 <section id="imports">
 <h2>Imports<a class="headerlink" href="#imports" title="Link to this heading">#</a></h2>
-<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
-
-<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">pooch</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">xarray</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">xr</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">movement.io</span><span class="w"> </span><span class="kn">import</span> <span class="n">save_bboxes</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">movement.plots</span><span class="w"> </span><span class="kn">import</span> <a href="https://movement.neuroinformatics.dev/latest/api/movement.plots.plot_occupancy.html#movement.plots.plot_occupancy" title="movement.plots.plot_occupancy" class="sphx-glr-backref-module-movement-plots sphx-glr-backref-type-py-function"><span class="n">plot_occupancy</span></a>
-<span class="kn">from</span><span class="w"> </span><span class="nn">movement.roi</span><span class="w"> </span><span class="kn">import</span> <a href="https://movement.neuroinformatics.dev/latest/api/movement.roi.PolygonOfInterest.html#movement.roi.PolygonOfInterest" title="movement.roi.PolygonOfInterest" class="sphx-glr-backref-module-movement-roi sphx-glr-backref-type-py-class"><span class="n">PolygonOfInterest</span></a>
-
-<span class="kn">from</span><span class="w"> </span><span class="nn">ethology.io.annotations</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_bboxes</span>
-
-<span class="c1"># For interactive plots: install ipympl with `pip install ipympl` and uncomment</span>
-<span class="c1"># the following line in your notebook</span>
-<span class="c1"># %matplotlib widget</span>
-</pre></div>
-</div>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span class="kn">import</span><span class="w"> </span><span class="nn">os</span><span class="w">
+</span><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span><span class="w">
+</span><span class="w">
+</span><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib</span><span class="nn">.</span><span class="nn">pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span><span class="w">
+</span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span><span class="w">
+</span><span class="kn">import</span><span class="w"> </span><span class="nn">pooch</span><span class="w">
+</span><span class="kn">import</span><span class="w"> </span><span class="nn">xarray</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">xr</span><span class="w">
+</span><span class="kn">from</span><span class="w"> </span><span class="nn">movement</span><span class="nn">.</span><span class="nn">io</span><span class="w"> </span><span class="kn">import</span> <span class="n">save_bboxes</span><span class="w">
+</span><span class="kn">from</span><span class="w"> </span><span class="nn">movement</span><span class="nn">.</span><span class="nn">plots</span><span class="w"> </span><span class="kn">import</span> <a class="sphx-glr-backref-module-movement-plots sphx-glr-backref-type-py-function reference external" href="https://movement.neuroinformatics.dev/latest/api/movement.plots.plot_occupancy.html#movement.plots.plot_occupancy" title="movement.plots.plot_occupancy"><span class="n">plot_occupancy</span></a><span class="w">
+</span><span class="kn">from</span><span class="w"> </span><span class="nn">movement</span><span class="nn">.</span><span class="nn">roi</span><span class="w"> </span><span class="kn">import</span> <a class="sphx-glr-backref-module-movement-roi sphx-glr-backref-type-py-class reference external" href="https://movement.neuroinformatics.dev/latest/api/movement.roi.PolygonOfInterest.html#movement.roi.PolygonOfInterest" title="movement.roi.PolygonOfInterest"><span class="n">PolygonOfInterest</span></a><span class="w">
+</span><span class="w">
+</span><span class="kn">from</span><span class="w"> </span><span class="nn">ethology</span><span class="nn">.</span><span class="nn">io</span><span class="nn">.</span><span class="nn">annotations</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_bboxes</span><span class="w">
+</span><span class="w">
+</span><span class="c1"># For interactive plots: install ipympl with `pip install ipympl` and uncomment</span><span class="w">
+</span><span class="c1"># the following line in your notebook</span><span class="w">
+</span><span class="c1"># %matplotlib widget</span><span class="w">
+</span></pre></div></div>
 </section>
 <section id="download-dataset">
 <h2>Download dataset<a class="headerlink" href="#download-dataset" title="Link to this heading">#</a></h2>
@@ -499,51 +524,48 @@ annotators and volunteers.</p>
 directly from the URL provided in the dataset webpage.
 We use the <a class="reference external" href="https://github.com/fatiando/pooch/">pooch</a> library
 to download it to the <code class="docutils literal notranslate"><span class="pre">.ethology</span></code> cache directory.</p>
-<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Source of the dataset</span>
-<a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">data_source</span></a> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="s2">&quot;https://storage.googleapis.com/public-datasets-lila/uas-imagery-of-migratory-waterfowl/uas-imagery-of-migratory-waterfowl.20240220.zip&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;hash&quot;</span><span class="p">:</span> <span class="s2">&quot;c5b8dfc5a87ef625770ac8f22335dc9eb8a67688b610490a029dae81815a9896&quot;</span><span class="p">,</span>
-<span class="p">}</span>
-
-<span class="c1"># Define cache directory</span>
-<a href="https://docs.python.org/3/library/pathlib.html#pathlib.PosixPath" title="pathlib.PosixPath" class="sphx-glr-backref-module-pathlib sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ethology_cache</span></a> <span class="o">=</span> <a href="https://docs.python.org/3/library/pathlib.html#pathlib.Path.home" title="pathlib.Path.home" class="sphx-glr-backref-module-pathlib sphx-glr-backref-type-py-method"><span class="n">Path</span><span class="o">.</span><span class="n">home</span></a><span class="p">()</span> <span class="o">/</span> <span class="s2">&quot;.ethology&quot;</span>
-<a href="https://docs.python.org/3/library/pathlib.html#pathlib.Path.mkdir" title="pathlib.Path.mkdir" class="sphx-glr-backref-module-pathlib sphx-glr-backref-type-py-method"><span class="n">ethology_cache</span><span class="o">.</span><span class="n">mkdir</span></a><span class="p">(</span><span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
-<span class="c1"># Download the dataset to the cache directory</span>
-<a href="https://docs.python.org/3/library/stdtypes.html#list" title="builtins.list" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">extracted_files</span></a> <span class="o">=</span> <span class="n">pooch</span><span class="o">.</span><span class="n">retrieve</span><span class="p">(</span>
-    <span class="n">url</span><span class="o">=</span><a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">data_source</span></a><span class="p">[</span><span class="s2">&quot;url&quot;</span><span class="p">],</span>
-    <span class="n">known_hash</span><span class="o">=</span><a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">data_source</span></a><span class="p">[</span><span class="s2">&quot;hash&quot;</span><span class="p">],</span>
-    <span class="n">fname</span><span class="o">=</span><span class="s2">&quot;waterfowl_dataset.zip&quot;</span><span class="p">,</span>
-    <span class="n">path</span><span class="o">=</span><a href="https://docs.python.org/3/library/pathlib.html#pathlib.PosixPath" title="pathlib.PosixPath" class="sphx-glr-backref-module-pathlib sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ethology_cache</span></a><span class="p">,</span>
-    <span class="n">processor</span><span class="o">=</span><a href="https://docs.python.org/3/library/abc.html#abc.ABC" title="abc.ABC" class="sphx-glr-backref-module-abc sphx-glr-backref-type-py-class"><span class="n">pooch</span><span class="o">.</span><span class="n">Unzip</span></a><span class="p">(</span><span class="n">extract_dir</span><span class="o">=</span><a href="https://docs.python.org/3/library/pathlib.html#pathlib.PosixPath" title="pathlib.PosixPath" class="sphx-glr-backref-module-pathlib sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ethology_cache</span></a><span class="p">),</span>
-<span class="p">)</span>
-
-<a href="https://docs.python.org/3/library/pathlib.html#pathlib.PosixPath" title="pathlib.PosixPath" class="sphx-glr-backref-module-pathlib sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">data_dir</span></a> <span class="o">=</span> <a href="https://docs.python.org/3/library/pathlib.html#pathlib.PosixPath" title="pathlib.PosixPath" class="sphx-glr-backref-module-pathlib sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ethology_cache</span></a> <span class="o">/</span> <span class="s2">&quot;uas-imagery-of-migratory-waterfowl&quot;</span>
-</pre></div>
-</div>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span class="c1"># Source of the dataset</span><span class="w">
+</span><a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="dict"><span class="n">data_source</span></a> <span class="o">=</span> <span class="p">{</span><span class="w">
+</span>    <span class="s2">&quot;</span><span class="s2">url</span><span class="s2">&quot;</span><span class="p">:</span> <span class="s2">&quot;</span><span class="s2">https://storage.googleapis.com/public-datasets-lila/uas-imagery-of-migratory-waterfowl/uas-imagery-of-migratory-waterfowl.20240220.zip</span><span class="s2">&quot;</span><span class="p">,</span><span class="w">
+</span>    <span class="s2">&quot;</span><span class="s2">hash</span><span class="s2">&quot;</span><span class="p">:</span> <span class="s2">&quot;</span><span class="s2">c5b8dfc5a87ef625770ac8f22335dc9eb8a67688b610490a029dae81815a9896</span><span class="s2">&quot;</span><span class="p">,</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span><span class="w">
+</span><span class="c1"># Define cache directory</span><span class="w">
+</span><a class="sphx-glr-backref-module-pathlib sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.PosixPath" title="pathlib.PosixPath"><span class="n">ethology_cache</span></a> <span class="o">=</span> <a class="sphx-glr-backref-module-pathlib sphx-glr-backref-type-py-method reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path.home" title="pathlib.Path.home"><span class="n">Path</span><span class="o">.</span><span class="n">home</span></a><span class="p">(</span><span class="p">)</span> <span class="o">/</span> <span class="s2">&quot;</span><span class="s2">.ethology</span><span class="s2">&quot;</span><span class="w">
+</span><a class="sphx-glr-backref-module-pathlib sphx-glr-backref-type-py-method reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path.mkdir" title="pathlib.Path.mkdir"><span class="n">ethology_cache</span><span class="o">.</span><span class="n">mkdir</span></a><span class="p">(</span><span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="w">
+</span><span class="w">
+</span><span class="c1"># Download the dataset to the cache directory</span><span class="w">
+</span><a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="list"><span class="n">extracted_files</span></a> <span class="o">=</span> <span class="n">pooch</span><span class="o">.</span><span class="n">retrieve</span><span class="p">(</span><span class="w">
+</span>    <span class="n">url</span><span class="o">=</span><a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="dict"><span class="n">data_source</span></a><span class="p">[</span><span class="s2">&quot;</span><span class="s2">url</span><span class="s2">&quot;</span><span class="p">]</span><span class="p">,</span><span class="w">
+</span>    <span class="n">known_hash</span><span class="o">=</span><a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="dict"><span class="n">data_source</span></a><span class="p">[</span><span class="s2">&quot;</span><span class="s2">hash</span><span class="s2">&quot;</span><span class="p">]</span><span class="p">,</span><span class="w">
+</span>    <span class="n">fname</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">waterfowl_dataset.zip</span><span class="s2">&quot;</span><span class="p">,</span><span class="w">
+</span>    <span class="n">path</span><span class="o">=</span><a class="sphx-glr-backref-module-pathlib sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.PosixPath" title="pathlib.PosixPath"><span class="n">ethology_cache</span></a><span class="p">,</span><span class="w">
+</span>    <span class="n">processor</span><span class="o">=</span><a class="sphx-glr-backref-module-abc sphx-glr-backref-type-py-class reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="abc.ABC"><span class="n">pooch</span><span class="o">.</span><span class="n">Unzip</span></a><span class="p">(</span><span class="n">extract_dir</span><span class="o">=</span><a class="sphx-glr-backref-module-pathlib sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.PosixPath" title="pathlib.PosixPath"><span class="n">ethology_cache</span></a><span class="p">)</span><span class="p">,</span><span class="w">
+</span><span class="p">)</span><span class="w">
+</span><span class="w">
+</span><a class="sphx-glr-backref-module-pathlib sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.PosixPath" title="pathlib.PosixPath"><span class="n">data_dir</span></a> <span class="o">=</span> <a class="sphx-glr-backref-module-pathlib sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.PosixPath" title="pathlib.PosixPath"><span class="n">ethology_cache</span></a> <span class="o">/</span> <span class="s2">&quot;</span><span class="s2">uas-imagery-of-migratory-waterfowl</span><span class="s2">&quot;</span><span class="w">
+</span></pre></div></div>
 <p>For this example, we will focus on the annotations labelled by the experts.</p>
-<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><a href="https://docs.python.org/3/library/pathlib.html#pathlib.PosixPath" title="pathlib.PosixPath" class="sphx-glr-backref-module-pathlib sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">annotations_file</span></a> <span class="o">=</span> <span class="p">(</span>
-    <a href="https://docs.python.org/3/library/pathlib.html#pathlib.PosixPath" title="pathlib.PosixPath" class="sphx-glr-backref-module-pathlib sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">data_dir</span></a> <span class="o">/</span> <span class="s2">&quot;experts&quot;</span> <span class="o">/</span> <span class="s2">&quot;20230331_dronesforducks_expert_refined.json&quot;</span>
-<span class="p">)</span>
-</pre></div>
-</div>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><a class="sphx-glr-backref-module-pathlib sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.PosixPath" title="pathlib.PosixPath"><span class="n">annotations_file</span></a> <span class="o">=</span> <span class="p">(</span><span class="w">
+</span>    <a class="sphx-glr-backref-module-pathlib sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.PosixPath" title="pathlib.PosixPath"><span class="n">data_dir</span></a> <span class="o">/</span> <span class="s2">&quot;</span><span class="s2">experts</span><span class="s2">&quot;</span> <span class="o">/</span> <span class="s2">&quot;</span><span class="s2">20230331_dronesforducks_expert_refined.json</span><span class="s2">&quot;</span><span class="w">
+</span><span class="p">)</span><span class="w">
+</span></pre></div></div>
 </section>
 <section id="load-annotations-as-an-ethology-dataset">
 <h2>Load annotations as an <code class="docutils literal notranslate"><span class="pre">ethology</span></code> dataset<a class="headerlink" href="#load-annotations-as-an-ethology-dataset" title="Link to this heading">#</a></h2>
 <p>We can use the <a class="reference internal" href="../api/ethology.io.annotations.load_bboxes.from_files.html#ethology.io.annotations.load_bboxes.from_files" title="ethology.io.annotations.load_bboxes.from_files"><code class="xref py py-func docutils literal notranslate"><span class="pre">from_files()</span></code></a>
 function to load the COCO file with the
 expert annotations as an <code class="docutils literal notranslate"><span class="pre">ethology</span></code> dataset.</p>
-<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><a href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="xarray.core.dataset.Dataset" class="sphx-glr-backref-module-xarray-core-dataset sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ds</span></a> <span class="o">=</span> <a href="../api/ethology.io.annotations.load_bboxes.from_files.html#ethology.io.annotations.load_bboxes.from_files" title="ethology.io.annotations.load_bboxes.from_files" class="sphx-glr-backref-module-ethology-io-annotations-load_bboxes sphx-glr-backref-type-py-function"><span class="n">load_bboxes</span><span class="o">.</span><span class="n">from_files</span></a><span class="p">(</span><a href="https://docs.python.org/3/library/pathlib.html#pathlib.PosixPath" title="pathlib.PosixPath" class="sphx-glr-backref-module-pathlib sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">annotations_file</span></a><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;COCO&quot;</span><span class="p">)</span>
-
-<span class="nb">print</span><span class="p">(</span><a href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="xarray.core.dataset.Dataset" class="sphx-glr-backref-module-xarray-core-dataset sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ds</span></a><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><a href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.sizes.html#xarray.Dataset.sizes" title="xarray.Dataset.sizes" class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-property"><span class="n">ds</span><span class="o">.</span><span class="n">sizes</span></a><span class="p">)</span>
-</pre></div>
-</div>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><a class="sphx-glr-backref-module-xarray-core-dataset sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="xarray.core.dataset.Dataset"><span class="n">ds</span></a> <span class="o">=</span> <a class="sphx-glr-backref-module-ethology-io-annotations-load_bboxes sphx-glr-backref-type-py-function reference internal" href="../api/ethology.io.annotations.load_bboxes.from_files.html#ethology.io.annotations.load_bboxes.from_files" title="ethology.io.annotations.load_bboxes.from_files"><span class="n">load_bboxes</span><span class="o">.</span><span class="n">from_files</span></a><span class="p">(</span><a class="sphx-glr-backref-module-pathlib sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.PosixPath" title="pathlib.PosixPath"><span class="n">annotations_file</span></a><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">COCO</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><span class="w">
+</span><span class="nb">print</span><span class="p">(</span><a class="sphx-glr-backref-module-xarray-core-dataset sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="xarray.core.dataset.Dataset"><span class="n">ds</span></a><span class="p">)</span><span class="w">
+</span><span class="nb">print</span><span class="p">(</span><a class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-property reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.sizes.html#xarray.Dataset.sizes" title="xarray.Dataset.sizes"><span class="n">ds</span><span class="o">.</span><span class="n">sizes</span></a><span class="p">)</span><span class="w">
+</span></pre></div></div>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;xarray.Dataset&gt; Size: 353kB
 Dimensions:      (image_id: 12, space: 2, id: 722)
 Coordinates:
   * image_id     (image_id) int64 96B 0 1 2 3 4 5 6 7 8 9 10 11
-  * space        (space) &lt;U1 8B &#39;x&#39; &#39;y&#39;
+  * space        (space) object 16B 'x' 'y'
   * id           (id) int64 6kB 0 1 2 3 4 5 6 7 ... 715 716 717 718 719 720 721
 Data variables:
     position     (image_id, space, id) float64 139kB 4.493e+03 3.49e+03 ... nan
@@ -551,7 +573,7 @@ Data variables:
     image_shape  (image_id, space) int64 192B 5472 3648 5472 ... 3648 5472 3648
     category     (image_id, id) int64 69kB 1 4 3 3 3 3 3 ... -1 -1 -1 -1 -1 -1
 Attributes: (5)
-Frozen({&#39;image_id&#39;: 12, &#39;space&#39;: 2, &#39;id&#39;: 722})
+Frozen({'image_id': 12, 'space': 2, 'id': 722})
 </pre></div>
 </div>
 <p>We can see that the expert annotations consist of 2D bounding boxes,
@@ -566,51 +588,49 @@ each bounding box per image.</p>
 <p>We can also see from the dataset description that it includes
 five attributes. These are stored under the <code class="docutils literal notranslate"><span class="pre">attrs</span></code> dictionary.
 We can inspect the content of the <code class="docutils literal notranslate"><span class="pre">attrs</span></code> dictionary as follows:</p>
-<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="o">*</span><a href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.attrs.html#xarray.Dataset.attrs" title="xarray.Dataset.attrs" class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-property"><span class="n">ds</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">items</span></a><span class="p">(),</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>(&#39;annotation_files&#39;, PosixPath(&#39;/home/runner/.ethology/uas-imagery-of-migratory-waterfowl/experts/20230331_dronesforducks_expert_refined.json&#39;))
-(&#39;annotation_format&#39;, &#39;COCO&#39;)
-(&#39;images_directories&#39;, None)
-(&#39;map_category_to_str&#39;, {1: &#39;Canadian Goose&#39;, 2: &#39;Sandhill Crane&#39;, 3: &#39;Mallard&#39;, 4: &#39;Northern Pintail&#39;, 5: &#39;American Wigeon&#39;, 6: &#39;Other&#39;, 7: &#39;Teal&#39;, 8: &#39;Gadwall&#39;, 9: &#39;Northern Shoveler&#39;})
-(&#39;map_image_id_to_filename&#39;, {0: &#39;BDA_12C_20181127_1.JPG&#39;, 1: &#39;BDA_12C_20181127_2.JPG&#39;, 2: &#39;BDA_12C_20181127_3.JPG&#39;, 3: &#39;BDA_18A4_20181106_1.JPG&#39;, 4: &#39;BDA_18A4_20181106_2.JPG&#39;, 5: &#39;BDA_18A4_20181106_3.JPG&#39;, 6: &#39;BDA_18A4_20181106_4.JPG&#39;, 7: &#39;BDA_18A4_20181107_1.JPG&#39;, 8: &#39;BDA_18A4_20181107_2.JPG&#39;, 9: &#39;BDA_18A4_20181107_3.JPG&#39;, 10: &#39;BDA_18A4_20181107_4.JPG&#39;, 11: &#39;mxw_L13_20181215_1.JPG&#39;})
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span class="nb">print</span><span class="p">(</span><span class="o">*</span><a class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-property reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.attrs.html#xarray.Dataset.attrs" title="xarray.Dataset.attrs"><span class="n">ds</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">items</span></a><span class="p">(</span><span class="p">)</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span></pre></div></div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>('annotation_files', PosixPath('/home/runner/.ethology/uas-imagery-of-migratory-waterfowl/experts/20230331_dronesforducks_expert_refined.json'))
+('annotation_format', 'COCO')
+('images_directories', None)
+('map_category_to_str', {1: 'Canadian Goose', 2: 'Sandhill Crane', 3: 'Mallard', 4: 'Northern Pintail', 5: 'American Wigeon', 6: 'Other', 7: 'Teal', 8: 'Gadwall', 9: 'Northern Shoveler'})
+('map_image_id_to_filename', {0: 'BDA_12C_20181127_1.JPG', 1: 'BDA_12C_20181127_2.JPG', 2: 'BDA_12C_20181127_3.JPG', 3: 'BDA_18A4_20181106_1.JPG', 4: 'BDA_18A4_20181106_2.JPG', 5: 'BDA_18A4_20181106_3.JPG', 6: 'BDA_18A4_20181106_4.JPG', 7: 'BDA_18A4_20181107_1.JPG', 8: 'BDA_18A4_20181107_2.JPG', 9: 'BDA_18A4_20181107_3.JPG', 10: 'BDA_18A4_20181107_4.JPG', 11: 'mxw_L13_20181215_1.JPG'})
 </pre></div>
 </div>
 <p>The attributes for the loaded dataset include two maps,
 one from category IDs to category names, and one from image IDs to image
 filenames. To inspect their values further we can use the convenient
 dot syntax:</p>
-<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Categories:&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="o">*</span><a href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="xarray.core.dataset.Dataset" class="sphx-glr-backref-module-xarray-core-dataset sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ds</span></a><span class="o">.</span><span class="n">map_category_to_str</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;--------------------------------&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Image filenames:&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="o">*</span><a href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="xarray.core.dataset.Dataset" class="sphx-glr-backref-module-xarray-core-dataset sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ds</span></a><span class="o">.</span><span class="n">map_image_id_to_filename</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="s2">Categories:</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><span class="nb">print</span><span class="p">(</span><span class="o">*</span><a class="sphx-glr-backref-module-xarray-core-dataset sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="xarray.core.dataset.Dataset"><span class="n">ds</span></a><span class="o">.</span><span class="n">map_category_to_str</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="p">)</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="s2">--------------------------------</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="s2">Image filenames:</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><span class="nb">print</span><span class="p">(</span><span class="o">*</span><a class="sphx-glr-backref-module-xarray-core-dataset sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="xarray.core.dataset.Dataset"><span class="n">ds</span></a><span class="o">.</span><span class="n">map_image_id_to_filename</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="p">)</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span></pre></div></div>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Categories:
-(1, &#39;Canadian Goose&#39;)
-(2, &#39;Sandhill Crane&#39;)
-(3, &#39;Mallard&#39;)
-(4, &#39;Northern Pintail&#39;)
-(5, &#39;American Wigeon&#39;)
-(6, &#39;Other&#39;)
-(7, &#39;Teal&#39;)
-(8, &#39;Gadwall&#39;)
-(9, &#39;Northern Shoveler&#39;)
+(1, 'Canadian Goose')
+(2, 'Sandhill Crane')
+(3, 'Mallard')
+(4, 'Northern Pintail')
+(5, 'American Wigeon')
+(6, 'Other')
+(7, 'Teal')
+(8, 'Gadwall')
+(9, 'Northern Shoveler')
 --------------------------------
 Image filenames:
-(0, &#39;BDA_12C_20181127_1.JPG&#39;)
-(1, &#39;BDA_12C_20181127_2.JPG&#39;)
-(2, &#39;BDA_12C_20181127_3.JPG&#39;)
-(3, &#39;BDA_18A4_20181106_1.JPG&#39;)
-(4, &#39;BDA_18A4_20181106_2.JPG&#39;)
-(5, &#39;BDA_18A4_20181106_3.JPG&#39;)
-(6, &#39;BDA_18A4_20181106_4.JPG&#39;)
-(7, &#39;BDA_18A4_20181107_1.JPG&#39;)
-(8, &#39;BDA_18A4_20181107_2.JPG&#39;)
-(9, &#39;BDA_18A4_20181107_3.JPG&#39;)
-(10, &#39;BDA_18A4_20181107_4.JPG&#39;)
-(11, &#39;mxw_L13_20181215_1.JPG&#39;)
+(0, 'BDA_12C_20181127_1.JPG')
+(1, 'BDA_12C_20181127_2.JPG')
+(2, 'BDA_12C_20181127_3.JPG')
+(3, 'BDA_18A4_20181106_1.JPG')
+(4, 'BDA_18A4_20181106_2.JPG')
+(5, 'BDA_18A4_20181106_3.JPG')
+(6, 'BDA_18A4_20181106_4.JPG')
+(7, 'BDA_18A4_20181107_1.JPG')
+(8, 'BDA_18A4_20181107_2.JPG')
+(9, 'BDA_18A4_20181107_3.JPG')
+(10, 'BDA_18A4_20181107_4.JPG')
+(11, 'mxw_L13_20181215_1.JPG')
 </pre></div>
 </div>
 <p>The category IDs are assigned to category names following the definition
@@ -620,9 +640,8 @@ alphabetically sorted list of unique image filenames in the input file.</p>
 <p>This dot syntax can be used to access any of the dataset attributes.
 For example, the annotation file that was used to load the dataset can
 be retrieved as:</p>
-<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><a href="https://docs.python.org/3/library/pathlib.html#pathlib.PosixPath" title="pathlib.PosixPath" class="sphx-glr-backref-module-pathlib sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ds</span><span class="o">.</span><span class="n">annotation_files</span></a><span class="p">)</span>
-</pre></div>
-</div>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span class="nb">print</span><span class="p">(</span><a class="sphx-glr-backref-module-pathlib sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.PosixPath" title="pathlib.PosixPath"><span class="n">ds</span><span class="o">.</span><span class="n">annotation_files</span></a><span class="p">)</span><span class="w">
+</span></pre></div></div>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/home/runner/.ethology/uas-imagery-of-migratory-waterfowl/experts/20230331_dronesforducks_expert_refined.json
 </pre></div>
 </div>
@@ -633,45 +652,48 @@ be retrieved as:</p>
 coordinate system. We can color the centroid of each bounding box by
 the corresponding category to get a better sense of the distribution
 by species.</p>
-<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="c1"># We use a colormap of 10 discrete colours</span>
-<span class="c1"># (we have 9 categories)</span>
-<a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.colors.ListedColormap.html#matplotlib.colors.ListedColormap" title="matplotlib.colors.ListedColormap" class="sphx-glr-backref-module-matplotlib-colors sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">cmap</span></a> <span class="o">=</span> <a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.colors.ListedColormap.html#matplotlib.colors.ListedColormap" title="matplotlib.colors.ListedColormap" class="sphx-glr-backref-module-matplotlib-colors sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">tab10</span></a>
-
-<a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.figure.Figure.html#matplotlib.figure.Figure" title="matplotlib.figure.Figure" class="sphx-glr-backref-module-matplotlib-figure sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">fig</span></a><span class="p">,</span> <a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes" title="matplotlib.axes.Axes" class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ax</span></a> <span class="o">=</span> <a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.subplots.html#matplotlib.pyplot.subplots" title="matplotlib.pyplot.subplots" class="sphx-glr-backref-module-matplotlib-pyplot sphx-glr-backref-type-py-function"><span class="n">plt</span><span class="o">.</span><span class="n">subplots</span></a><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
-
-<span class="c1"># Plot the centroids of the bounding boxes</span>
-<a href="https://matplotlib.org/stable/api/collections_api.html#matplotlib.collections.PathCollection" title="matplotlib.collections.PathCollection" class="sphx-glr-backref-module-matplotlib-collections sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">sc</span></a> <span class="o">=</span> <a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.scatter.html#matplotlib.axes.Axes.scatter" title="matplotlib.axes.Axes.scatter" class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-method"><span class="n">ax</span><span class="o">.</span><span class="n">scatter</span></a><span class="p">(</span>
-    <a href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.sel.html#xarray.DataArray.sel" title="xarray.DataArray.sel" class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-method"><span class="n">ds</span><span class="o">.</span><span class="n">position</span><span class="o">.</span><span class="n">sel</span></a><span class="p">(</span><span class="n">space</span><span class="o">=</span><span class="s2">&quot;x&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
-    <a href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.sel.html#xarray.DataArray.sel" title="xarray.DataArray.sel" class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-method"><span class="n">ds</span><span class="o">.</span><span class="n">position</span><span class="o">.</span><span class="n">sel</span></a><span class="p">(</span><span class="n">space</span><span class="o">=</span><span class="s2">&quot;y&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
-    <span class="n">s</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
-    <span class="n">c</span><span class="o">=</span><a href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.values.html#xarray.DataArray.values" title="xarray.DataArray.values" class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-property"><span class="n">ds</span><span class="o">.</span><span class="n">category</span><span class="o">.</span><span class="n">values</span></a><span class="p">,</span>
-    <a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.colors.ListedColormap.html#matplotlib.colors.ListedColormap" title="matplotlib.colors.ListedColormap" class="sphx-glr-backref-module-matplotlib-colors sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">cmap</span></a><span class="o">=</span><a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.colors.ListedColormap.html#matplotlib.colors.ListedColormap" title="matplotlib.colors.ListedColormap" class="sphx-glr-backref-module-matplotlib-colors sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">cmap</span></a><span class="p">,</span>
-<span class="p">)</span>
-
-<span class="c1"># Add legend</span>
-<span class="c1"># Note: we use ds.category.values rather than</span>
-<span class="c1"># ds.map_category_to_str.values() because</span>
-<span class="c1"># the array contains the padding value -1,</span>
-<span class="c1"># which is also included in the colormap of the</span>
-<span class="c1"># scatter plot.</span>
-<a href="https://docs.python.org/3/library/stdtypes.html#list" title="builtins.list" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">legend_elements</span></a> <span class="o">=</span> <span class="p">[</span>
-    <a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.lines.Line2D.html#matplotlib.lines.Line2D" title="matplotlib.lines.Line2D" class="sphx-glr-backref-module-matplotlib-lines sphx-glr-backref-type-py-class"><span class="n">plt</span><span class="o">.</span><span class="n">Line2D</span></a><span class="p">([</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.colors.ListedColormap.html#matplotlib.colors.ListedColormap" title="matplotlib.colors.ListedColormap" class="sphx-glr-backref-module-matplotlib-colors sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">cmap</span></a><span class="p">(</span><span class="n">i</span><span class="p">))</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.unique.html#numpy.unique" title="numpy.unique" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">unique</span></a><span class="p">(</span><a href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.values.html#xarray.DataArray.values" title="xarray.DataArray.values" class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-property"><span class="n">ds</span><span class="o">.</span><span class="n">category</span><span class="o">.</span><span class="n">values</span></a><span class="p">)</span>
-<span class="p">]</span>
-<a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.legend.html#matplotlib.pyplot.legend" title="matplotlib.pyplot.legend" class="sphx-glr-backref-module-matplotlib-pyplot sphx-glr-backref-type-py-function"><span class="n">plt</span><span class="o">.</span><span class="n">legend</span></a><span class="p">(</span>
-    <a href="https://docs.python.org/3/library/stdtypes.html#list" title="builtins.list" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">legend_elements</span></a><span class="p">,</span>
-    <a href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="xarray.core.dataset.Dataset" class="sphx-glr-backref-module-xarray-core-dataset sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ds</span></a><span class="o">.</span><span class="n">map_category_to_str</span><span class="o">.</span><span class="n">values</span><span class="p">(),</span>
-    <span class="n">bbox_to_anchor</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
-    <span class="n">loc</span><span class="o">=</span><span class="s2">&quot;best&quot;</span><span class="p">,</span>
-<span class="p">)</span>
-<a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.set_title.html#matplotlib.axes.Axes.set_title" title="matplotlib.axes.Axes.set_title" class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-method"><span class="n">ax</span><span class="o">.</span><span class="n">set_title</span></a><span class="p">(</span><span class="s2">&quot;Annotations per category&quot;</span><span class="p">)</span>
-<a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.set_xlabel.html#matplotlib.axes.Axes.set_xlabel" title="matplotlib.axes.Axes.set_xlabel" class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-method"><span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span></a><span class="p">(</span><span class="s2">&quot;x (pixels)&quot;</span><span class="p">)</span>
-<a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.set_ylabel.html#matplotlib.axes.Axes.set_ylabel" title="matplotlib.axes.Axes.set_ylabel" class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-method"><span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span></a><span class="p">(</span><span class="s2">&quot;y (pixels)&quot;</span><span class="p">)</span>
-<a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.axis.html#matplotlib.axes.Axes.axis" title="matplotlib.axes.Axes.axis" class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-method"><span class="n">ax</span><span class="o">.</span><span class="n">axis</span></a><span class="p">(</span><span class="s2">&quot;equal&quot;</span><span class="p">)</span>
-<a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.invert_yaxis.html#matplotlib.axes.Axes.invert_yaxis" title="matplotlib.axes.Axes.invert_yaxis" class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-method"><span class="n">ax</span><span class="o">.</span><span class="n">invert_yaxis</span></a><span class="p">()</span>
-<a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.tight_layout.html#matplotlib.pyplot.tight_layout" title="matplotlib.pyplot.tight_layout" class="sphx-glr-backref-module-matplotlib-pyplot sphx-glr-backref-type-py-function"><span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span></a><span class="p">()</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span class="c1"># We use a colormap of 10 discrete colours</span><span class="w">
+</span><span class="c1"># (we have 9 categories)</span><span class="w">
+</span><a class="sphx-glr-backref-module-matplotlib-colors sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.colors.ListedColormap.html#matplotlib.colors.ListedColormap" title="matplotlib.colors.ListedColormap"><span class="n">cmap</span></a> <span class="o">=</span> <a class="sphx-glr-backref-module-matplotlib-colors sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.colors.ListedColormap.html#matplotlib.colors.ListedColormap" title="matplotlib.colors.ListedColormap"><span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">tab10</span></a><span class="w">
+</span><span class="w">
+</span><a class="sphx-glr-backref-module-matplotlib-figure sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.figure.Figure.html#matplotlib.figure.Figure" title="matplotlib.figure.Figure"><span class="n">fig</span></a><span class="p">,</span> <a class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes" title="matplotlib.axes.Axes"><span class="n">ax</span></a> <span class="o">=</span> <a class="sphx-glr-backref-module-matplotlib-pyplot sphx-glr-backref-type-py-function reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.subplots.html#matplotlib.pyplot.subplots" title="matplotlib.pyplot.subplots"><span class="n">plt</span><span class="o">.</span><span class="n">subplots</span></a><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span><span class="p">)</span><span class="w">
+</span><span class="w">
+</span><span class="c1"># Plot the centroids of the bounding boxes</span><span class="w">
+</span><a class="sphx-glr-backref-module-matplotlib-collections sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://matplotlib.org/stable/api/collections_api.html#matplotlib.collections.PathCollection" title="matplotlib.collections.PathCollection"><span class="n">sc</span></a> <span class="o">=</span> <a class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-method reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.scatter.html#matplotlib.axes.Axes.scatter" title="matplotlib.axes.Axes.scatter"><span class="n">ax</span><span class="o">.</span><span class="n">scatter</span></a><span class="p">(</span><span class="w">
+</span>    <a class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-method reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.sel.html#xarray.DataArray.sel" title="xarray.DataArray.sel"><span class="n">ds</span><span class="o">.</span><span class="n">position</span><span class="o">.</span><span class="n">sel</span></a><span class="p">(</span><span class="n">space</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">x</span><span class="s2">&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">,</span><span class="w">
+</span>    <a class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-method reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.sel.html#xarray.DataArray.sel" title="xarray.DataArray.sel"><span class="n">ds</span><span class="o">.</span><span class="n">position</span><span class="o">.</span><span class="n">sel</span></a><span class="p">(</span><span class="n">space</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">y</span><span class="s2">&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">,</span><span class="w">
+</span>    <span class="n">s</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span><span class="w">
+</span>    <span class="n">c</span><span class="o">=</span><a class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-property reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.values.html#xarray.DataArray.values" title="xarray.DataArray.values"><span class="n">ds</span><span class="o">.</span><span class="n">category</span><span class="o">.</span><span class="n">values</span></a><span class="p">,</span><span class="w">
+</span>    <a class="sphx-glr-backref-module-matplotlib-colors sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.colors.ListedColormap.html#matplotlib.colors.ListedColormap" title="matplotlib.colors.ListedColormap"><span class="n">cmap</span></a><span class="o">=</span><a class="sphx-glr-backref-module-matplotlib-colors sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.colors.ListedColormap.html#matplotlib.colors.ListedColormap" title="matplotlib.colors.ListedColormap"><span class="n">cmap</span></a><span class="p">,</span><span class="w">
+</span><span class="p">)</span><span class="w">
+</span><span class="w">
+</span><span class="c1"># Add legend</span><span class="w">
+</span><span class="c1"># Note: we use ds.category.values rather than</span><span class="w">
+</span><span class="c1"># ds.map_category_to_str.values() because</span><span class="w">
+</span><span class="c1"># the array contains the padding value -1,</span><span class="w">
+</span><span class="c1"># which is also included in the colormap of the</span><span class="w">
+</span><span class="c1"># scatter plot.</span><span class="w">
+</span><a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="list"><span class="n">legend_elements</span></a> <span class="o">=</span> <span class="p">[</span><span class="w">
+</span>    <a class="sphx-glr-backref-module-matplotlib-lines sphx-glr-backref-type-py-class reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.lines.Line2D.html#matplotlib.lines.Line2D" title="matplotlib.lines.Line2D"><span class="n">plt</span><span class="o">.</span><span class="n">Line2D</span></a><span class="p">(</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><a class="sphx-glr-backref-module-matplotlib-colors sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.colors.ListedColormap.html#matplotlib.colors.ListedColormap" title="matplotlib.colors.ListedColormap"><span class="n">cmap</span></a><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.unique.html#numpy.unique" title="numpy.unique"><span class="n">np</span><span class="o">.</span><span class="n">unique</span></a><span class="p">(</span><a class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-property reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.values.html#xarray.DataArray.values" title="xarray.DataArray.values"><span class="n">ds</span><span class="o">.</span><span class="n">category</span><span class="o">.</span><span class="n">values</span></a><span class="p">)</span><span class="w">
+</span><span class="p">]</span><span class="w">
+</span><a class="sphx-glr-backref-module-matplotlib-pyplot sphx-glr-backref-type-py-function reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.legend.html#matplotlib.pyplot.legend" title="matplotlib.pyplot.legend"><span class="n">plt</span><span class="o">.</span><span class="n">legend</span></a><span class="p">(</span><span class="w">
+</span>    <a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="list"><span class="n">legend_elements</span></a><span class="p">,</span><span class="w">
+</span>    <a class="sphx-glr-backref-module-xarray-core-dataset sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="xarray.core.dataset.Dataset"><span class="n">ds</span></a><span class="o">.</span><span class="n">map_category_to_str</span><span class="o">.</span><span class="n">values</span><span class="p">(</span><span class="p">)</span><span class="p">,</span><span class="w">
+</span>    <span class="n">bbox_to_anchor</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span><span class="p">,</span><span class="w">
+</span>    <span class="n">loc</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">best</span><span class="s2">&quot;</span><span class="p">,</span><span class="w">
+</span><span class="p">)</span><span class="w">
+</span><a class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-method reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.set_title.html#matplotlib.axes.Axes.set_title" title="matplotlib.axes.Axes.set_title"><span class="n">ax</span><span class="o">.</span><span class="n">set_title</span></a><span class="p">(</span><span class="s2">&quot;</span><span class="s2">Annotations per category</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><a class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-method reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.set_xlabel.html#matplotlib.axes.Axes.set_xlabel" title="matplotlib.axes.Axes.set_xlabel"><span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span></a><span class="p">(</span><span class="s2">&quot;</span><span class="s2">x (pixels)</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><a class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-method reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.set_ylabel.html#matplotlib.axes.Axes.set_ylabel" title="matplotlib.axes.Axes.set_ylabel"><span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span></a><span class="p">(</span><span class="s2">&quot;</span><span class="s2">y (pixels)</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><a class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-method reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.axis.html#matplotlib.axes.Axes.axis" title="matplotlib.axes.Axes.axis"><span class="n">ax</span><span class="o">.</span><span class="n">axis</span></a><span class="p">(</span><span class="s2">&quot;</span><span class="s2">equal</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><a class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-method reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.invert_yaxis.html#matplotlib.axes.Axes.invert_yaxis" title="matplotlib.axes.Axes.invert_yaxis"><span class="n">ax</span><span class="o">.</span><span class="n">invert_yaxis</span></a><span class="p">(</span><span class="p">)</span><span class="w">
+</span><a class="sphx-glr-backref-module-matplotlib-pyplot sphx-glr-backref-type-py-function reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.tight_layout.html#matplotlib.pyplot.tight_layout" title="matplotlib.pyplot.tight_layout"><span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span></a><span class="p">(</span><span class="p">)</span><span class="w">
+</span></pre></div></div>
+<img src="../_images/sphx_glr_coco_bbox_ethology_and_movement_001.png" srcset="../_images/sphx_glr_coco_bbox_ethology_and_movement_001.png" alt="Annotations per category" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/home/runner/work/ethology/ethology/examples/coco_bbox_ethology_and_movement.py:173: UserWarning: Mismatched number of handles and labels: len(handles) = 10 len(labels) = 9
+  plt.legend(
 </pre></div>
 </div>
-<img src="../_images/sphx_glr_coco_bbox_ethology_and_movement_001.png" srcset="../_images/sphx_glr_coco_bbox_ethology_and_movement_001.png" alt="Annotations per category" class = "sphx-glr-single-img"/></section>
+</section>
 <section id="count-annotations-within-a-region-of-interest">
 <h2>Count annotations within a region of interest<a class="headerlink" href="#count-annotations-within-a-region-of-interest" title="Link to this heading">#</a></h2>
 <p>We may want to compute the number of annotations within a specific region of
@@ -679,46 +701,45 @@ the image. We can do this using
 <a class="reference external" href="https://movement.neuroinformatics.dev/">movement</a>
 to define a <a class="reference external" href="https://movement.neuroinformatics.dev/latest/api/movement.roi.PolygonOfInterest.html#movement.roi.PolygonOfInterest" title="(in movement)"><code class="xref py py-class docutils literal notranslate"><span class="pre">movement.roi.PolygonOfInterest</span></code></a> and then
 count how many annotations are within the polygon.</p>
-<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Define a polygon</span>
-<a href="https://movement.neuroinformatics.dev/latest/api/movement.roi.PolygonOfInterest.html#movement.roi.PolygonOfInterest" title="movement.roi.PolygonOfInterest" class="sphx-glr-backref-module-movement-roi sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">central_region</span></a> <span class="o">=</span> <a href="https://movement.neuroinformatics.dev/latest/api/movement.roi.PolygonOfInterest.html#movement.roi.PolygonOfInterest" title="movement.roi.PolygonOfInterest" class="sphx-glr-backref-module-movement-roi sphx-glr-backref-type-py-class"><span class="n">PolygonOfInterest</span></a><span class="p">(</span>
-    <span class="p">((</span><span class="mi">1000</span><span class="p">,</span> <span class="mi">500</span><span class="p">),</span> <span class="p">(</span><span class="mi">1000</span><span class="p">,</span> <span class="mi">3000</span><span class="p">),</span> <span class="p">(</span><span class="mi">4500</span><span class="p">,</span> <span class="mi">3000</span><span class="p">),</span> <span class="p">(</span><span class="mi">4500</span><span class="p">,</span> <span class="mi">500</span><span class="p">)),</span>
-    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Central region&quot;</span><span class="p">,</span>
-<span class="p">)</span>
-
-<span class="c1"># Plot all annotations</span>
-<a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.figure.Figure.html#matplotlib.figure.Figure" title="matplotlib.figure.Figure" class="sphx-glr-backref-module-matplotlib-figure sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">fig</span></a><span class="p">,</span> <a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes" title="matplotlib.axes.Axes" class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ax</span></a> <span class="o">=</span> <a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.subplots.html#matplotlib.pyplot.subplots" title="matplotlib.pyplot.subplots" class="sphx-glr-backref-module-matplotlib-pyplot sphx-glr-backref-type-py-function"><span class="n">plt</span><span class="o">.</span><span class="n">subplots</span></a><span class="p">()</span>
-<a href="https://matplotlib.org/stable/api/collections_api.html#matplotlib.collections.PathCollection" title="matplotlib.collections.PathCollection" class="sphx-glr-backref-module-matplotlib-collections sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">sc</span></a> <span class="o">=</span> <a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.scatter.html#matplotlib.axes.Axes.scatter" title="matplotlib.axes.Axes.scatter" class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-method"><span class="n">ax</span><span class="o">.</span><span class="n">scatter</span></a><span class="p">(</span>
-    <a href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.sel.html#xarray.DataArray.sel" title="xarray.DataArray.sel" class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-method"><span class="n">ds</span><span class="o">.</span><span class="n">position</span><span class="o">.</span><span class="n">sel</span></a><span class="p">(</span><span class="n">space</span><span class="o">=</span><span class="s2">&quot;x&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
-    <a href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.sel.html#xarray.DataArray.sel" title="xarray.DataArray.sel" class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-method"><span class="n">ds</span><span class="o">.</span><span class="n">position</span><span class="o">.</span><span class="n">sel</span></a><span class="p">(</span><span class="n">space</span><span class="o">=</span><span class="s2">&quot;y&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
-    <span class="n">s</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
-    <span class="n">c</span><span class="o">=</span><a href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.values.html#xarray.DataArray.values" title="xarray.DataArray.values" class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-property"><span class="n">ds</span><span class="o">.</span><span class="n">category</span><span class="o">.</span><span class="n">values</span></a><span class="p">,</span>
-    <a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.colors.ListedColormap.html#matplotlib.colors.ListedColormap" title="matplotlib.colors.ListedColormap" class="sphx-glr-backref-module-matplotlib-colors sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">cmap</span></a><span class="o">=</span><a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.colors.ListedColormap.html#matplotlib.colors.ListedColormap" title="matplotlib.colors.ListedColormap" class="sphx-glr-backref-module-matplotlib-colors sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">cmap</span></a><span class="p">,</span>
-<span class="p">)</span>
-<a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.set_title.html#matplotlib.axes.Axes.set_title" title="matplotlib.axes.Axes.set_title" class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-method"><span class="n">ax</span><span class="o">.</span><span class="n">set_title</span></a><span class="p">(</span><span class="s2">&quot;Annotations in polygon&quot;</span><span class="p">)</span>
-<a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.set_xlabel.html#matplotlib.axes.Axes.set_xlabel" title="matplotlib.axes.Axes.set_xlabel" class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-method"><span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span></a><span class="p">(</span><span class="s2">&quot;x (pixels)&quot;</span><span class="p">)</span>
-<a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.set_ylabel.html#matplotlib.axes.Axes.set_ylabel" title="matplotlib.axes.Axes.set_ylabel" class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-method"><span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span></a><span class="p">(</span><span class="s2">&quot;y (pixels)&quot;</span><span class="p">)</span>
-<a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.axis.html#matplotlib.axes.Axes.axis" title="matplotlib.axes.Axes.axis" class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-method"><span class="n">ax</span><span class="o">.</span><span class="n">axis</span></a><span class="p">(</span><span class="s2">&quot;equal&quot;</span><span class="p">)</span>
-<a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.invert_yaxis.html#matplotlib.axes.Axes.invert_yaxis" title="matplotlib.axes.Axes.invert_yaxis" class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-method"><span class="n">ax</span><span class="o">.</span><span class="n">invert_yaxis</span></a><span class="p">()</span>
-
-
-<span class="c1"># Plot ROI (region of interest) polygon on top</span>
-<a href="https://movement.neuroinformatics.dev/latest/api/movement.roi.PolygonOfInterest.html#movement.roi.PolygonOfInterest.plot" title="movement.roi.PolygonOfInterest.plot" class="sphx-glr-backref-module-movement-roi sphx-glr-backref-type-py-method"><span class="n">central_region</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span><a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes" title="matplotlib.axes.Axes" class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ax</span></a><span class="p">,</span> <span class="n">facecolor</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.25</span><span class="p">)</span>
-
-<span class="c1"># Check the number of annotations in the polygon</span>
-<span class="c1"># Note: if position is NaN, ``.contains_point`` returns ``False``</span>
-<a href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.html#xarray.DataArray" title="xarray.core.dataarray.DataArray" class="sphx-glr-backref-module-xarray-core-dataarray sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ds_in_region</span></a> <span class="o">=</span> <a href="https://movement.neuroinformatics.dev/latest/api/movement.roi.PolygonOfInterest.html#movement.roi.PolygonOfInterest.contains_point" title="movement.roi.PolygonOfInterest.contains_point" class="sphx-glr-backref-module-movement-roi sphx-glr-backref-type-py-method"><span class="n">central_region</span><span class="o">.</span><span class="n">contains_point</span></a><span class="p">(</span>
-    <a href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.html#xarray.DataArray" title="xarray.core.dataarray.DataArray" class="sphx-glr-backref-module-xarray-core-dataarray sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ds</span><span class="o">.</span><span class="n">position</span></a>
-<span class="p">)</span>  <span class="c1"># shape: (n_images, n_max_annotations_per_image)</span>
-
-<a href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.html#xarray.DataArray" title="xarray.core.dataarray.DataArray" class="sphx-glr-backref-module-xarray-core-dataarray sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">n_annotations_in_region</span></a> <span class="o">=</span> <a href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.sum.html#xarray.DataArray.sum" title="xarray.DataArray.sum" class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-method"><span class="n">ds_in_region</span><span class="o">.</span><span class="n">sum</span></a><span class="p">()</span>
-<a href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.html#xarray.DataArray" title="xarray.core.dataarray.DataArray" class="sphx-glr-backref-module-xarray-core-dataarray sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">n_annotations_total</span></a> <span class="o">=</span> <span class="p">(</span><span class="o">~</span><a href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.isnull.html#xarray.DataArray.isnull" title="xarray.DataArray.isnull" class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-method"><span class="n">ds</span><span class="o">.</span><span class="n">position</span><span class="o">.</span><span class="n">isnull</span></a><span class="p">()</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
-<a href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.html#xarray.DataArray" title="xarray.core.dataarray.DataArray" class="sphx-glr-backref-module-xarray-core-dataarray sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">fraction_in_region</span></a> <span class="o">=</span> <a href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.html#xarray.DataArray" title="xarray.core.dataarray.DataArray" class="sphx-glr-backref-module-xarray-core-dataarray sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">n_annotations_in_region</span></a> <span class="o">/</span> <a href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.html#xarray.DataArray" title="xarray.core.dataarray.DataArray" class="sphx-glr-backref-module-xarray-core-dataarray sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">n_annotations_total</span></a>
-
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Total annotations: </span><span class="si">{</span><a href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.item.html#xarray.DataArray.item" title="xarray.DataArray.item" class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-method"><span class="n">n_annotations_total</span><span class="o">.</span><span class="n">item</span></a><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Annotations in region: </span><span class="si">{</span><a href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.item.html#xarray.DataArray.item" title="xarray.DataArray.item" class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-method"><span class="n">n_annotations_in_region</span><span class="o">.</span><span class="n">item</span></a><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Fraction of annotations in region: </span><span class="si">{</span><a href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.html#xarray.DataArray" title="xarray.core.dataarray.DataArray" class="sphx-glr-backref-module-xarray-core-dataarray sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">fraction_in_region</span></a><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">100</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">%&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span class="c1"># Define a polygon</span><span class="w">
+</span><a class="sphx-glr-backref-module-movement-roi sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://movement.neuroinformatics.dev/latest/api/movement.roi.PolygonOfInterest.html#movement.roi.PolygonOfInterest" title="movement.roi.PolygonOfInterest"><span class="n">central_region</span></a> <span class="o">=</span> <a class="sphx-glr-backref-module-movement-roi sphx-glr-backref-type-py-class reference external" href="https://movement.neuroinformatics.dev/latest/api/movement.roi.PolygonOfInterest.html#movement.roi.PolygonOfInterest" title="movement.roi.PolygonOfInterest"><span class="n">PolygonOfInterest</span></a><span class="p">(</span><span class="w">
+</span>    <span class="p">(</span><span class="p">(</span><span class="mi">1000</span><span class="p">,</span> <span class="mi">500</span><span class="p">)</span><span class="p">,</span> <span class="p">(</span><span class="mi">1000</span><span class="p">,</span> <span class="mi">3000</span><span class="p">)</span><span class="p">,</span> <span class="p">(</span><span class="mi">4500</span><span class="p">,</span> <span class="mi">3000</span><span class="p">)</span><span class="p">,</span> <span class="p">(</span><span class="mi">4500</span><span class="p">,</span> <span class="mi">500</span><span class="p">)</span><span class="p">)</span><span class="p">,</span><span class="w">
+</span>    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">Central region</span><span class="s2">&quot;</span><span class="p">,</span><span class="w">
+</span><span class="p">)</span><span class="w">
+</span><span class="w">
+</span><span class="c1"># Plot all annotations</span><span class="w">
+</span><a class="sphx-glr-backref-module-matplotlib-figure sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.figure.Figure.html#matplotlib.figure.Figure" title="matplotlib.figure.Figure"><span class="n">fig</span></a><span class="p">,</span> <a class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes" title="matplotlib.axes.Axes"><span class="n">ax</span></a> <span class="o">=</span> <a class="sphx-glr-backref-module-matplotlib-pyplot sphx-glr-backref-type-py-function reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.subplots.html#matplotlib.pyplot.subplots" title="matplotlib.pyplot.subplots"><span class="n">plt</span><span class="o">.</span><span class="n">subplots</span></a><span class="p">(</span><span class="p">)</span><span class="w">
+</span><a class="sphx-glr-backref-module-matplotlib-collections sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://matplotlib.org/stable/api/collections_api.html#matplotlib.collections.PathCollection" title="matplotlib.collections.PathCollection"><span class="n">sc</span></a> <span class="o">=</span> <a class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-method reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.scatter.html#matplotlib.axes.Axes.scatter" title="matplotlib.axes.Axes.scatter"><span class="n">ax</span><span class="o">.</span><span class="n">scatter</span></a><span class="p">(</span><span class="w">
+</span>    <a class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-method reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.sel.html#xarray.DataArray.sel" title="xarray.DataArray.sel"><span class="n">ds</span><span class="o">.</span><span class="n">position</span><span class="o">.</span><span class="n">sel</span></a><span class="p">(</span><span class="n">space</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">x</span><span class="s2">&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">,</span><span class="w">
+</span>    <a class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-method reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.sel.html#xarray.DataArray.sel" title="xarray.DataArray.sel"><span class="n">ds</span><span class="o">.</span><span class="n">position</span><span class="o">.</span><span class="n">sel</span></a><span class="p">(</span><span class="n">space</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">y</span><span class="s2">&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">,</span><span class="w">
+</span>    <span class="n">s</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span><span class="w">
+</span>    <span class="n">c</span><span class="o">=</span><a class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-property reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.values.html#xarray.DataArray.values" title="xarray.DataArray.values"><span class="n">ds</span><span class="o">.</span><span class="n">category</span><span class="o">.</span><span class="n">values</span></a><span class="p">,</span><span class="w">
+</span>    <a class="sphx-glr-backref-module-matplotlib-colors sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.colors.ListedColormap.html#matplotlib.colors.ListedColormap" title="matplotlib.colors.ListedColormap"><span class="n">cmap</span></a><span class="o">=</span><a class="sphx-glr-backref-module-matplotlib-colors sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.colors.ListedColormap.html#matplotlib.colors.ListedColormap" title="matplotlib.colors.ListedColormap"><span class="n">cmap</span></a><span class="p">,</span><span class="w">
+</span><span class="p">)</span><span class="w">
+</span><a class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-method reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.set_title.html#matplotlib.axes.Axes.set_title" title="matplotlib.axes.Axes.set_title"><span class="n">ax</span><span class="o">.</span><span class="n">set_title</span></a><span class="p">(</span><span class="s2">&quot;</span><span class="s2">Annotations in polygon</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><a class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-method reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.set_xlabel.html#matplotlib.axes.Axes.set_xlabel" title="matplotlib.axes.Axes.set_xlabel"><span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span></a><span class="p">(</span><span class="s2">&quot;</span><span class="s2">x (pixels)</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><a class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-method reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.set_ylabel.html#matplotlib.axes.Axes.set_ylabel" title="matplotlib.axes.Axes.set_ylabel"><span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span></a><span class="p">(</span><span class="s2">&quot;</span><span class="s2">y (pixels)</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><a class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-method reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.axis.html#matplotlib.axes.Axes.axis" title="matplotlib.axes.Axes.axis"><span class="n">ax</span><span class="o">.</span><span class="n">axis</span></a><span class="p">(</span><span class="s2">&quot;</span><span class="s2">equal</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><a class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-method reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.invert_yaxis.html#matplotlib.axes.Axes.invert_yaxis" title="matplotlib.axes.Axes.invert_yaxis"><span class="n">ax</span><span class="o">.</span><span class="n">invert_yaxis</span></a><span class="p">(</span><span class="p">)</span><span class="w">
+</span><span class="w">
+</span><span class="w">
+</span><span class="c1"># Plot ROI (region of interest) polygon on top</span><span class="w">
+</span><a class="sphx-glr-backref-module-movement-roi sphx-glr-backref-type-py-method reference external" href="https://movement.neuroinformatics.dev/latest/api/movement.roi.PolygonOfInterest.html#movement.roi.PolygonOfInterest.plot" title="movement.roi.PolygonOfInterest.plot"><span class="n">central_region</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span><a class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes" title="matplotlib.axes.Axes"><span class="n">ax</span></a><span class="p">,</span> <span class="n">facecolor</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">red</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">red</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.25</span><span class="p">)</span><span class="w">
+</span><span class="w">
+</span><span class="c1"># Check the number of annotations in the polygon</span><span class="w">
+</span><span class="c1"># Note: if position is NaN, ``.contains_point`` returns ``False``</span><span class="w">
+</span><a class="sphx-glr-backref-module-xarray-core-dataarray sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.html#xarray.DataArray" title="xarray.core.dataarray.DataArray"><span class="n">ds_in_region</span></a> <span class="o">=</span> <a class="sphx-glr-backref-module-movement-roi sphx-glr-backref-type-py-method reference external" href="https://movement.neuroinformatics.dev/latest/api/movement.roi.PolygonOfInterest.html#movement.roi.PolygonOfInterest.contains_point" title="movement.roi.PolygonOfInterest.contains_point"><span class="n">central_region</span><span class="o">.</span><span class="n">contains_point</span></a><span class="p">(</span><span class="w">
+</span>    <a class="sphx-glr-backref-module-xarray-core-dataarray sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.html#xarray.DataArray" title="xarray.core.dataarray.DataArray"><span class="n">ds</span><span class="o">.</span><span class="n">position</span></a><span class="w">
+</span><span class="p">)</span>  <span class="c1"># shape: (n_images, n_max_annotations_per_image)</span><span class="w">
+</span><span class="w">
+</span><a class="sphx-glr-backref-module-xarray-core-dataarray sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.html#xarray.DataArray" title="xarray.core.dataarray.DataArray"><span class="n">n_annotations_in_region</span></a> <span class="o">=</span> <a class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-method reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.sum.html#xarray.DataArray.sum" title="xarray.DataArray.sum"><span class="n">ds_in_region</span><span class="o">.</span><span class="n">sum</span></a><span class="p">(</span><span class="p">)</span><span class="w">
+</span><a class="sphx-glr-backref-module-xarray-core-dataarray sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.html#xarray.DataArray" title="xarray.core.dataarray.DataArray"><span class="n">n_annotations_total</span></a> <span class="o">=</span> <span class="p">(</span><span class="o">~</span><a class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-method reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.isnull.html#xarray.DataArray.isnull" title="xarray.DataArray.isnull"><span class="n">ds</span><span class="o">.</span><span class="n">position</span><span class="o">.</span><span class="n">isnull</span></a><span class="p">(</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="p">)</span><span class="w">
+</span><a class="sphx-glr-backref-module-xarray-core-dataarray sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.html#xarray.DataArray" title="xarray.core.dataarray.DataArray"><span class="n">fraction_in_region</span></a> <span class="o">=</span> <a class="sphx-glr-backref-module-xarray-core-dataarray sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.html#xarray.DataArray" title="xarray.core.dataarray.DataArray"><span class="n">n_annotations_in_region</span></a> <span class="o">/</span> <a class="sphx-glr-backref-module-xarray-core-dataarray sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.html#xarray.DataArray" title="xarray.core.dataarray.DataArray"><span class="n">n_annotations_total</span></a><span class="w">
+</span><span class="w">
+</span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="s2">Total annotations: </span><span class="si">{</span><a class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-method reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.item.html#xarray.DataArray.item" title="xarray.DataArray.item"><span class="n">n_annotations_total</span><span class="o">.</span><span class="n">item</span></a><span class="p">(</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="s2">Annotations in region: </span><span class="si">{</span><a class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-method reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.item.html#xarray.DataArray.item" title="xarray.DataArray.item"><span class="n">n_annotations_in_region</span><span class="o">.</span><span class="n">item</span></a><span class="p">(</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="s2">Fraction of annotations in region: </span><span class="si">{</span><a class="sphx-glr-backref-module-xarray-core-dataarray sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.html#xarray.DataArray" title="xarray.core.dataarray.DataArray"><span class="n">fraction_in_region</span></a><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">100</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">%</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span></pre></div></div>
 <img src="../_images/sphx_glr_coco_bbox_ethology_and_movement_002.png" srcset="../_images/sphx_glr_coco_bbox_ethology_and_movement_002.png" alt="Annotations in polygon" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Total annotations: 2243
 Annotations in region: 1155
 Fraction of annotations in region: 51.49%
@@ -734,50 +755,49 @@ our annotations dataset to a <code class="docutils literal notranslate"><span cl
 <p>To do this, we need to rename the dataset dimensions,
 add a <code class="docutils literal notranslate"><span class="pre">confidence</span></code> array, and add a <code class="docutils literal notranslate"><span class="pre">time_unit</span></code> attribute.
 Although it is not required, we also rename the
-<code class="docutils literal notranslate"><span class="pre">individuals</span></code> coordinate values to follow the <code class="docutils literal notranslate"><span class="pre">movement</span></code>
+<code class="docutils literal notranslate"><span class="pre">individual</span></code> coordinate values to follow the <code class="docutils literal notranslate"><span class="pre">movement</span></code>
 naming convention.</p>
-<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Rename dimensions</span>
-<a href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="xarray.core.dataset.Dataset" class="sphx-glr-backref-module-xarray-core-dataset sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ds_as_movement</span></a> <span class="o">=</span> <a href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.rename.html#xarray.Dataset.rename" title="xarray.Dataset.rename" class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-method"><span class="n">ds</span><span class="o">.</span><span class="n">rename</span></a><span class="p">({</span><span class="s2">&quot;image_id&quot;</span><span class="p">:</span> <span class="s2">&quot;time&quot;</span><span class="p">,</span> <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;individuals&quot;</span><span class="p">})</span>
-
-<span class="c1"># Rename &#39;individuals&#39; values to follow ``movement`` convention</span>
-<a href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="xarray.core.dataset.Dataset" class="sphx-glr-backref-module-xarray-core-dataset sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ds_as_movement</span></a><span class="p">[</span><span class="s2">&quot;individuals&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="sa">f</span><span class="s2">&quot;id_</span><span class="si">{</span><span class="n">i</span><span class="o">.</span><span class="n">item</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <a href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.values.html#xarray.DataArray.values" title="xarray.DataArray.values" class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-property"><span class="n">ds_as_movement</span><span class="o">.</span><span class="n">individuals</span><span class="o">.</span><span class="n">values</span></a>
-<span class="p">]</span>
-
-<span class="c1"># Add confidence array with NaNs</span>
-<a href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="xarray.core.dataset.Dataset" class="sphx-glr-backref-module-xarray-core-dataset sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ds_as_movement</span></a><span class="p">[</span><span class="s2">&quot;confidence&quot;</span><span class="p">]</span> <span class="o">=</span> <a href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.html#xarray.DataArray" title="xarray.core.dataarray.DataArray" class="sphx-glr-backref-module-xarray-core-dataarray sphx-glr-backref-type-py-class"><span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span></a><span class="p">(</span>
-    <a href="https://numpy.org/doc/stable/reference/generated/numpy.full.html#numpy.full" title="numpy.full" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">full</span></a><span class="p">(</span>
-        <span class="p">(</span>
-            <a href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.sizes.html#xarray.Dataset.sizes" title="xarray.Dataset.sizes" class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-property"><span class="n">ds_as_movement</span><span class="o">.</span><span class="n">sizes</span></a><span class="p">[</span><span class="s2">&quot;time&quot;</span><span class="p">],</span>
-            <a href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.sizes.html#xarray.Dataset.sizes" title="xarray.Dataset.sizes" class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-property"><span class="n">ds_as_movement</span><span class="o">.</span><span class="n">sizes</span></a><span class="p">[</span><span class="s2">&quot;individuals&quot;</span><span class="p">],</span>
-        <span class="p">),</span>
-        <a href="https://docs.python.org/3/library/functions.html#float" title="builtins.float" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">np</span><span class="o">.</span><span class="n">nan</span></a><span class="p">,</span>
-    <span class="p">),</span>
-    <span class="n">dims</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;time&quot;</span><span class="p">,</span> <span class="s2">&quot;individuals&quot;</span><span class="p">],</span>
-<span class="p">)</span>
-
-<span class="c1"># Add time_unit attribute</span>
-<a href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.attrs.html#xarray.Dataset.attrs" title="xarray.Dataset.attrs" class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-property"><span class="n">ds_as_movement</span><span class="o">.</span><span class="n">attrs</span></a><span class="p">[</span><span class="s2">&quot;time_unit&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;frames&quot;</span>
-
-
-<span class="nb">print</span><span class="p">(</span><a href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="xarray.core.dataset.Dataset" class="sphx-glr-backref-module-xarray-core-dataset sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ds_as_movement</span></a><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><a href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.sizes.html#xarray.Dataset.sizes" title="xarray.Dataset.sizes" class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-property"><span class="n">ds_as_movement</span><span class="o">.</span><span class="n">sizes</span></a><span class="p">)</span>
-</pre></div>
-</div>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;xarray.Dataset&gt; Size: 433kB
-Dimensions:      (time: 12, space: 2, individuals: 722)
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span class="c1"># Rename dimensions</span><span class="w">
+</span><a class="sphx-glr-backref-module-xarray-core-dataset sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="xarray.core.dataset.Dataset"><span class="n">ds_as_movement</span></a> <span class="o">=</span> <a class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-method reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.rename.html#xarray.Dataset.rename" title="xarray.Dataset.rename"><span class="n">ds</span><span class="o">.</span><span class="n">rename</span></a><span class="p">(</span><span class="p">{</span><span class="s2">&quot;</span><span class="s2">image_id</span><span class="s2">&quot;</span><span class="p">:</span> <span class="s2">&quot;</span><span class="s2">time</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="s2">id</span><span class="s2">&quot;</span><span class="p">:</span> <span class="s2">&quot;</span><span class="s2">individual</span><span class="s2">&quot;</span><span class="p">}</span><span class="p">)</span><span class="w">
+</span><span class="w">
+</span><span class="c1"># Rename 'individual' values to follow ``movement`` convention</span><span class="w">
+</span><a class="sphx-glr-backref-module-xarray-core-dataset sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="xarray.core.dataset.Dataset"><span class="n">ds_as_movement</span></a><span class="p">[</span><span class="s2">&quot;</span><span class="s2">individual</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="w">
+</span>    <span class="sa">f</span><span class="s2">&quot;</span><span class="s2">id_</span><span class="si">{</span><span class="n">i</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <a class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-property reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.values.html#xarray.DataArray.values" title="xarray.DataArray.values"><span class="n">ds_as_movement</span><span class="o">.</span><span class="n">individual</span><span class="o">.</span><span class="n">values</span></a><span class="w">
+</span><span class="p">]</span><span class="w">
+</span><span class="w">
+</span><span class="c1"># Add confidence array with NaNs</span><span class="w">
+</span><a class="sphx-glr-backref-module-xarray-core-dataset sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="xarray.core.dataset.Dataset"><span class="n">ds_as_movement</span></a><span class="p">[</span><span class="s2">&quot;</span><span class="s2">confidence</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">=</span> <a class="sphx-glr-backref-module-xarray-core-dataarray sphx-glr-backref-type-py-class reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.html#xarray.DataArray" title="xarray.core.dataarray.DataArray"><span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span></a><span class="p">(</span><span class="w">
+</span>    <a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.full.html#numpy.full" title="numpy.full"><span class="n">np</span><span class="o">.</span><span class="n">full</span></a><span class="p">(</span><span class="w">
+</span>        <span class="p">(</span><span class="w">
+</span>            <a class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-property reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.sizes.html#xarray.Dataset.sizes" title="xarray.Dataset.sizes"><span class="n">ds_as_movement</span><span class="o">.</span><span class="n">sizes</span></a><span class="p">[</span><span class="s2">&quot;</span><span class="s2">time</span><span class="s2">&quot;</span><span class="p">]</span><span class="p">,</span><span class="w">
+</span>            <a class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-property reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.sizes.html#xarray.Dataset.sizes" title="xarray.Dataset.sizes"><span class="n">ds_as_movement</span><span class="o">.</span><span class="n">sizes</span></a><span class="p">[</span><span class="s2">&quot;</span><span class="s2">individual</span><span class="s2">&quot;</span><span class="p">]</span><span class="p">,</span><span class="w">
+</span>        <span class="p">)</span><span class="p">,</span><span class="w">
+</span>        <a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="float"><span class="n">np</span><span class="o">.</span><span class="n">nan</span></a><span class="p">,</span><span class="w">
+</span>    <span class="p">)</span><span class="p">,</span><span class="w">
+</span>    <span class="n">dims</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;</span><span class="s2">time</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="s2">individual</span><span class="s2">&quot;</span><span class="p">]</span><span class="p">,</span><span class="w">
+</span><span class="p">)</span><span class="w">
+</span><span class="w">
+</span><span class="c1"># Add time_unit attribute</span><span class="w">
+</span><a class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-property reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.attrs.html#xarray.Dataset.attrs" title="xarray.Dataset.attrs"><span class="n">ds_as_movement</span><span class="o">.</span><span class="n">attrs</span></a><span class="p">[</span><span class="s2">&quot;</span><span class="s2">time_unit</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="s2">frames</span><span class="s2">&quot;</span><span class="w">
+</span><span class="w">
+</span><span class="w">
+</span><span class="nb">print</span><span class="p">(</span><a class="sphx-glr-backref-module-xarray-core-dataset sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="xarray.core.dataset.Dataset"><span class="n">ds_as_movement</span></a><span class="p">)</span><span class="w">
+</span><span class="nb">print</span><span class="p">(</span><a class="sphx-glr-backref-module-xarray sphx-glr-backref-type-py-property reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.sizes.html#xarray.Dataset.sizes" title="xarray.Dataset.sizes"><span class="n">ds_as_movement</span><span class="o">.</span><span class="n">sizes</span></a><span class="p">)</span><span class="w">
+</span></pre></div></div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;xarray.Dataset&gt; Size: 434kB
+Dimensions:      (time: 12, space: 2, individual: 722)
 Coordinates:
   * time         (time) int64 96B 0 1 2 3 4 5 6 7 8 9 10 11
-  * space        (space) &lt;U1 8B &#39;x&#39; &#39;y&#39;
-  * individuals  (individuals) &lt;U6 17kB &#39;id_0&#39; &#39;id_1&#39; ... &#39;id_720&#39; &#39;id_721&#39;
+  * space        (space) object 16B 'x' 'y'
+  * individual   (individual) &lt;U6 17kB 'id_0' 'id_1' ... 'id_720' 'id_721'
 Data variables:
-    position     (time, space, individuals) float64 139kB 4.493e+03 ... nan
-    shape        (time, space, individuals) float64 139kB 95.0 43.0 ... nan nan
+    position     (time, space, individual) float64 139kB 4.493e+03 ... nan
+    shape        (time, space, individual) float64 139kB 95.0 43.0 ... nan nan
     image_shape  (time, space) int64 192B 5472 3648 5472 3648 ... 3648 5472 3648
-    category     (time, individuals) int64 69kB 1 4 3 3 3 3 ... -1 -1 -1 -1 -1
-    confidence   (time, individuals) float64 69kB nan nan nan ... nan nan nan
+    category     (time, individual) int64 69kB 1 4 3 3 3 3 ... -1 -1 -1 -1 -1 -1
+    confidence   (time, individual) float64 69kB nan nan nan nan ... nan nan nan
 Attributes: (6)
-Frozen({&#39;time&#39;: 12, &#39;space&#39;: 2, &#39;individuals&#39;: 722})
+Frozen({'time': 12, 'space': 2, 'individual': 722})
 </pre></div>
 </div>
 <p>Since this dataset represents manually labelled data, there isn’t
@@ -797,40 +817,38 @@ that shows for each 2D bin the number of annotations that fall within it.</p>
 <p>To define similar-sized bins along each dimension, we use the aspect ratio
 of the images. This makes the occupancy map more informative. Note that all
 images have the same dimensions.</p>
-<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Determine aspect ratio of the images</span>
-<a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">image_width</span></a> <span class="o">=</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.unique.html#numpy.unique" title="numpy.unique" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">unique</span></a><span class="p">(</span><a href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="xarray.core.dataset.Dataset" class="sphx-glr-backref-module-xarray-core-dataset sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ds</span></a><span class="p">[</span><span class="s2">&quot;image_shape&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">sel</span><span class="p">(</span><span class="n">space</span><span class="o">=</span><span class="s2">&quot;x&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">)</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
-<a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">image_height</span></a> <span class="o">=</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.unique.html#numpy.unique" title="numpy.unique" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">unique</span></a><span class="p">(</span><a href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="xarray.core.dataset.Dataset" class="sphx-glr-backref-module-xarray-core-dataset sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ds</span></a><span class="p">[</span><span class="s2">&quot;image_shape&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">sel</span><span class="p">(</span><span class="n">space</span><span class="o">=</span><span class="s2">&quot;y&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">)</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
-<a href="https://docs.python.org/3/library/functions.html#float" title="builtins.float" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">image_AR</span></a> <span class="o">=</span> <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">image_width</span></a> <span class="o">/</span> <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">image_height</span></a>
-
-<span class="c1"># Set number of bins along each dimension</span>
-<a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">n_bins_x</span></a> <span class="o">=</span> <span class="mi">75</span>
-<a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">n_bins_y</span></a> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">n_bins_x</span></a> <span class="o">/</span> <a href="https://docs.python.org/3/library/functions.html#float" title="builtins.float" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">image_AR</span></a><span class="p">)</span>
-
-<span class="c1"># Plot occupancy map</span>
-<a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.figure.Figure.html#matplotlib.figure.Figure" title="matplotlib.figure.Figure" class="sphx-glr-backref-module-matplotlib-figure sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">fig</span></a><span class="p">,</span> <a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes" title="matplotlib.axes.Axes" class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ax</span></a><span class="p">,</span> <a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">hist</span></a> <span class="o">=</span> <a href="https://movement.neuroinformatics.dev/latest/api/movement.plots.plot_occupancy.html#movement.plots.plot_occupancy" title="movement.plots.plot_occupancy" class="sphx-glr-backref-module-movement-plots sphx-glr-backref-type-py-function"><span class="n">plot_occupancy</span></a><span class="p">(</span>
-    <a href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.html#xarray.DataArray" title="xarray.core.dataarray.DataArray" class="sphx-glr-backref-module-xarray-core-dataarray sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ds_as_movement</span><span class="o">.</span><span class="n">position</span></a><span class="p">,</span>
-    <span class="n">bins</span><span class="o">=</span><span class="p">[</span><a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">n_bins_x</span></a><span class="p">,</span> <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">n_bins_y</span></a><span class="p">],</span>
-<span class="p">)</span>
-<a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.figure.Figure.set_size_inches.html#matplotlib.figure.Figure.set_size_inches" title="matplotlib.figure.Figure.set_size_inches" class="sphx-glr-backref-module-matplotlib-figure sphx-glr-backref-type-py-method"><span class="n">fig</span><span class="o">.</span><span class="n">set_size_inches</span></a><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
-<a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.set_xlim.html#matplotlib.axes.Axes.set_xlim" title="matplotlib.axes.Axes.set_xlim" class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-method"><span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span></a><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">image_width</span></a><span class="p">)</span>
-<a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.set_ylim.html#matplotlib.axes.Axes.set_ylim" title="matplotlib.axes.Axes.set_ylim" class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-method"><span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span></a><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">image_height</span></a><span class="p">)</span>
-<a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.set_xlabel.html#matplotlib.axes.Axes.set_xlabel" title="matplotlib.axes.Axes.set_xlabel" class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-method"><span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span></a><span class="p">(</span><span class="s2">&quot;x (pixels)&quot;</span><span class="p">)</span>
-<a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.set_ylabel.html#matplotlib.axes.Axes.set_ylabel" title="matplotlib.axes.Axes.set_ylabel" class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-method"><span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span></a><span class="p">(</span><span class="s2">&quot;y (pixels)&quot;</span><span class="p">)</span>
-<a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.axis.html#matplotlib.axes.Axes.axis" title="matplotlib.axes.Axes.axis" class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-method"><span class="n">ax</span><span class="o">.</span><span class="n">axis</span></a><span class="p">(</span><span class="s2">&quot;equal&quot;</span><span class="p">)</span>
-<a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.invert_yaxis.html#matplotlib.axes.Axes.invert_yaxis" title="matplotlib.axes.Axes.invert_yaxis" class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-method"><span class="n">ax</span><span class="o">.</span><span class="n">invert_yaxis</span></a><span class="p">()</span>
-</pre></div>
-</div>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span class="c1"># Determine aspect ratio of the images</span><span class="w">
+</span><a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="int"><span class="n">image_width</span></a> <span class="o">=</span> <a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.unique.html#numpy.unique" title="numpy.unique"><span class="n">np</span><span class="o">.</span><span class="n">unique</span></a><span class="p">(</span><a class="sphx-glr-backref-module-xarray-core-dataset sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="xarray.core.dataset.Dataset"><span class="n">ds</span></a><span class="p">[</span><span class="s2">&quot;</span><span class="s2">image_shape</span><span class="s2">&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">sel</span><span class="p">(</span><span class="n">space</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">x</span><span class="s2">&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">)</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="p">)</span><span class="w">
+</span><a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="int"><span class="n">image_height</span></a> <span class="o">=</span> <a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.unique.html#numpy.unique" title="numpy.unique"><span class="n">np</span><span class="o">.</span><span class="n">unique</span></a><span class="p">(</span><a class="sphx-glr-backref-module-xarray-core-dataset sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="xarray.core.dataset.Dataset"><span class="n">ds</span></a><span class="p">[</span><span class="s2">&quot;</span><span class="s2">image_shape</span><span class="s2">&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">sel</span><span class="p">(</span><span class="n">space</span><span class="o">=</span><span class="s2">&quot;</span><span class="s2">y</span><span class="s2">&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">)</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="p">)</span><span class="w">
+</span><a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="float"><span class="n">image_AR</span></a> <span class="o">=</span> <a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="int"><span class="n">image_width</span></a> <span class="o">/</span> <a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="int"><span class="n">image_height</span></a><span class="w">
+</span><span class="w">
+</span><span class="c1"># Set number of bins along each dimension</span><span class="w">
+</span><a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="int"><span class="n">n_bins_x</span></a> <span class="o">=</span> <span class="mi">75</span><span class="w">
+</span><a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="int"><span class="n">n_bins_y</span></a> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="int"><span class="n">n_bins_x</span></a> <span class="o">/</span> <a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="float"><span class="n">image_AR</span></a><span class="p">)</span><span class="w">
+</span><span class="w">
+</span><span class="c1"># Plot occupancy map</span><span class="w">
+</span><a class="sphx-glr-backref-module-matplotlib-figure sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.figure.Figure.html#matplotlib.figure.Figure" title="matplotlib.figure.Figure"><span class="n">fig</span></a><span class="p">,</span> <a class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes" title="matplotlib.axes.Axes"><span class="n">ax</span></a><span class="p">,</span> <a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="dict"><span class="n">hist</span></a> <span class="o">=</span> <a class="sphx-glr-backref-module-movement-plots sphx-glr-backref-type-py-function reference external" href="https://movement.neuroinformatics.dev/latest/api/movement.plots.plot_occupancy.html#movement.plots.plot_occupancy" title="movement.plots.plot_occupancy"><span class="n">plot_occupancy</span></a><span class="p">(</span><span class="w">
+</span>    <a class="sphx-glr-backref-module-xarray-core-dataarray sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.html#xarray.DataArray" title="xarray.core.dataarray.DataArray"><span class="n">ds_as_movement</span><span class="o">.</span><span class="n">position</span></a><span class="p">,</span><span class="w">
+</span>    <span class="n">bins</span><span class="o">=</span><span class="p">[</span><a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="int"><span class="n">n_bins_x</span></a><span class="p">,</span> <a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="int"><span class="n">n_bins_y</span></a><span class="p">]</span><span class="p">,</span><span class="w">
+</span><span class="p">)</span><span class="w">
+</span><a class="sphx-glr-backref-module-matplotlib-figure sphx-glr-backref-type-py-method reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.figure.Figure.set_size_inches.html#matplotlib.figure.Figure.set_size_inches" title="matplotlib.figure.Figure.set_size_inches"><span class="n">fig</span><span class="o">.</span><span class="n">set_size_inches</span></a><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span><span class="w">
+</span><a class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-method reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.set_xlim.html#matplotlib.axes.Axes.set_xlim" title="matplotlib.axes.Axes.set_xlim"><span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span></a><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="int"><span class="n">image_width</span></a><span class="p">)</span><span class="w">
+</span><a class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-method reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.set_ylim.html#matplotlib.axes.Axes.set_ylim" title="matplotlib.axes.Axes.set_ylim"><span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span></a><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="int"><span class="n">image_height</span></a><span class="p">)</span><span class="w">
+</span><a class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-method reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.set_xlabel.html#matplotlib.axes.Axes.set_xlabel" title="matplotlib.axes.Axes.set_xlabel"><span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span></a><span class="p">(</span><span class="s2">&quot;</span><span class="s2">x (pixels)</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><a class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-method reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.set_ylabel.html#matplotlib.axes.Axes.set_ylabel" title="matplotlib.axes.Axes.set_ylabel"><span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span></a><span class="p">(</span><span class="s2">&quot;</span><span class="s2">y (pixels)</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><a class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-method reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.axis.html#matplotlib.axes.Axes.axis" title="matplotlib.axes.Axes.axis"><span class="n">ax</span><span class="o">.</span><span class="n">axis</span></a><span class="p">(</span><span class="s2">&quot;</span><span class="s2">equal</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><a class="sphx-glr-backref-module-matplotlib-axes sphx-glr-backref-type-py-method reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.invert_yaxis.html#matplotlib.axes.Axes.invert_yaxis" title="matplotlib.axes.Axes.invert_yaxis"><span class="n">ax</span><span class="o">.</span><span class="n">invert_yaxis</span></a><span class="p">(</span><span class="p">)</span><span class="w">
+</span></pre></div></div>
 <img src="../_images/sphx_glr_coco_bbox_ethology_and_movement_003.png" srcset="../_images/sphx_glr_coco_bbox_ethology_and_movement_003.png" alt="coco bbox ethology and movement" class = "sphx-glr-single-img"/><p>The occupancy map shows that the maximum bin count is 5 annotations,
 and the minimum count is 0. We can confirm this by inspecting
 the outputs of the <a class="reference external" href="https://movement.neuroinformatics.dev/latest/api/movement.plots.plot_occupancy.html#movement.plots.plot_occupancy" title="(in movement)"><code class="xref py py-func docutils literal notranslate"><span class="pre">movement.plots.plot_occupancy()</span></code></a> function.</p>
-<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><a href="https://docs.python.org/3/library/functions.html#float" title="builtins.float" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">bin_size_x</span></a> <span class="o">=</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.diff.html#numpy.diff" title="numpy.diff" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">diff</span></a><span class="p">(</span><a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">hist</span></a><span class="p">[</span><span class="s2">&quot;xedges&quot;</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
-<a href="https://docs.python.org/3/library/functions.html#float" title="builtins.float" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">bin_size_y</span></a> <span class="o">=</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.diff.html#numpy.diff" title="numpy.diff" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">diff</span></a><span class="p">(</span><a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">hist</span></a><span class="p">[</span><span class="s2">&quot;yedges&quot;</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Bin size (pixels): (</span><span class="si">{</span><a href="https://docs.python.org/3/library/functions.html#float" title="builtins.float" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">bin_size_x</span></a><span class="si">}</span><span class="s2">, </span><span class="si">{</span><a href="https://docs.python.org/3/library/functions.html#float" title="builtins.float" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">bin_size_y</span></a><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Maximum bin count: </span><span class="si">{</span><a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">hist</span></a><span class="p">[</span><span class="s1">&#39;h&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="o">.</span><span class="n">item</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Minimum bin count: </span><span class="si">{</span><a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">hist</span></a><span class="p">[</span><span class="s1">&#39;h&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span><span class="o">.</span><span class="n">item</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="float"><span class="n">bin_size_x</span></a> <span class="o">=</span> <a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.diff.html#numpy.diff" title="numpy.diff"><span class="n">np</span><span class="o">.</span><span class="n">diff</span></a><span class="p">(</span><a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="dict"><span class="n">hist</span></a><span class="p">[</span><span class="s2">&quot;</span><span class="s2">xedges</span><span class="s2">&quot;</span><span class="p">]</span><span class="p">)</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="p">)</span><span class="w">
+</span><a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="float"><span class="n">bin_size_y</span></a> <span class="o">=</span> <a class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.diff.html#numpy.diff" title="numpy.diff"><span class="n">np</span><span class="o">.</span><span class="n">diff</span></a><span class="p">(</span><a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="dict"><span class="n">hist</span></a><span class="p">[</span><span class="s2">&quot;</span><span class="s2">yedges</span><span class="s2">&quot;</span><span class="p">]</span><span class="p">)</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="p">)</span><span class="w">
+</span><span class="w">
+</span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="s2">Bin size (pixels): (</span><span class="si">{</span><a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="float"><span class="n">bin_size_x</span></a><span class="si">}</span><span class="s2">, </span><span class="si">{</span><a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="float"><span class="n">bin_size_y</span></a><span class="si">}</span><span class="s2">)</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="s2">Maximum bin count: </span><span class="si">{</span><a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="dict"><span class="n">hist</span></a><span class="p">[</span><span class="s1">'</span><span class="s1">h</span><span class="s1">'</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="p">)</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="s2">Minimum bin count: </span><span class="si">{</span><a class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="dict"><span class="n">hist</span></a><span class="p">[</span><span class="s1">'</span><span class="s1">h</span><span class="s1">'</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="p">)</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span></pre></div></div>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Bin size (pixels): (72.77666666666667, 72.605)
 Maximum bin count: 5.0
 Minimum bin count: 0.0
@@ -845,10 +863,9 @@ that we can visualise in the <a class="reference external" href="https://movemen
 For example, we can use the
 <a class="reference external" href="https://movement.neuroinformatics.dev/latest/api/movement.io.save_bboxes.to_via_tracks_file.html#movement.io.save_bboxes.to_via_tracks_file" title="(in movement)"><code class="xref py py-func docutils literal notranslate"><span class="pre">movement.io.save_bboxes.to_via_tracks_file()</span></code></a> function, that saves
 bounding box <code class="docutils literal notranslate"><span class="pre">movement</span></code> datasets as VIA-tracks files.</p>
-<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><a href="https://movement.neuroinformatics.dev/latest/api/movement.io.save_bboxes.to_via_tracks_file.html#movement.io.save_bboxes.to_via_tracks_file" title="movement.io.save_bboxes.to_via_tracks_file" class="sphx-glr-backref-module-movement-io-save_bboxes sphx-glr-backref-type-py-function"><span class="n">save_bboxes</span><span class="o">.</span><span class="n">to_via_tracks_file</span></a><span class="p">(</span><a href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="xarray.core.dataset.Dataset" class="sphx-glr-backref-module-xarray-core-dataset sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">ds_as_movement</span></a><span class="p">,</span> <span class="s2">&quot;waterfowl_dataset.csv&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>PosixPath(&#39;waterfowl_dataset.csv&#39;)
+<div class="highlight-Python notranslate"><div class="highlight"><pre><a class="sphx-glr-backref-module-movement-io-save_bboxes sphx-glr-backref-type-py-function reference external" href="https://movement.neuroinformatics.dev/latest/api/movement.io.save_bboxes.to_via_tracks_file.html#movement.io.save_bboxes.to_via_tracks_file" title="movement.io.save_bboxes.to_via_tracks_file"><span class="n">save_bboxes</span><span class="o">.</span><span class="n">to_via_tracks_file</span></a><span class="p">(</span><a class="sphx-glr-backref-module-xarray-core-dataset sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="xarray.core.dataset.Dataset"><span class="n">ds_as_movement</span></a><span class="p">,</span> <span class="s2">&quot;</span><span class="s2">waterfowl_dataset.csv</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span></pre></div></div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>PosixPath('waterfowl_dataset.csv')
 </pre></div>
 </div>
 <p>You can now follow the <a class="reference external" href="https://movement.neuroinformatics.dev/latest/user_guide/gui.html">movement napari guide</a>
@@ -857,9 +874,8 @@ to load the output VIA-tracks file into <code class="docutils literal notranslat
 first drag and drop the images directory into the <code class="docutils literal notranslate"><span class="pre">napari</span></code> canvas.
 You will find the images for the experts’ annotations under the
 <code class="docutils literal notranslate"><span class="pre">data_dir</span> <span class="pre">/</span> <span class="pre">&quot;experts&quot;</span> <span class="pre">/</span> <span class="pre">&quot;images&quot;</span></code> directory.</p>
-<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Images directory: </span><span class="si">{</span><a href="https://docs.python.org/3/library/pathlib.html#pathlib.PosixPath" title="pathlib.PosixPath" class="sphx-glr-backref-module-pathlib sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">data_dir</span></a><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="s1">&#39;experts&#39;</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="s1">&#39;images&#39;</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="s2">Images directory: </span><span class="si">{</span><a class="sphx-glr-backref-module-pathlib sphx-glr-backref-type-py-class sphx-glr-backref-instance reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.PosixPath" title="pathlib.PosixPath"><span class="n">data_dir</span></a><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="s1">'</span><span class="s1">experts</span><span class="s1">'</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="s1">'</span><span class="s1">images</span><span class="s1">'</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span></pre></div></div>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Images directory: /home/runner/.ethology/uas-imagery-of-migratory-waterfowl/experts/images
 </pre></div>
 </div>
@@ -875,10 +891,9 @@ for an easier visualisation, like in the example screenshot above.</p>
 <h2>Clean-up<a class="headerlink" href="#clean-up" title="Link to this heading">#</a></h2>
 <p>To remove the output files we have just created, we can run the
 following code.</p>
-<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><a href="https://docs.python.org/3/library/os.html#os.remove" title="os.remove" class="sphx-glr-backref-module-os sphx-glr-backref-type-py-function"><span class="n">os</span><span class="o">.</span><span class="n">remove</span></a><span class="p">(</span><span class="s2">&quot;waterfowl_dataset.csv&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 5.551 seconds)</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><a class="sphx-glr-backref-module-os sphx-glr-backref-type-py-function reference external" href="https://docs.python.org/3/library/os.html#os.remove" title="os.remove"><span class="n">os</span><span class="o">.</span><span class="n">remove</span></a><span class="p">(</span><span class="s2">&quot;</span><span class="s2">waterfowl_dataset.csv</span><span class="s2">&quot;</span><span class="p">)</span><span class="w">
+</span></pre></div></div>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 2.587 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-coco-bbox-ethology-and-movement-py">
 <div class="binder-badge docutils container">
 <a class="reference external image-reference" href="https://mybinder.org/v2/gh/neuroinformatics-unit/ethology/main?filepath=notebooks/examples/coco_bbox_ethology_and_movement.ipynb"><img alt="Launch binder" src="../_images/binder_badge_logo.svg" style="width: 150px;" />
@@ -943,8 +958,8 @@ following code.</p>
     class="page-toc tocsection onthispage">
     <i class="fa-solid fa-list"></i> On this page
   </div>
-  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
-    <ul class="visible nav section-nav flex-column">
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#imports">Imports</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#download-dataset">Download dataset</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#load-annotations-as-an-ethology-dataset">Load annotations as an <code class="docutils literal notranslate"><span class="pre">ethology</span></code> dataset</a></li>
@@ -958,13 +973,13 @@ following code.</p>
   </nav></div>
 
   <div class="sidebar-secondary-item">
-  <div role="note" aria-label="source link">
-    <h3>This Page</h3>
-    <ul class="this-page-menu">
-      <li><a href="../_sources/examples/coco_bbox_ethology_and_movement.rst.txt"
-            rel="nofollow">Show Source</a></li>
-    </ul>
-   </div></div>
+
+  <div class="tocsection sourcelink">
+    <a href="../_sources/examples/coco_bbox_ethology_and_movement.rst.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
 
 </div></div>
               
@@ -979,8 +994,8 @@ following code.</p>
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script defer src="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
-<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+  <script defer src="../_static/scripts/bootstrap.js?digest=18bd87630a240e9c25be"></script>
+<script defer src="../_static/scripts/pydata-sphinx-theme.js?digest=18bd87630a240e9c25be"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -994,7 +1009,7 @@ following code.</p>
     <p class="theme-version">
     Built with the
     <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a>
-    0.16.1.
+    0.23.0.
     </p></div>
       
     </div>
