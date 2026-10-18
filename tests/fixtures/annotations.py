@@ -163,3 +163,51 @@ def valid_bbox_annotations_dataset_extra_vars_and_dims(
     ds["extra_var_1"] = (["image_id"], np.random.rand(len(ds.image_id)))
     ds["extra_var_2"] = (["id"], np.random.rand(len(ds.id)))
     return ds
+
+
+# ----------------- Keypoints dataset validation fixtures -----------------
+@pytest.fixture
+def valid_keypoints_annotations_dataset():
+    """Create a valid keypoints annotations dataset for validation."""
+    image_ids = [1, 2]
+    annotation_ids = [0, 1]
+    keypoints = ["nose", "tail"]
+    space_dims = ["x", "y"]
+
+    position_data = np.zeros(
+        (
+            len(image_ids),
+            len(space_dims),
+            len(keypoints),
+            len(annotation_ids),
+        )
+    )
+
+    ds = xr.Dataset(
+        data_vars={
+            "position": (
+                ["image_id", "space", "keypoint", "id"],
+                position_data,
+            ),
+        },
+        coords={
+            "image_id": image_ids,
+            "space": space_dims,
+            "keypoint": keypoints,
+            "id": annotation_ids,
+        },
+    )
+
+    return ds
+
+
+@pytest.fixture
+def valid_keypoints_annotations_dataset_extra_vars_and_dims(
+    valid_keypoints_annotations_dataset: xr.Dataset,
+) -> xr.Dataset:
+    """Create a valid keypoints annotations dataset with extra dims/vars."""
+    ds = valid_keypoints_annotations_dataset.copy(deep=True)
+    ds.coords["extra_dim"] = [10, 20]
+    ds["extra_var_1"] = (["image_id"], np.random.rand(len(ds.image_id)))
+    ds["extra_var_2"] = (["id"], np.random.rand(len(ds.id)))
+    return ds

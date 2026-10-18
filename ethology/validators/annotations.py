@@ -265,6 +265,53 @@ class ValidBboxAnnotationsDataset(ValidDataset):
     }
 
 
+@define
+class ValidKeypointsAnnotationsDataset(ValidDataset):
+    """Class for valid ``ethology`` keypoints annotations datasets.
+
+    This class validates that the input dataset:
+
+    - is an xarray Dataset,
+    - has ``image_id``, ``space``, ``keypoint``, ``id`` as dimensions,
+    - has ``position`` as a data variable,
+    - ``position`` spans at least the dimensions ``image_id``, ``space``,
+      ``keypoint`` and ``id``.
+
+    Attributes
+    ----------
+    dataset : xarray.Dataset
+        The xarray dataset to validate.
+    required_dims : ClassVar[set]
+        The set of required dimension names: ``image_id``, ``space``,
+        ``keypoint`` and ``id``.
+    required_data_vars : ClassVar[dict[str, set]]
+        A dictionary mapping data variable names to their required minimum
+        dimensions:
+
+        - ``position`` maps to ``image_id``, ``space``, ``keypoint`` and
+          ``id``.
+
+    Raises
+    ------
+    TypeError
+        If the input is not an xarray Dataset.
+    ValueError
+        If the dataset is missing required data variables or dimensions,
+        or if any required dimensions are missing for any data variable.
+
+    Notes
+    -----
+    The dataset can have other data variables and dimensions, but only the
+    required ones are checked.
+
+    """
+
+    required_dims: ClassVar[set] = {"image_id", "space", "keypoint", "id"}
+    required_data_vars: ClassVar[dict[str, set]] = {
+        "position": {"image_id", "space", "keypoint", "id"},
+    }
+
+
 class ValidBboxAnnotationsDataFrame(pa.DataFrameModel):
     """Class for valid bounding boxes intermediate dataframes.
 
