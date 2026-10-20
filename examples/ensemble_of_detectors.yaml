@@ -1,0 +1,19 @@
+models:
+  model_class: fasterrcnn_resnet50_fpn_v2
+  model_kwargs:
+    num_classes: 2
+    weights: null
+    weights_backbone: null
+  checkpoints:
+  - /home/sminano/swc/project_crabs/ml-runs/617393114420881798/f348d9d196934073bece1b877cbc4d38/checkpoints/last.ckpt
+  - /home/sminano/swc/project_crabs/ml-runs/617393114420881798/879d2f77e2b24adcb06b87d2fede6a04/checkpoints/last.ckpt
+  - /home/sminano/swc/project_crabs/ml-runs/617393114420881798/75583ec227e3444ab692b99c64795325/checkpoints/last.ckpt
+  - /home/sminano/swc/project_crabs/ml-runs/617393114420881798/4acc37206b1e4f679d535c837bee2c2f/checkpoints/last.ckpt
+  - /home/sminano/swc/project_crabs/ml-runs/617393114420881798/fdcf88fcbcc84fbeb94b45ca6b6f8914/checkpoints/last.ckpt
+  - /home/sminano/swc/project_crabs/ml-runs/617393114420881798/daa05ded0ea047388c9134bf044061c5/checkpoints/last.ckpt
+fusion:
+  method: weighted_boxes_fusion
+  method_kwargs:
+    iou_thr: 0.5
+    skip_box_thr: 0.0001
+  max_n_detections: 300
