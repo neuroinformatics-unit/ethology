@@ -9,7 +9,7 @@
 
 # ethology
 
-Mix-and-match computer vision tools for your animal behaviour analysis.
+Manage annotation data for your animal behaviour analysis.
 
 ## Quick install
 
