@@ -1,0 +1,23 @@
+﻿ethology.datasets.split
+=======================
+
+.. rubric:: Description
+
+.. automodule:: ethology.datasets.split
+
+.. currentmodule:: ethology.datasets.split
+
+
+
+
+.. rubric:: Functions
+
+.. autosummary::
+    :toctree: .
+    :nosignatures:
+    
+    split_dataset_group_by
+    
+    split_dataset_random
+    
+

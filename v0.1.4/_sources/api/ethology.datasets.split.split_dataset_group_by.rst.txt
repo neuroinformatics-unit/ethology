@@ -1,0 +1,9 @@
+split\_dataset\_group\_by
+=========================
+
+.. currentmodule:: ethology.datasets.split
+
+.. autofunction:: split_dataset_group_by
+
+.. minigallery:: ethology.datasets.split.split_dataset_group_by
+   :add-heading: Examples using ``split_dataset_group_by``
