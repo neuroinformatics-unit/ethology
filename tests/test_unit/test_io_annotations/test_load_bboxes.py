@@ -1027,3 +1027,41 @@ def test_get_image_shape_attr_as_integer(
         _get_image_shape_attr_as_integer(file_attrs, attr_name)
         == expected_value
     )
+
+
+def test_annotations_keep_file_order_within_image(tmp_path: Path):
+    """Test that the boxes of an image follow their order in the input file.
+
+    The annotations of the three images are interleaved, and each image has
+    many annotations, so that an unstable sort would reorder them. The
+    x-coordinate of each box is its position in the input file.
+    """
+    n_images, n_annotations = 3, 120
+    coco = {
+        "images": [
+            {"id": i, "file_name": f"img_{i}.png", "width": 500, "height": 50}
+            for i in range(n_images)
+        ],
+        "annotations": [
+            {
+                "id": k,
+                "image_id": k % n_images,
+                "bbox": [k, 0, 10, 10],
+                "category_id": 1,
+            }
+            for k in range(n_annotations)
+        ],
+        "categories": [{"id": 1, "name": "crab"}],
+    }
+    file_path = tmp_path / "interleaved_COCO.json"
+    file_path.write_text(json.dumps(coco))
+
+    ds = from_files(file_paths=file_path, format="COCO")
+
+    # position is the box centre: x_min + width / 2
+    x_min = ds.position.sel(space="x") - ds.shape.sel(space="x") / 2
+    for image_id in range(n_images):
+        np.testing.assert_array_equal(
+            x_min.sel(image_id=image_id).values,
+            np.arange(image_id, n_annotations, n_images),
+        )

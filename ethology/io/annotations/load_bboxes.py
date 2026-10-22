@@ -218,7 +218,7 @@ def _df_from_multiple_files(
     )
 
     # Sort by image_filename
-    df_all = df_all.sort_values(by=["image_filename"])
+    df_all = df_all.sort_values(by=["image_filename"], kind="stable")
 
     # Remove duplicates that may exist across files and reindex
     # NOTE: we exclude image_width and image_height from the set of columns
@@ -280,7 +280,7 @@ def _df_from_single_file(
     df = pd.DataFrame(list_rows)
 
     # Sort annotations by image_filename
-    df = df.sort_values(by=["image_filename"])
+    df = df.sort_values(by=["image_filename"], kind="stable")
 
     # Drop duplicates and reindex
     # The resulting axis is labeled 0,1,…,n-1.
@@ -597,7 +597,7 @@ def _df_to_xarray_ds(
     max_annotations_per_image = df["image_id"].value_counts().max()
 
     # Sort the dataframe by image_id
-    df = df.sort_values(by=["image_id"])
+    df = df.sort_values(by=["image_id"], kind="stable")
 
     # Compute indices of the rows where the image ID switches
     bool_id_diff_from_prev = df["image_id"].ne(df["image_id"].shift())
