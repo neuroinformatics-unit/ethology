@@ -2,7 +2,7 @@ import json
 from contextlib import nullcontext as does_not_raise
 from itertools import groupby
 from pathlib import Path
-from typing import Literal
+from typing import Any, Literal
 from unittest.mock import patch
 
 import numpy as np
@@ -1027,3 +1027,72 @@ def test_get_image_shape_attr_as_integer(
         _get_image_shape_attr_as_integer(file_attrs, attr_name)
         == expected_value
     )
+
+
+def test_annotations_order_within_image(tmp_path: Path):
+    """Test that the annotation IDs are in the expected order.
+
+    The annotation IDs for an image should follow their order of appearance
+    in the input file.
+
+    In this test the annotations of the three images are interleaved,
+    and each image has many annotations, so that an unstable sort would
+    reorder them. The `x_min` of each box is set to its index in the
+    input file, so that we can check the order after loading.
+    """
+    # Create annotations file
+    # (annotations are assigned to images "interleaved")
+    n_images, n_annotations = 3, 120
+    coco: dict[str, Any] = {
+        "images": [
+            {"id": i, "file_name": f"img_{i}.png", "width": 500, "height": 50}
+            for i in range(n_images)
+        ],
+        "annotations": [
+            {
+                "id": k,
+                "image_id": k % n_images,
+                # we cycle thru the images (0,1,2,0,1,2....)
+                "bbox": [k, 0, 10, 10],
+                "category_id": 1,
+            }
+            for k in range(n_annotations)
+        ],
+        "categories": [{"id": 1, "name": "crab"}],
+    }
+    file_path = tmp_path / "interleaved_COCO.json"
+    file_path.write_text(json.dumps(coco))
+
+    # Read annotations as dataset
+    ds = from_files(file_paths=file_path, format="COCO")
+
+    # Get the map from image filename to image ID
+    # (the dataset image IDs follow the alphabetical order of the filenames,
+    # which may differ from the image IDs in the COCO file)
+    map_filename_to_ds_image_id = {
+        filename: image_id
+        for image_id, filename in ds.attrs["map_image_id_to_filename"].items()
+    }
+
+    # Check that, for each image, the boxes are in the same order
+    # as in the input file
+    for img_dict in coco["images"]:
+        # get x-coord from coco file for all annotations in this image
+        boxes_x_coord_from_coco = [
+            annot["bbox"][0] + annot["bbox"][2] / 2  # x_min + width / 2
+            for annot in coco["annotations"]
+            if annot["image_id"] == img_dict["id"]
+        ]
+
+        # get x-coord from ds, for this image
+        boxes_x_coord_from_ds = ds.position.sel(
+            image_id=map_filename_to_ds_image_id[img_dict["file_name"]],
+            space="x",
+        ).values
+
+        # check they are in the same order
+        # Note: only the x-coord changes, so we limit the check to x
+        np.testing.assert_array_equal(
+            boxes_x_coord_from_ds,
+            boxes_x_coord_from_coco,
+        )

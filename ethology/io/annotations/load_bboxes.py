@@ -70,12 +70,15 @@ def from_files(
 
     The `id` dimension corresponds to the annotation ID per image. It
     ranges from 0 to the maximum number of annotations per image in
-    the dataset. Note that the annotation IDs are not necessarily
-    consistent across images. This means that the annotations with ID=3
-    in image `t` and image `t+1` will likely not correspond to the same
-    individual.
+    the dataset. Within each image, IDs are assigned following the order
+    in which the annotations appear in the input file. If multiple files
+    are passed, annotations from earlier files in the list come first.
+    Note that the annotation IDs are not necessarily consistent across
+    images. This means that the annotations with ID=3 in image `t` and
+    image `t+1` will likely not correspond to the same individual.
 
     The `space` dimension holds the "x" and "y" coordinates.
+
 
     Note that supercategories are not currently added to the xarray dataset,
     even if specified in the input file.
@@ -218,7 +221,7 @@ def _df_from_multiple_files(
     )
 
     # Sort by image_filename
-    df_all = df_all.sort_values(by=["image_filename"])
+    df_all = df_all.sort_values(by=["image_filename"], kind="stable")
 
     # Remove duplicates that may exist across files and reindex
     # NOTE: we exclude image_width and image_height from the set of columns
@@ -280,7 +283,7 @@ def _df_from_single_file(
     df = pd.DataFrame(list_rows)
 
     # Sort annotations by image_filename
-    df = df.sort_values(by=["image_filename"])
+    df = df.sort_values(by=["image_filename"], kind="stable")
 
     # Drop duplicates and reindex
     # The resulting axis is labeled 0,1,…,n-1.
@@ -571,11 +574,12 @@ def _df_to_xarray_ds(
     -------
     xr.Dataset
         an xarray dataset with the following dimensions:
-        - `image_id`: holds the 0-based index of the image in the "images"
-        list of the COCO JSON file;
+        - `image_id`: holds the 0-based index of the image in the
+        alphabetically sorted list of unique image filenames;
         - `space`: `x` or `y`;
         - `id`: annotation ID per image, assigned from 0 to the max number of
-        annotations per image in the full dataset. Note that the annotation IDs
+        annotations per image in the full dataset, following the order of the
+        rows in the input dataframe. Note that the annotation IDs
         are not necessarily consistent across images. This means that the
         annotations with ID `m` in image `t` and image `t+1` will likely not
         correspond to the same individual.
@@ -597,7 +601,7 @@ def _df_to_xarray_ds(
     max_annotations_per_image = df["image_id"].value_counts().max()
 
     # Sort the dataframe by image_id
-    df = df.sort_values(by=["image_id"])
+    df = df.sort_values(by=["image_id"], kind="stable")
 
     # Compute indices of the rows where the image ID switches
     bool_id_diff_from_prev = df["image_id"].ne(df["image_id"].shift())
