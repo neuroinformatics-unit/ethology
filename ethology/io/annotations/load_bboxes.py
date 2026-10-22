@@ -70,12 +70,15 @@ def from_files(
 
     The `id` dimension corresponds to the annotation ID per image. It
     ranges from 0 to the maximum number of annotations per image in
-    the dataset. Note that the annotation IDs are not necessarily
-    consistent across images. This means that the annotations with ID=3
-    in image `t` and image `t+1` will likely not correspond to the same
-    individual.
+    the dataset. Within each image, IDs are assigned following the order
+    in which the annotations appear in the input file. If multiple files
+    are passed, annotations from earlier files in the list come first.
+    Note that the annotation IDs are not necessarily consistent across
+    images. This means that the annotations with ID=3 in image `t` and
+    image `t+1` will likely not correspond to the same individual.
 
     The `space` dimension holds the "x" and "y" coordinates.
+
 
     Note that supercategories are not currently added to the xarray dataset,
     even if specified in the input file.
