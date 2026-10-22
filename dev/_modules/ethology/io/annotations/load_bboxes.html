@@ -43,7 +43,7 @@
   <link rel="preload" as="script" href="../../../../_static/scripts/bootstrap.js?digest=18bd87630a240e9c25be" />
 <link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=18bd87630a240e9c25be" />
 
-    <script src="../../../../_static/documentation_options.js?v=7ab7ee3c"></script>
+    <script src="../../../../_static/documentation_options.js?v=decf6a25"></script>
     <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/sg-tags.js?v=d80f6fa4"></script>
@@ -133,7 +133,7 @@
   
   
   
-    <p class="title logo__title">ethology v0.1.4.dev4</p>
+    <p class="title logo__title">ethology v0.1.4.dev5</p>
   
 </a></div>
     
@@ -530,12 +530,15 @@
 
 <span class="sd">    The `id` dimension corresponds to the annotation ID per image. It</span>
 <span class="sd">    ranges from 0 to the maximum number of annotations per image in</span>
-<span class="sd">    the dataset. Note that the annotation IDs are not necessarily</span>
-<span class="sd">    consistent across images. This means that the annotations with ID=3</span>
-<span class="sd">    in image `t` and image `t+1` will likely not correspond to the same</span>
-<span class="sd">    individual.</span>
+<span class="sd">    the dataset. Within each image, IDs are assigned following the order</span>
+<span class="sd">    in which the annotations appear in the input file. If multiple files</span>
+<span class="sd">    are passed, annotations from earlier files in the list come first.</span>
+<span class="sd">    Note that the annotation IDs are not necessarily consistent across</span>
+<span class="sd">    images. This means that the annotations with ID=3 in image `t` and</span>
+<span class="sd">    image `t+1` will likely not correspond to the same individual.</span>
 
 <span class="sd">    The `space` dimension holds the "x" and "y" coordinates.</span>
+
 
 <span class="sd">    Note that supercategories are not currently added to the xarray dataset,</span>
 <span class="sd">    even if specified in the input file.</span>
@@ -679,7 +682,7 @@
     <span class="p">)</span>
 
     <span class="c1"># Sort by image_filename</span>
-    <span class="n">df_all</span> <span class="o">=</span> <span class="n">df_all</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="p">[</span><span class="s2">"image_filename"</span><span class="p">])</span>
+    <span class="n">df_all</span> <span class="o">=</span> <span class="n">df_all</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="p">[</span><span class="s2">"image_filename"</span><span class="p">],</span> <span class="n">kind</span><span class="o">=</span><span class="s2">"stable"</span><span class="p">)</span>
 
     <span class="c1"># Remove duplicates that may exist across files and reindex</span>
     <span class="c1"># NOTE: we exclude image_width and image_height from the set of columns</span>
@@ -741,7 +744,7 @@
     <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">list_rows</span><span class="p">)</span>
 
     <span class="c1"># Sort annotations by image_filename</span>
-    <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="p">[</span><span class="s2">"image_filename"</span><span class="p">])</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="p">[</span><span class="s2">"image_filename"</span><span class="p">],</span> <span class="n">kind</span><span class="o">=</span><span class="s2">"stable"</span><span class="p">)</span>
 
     <span class="c1"># Drop duplicates and reindex</span>
     <span class="c1"># The resulting axis is labeled 0,1,…,n-1.</span>
@@ -1032,11 +1035,12 @@
 <span class="sd">    -------</span>
 <span class="sd">    xr.Dataset</span>
 <span class="sd">        an xarray dataset with the following dimensions:</span>
-<span class="sd">        - `image_id`: holds the 0-based index of the image in the "images"</span>
-<span class="sd">        list of the COCO JSON file;</span>
+<span class="sd">        - `image_id`: holds the 0-based index of the image in the</span>
+<span class="sd">        alphabetically sorted list of unique image filenames;</span>
 <span class="sd">        - `space`: `x` or `y`;</span>
 <span class="sd">        - `id`: annotation ID per image, assigned from 0 to the max number of</span>
-<span class="sd">        annotations per image in the full dataset. Note that the annotation IDs</span>
+<span class="sd">        annotations per image in the full dataset, following the order of the</span>
+<span class="sd">        rows in the input dataframe. Note that the annotation IDs</span>
 <span class="sd">        are not necessarily consistent across images. This means that the</span>
 <span class="sd">        annotations with ID `m` in image `t` and image `t+1` will likely not</span>
 <span class="sd">        correspond to the same individual.</span>
@@ -1058,7 +1062,7 @@
     <span class="n">max_annotations_per_image</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s2">"image_id"</span><span class="p">]</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
 
     <span class="c1"># Sort the dataframe by image_id</span>
-    <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="p">[</span><span class="s2">"image_id"</span><span class="p">])</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="p">[</span><span class="s2">"image_id"</span><span class="p">],</span> <span class="n">kind</span><span class="o">=</span><span class="s2">"stable"</span><span class="p">)</span>
 
     <span class="c1"># Compute indices of the rows where the image ID switches</span>
     <span class="n">bool_id_diff_from_prev</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s2">"image_id"</span><span class="p">]</span><span class="o">.</span><span class="n">ne</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s2">"image_id"</span><span class="p">]</span><span class="o">.</span><span class="n">shift</span><span class="p">())</span>

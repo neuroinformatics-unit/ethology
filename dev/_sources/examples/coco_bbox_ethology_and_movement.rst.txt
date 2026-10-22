@@ -170,10 +170,10 @@ expert annotations as an ``ethology`` dataset.
       * space        (space) object 16B 'x' 'y'
       * id           (id) int64 6kB 0 1 2 3 4 5 6 7 ... 715 716 717 718 719 720 721
     Data variables:
-        position     (image_id, space, id) float64 139kB 4.493e+03 3.49e+03 ... nan
-        shape        (image_id, space, id) float64 139kB 95.0 43.0 49.0 ... nan nan
+        position     (image_id, space, id) float64 139kB 4.493e+03 4.362e+03 ... nan
+        shape        (image_id, space, id) float64 139kB 95.0 98.0 73.5 ... nan nan
         image_shape  (image_id, space) int64 192B 5472 3648 5472 ... 3648 5472 3648
-        category     (image_id, id) int64 69kB 1 4 3 3 3 3 3 ... -1 -1 -1 -1 -1 -1
+        category     (image_id, id) int64 69kB 1 1 1 1 1 1 1 ... -1 -1 -1 -1 -1 -1
     Attributes: (5)
     Frozen({'image_id': 12, 'space': 2, 'id': 722})
 
@@ -522,9 +522,9 @@ naming convention.
       * individual   (individual) <U6 17kB 'id_0' 'id_1' ... 'id_720' 'id_721'
     Data variables:
         position     (time, space, individual) float64 139kB 4.493e+03 ... nan
-        shape        (time, space, individual) float64 139kB 95.0 43.0 ... nan nan
+        shape        (time, space, individual) float64 139kB 95.0 98.0 ... nan nan
         image_shape  (time, space) int64 192B 5472 3648 5472 3648 ... 3648 5472 3648
-        category     (time, individual) int64 69kB 1 4 3 3 3 3 ... -1 -1 -1 -1 -1 -1
+        category     (time, individual) int64 69kB 1 1 1 1 1 1 ... -1 -1 -1 -1 -1 -1
         confidence   (time, individual) float64 69kB nan nan nan nan ... nan nan nan
     Attributes: (6)
     Frozen({'time': 12, 'space': 2, 'individual': 722})
@@ -733,7 +733,7 @@ following code.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 5.615 seconds)
+   **Total running time of the script:** (0 minutes 4.303 seconds)
 
 
 .. _sphx_glr_download_examples_coco_bbox_ethology_and_movement.py:
