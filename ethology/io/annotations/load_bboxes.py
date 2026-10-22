@@ -574,11 +574,12 @@ def _df_to_xarray_ds(
     -------
     xr.Dataset
         an xarray dataset with the following dimensions:
-        - `image_id`: holds the 0-based index of the image in the "images"
-        list of the COCO JSON file;
+        - `image_id`: holds the 0-based index of the image in the
+        alphabetically sorted list of unique image filenames;
         - `space`: `x` or `y`;
         - `id`: annotation ID per image, assigned from 0 to the max number of
-        annotations per image in the full dataset. Note that the annotation IDs
+        annotations per image in the full dataset, following the order of the
+        rows in the input dataframe. Note that the annotation IDs
         are not necessarily consistent across images. This means that the
         annotations with ID `m` in image `t` and image `t+1` will likely not
         correspond to the same individual.
