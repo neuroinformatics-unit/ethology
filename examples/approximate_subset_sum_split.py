@@ -4,6 +4,7 @@
 Split an annotations dataset by grouping variable, and compare to random
 splitting.
 """
+
 # %%
 # This example demonstrates two dataset splitting strategies:
 #

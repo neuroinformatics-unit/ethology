@@ -6,7 +6,6 @@ and inspect them using ``ethology`` and
 `movement <https://movement.neuroinformatics.dev/>`_.
 """
 
-
 # %%
 # Imports
 # -------

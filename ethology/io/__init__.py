@@ -1,1 +1,1 @@
-""" Load and export `ethology` datasets."""
+"""Load and export `ethology` datasets."""
