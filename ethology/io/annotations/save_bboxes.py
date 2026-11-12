@@ -55,6 +55,77 @@ def to_COCO_file(dataset: xr.Dataset, output_filepath: str | Path):
 
 
 @_check_input(validator=ValidBboxAnnotationsDataset)
+def to_netcdf(
+    dataset: xr.Dataset,
+    output_filepath: str | Path,
+) -> Path:
+    """Save an ethology bounding box annotations dataset to netCDF4.
+
+    This function wraps func:xarray.Dataset.to_netcdf with automatic
+    serialisation of Python dict attributes. The netCDF4 format cannot
+    store Python dicts, Path objects, or None values as attribute values
+    natively. This function serialises them before saving and
+    func:ethology.io.annotations.load_bboxes.from_netcdf reverses
+    the serialisation on load.
+
+    Parameters
+    ----------
+    dataset
+        A valid bounding box annotations dataset, as returned by
+        func:ethology.io.annotations.load_bboxes.from_files.
+    output_filepath
+        Path to the output netCDF4 file. By convention, use ".nc".
+
+    Returns
+    -------
+    Path
+        Path to the written file.
+
+    Examples
+    --------
+    Save and reload a dataset:
+
+    >>> from ethology.io.annotations import load_bboxes, save_bboxes
+    >>> ds = load_bboxes.from_files("annotations.json", format="COCO")
+    >>> save_bboxes.to_netcdf(ds, "annotations.nc")
+    PosixPath('annotations.nc')
+    >>> ds_reloaded = load_bboxes.from_netcdf("annotations.nc")
+
+    """
+    output_filepath = Path(output_filepath)
+
+    # Deep copy so the caller's Dataset attrs remain unchanged after this call.
+    ds_to_save = dataset.copy(deep=True)
+
+    # netCDF4 cannot store Python dicts, Path objects, or None values
+    # as attribute values. Convert everything to netCDF4-safe types.
+    # from_netcdf() reverses this on load.
+    #
+    # Conversion rules:
+    #   dict  → JSON string
+    #   list  → JSON string
+    #   Path  → str
+    #   None  → dropped entirely
+    #   str, int, float → kept as-is
+    clean_attrs = {}
+    for k, v in ds_to_save.attrs.items():
+        if v is None:
+            continue
+        elif isinstance(v, dict):
+            clean_attrs[k] = json.dumps(v)
+        elif isinstance(v, list):
+            clean_attrs[k] = json.dumps([str(p) for p in v])
+        elif isinstance(v, Path):
+            clean_attrs[k] = str(v)
+        else:
+            clean_attrs[k] = v
+
+    ds_to_save.attrs = clean_attrs
+    ds_to_save.to_netcdf(output_filepath)
+    return output_filepath
+
+
+@_check_input(validator=ValidBboxAnnotationsDataset)
 @pa.check_types
 def _to_COCO_exportable_df(
     ds: xr.Dataset,
