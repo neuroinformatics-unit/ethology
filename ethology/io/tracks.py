@@ -1,0 +1,116 @@
+"""Load tracked bounding box datasets into ``ethology`` format.
+
+Convert a ``movement`` bounding box dataset into an ``ethology`` tracks
+dataset (dimensions and variables renamed, output validated).
+"""
+
+from collections.abc import Iterable
+
+import numpy as np
+import xarray as xr
+
+from ethology.validators.detections import ValidBboxTracksDataset
+from ethology.validators.utils import _check_output
+
+_REQUIRED_DIMS = {"time", "space", "individuals"}
+_REQUIRED_VARS = {"position", "shape"}
+
+
+def _require_dims(dataset: xr.Dataset, required_dims: Iterable[str]) -> None:
+    """Check required dimensions exist; raise ValueError if not."""
+    missing = set(required_dims) - set(dataset.dims)
+    if missing:
+        raise ValueError(
+            "Expected a movement-like dataset with dimensions "
+            f"{sorted(required_dims)}, but missing {sorted(missing)}."
+        )
+
+
+def _require_vars(dataset: xr.Dataset, required_vars: Iterable[str]) -> None:
+    """Check required data variables exist; raise ValueError if not."""
+    missing = set(required_vars) - set(dataset.data_vars)
+    if missing:
+        raise ValueError(
+            "Expected a movement-like dataset with data variables "
+            f"{sorted(required_vars)}, but missing {sorted(missing)}."
+        )
+
+
+@_check_output(ValidBboxTracksDataset)
+def from_movement_bboxes(movement_ds: xr.Dataset) -> xr.Dataset:
+    """Create a bounding box tracks dataset from a ``movement`` dataset.
+
+    Parameters
+    ----------
+    movement_ds : xarray.Dataset
+        Input bounding boxes dataset in ``movement`` format. It is expected
+        to have at least the following:
+
+        - dimensions: ``time``, ``space``, ``individuals``,
+        - data variables: ``position`` and ``shape``.
+
+        Optionally, it may contain:
+
+        - ``category``: (time, individuals),
+        - ``confidence``: (time, individuals).
+
+    Returns
+    -------
+    xarray.Dataset
+        A valid ``ethology`` bounding box tracks dataset with dimensions
+        ``image_id``, ``space`` and ``id`` and data variables
+        ``position``, ``shape``, ``category`` and ``confidence``. The
+        dataset is validated using
+        :class:`ethology.validators.detections.ValidBboxTracksDataset`.
+
+    Raises
+    ------
+    ValueError
+        If the input dataset does not contain the expected dimensions
+        or data variables.
+
+    Notes
+    -----
+    Renames ``movement`` dimensions ``time`` → ``image_id`` and
+    ``individuals`` → ``id``, forwards ``position``, ``shape`` and
+    attributes. Missing ``category`` or ``confidence`` are added
+    (``-1`` and ``NaN`` respectively).
+
+    """
+    _require_dims(movement_ds, _REQUIRED_DIMS)
+    _require_vars(movement_ds, _REQUIRED_VARS)
+
+    ds = movement_ds.rename({"time": "image_id", "individuals": "id"})
+    out = xr.Dataset(
+        data_vars={
+            "position": ds["position"],
+            "shape": ds["shape"],
+        },
+        coords={
+            "image_id": ds.coords["image_id"],
+            "space": ds.coords["space"],
+            "id": ds.coords["id"],
+        },
+        attrs=dict(ds.attrs),
+    )
+
+    n_images = out.sizes["image_id"]
+    n_ids = out.sizes["id"]
+
+    if "category" in ds.data_vars:
+        out["category"] = ds["category"]
+    else:
+        out["category"] = xr.DataArray(
+            np.full((n_images, n_ids), -1, dtype=int),
+            dims=("image_id", "id"),
+        )
+
+    if "confidence" in ds.data_vars:
+        out["confidence"] = ds["confidence"]
+    else:
+        out["confidence"] = xr.DataArray(
+            np.full((n_images, n_ids), np.nan, dtype=float),
+            dims=("image_id", "id"),
+        )
+
+    return out

@@ -4,7 +4,10 @@ import numpy as np
 import pytest
 import xarray as xr
 
-from ethology.validators.detections import ValidBboxDetectionsDataset
+from ethology.validators.detections import (
+    ValidBboxDetectionsDataset,
+    ValidBboxTracksDataset,
+)
 
 
 @pytest.fixture
@@ -255,7 +258,144 @@ def test_validator_bbox_detections_dataset(
 
     if excinfo:
         error_msg = str(excinfo.value)
-        assert error_msg in expected_error_message
+        assert expected_error_message in error_msg
+    else:
+        assert validator.dataset is dataset
+        assert validator.required_dims == {"image_id", "space", "id"}
+        assert validator.required_data_vars == {
+            "position": {"image_id", "space", "id"},
+            "shape": {"image_id", "space", "id"},
+            "category": {"image_id", "id"},
+            "confidence": {"image_id", "id"},
+        }
+
+
+@pytest.fixture
+def valid_bbox_tracks_dataset() -> xr.Dataset:
+    """Create a valid bbox tracks dataset for validation."""
+    image_ids = [0, 1, 2]
+    track_ids = [0, 1]
+    space_dims = ["x", "y"]
+
+    position_data = np.zeros((len(image_ids), len(space_dims), len(track_ids)))
+    shape_data = np.copy(position_data)
+    category_data = np.ones((len(image_ids), len(track_ids)))
+    confidence_data = np.zeros((len(image_ids), len(track_ids)))
+
+    ds = xr.Dataset(
+        data_vars={
+            "position": (["image_id", "space", "id"], position_data),
+            "shape": (["image_id", "space", "id"], shape_data),
+            "category": (["image_id", "id"], category_data),
+            "confidence": (["image_id", "id"], confidence_data),
+        },
+        coords={
+            "image_id": image_ids,
+            "space": space_dims,
+            "id": track_ids,
+        },
+    )
+    return ds
+
+
+@pytest.mark.parametrize(
+    "sample_dataset, expected_exception, expected_error_message",
+    [
+        (
+            "valid_bbox_tracks_dataset",
+            does_not_raise(),
+            "",
+        ),
+        (
+            xr.Dataset(
+                coords={
+                    "image_id": np.arange(3),
+                    "space": ["x", "y"],
+                    "id": np.arange(2),
+                },
+                data_vars={
+                    "position": (
+                        ["image_id", "space", "id"],
+                        np.zeros((3, 2, 2)),
+                    ),
+                    "shape": (
+                        ["image_id", "space", "id"],
+                        np.zeros((3, 2, 2)),
+                    ),
+                    "category": (["image_id", "id"], np.ones((3, 2))),
+                    "confidence": (["image_id", "id"], np.zeros((3, 2))),
+                },
+            ),
+            does_not_raise(),
+            "",
+        ),
+        (
+            {"position": [1, 2, 3], "shape": [4, 5, 6]},
+            pytest.raises(TypeError),
+            "Expected an xarray Dataset, but got <class 'dict'>.",
+        ),
+        (
+            xr.Dataset(
+                coords={
+                    "image_id": np.arange(3),
+                    "space": ["x", "y"],
+                    "id": np.arange(2),
+                },
+                data_vars={
+                    "position": (
+                        ["image_id", "space", "id"],
+                        np.zeros((3, 2, 2)),
+                    ),
+                    "shape": (
+                        ["image_id", "space", "id"],
+                        np.zeros((3, 2, 2)),
+                    ),
+                    "category": (["image_id", "id"], np.ones((3, 2))),
+                },
+            ),
+            pytest.raises(ValueError),
+            "Missing required data variables: ['confidence']",
+        ),
+        (
+            xr.Dataset(
+                coords={"image_id": np.arange(3), "id": np.arange(2)},
+                data_vars={
+                    "position": (["image_id", "id"], np.zeros((3, 2))),
+                    "shape": (["image_id", "id"], np.zeros((3, 2))),
+                    "category": (["image_id", "id"], np.ones((3, 2))),
+                    "confidence": (["image_id", "id"], np.zeros((3, 2))),
+                },
+            ),
+            pytest.raises(ValueError),
+            "Missing required dimensions: ['space']",
+        ),
+    ],
+    ids=[
+        "valid_bbox_tracks",
+        "valid_bbox_tracks_minimal",
+        "invalid_bbox_tracks_type",
+        "invalid_bbox_tracks_missing_confidence",
+        "invalid_bbox_tracks_missing_space_dim",
+    ],
+)
+def test_validator_bbox_tracks_dataset(
+    sample_dataset: str | xr.Dataset | dict,
+    expected_exception,
+    expected_error_message: str,
+    request: pytest.FixtureRequest,
+):
+    """Test bbox tracks dataset validation in various input scenarios."""
+    if isinstance(sample_dataset, str):
+        dataset = request.getfixturevalue(sample_dataset)
+    else:
+        dataset = sample_dataset
+
+    with expected_exception as excinfo:
+        validator = ValidBboxTracksDataset(dataset=dataset)
+
+    if excinfo:
+        error_msg = str(excinfo.value)
+        assert expected_error_message in error_msg
     else:
         assert validator.dataset is dataset
         assert validator.required_dims == {"image_id", "space", "id"}
