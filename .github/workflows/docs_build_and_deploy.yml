@@ -40,7 +40,6 @@ jobs:
           python-version: 3.13 # default for the action is 3.x
           use-make: true
           fetch-tags: true
-          use-artifactci: lazy
           use-requirements-txt: false
 
   check_tag:
